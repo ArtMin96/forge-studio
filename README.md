@@ -30,58 +30,77 @@ Personal Claude Code marketplace for making the model work at its best. Behavior
 
 After installing, start a new session for plugins to load.
 
+### Recommended CLAUDE.md
+
+A lean CLAUDE.md template is included at `templates/CLAUDE.md`. It's designed to work with forge-studio plugins — covers personality, judgment, and project config without repeating what hooks enforce. Under 60 lines.
+
+```bash
+cp templates/CLAUDE.md ./CLAUDE.md
+# Edit the Project Config and Conventions sections for your project
+```
+
 ---
 
 ## Quick Reference
 
 ### Discipline
 
-| Command | What it does |
-|---------|-------------|
-| `/rules-audit` | Audit session for sycophancy, apologies, scope creep, filler |
-| `/challenge` | Critique your own work before presenting it |
-| `/devils-advocate <decision>` | Argue against a design decision to find holes |
+
+| Command                       | What it does                                                 |
+| ----------------------------- | ------------------------------------------------------------ |
+| `/rules-audit`                | Audit session for sycophancy, apologies, scope creep, filler |
+| `/challenge`                  | Critique your own work before presenting it                  |
+| `/devils-advocate <decision>` | Argue against a design decision to find holes                |
+
 
 ### Context
 
-| Command | What it does |
-|---------|-------------|
-| `/handoff [topic]` | Generate a session transfer document |
-| `/resume` | Pick up from the latest handoff |
-| `/checkpoint` | Mid-session drift and scope creep check |
-| `/audit-context` | Analyze token overhead from CLAUDE.md, plugins, MCP servers |
-| `/lean-claude-md [path]` | Trim CLAUDE.md to only lines that change behavior |
+
+| Command                  | What it does                                                |
+| ------------------------ | ----------------------------------------------------------- |
+| `/handoff [topic]`       | Generate a session transfer document                        |
+| `/resume`                | Pick up from the latest handoff                             |
+| `/checkpoint`            | Mid-session drift and scope creep check                     |
+| `/audit-context`         | Analyze token overhead from CLAUDE.md, plugins, MCP servers |
+| `/lean-claude-md [path]` | Trim CLAUDE.md to only lines that change behavior           |
+
 
 ### Effectiveness
 
-| Command | What it does |
-|---------|-------------|
-| `/route <task>` | Pick the right workflow pattern for this task |
-| `/verify` | Evidence-based completion check before claiming done |
-| `/scope <task>` | Define task boundaries and acceptance criteria |
-| `/timebox [N]` | Set a message budget (default 15) for the current task |
+
+| Command         | What it does                                           |
+| --------------- | ------------------------------------------------------ |
+| `/route <task>` | Pick the right workflow pattern for this task          |
+| `/verify`       | Evidence-based completion check before claiming done   |
+| `/scope <task>` | Define task boundaries and acceptance criteria         |
+| `/timebox [N]`  | Set a message budget (default 15) for the current task |
+
 
 ### Workflow
 
-| Command | What it does |
-|---------|-------------|
-| `/morning` | Daily planning: review yesterday, check handoffs, prioritize today |
-| `/eod` | End-of-day: capture progress, create daily log, trigger handoff |
-| `/weekly` | Weekly retro: patterns, wins, blockers, tech debt from daily logs |
-| `/explore <what>` | Phase 1: Read codebase via subagent without making changes |
-| `/plan <task>` | Phase 2: Create implementation plan with files, changes, risks |
-| `/implement` | Phase 3: Execute plan step-by-step with scope checks |
+
+| Command           | What it does                                                       |
+| ----------------- | ------------------------------------------------------------------ |
+| `/morning`        | Daily planning: review yesterday, check handoffs, prioritize today |
+| `/eod`            | End-of-day: capture progress, create daily log, trigger handoff    |
+| `/weekly`         | Weekly retro: patterns, wins, blockers, tech debt from daily logs  |
+| `/explore <what>` | Phase 1: Read codebase via subagent without making changes         |
+| `/plan <task>`    | Phase 2: Create implementation plan with files, changes, risks     |
+| `/implement`      | Phase 3: Execute plan step-by-step with scope checks               |
+
 
 ### Gems
 
-| Command | What it does |
-|---------|-------------|
-| `/healthcheck [--quick\|--full]` | Run Pint + Larastan + Pest pipeline |
-| `/gate-report` | Aggregate all quality warnings before committing |
-| `/ultrathink` | Guide to thinking modes and effort levels |
-| `/parallel-power` | Multi-session patterns: worktrees, fan-out, writer/reviewer |
-| `/unix-pipe` | Claude as CLI tool: headless mode, piping, output formats |
-| `/context-tricks` | Guided compaction, /btw, checkpoints, @ references |
+
+| Command                         | What it does                                                |
+| ------------------------------- | ----------------------------------------------------------- |
+| `/healthcheck [--quick|--full]` | Run Pint + Larastan + Pest pipeline                         |
+| `/gate-report`                  | Aggregate all quality warnings before committing            |
+| `/ultrathink`                   | Guide to thinking modes and effort levels                   |
+| `/parallel-power`               | Multi-session patterns: worktrees, fan-out, writer/reviewer |
+| `/unix-pipe`                    | Claude as CLI tool: headless mode, piping, output formats   |
+| `/context-tricks`               | Guided compaction, /btw, checkpoints, @ references          |
+
 
 ---
 
@@ -89,16 +108,18 @@ After installing, start a new session for plugins to load.
 
 These fire automatically. No commands needed.
 
-| Event | Plugin | What it does |
-|-------|--------|-------------|
-| Every message | iron-rules | Re-anchors behavioral rules (no sycophancy, be critical, stay focused) |
-| Every message | context-guardian | Tracks message count; warns at 25, 40, 50 messages |
-| Before Bash | iron-rules | Blocks `rm -rf`, `git push --force`, `git reset --hard`, `DROP TABLE` |
-| Before any tool | focus-mode | Reminds of active scope boundaries (if a scope exists) |
-| Before `git commit` | quality-gates | Reminds to run tests |
-| After Write/Edit | iron-rules | Nudges: "Does this change do ONLY what was asked?" |
-| After reading >500 lines | context-guardian | Warns to extract what you need before compaction |
-| After writing .php | quality-gates | Runs Larastan/PHPStan on the changed file |
+
+| Event                    | Plugin           | What it does                                                           |
+| ------------------------ | ---------------- | ---------------------------------------------------------------------- |
+| Every message            | iron-rules       | Re-anchors behavioral rules (no sycophancy, be critical, stay focused) |
+| Every message            | context-guardian | Tracks message count; warns at 25, 40, 50 messages                     |
+| Before Bash              | iron-rules       | Blocks `rm -rf`, `git push --force`, `git reset --hard`, `DROP TABLE`  |
+| Before any tool          | focus-mode       | Reminds of active scope boundaries (if a scope exists)                 |
+| Before `git commit`      | quality-gates    | Reminds to run tests                                                   |
+| After Write/Edit         | iron-rules       | Nudges: "Does this change do ONLY what was asked?"                     |
+| After reading >500 lines | context-guardian | Warns to extract what you need before compaction                       |
+| After writing .php       | quality-gates    | Runs Larastan/PHPStan on the changed file                              |
+
 
 ---
 
@@ -261,33 +282,43 @@ Reads the week's daily logs. Surfaces patterns, wins, blockers, and accumulated 
 ## Plugins
 
 ### iron-rules
+
 The behavioral backbone. Three hooks enforce discipline on every interaction: anti-sycophancy anchoring on every message, destructive command blocking on bash, and self-review nudging after every code write. CLAUDE.md rules degrade over long sessions (~80% compliance). Hooks fire at 100%. This is the difference.
 
 ### self-critic
+
 Implements Anthropic's evaluator-optimizer pattern. `/challenge` forces self-critique before completion. `/devils-advocate` argues against decisions to find holes. The adversarial-reviewer agent does read-only code review with a skeptical eye — it can't modify code, only critique it.
 
 ### context-guardian
+
 Context is the most important resource (per Anthropic's own docs). This plugin tracks message count (warns at 25, 40, 50), warns when reading large files, and provides the handoff/resume/checkpoint system for session-to-session continuity.
 
 ### context-diet
+
 Your setup competes for context tokens. This plugin audits the overhead (CLAUDE.md size, plugin count, MCP server count) and trims waste. Based on the finding that a focused 30-line CLAUDE.md outperforms a 200-line one.
 
 ### smart-workflow
+
 From Anthropic's "Building Effective Agents" research. `/route` picks the right pattern for the task (simple fix, prompt chaining, routing, orchestrator-workers, evaluator-optimizer). `/verify` enforces evidence-based completion — no more "it should work."
 
 ### focus-mode
+
 Prevents the "infinite exploration" anti-pattern. `/scope` defines boundaries before work starts. The scope-reminder hook nudges focus on every tool use. `/timebox` sets a message budget forcing efficiency.
 
 ### session-mastery
+
 Daily rituals that compound over weeks. Morning planning, end-of-day capture, weekly retrospective. Each feeds the next: morning reads handoffs and daily logs, EOD creates daily logs and triggers handoffs, weekly analyzes the full week.
 
 ### explore-plan-code
+
 Structures Anthropic's recommended four-phase workflow into explicit skills. Explore runs in an isolated subagent (keeps main context clean). Plan produces a file that can be edited before implementation. Implement follows the plan step-by-step with scope checks.
 
 ### power-user
+
 Reference skills for hidden Claude Code features. Not tools you invoke during work — knowledge you look up when you need it. Ultrathink, parallel worktrees, Unix piping, context management tricks. All `disable-model-invocation: true` so they cost zero tokens until invoked.
 
 ### quality-gates
+
 PHP-specific quality hooks. Larastan runs automatically on every PHP file write. Migration files get checked for `down()` methods. Pre-commit triggers a test reminder. `/healthcheck` runs the full Pint → Larastan → Pest pipeline on demand.
 
 ---
@@ -296,7 +327,7 @@ PHP-specific quality hooks. Larastan runs automatically on every PHP file write.
 
 **Hooks over instructions.** CLAUDE.md rules have ~80% compliance that degrades as context fills. Hooks fire deterministically at 100%. For non-negotiable behavior, use hooks.
 
-**`exit 2` blocks, `exit 1` warns.** Most developers get hook exit codes wrong. The iron-rules destructive command blocker uses `exit 2` to actually prevent execution.
+`**exit 2` blocks, `exit 1` warns.** Most developers get hook exit codes wrong. The iron-rules destructive command blocker uses `exit 2` to actually prevent execution.
 
 **Zero cost until invoked.** All 24 skills use `disable-model-invocation: true`. They don't load into context until you call them. Installing all 10 plugins adds near-zero overhead.
 
