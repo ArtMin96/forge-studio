@@ -1,0 +1,6 @@
+{
+  "name": "context-diet",
+  "description": "Context optimization audit: analyze token waste, trim CLAUDE.md, reduce overhead",
+  "version": "1.0.0",
+  "author": { "name": "Arthur" }
+}

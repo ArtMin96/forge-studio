@@ -1,0 +1,6 @@
+{
+  "name": "power-user",
+  "description": "Hidden Claude Code features: ultrathink, parallel worktrees, unix pipes, context tricks",
+  "version": "1.0.0",
+  "author": { "name": "Arthur" }
+}

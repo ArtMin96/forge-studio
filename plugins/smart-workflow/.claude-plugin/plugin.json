@@ -1,0 +1,6 @@
+{
+  "name": "smart-workflow",
+  "description": "Agent effectiveness patterns from Anthropic research: task routing, evidence-based verification",
+  "version": "1.0.0",
+  "author": { "name": "Arthur" }
+}

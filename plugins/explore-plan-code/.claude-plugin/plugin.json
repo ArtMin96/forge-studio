@@ -1,0 +1,6 @@
+{
+  "name": "explore-plan-code",
+  "description": "Four-phase development workflow: explore with subagents, plan, implement, verify",
+  "version": "1.0.0",
+  "author": { "name": "Arthur" }
+}

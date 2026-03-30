@@ -1,0 +1,91 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "forge-studio",
+  "version": "1.0.0",
+  "description": "Personal marketplace for optimal Claude Code behavior: discipline, context mastery, agent effectiveness, workflow patterns, and hidden gems.",
+  "owner": {
+    "name": "Arthur"
+  },
+  "plugins": [
+    {
+      "name": "iron-rules",
+      "description": "Behavioral discipline via hooks: anti-sycophancy, destructive command blocking, self-review enforcement",
+      "version": "1.0.0",
+      "source": "./plugins/iron-rules",
+      "category": "discipline",
+      "tags": ["behavioral", "hooks", "anti-sycophancy", "safety"]
+    },
+    {
+      "name": "self-critic",
+      "description": "Evaluator-optimizer pattern: challenge work before completion, adversarial code review",
+      "version": "1.0.0",
+      "source": "./plugins/self-critic",
+      "category": "discipline",
+      "tags": ["code-review", "quality", "self-improvement"]
+    },
+    {
+      "name": "context-guardian",
+      "description": "Context window management: session handoffs, drift detection, checkpoint system",
+      "version": "1.0.0",
+      "source": "./plugins/context-guardian",
+      "category": "context",
+      "tags": ["context", "handoff", "session-management"]
+    },
+    {
+      "name": "context-diet",
+      "description": "Context optimization audit: analyze token waste, trim CLAUDE.md, reduce overhead",
+      "version": "1.0.0",
+      "source": "./plugins/context-diet",
+      "category": "context",
+      "tags": ["context", "optimization", "tokens"]
+    },
+    {
+      "name": "smart-workflow",
+      "description": "Agent effectiveness patterns from Anthropic research: task routing, evidence-based verification",
+      "version": "1.0.0",
+      "source": "./plugins/smart-workflow",
+      "category": "effectiveness",
+      "tags": ["workflow", "agent-patterns", "verification"]
+    },
+    {
+      "name": "focus-mode",
+      "description": "Scope enforcement: task boundaries, out-of-scope warnings, message timeboxing",
+      "version": "1.0.0",
+      "source": "./plugins/focus-mode",
+      "category": "effectiveness",
+      "tags": ["focus", "scope", "discipline"]
+    },
+    {
+      "name": "session-mastery",
+      "description": "Senior developer daily rituals: morning planning, EOD summary, weekly retrospective",
+      "version": "1.0.0",
+      "source": "./plugins/session-mastery",
+      "category": "workflow",
+      "tags": ["daily", "planning", "ritual"]
+    },
+    {
+      "name": "explore-plan-code",
+      "description": "Four-phase development workflow: explore with subagents, plan, implement, verify",
+      "version": "1.0.0",
+      "source": "./plugins/explore-plan-code",
+      "category": "workflow",
+      "tags": ["workflow", "planning", "subagents"]
+    },
+    {
+      "name": "power-user",
+      "description": "Hidden Claude Code features: ultrathink, parallel worktrees, unix pipes, context tricks",
+      "version": "1.0.0",
+      "source": "./plugins/power-user",
+      "category": "gems",
+      "tags": ["hidden-features", "tips", "advanced"]
+    },
+    {
+      "name": "quality-gates",
+      "description": "PHP code quality hooks: Larastan static analysis, migration checks, pre-commit reminders",
+      "version": "1.0.0",
+      "source": "./plugins/quality-gates",
+      "category": "gems",
+      "tags": ["php", "quality", "static-analysis", "hooks"]
+    }
+  ]
+}

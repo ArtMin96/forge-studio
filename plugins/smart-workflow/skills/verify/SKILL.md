@@ -1,0 +1,51 @@
+---
+name: verify
+description: Evidence-based completion check. Run before claiming any task is done. Prevents the trust-then-verify gap. Use after implementing a feature, fix, or refactor.
+disable-model-invocation: true
+allowed-tools:
+  - Read
+  - Bash
+  - Glob
+  - Grep
+---
+
+# Verify: Evidence Before Assertions
+
+From Anthropic's best practices: "The single highest-leverage thing you can do is include tests, screenshots, or expected outputs so Claude can verify its own work."
+
+Before marking this task complete, answer EVERY question:
+
+## 1. What Changed?
+- List every file modified and what changed in each (one line per file)
+- Run `git diff --stat` to confirm
+
+## 2. What's the Verification Method?
+Pick one or more:
+- **Tests**: Run the test suite. Show output. All pass? Which tests cover this change?
+- **Build**: Does it compile/build without errors? Run the build command.
+- **Manual check**: Describe what to look at and what the expected behavior is.
+- **Type check**: Run static analysis if available.
+
+## 3. Run the Verification
+Actually run it. Show the output. Don't say "it should work" — show that it DOES work.
+
+## 4. Edge Cases
+- What's the most likely way this breaks?
+- Did you handle null/empty/boundary inputs?
+- What happens if this runs twice?
+
+## 5. Verdict
+```
+VERIFIED: [Yes/No]
+METHOD: [tests/build/manual/type-check]
+EVIDENCE: [One line summary of proof]
+REMAINING RISK: [What could still go wrong, or "None identified"]
+```
+
+If you CANNOT verify the change:
+```
+UNVERIFIED: Cannot verify this change.
+NEEDED: [What would be needed to verify — test command, expected output, etc.]
+```
+
+Never claim work is done without evidence. Evidence, not assertions.

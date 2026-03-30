@@ -1,0 +1,6 @@
+{
+  "name": "self-critic",
+  "description": "Evaluator-optimizer pattern: challenge work before completion, adversarial code review",
+  "version": "1.0.0",
+  "author": { "name": "Arthur" }
+}
