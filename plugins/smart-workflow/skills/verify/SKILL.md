@@ -29,6 +29,12 @@ Pick one or more:
 ## 3. Run the Verification
 Actually run it. Show the output. Don't say "it should work" — show that it DOES work.
 
+## 3b. Ground in Actual Output
+Quote the actual output — don't paraphrase it. Copy-paste the real test output, build output, or command result. If you can't quote real output, you haven't verified.
+
+Bad: "Tests pass successfully."
+Good: "Output: `Tests: 42 passed, 0 failed (0.83s)`"
+
 ## 4. Edge Cases
 - What's the most likely way this breaks?
 - Did you handle null/empty/boundary inputs?
