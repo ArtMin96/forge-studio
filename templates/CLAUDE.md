@@ -37,16 +37,18 @@ When user pastes error logs, trace the actual error. Don't guess or chase theori
 - Plan mode for non-trivial tasks (3+ steps or architectural decisions)
 - If something goes sideways: STOP, re-plan — don't keep pushing
 - Subagents for research and exploration (keep main context clean)
-- After ANY correction: save the pattern to memory
+- After ANY correction from the user: note the pattern so you don't repeat it. For recurring patterns, suggest adding to project conventions or CLAUDE.md.
 - When given a bug report: just fix it. Don't ask for hand-holding.
 - Before any structural refactor on a file >300 LOC, remove all dead props, unused exports, unused imports, debug logs. Commit cleanup separately.
 - Never attempt multi-file refactors in a single response. Max 5 files per phase. Complete Phase 1, verify, get approval before Phase 2.
 - When asked to plan, output only the plan. No code until the user says go. If instructions are vague, outline what you'd build and get approval first.
+- When executing an approved plan: follow it exactly. If you discover a problem mid-implementation, stop and flag it — don't silently deviate.
+- For non-trivial features (new patterns, ambiguous requirements): outline what you'll build and get confirmation before writing code. Don't build on assumptions.
 
 ## Core Principles
 
 - Find root cause. No temporary fixes.
-- Only make directly requested or clearly necessary changes.
+- Bug fixes: minimal change. Fix the bug, nothing else.
 - Bug fixes don't justify cleaning surrounding code.
 - Don't add error handling for scenarios that can't happen.
 - Don't create abstractions for one-time operations.
@@ -54,7 +56,7 @@ When user pastes error logs, trace the actual error. Don't guess or chase theori
 - Trust your types. Don't add defensive checks the type system covers.
 - Run the linter — never fix formatting manually.
 - Test behavior, not implementation. Minimize mocking.
-- If architecture is flawed, state is duplicated, or patterns are inconsistent — propose structural fixes. Ask: "What would a senior dev reject in code review?"
+- Feature work and refactors: if architecture is flawed, state is duplicated, or patterns are inconsistent — propose structural fixes. Ask: "What would a senior dev reject in code review?"
 - Never report a task complete until running the project's type-checker and linter and fixing ALL resulting errors. If no checker is configured, state that explicitly.
 - No robotic comment blocks, no excessive section headers. Code should read like a human wrote it.
 - Re-read a file before every edit. Read again after to confirm. Never batch more than 3 edits to the same file without a verification read.
@@ -64,9 +66,19 @@ When user pastes error logs, trace the actual error. Don't guess or chase theori
 ## Context Management
 
 - For tasks touching >5 independent files, launch parallel sub-agents (5-8 files per agent). Each gets its own context window. One agent processing 20 files sequentially guarantees context decay.
+  - Inherit context (fork) for subtasks that need your current understanding.
+  - Use worktree isolation for independent parallel work on the same repo.
+  - Use run_in_background for long-running sub-agents. Don't poll their output mid-run — wait for completion.
 - After 10+ messages, re-read any file before editing. Auto-compaction may have silently destroyed context.
 - Each read is capped at 2,000 lines. For files >500 LOC, use offset/limit to read in chunks. Never assume a single read captured the complete file.
 - Tool results over 50,000 chars are silently truncated. If search results seem suspiciously few, re-run with narrower scope. State when you suspect truncation.
+- For complex multi-step tasks: write intermediate results and decisions to files. The filesystem survives compaction; your context window does not.
+
+## Prompt Cache
+
+- Don't request model switches mid-session — delegate to a sub-agent if needed.
+- Don't suggest adding or removing tools mid-conversation.
+- On context exhaustion: compact and continue. Write session state to `.claude/` if a handoff is needed.
 
 ## Self-Evaluation
 
