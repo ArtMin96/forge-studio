@@ -361,3 +361,9 @@ Enforces edit verification patterns. Tracks how many times each file is edited p
 **Disable a plugin:** `/plugin disable {name}@forge-studio`
 
 **Adjust the destructive command blocklist:** Edit `iron-rules/hooks/block-destructive.sh` to add or remove patterns.
+
+---
+
+## Docs
+
+- [Budget Window Warmup](docs/warmup.md) — Anchor your 5-hour token budget window to predictable hours using scheduled triggers or GitHub Actions
