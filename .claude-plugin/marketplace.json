@@ -81,11 +81,19 @@
     },
     {
       "name": "quality-gates",
-      "description": "PHP code quality hooks: Larastan static analysis, migration checks, pre-commit reminders",
+      "description": "Code quality hooks: PHP (Larastan, migrations) and JS/TS (TypeScript, ESLint) static analysis, pre-commit reminders",
       "version": "1.0.0",
       "source": "./plugins/quality-gates",
       "category": "gems",
       "tags": ["php", "quality", "static-analysis", "hooks"]
+    },
+    {
+      "name": "edit-safety",
+      "description": "Enforces edit verification patterns to prevent stale-context edits",
+      "version": "1.0.0",
+      "source": "./plugins/edit-safety",
+      "category": "effectiveness",
+      "tags": ["edit", "safety", "verification", "context"]
     }
   ]
 }
