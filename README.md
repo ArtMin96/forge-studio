@@ -2,7 +2,7 @@
 
 Personal Claude Code marketplace for making the model work at its best. Behavioral discipline, context mastery, agent effectiveness patterns, and hidden gems.
 
-10 plugins. 24 skills. 8 hooks. 1 agent.
+11 plugins. 25 skills. 11 hooks. 1 agent.
 
 ---
 
@@ -26,13 +26,14 @@ Personal Claude Code marketplace for making the model work at its best. Behavior
 /plugin install explore-plan-code@forge-studio
 /plugin install power-user@forge-studio
 /plugin install quality-gates@forge-studio
+/plugin install edit-safety@forge-studio
 ```
 
 After installing, start a new session for plugins to load.
 
 ### Recommended CLAUDE.md
 
-A lean CLAUDE.md template is included at `templates/CLAUDE.md`. It's designed to work with forge-studio plugins — covers personality, judgment, and project config without repeating what hooks enforce. Under 60 lines.
+A lean CLAUDE.md template is included at `templates/CLAUDE.md`. It's designed to work with forge-studio plugins — covers personality, judgment, context management, self-evaluation, and project config without repeating what hooks enforce.
 
 ```bash
 cp templates/CLAUDE.md ./CLAUDE.md
@@ -51,6 +52,7 @@ cp templates/CLAUDE.md ./CLAUDE.md
 | `/rules-audit`                | Audit session for sycophancy, apologies, scope creep, filler |
 | `/challenge`                  | Critique your own work before presenting it                  |
 | `/devils-advocate <decision>` | Argue against a design decision to find holes                |
+| `/postmortem [bug]`           | Structured bug autopsy: root cause, category, prevention     |
 
 
 ### Context
@@ -94,7 +96,7 @@ cp templates/CLAUDE.md ./CLAUDE.md
 
 | Command                         | What it does                                                |
 | ------------------------------- | ----------------------------------------------------------- |
-| `/healthcheck [--quick|--full]` | Run Pint + Larastan + Pest pipeline                         |
+| `/healthcheck [--quick|--full]` | Run quality pipeline (auto-detects PHP and/or JS/TS)        |
 | `/gate-report`                  | Aggregate all quality warnings before committing            |
 | `/ultrathink`                   | Guide to thinking modes and effort levels                   |
 | `/parallel-power`               | Multi-session patterns: worktrees, fan-out, writer/reviewer |
@@ -112,13 +114,16 @@ These fire automatically. No commands needed.
 | Event                    | Plugin           | What it does                                                           |
 | ------------------------ | ---------------- | ---------------------------------------------------------------------- |
 | Every message            | iron-rules       | Re-anchors behavioral rules (no sycophancy, be critical, stay focused) |
-| Every message            | context-guardian | Tracks message count; warns at 25, 40, 50 messages                     |
+| Every message            | context-guardian | Tracks message count; warns at 10, 25, 40, 50 messages                 |
 | Before Bash              | iron-rules       | Blocks `rm -rf`, `git push --force`, `git reset --hard`, `DROP TABLE`  |
 | Before any tool          | focus-mode       | Reminds of active scope boundaries (if a scope exists)                 |
 | Before `git commit`      | quality-gates    | Reminds to run tests                                                   |
 | After Write/Edit         | iron-rules       | Nudges: "Does this change do ONLY what was asked?"                     |
 | After reading >500 lines | context-guardian | Warns to extract what you need before compaction                       |
 | After writing .php       | quality-gates    | Runs Larastan/PHPStan on the changed file                              |
+| After writing .js/.ts    | quality-gates    | Runs tsc --noEmit and ESLint on the changed file                       |
+| After Bash/Grep          | context-guardian | Warns if tool output approaching 50K char truncation boundary          |
+| After Edit/Read          | edit-safety      | Tracks edits per file; warns after 3 edits without re-reading          |
 
 
 ---
@@ -183,7 +188,7 @@ Shows evidence: what changed, test output, edge case analysis. Either "VERIFIED"
 
 ### Long session management
 
-After 25 messages, the context-guardian hook warns you. Check drift:
+After 10 messages, context-guardian warns about context decay (re-read files before editing). At 25, it suggests compaction or handoff. Check drift:
 
 ```
 /checkpoint
@@ -211,7 +216,7 @@ Generates a structured handoff document. Next session:
 
 ### Before committing
 
-The quality-gates hooks already ran Larastan on every PHP file you edited. Check the full picture:
+The quality-gates hooks already ran Larastan on every PHP file and tsc/ESLint on every JS/TS file you edited. Check the full picture:
 
 ```
 /healthcheck --quick
@@ -291,7 +296,7 @@ Implements Anthropic's evaluator-optimizer pattern. `/challenge` forces self-cri
 
 ### context-guardian
 
-Context is the most important resource (per Anthropic's own docs). This plugin tracks message count (warns at 25, 40, 50), warns when reading large files, and provides the handoff/resume/checkpoint system for session-to-session continuity.
+Context is the most important resource (per Anthropic's own docs). This plugin tracks message count (warns at 10, 25, 40, 50), warns when reading large files, detects potential tool output truncation near the 50K char boundary, and provides the handoff/resume/checkpoint system for session-to-session continuity.
 
 ### context-diet
 
@@ -319,7 +324,11 @@ Reference skills for hidden Claude Code features. Not tools you invoke during wo
 
 ### quality-gates
 
-PHP-specific quality hooks. Larastan runs automatically on every PHP file write. Migration files get checked for `down()` methods. Pre-commit triggers a test reminder. `/healthcheck` runs the full Pint → Larastan → Pest pipeline on demand.
+Code quality hooks for PHP and JS/TS. Larastan runs automatically on every PHP file write. TypeScript compiler and ESLint run on every JS/TS file write. Migration files get checked for `down()` methods. Pre-commit triggers a test reminder. `/healthcheck` auto-detects project type and runs the appropriate pipeline (Pint → Larastan → Pest for PHP, Prettier → tsc → ESLint → Vitest/Jest for JS/TS).
+
+### edit-safety
+
+Enforces edit verification patterns. Tracks how many times each file is edited per session. After 3 edits to the same file without a re-read, warns to verify current file state. Prevents the common failure mode where auto-compaction silently destroys context of earlier file reads, leading to edits against stale state.
 
 ---
 
@@ -329,7 +338,7 @@ PHP-specific quality hooks. Larastan runs automatically on every PHP file write.
 
 `**exit 2` blocks, `exit 1` warns.** Most developers get hook exit codes wrong. The iron-rules destructive command blocker uses `exit 2` to actually prevent execution.
 
-**Zero cost until invoked.** All 24 skills use `disable-model-invocation: true`. They don't load into context until you call them. Installing all 10 plugins adds near-zero overhead.
+**Zero cost until invoked.** All 25 skills use `disable-model-invocation: true`. They don't load into context until you call them. Installing all 11 plugins adds near-zero overhead.
 
 **Subagent isolation.** Skills that read many files (`/explore`, `/challenge`, `/devils-advocate`) use `context: fork` to run in isolated subagents. Only summaries return to your main session.
 

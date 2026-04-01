@@ -1,6 +1,6 @@
 ---
 name: healthcheck
-description: Run a full project health check. Pint (formatting) then PHPStan/Larastan (static analysis) then Pest (tests). Use before committing or when you want a quality snapshot.
+description: Run a full project health check. Auto-detects PHP and/or JS/TS projects and runs the appropriate quality pipeline. Use before committing or when you want a quality snapshot.
 disable-model-invocation: true
 argument-hint: [--quick|--full]
 allowed-tools:
@@ -11,13 +11,25 @@ allowed-tools:
 
 # Healthcheck: One-Command Project Quality
 
-Runs a sequential pipeline. Stops at the first failure unless `--full` is passed.
+Detects the project type and runs the appropriate pipeline. Stops at the first failure unless `--full` is passed.
 
-## Pipeline
+## Project Detection
+
+Check what's available:
+```bash
+# PHP project?
+test -f composer.json && echo "PHP detected"
+# JS/TS project?
+test -f package.json && echo "JS detected"
+test -f tsconfig.json && echo "TypeScript detected"
+```
+
+Run the pipeline for each detected language.
+
+## PHP Pipeline
 
 ### Step 1: Formatting (Pint/php-cs-fixer)
 ```bash
-# Try Pint first, fall back to php-cs-fixer
 ./vendor/bin/pint --test 2>/dev/null || php-cs-fixer fix --dry-run --diff 2>/dev/null
 ```
 Report: files that need formatting
@@ -34,17 +46,45 @@ Report: errors found, severity
 ```
 Report: tests passed/failed
 
+## JS/TS Pipeline
+
+### Step 1: Formatting (Prettier/ESLint style rules)
+```bash
+npx prettier --check "src/**/*.{ts,tsx,js,jsx}" 2>/dev/null
+```
+Report: files that need formatting
+
+### Step 2: Type Check + Linting
+```bash
+npx tsc --noEmit 2>/dev/null
+npx eslint . --quiet 2>/dev/null
+```
+Report: type errors, lint issues
+
+### Step 3: Tests (Vitest/Jest) — skipped with `--quick`
+```bash
+npx vitest run 2>/dev/null || npx jest --no-coverage 2>/dev/null
+```
+Report: tests passed/failed
+
 ## Arguments
-- `--quick`: Steps 1-2 only (formatting + static analysis). Fast.
-- `--full` (default): All 3 steps including tests.
+- `--quick`: Formatting + static analysis only. Fast.
+- `--full` (default): All steps including tests.
 
 ## Output
 ```
 HEALTHCHECK
 ===========
-Formatting:      [PASS/FAIL] — [X files need formatting]
-Static Analysis: [PASS/FAIL] — [X errors]
-Tests:           [PASS/FAIL/SKIPPED] — [X passed, Y failed]
+[PHP]
+Formatting:      [PASS/FAIL/SKIP] — [details]
+Static Analysis: [PASS/FAIL/SKIP] — [details]
+Tests:           [PASS/FAIL/SKIP] — [details]
+
+[JS/TS]
+Formatting:      [PASS/FAIL/SKIP] — [details]
+Type Check:      [PASS/FAIL/SKIP] — [details]
+Lint:            [PASS/FAIL/SKIP] — [details]
+Tests:           [PASS/FAIL/SKIP] — [details]
 ---
 Overall:         [HEALTHY / NEEDS ATTENTION]
 ```

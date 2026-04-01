@@ -14,7 +14,9 @@ fi
 COUNT=$((COUNT + 1))
 echo "$COUNT" > "$COUNTFILE"
 
-if [[ $COUNT -eq 25 ]]; then
+if [[ $COUNT -eq 10 ]]; then
+  echo "Context decay warning: 10+ messages. Re-read any file before editing — auto-compaction may have silently destroyed your earlier context."
+elif [[ $COUNT -eq 25 ]]; then
   echo "Context check: 25 messages in. Consider: /compact, /handoff, or start fresh."
 elif [[ $COUNT -eq 40 ]]; then
   echo "Context warning: 40 messages. Quality is likely degrading. Strongly recommend /handoff and fresh session."
