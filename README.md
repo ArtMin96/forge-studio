@@ -40,17 +40,27 @@ cp templates/CLAUDE.md ./CLAUDE.md
 # Edit the Project Config and Conventions sections for your project
 ```
 
-### Recommended Settings
+### Recommended settings.json
 
-A `templates/settings.json` provides deny rules, auto-compact tuning, and thinking/effort defaults. Merge into your `~/.claude/settings.json`:
+A power-user settings.json template is included at `templates/settings.json`. It enables extended thinking, maximum effort, LSP tools, and bypass permissions with a deny list for destructive commands.
 
-- **18 deny rules** block destructive commands at the permission layer (before hooks fire)
-- **Auto-compact at 75%** prevents context quality decay on multi-step tasks
-- **Extended thinking + high effort** for maximum output quality
+```bash
+# Copy to your global Claude Code config
+cp templates/settings.json ~/.claude/settings.json
 
-The deny rules work in any permission mode, including `bypassPermissions`. Combined with iron-rules hooks (4-layer detection), this provides defense-in-depth against destructive operations.
+# Or to a project-level config
+mkdir -p .claude && cp templates/settings.json .claude/settings.json
+```
 
-See [Settings Best Practices](docs/settings.md) for the full guide: permission modes, performance tuning, sandbox config, and hidden gems.
+Key choices:
+- **Bypass permissions + deny list** — allows everything except destructive commands (`git push --force`, `rm -rf /`, `DROP TABLE`, etc.). Two safety layers: the deny list here and iron-rules hooks.
+- **No co-authored-by** — removes the "Co-Authored-By: Claude" trailer from commits
+- **Always thinking + high effort** — maximizes reasoning quality at the cost of more tokens
+- **LSP + tool search** — enables IDE-level code navigation and on-demand tool loading
+- **Auto-compact at 75%** — compacts context earlier than the default 95%, preventing quality decay
+- **90-day transcript retention** — extends the default 30-day cleanup period for session logs
+
+See [Settings Best Practices](docs/settings.md) for detailed documentation on each setting.
 
 ---
 
@@ -379,3 +389,4 @@ Enforces edit verification patterns. Tracks how many times each file is edited p
 ## Docs
 
 - [Budget Window Warmup](docs/warmup.md) — Anchor your 5-hour token budget window to predictable hours using scheduled triggers or GitHub Actions
+- [Settings Best Practices](docs/settings.md) — Recommended settings.json configuration, permission modes, deny rules, and performance tuning
