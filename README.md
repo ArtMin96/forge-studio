@@ -40,6 +40,18 @@ cp templates/CLAUDE.md ./CLAUDE.md
 # Edit the Project Config and Conventions sections for your project
 ```
 
+### Recommended Settings
+
+A `templates/settings.json` provides deny rules, auto-compact tuning, and thinking/effort defaults. Merge into your `~/.claude/settings.json`:
+
+- **18 deny rules** block destructive commands at the permission layer (before hooks fire)
+- **Auto-compact at 75%** prevents context quality decay on multi-step tasks
+- **Extended thinking + high effort** for maximum output quality
+
+The deny rules work in any permission mode, including `bypassPermissions`. Combined with iron-rules hooks (4-layer detection), this provides defense-in-depth against destructive operations.
+
+See [Settings Best Practices](docs/settings.md) for the full guide: permission modes, performance tuning, sandbox config, and hidden gems.
+
 ---
 
 ## Quick Reference
