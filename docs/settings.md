@@ -177,7 +177,7 @@ OS-level restrictions. Prevents Claude from reading sensitive files or making un
 The `templates/settings.json` in this repo provides:
 
 1. **Auto-compact at 75%** — Prevents context quality decay
-2. **18 deny rules** — Blocks destructive commands at the permission layer
+2. **11 deny rules** — Blocks destructive commands at the permission layer
 3. **Extended thinking** — Always-on for better reasoning
 4. **High effort** — Maximum quality (downgrade to `medium` if cost-sensitive)
 
@@ -214,7 +214,7 @@ Useful variables to set in `settings.json` under `"env"`:
 | Variable | Value | Purpose |
 |----------|-------|---------|
 | `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` | `"75"` | Earlier context compaction |
-| `ENABLE_LSP_TOOLS` | `"1"` | Enable LSP-based code intelligence |
+| `ENABLE_LSP_TOOL` | `"1"` | Enable LSP-based code intelligence |
 | `NODE_ENV` | `"development"` | Set Node environment |
 | `CLAUDE_CODE_AUTO_COMPACT_WINDOW` | `"33000"` | Compaction window size (tokens) |
 
