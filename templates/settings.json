@@ -1,30 +1,30 @@
 {
   "env": {
+    "ENABLE_LSP_TOOL": "1",
+    "ENABLE_TOOL_SEARCH": "true",
+    "CLAUDE_CODE_NO_FLICKER": "1",
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "75"
   },
+  "includeCoAuthoredBy": false,
   "permissions": {
+    "allow": [],
     "deny": [
-      "Bash(rm -rf *)",
-      "Bash(rm -r *)",
-      "Bash(git push --force *)",
-      "Bash(git push -f *)",
-      "Bash(git push * --force)",
-      "Bash(git push * -f)",
-      "Bash(git reset --hard *)",
-      "Bash(git checkout -- *)",
-      "Bash(git checkout . *)",
-      "Bash(git clean -f *)",
-      "Bash(git clean -fd *)",
-      "Bash(git branch -D *)",
-      "Bash(* DROP TABLE *)",
-      "Bash(* DROP DATABASE *)",
-      "Bash(* TRUNCATE *)",
-      "Bash(curl * | bash *)",
-      "Bash(curl * | sh *)",
-      "Bash(wget * | bash *)",
-      "Bash(wget * | sh *)"
-    ]
+      "Bash(rm -rf /*)",
+      "Bash(rm -rf ~*)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git reset --hard*)",
+      "Bash(git checkout .)",
+      "Bash(git clean -f*)",
+      "Bash(git branch -D*)",
+      "Bash(*DROP TABLE*)",
+      "Bash(*DROP DATABASE*)",
+      "Bash(*TRUNCATE *)"
+    ],
+    "defaultMode": "bypassPermissions"
   },
+  "skipDangerousModePermissionPrompt": true,
+  "effortLevel": "high",
   "alwaysThinkingEnabled": true,
-  "effortLevel": "high"
+  "cleanupPeriodDays": 90
 }
