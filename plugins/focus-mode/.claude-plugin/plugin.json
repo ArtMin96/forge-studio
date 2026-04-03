@@ -1,8 +1,0 @@
-{
-  "name": "focus-mode",
-  "description": "Scope enforcement: task boundaries, out-of-scope warnings, message timeboxing",
-  "version": "1.0.0",
-  "author": {
-    "name": "Arthur"
-  }
-}
