@@ -1,6 +1,0 @@
-{
-  "name": "quality-gates",
-  "description": "PHP code quality hooks: Larastan static analysis, migration checks, pre-commit reminders",
-  "version": "1.0.0",
-  "author": { "name": "Arthur" }
-}
