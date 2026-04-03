@@ -6,7 +6,7 @@
 Agent = Model + Harness
 ```
 
-The **harness** is everything in an AI agent except the model: the code that determines what to store, retrieve, and present to the model at each turn. Research shows that changing only the harness — with the same underlying model — can produce a **6x performance gap** (Meta-Harness, 2025).
+The **harness** is everything in an AI agent except the model: the code that determines what to store, retrieve, and present to the model at each turn. Research shows that changing only the harness — with the same underlying model — can produce a **6x performance gap** (Meta-Harness, 2026).
 
 Forge Studio implements harness principles as composable Claude Code plugins.
 
@@ -22,7 +22,7 @@ Forge Studio implements harness principles as composable Claude Code plugins.
 | 6 | Multi-Agent Decomposition | How work is split across agents | `agents` |
 | 7 | Behavioral Steering | Ongoing course correction | `behavioral-core` (hooks) |
 
-Cross-cutting: `evaluator` (quality gates), `workflow` (orchestration), `reference` (advanced patterns).
+Cross-cutting: `evaluator` (quality gates), `workflow` (orchestration), `reference` (advanced patterns), `traces` (execution diagnostics).
 
 ## Three-Layer Model
 
@@ -95,6 +95,24 @@ Multi-agent decomposition with **tool isolation**:
 
 This mirrors the Meta-Harness finding that capability isolation prevents error propagation between phases.
 
+## Execution Trace Collection
+
+The Meta-Harness paper's ablation (Table 3) proves that full execution trace access produces a 43% relative improvement over compressed summaries (50.0 vs 34.9 median accuracy). The `traces` plugin implements this by collecting structured JSONL traces across sessions:
+
+- **PostToolUse:Bash** — logs command, exit code, output preview
+- **PostToolUse:Write|Edit** — logs file path and change type
+- **SessionEnd** — writes session summary (commands, errors, files modified)
+
+Traces stored in `~/.claude/traces/` are grep-searchable and analyzable via `/trace-review` and `/trace-stats` skills. This bridges the gap between Forge Studio's static harness and the paper's dynamic diagnostic feedback loop.
+
+## Context Preservation Across Compaction
+
+The `PreCompact` and `PostCompact` hooks in context-engine save and restore critical state (active scope, plan, handoff, git state) across compaction events. This prevents the model from losing track of what it was doing when context gets compressed.
+
+## Environment Bootstrapping
+
+Based on the Meta-Harness TerminalBench-2 finding (+1.7% from environment snapshot), the `SessionStart` hook gathers OS info, available memory, available languages, package managers, project type, and git state. This eliminates 2-4 wasted turns agents typically spend discovering their environment.
+
 ## Design Principles
 
 1. **Zero-cost until invoked**: All skills use `disable-model-invocation: true`. No tokens spent loading unused capabilities.
@@ -102,3 +120,4 @@ This mirrors the Meta-Harness finding that capability isolation prevents error p
 3. **Fork for read-only**: Expensive analysis skills use `context: fork` to avoid polluting the main conversation.
 4. **Exit codes as signals**: `exit 0` = info injected, `exit 1` = warning, `exit 2` = block the action.
 5. **Filesystem as substrate**: Memory, session state, and configuration all live in files — they survive context compaction.
+6. **Prefer additive changes**: The Meta-Harness TerminalBench-2 search (Appendix A.2) proved that purely additive modifications succeed where "fixing" fragile existing code fails. Six consecutive iterations modifying completion flow all regressed; the winning change was purely additive (environment bootstrapping). When extending harness behavior, add new hooks and skills rather than rewriting existing ones.
