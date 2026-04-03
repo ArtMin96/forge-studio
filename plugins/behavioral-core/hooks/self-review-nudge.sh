@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Iron Rules: After every code write, nudge self-review.
+# Behavioral Core: After every code write, nudge self-review.
 # Lightweight reminder — costs minimal tokens.
 
 INPUT=$(cat)

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Iron Rules: Block destructive commands.
+# Behavioral Core: Block destructive commands.
 # exit 2 = BLOCK the command. exit 1 = warn only. exit 0 = allow.
 
 INPUT=$(cat)
