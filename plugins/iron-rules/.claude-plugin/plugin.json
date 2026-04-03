@@ -1,8 +1,0 @@
-{
-  "name": "iron-rules",
-  "description": "Behavioral discipline via hooks: anti-sycophancy, destructive command blocking, self-review enforcement",
-  "version": "1.0.0",
-  "author": {
-    "name": "Arthur"
-  }
-}
