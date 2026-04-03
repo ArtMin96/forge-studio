@@ -1,99 +1,82 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "forge-studio",
-  "version": "1.0.0",
-  "description": "Personal marketplace for optimal Claude Code behavior: discipline, context mastery, agent effectiveness, workflow patterns, and hidden gems.",
+  "version": "2.0.0",
+  "description": "Harness-aligned Claude Code marketplace: behavioral steering, context management, memory architecture, evaluation, orchestration, and multi-agent decomposition.",
   "owner": {
     "name": "Arthur"
   },
+  "harness_thesis": "Agent = Model + Harness. Changing only the harness can move a system from outside top-30 to top-5 on benchmarks. This marketplace implements the 7 harness components as composable plugins.",
   "plugins": [
     {
-      "name": "iron-rules",
-      "description": "Behavioral discipline via hooks: anti-sycophancy, destructive command blocking, self-review enforcement",
+      "name": "behavioral-core",
+      "description": "Behavioral steering via modular hooks: anti-sycophancy, destructive command blocking, self-review enforcement, scope discipline",
       "version": "1.0.0",
-      "source": "./plugins/iron-rules",
-      "category": "discipline",
-      "tags": ["behavioral", "hooks", "anti-sycophancy", "safety"]
+      "source": "./plugins/behavioral-core",
+      "category": "behavioral-steering",
+      "harness_layer": "behavioral-steering",
+      "overhead": "minimal",
+      "tags": ["behavioral", "hooks", "anti-sycophancy", "safety", "scope"]
     },
     {
-      "name": "self-critic",
-      "description": "Evaluator-optimizer pattern: challenge work before completion, adversarial code review",
+      "name": "context-engine",
+      "description": "Context management: progressive pressure tracking, session handoffs, drift detection, edit safety, large-file warnings",
       "version": "1.0.0",
-      "source": "./plugins/self-critic",
-      "category": "discipline",
-      "tags": ["code-review", "quality", "self-improvement"]
+      "source": "./plugins/context-engine",
+      "category": "context-management",
+      "harness_layer": "context-management",
+      "overhead": "minimal",
+      "tags": ["context", "handoff", "session-management", "edit-safety"]
     },
     {
-      "name": "context-guardian",
-      "description": "Context window management: session handoffs, drift detection, checkpoint system",
+      "name": "memory",
+      "description": "Three-tier memory architecture: pointer index, on-demand topics, searchable transcripts",
       "version": "1.0.0",
-      "source": "./plugins/context-guardian",
-      "category": "context",
-      "tags": ["context", "handoff", "session-management"]
+      "source": "./plugins/memory",
+      "category": "memory-architecture",
+      "harness_layer": "memory-architecture",
+      "overhead": "zero",
+      "tags": ["memory", "persistence", "recall"]
     },
     {
-      "name": "context-diet",
-      "description": "Context optimization audit: analyze token waste, trim CLAUDE.md, reduce overhead",
+      "name": "evaluator",
+      "description": "Evaluator-optimizer pattern: adversarial review, verification, static analysis gates, postmortems",
       "version": "1.0.0",
-      "source": "./plugins/context-diet",
-      "category": "context",
-      "tags": ["context", "optimization", "tokens"]
+      "source": "./plugins/evaluator",
+      "category": "evaluation",
+      "harness_layer": "evaluation",
+      "overhead": "moderate",
+      "tags": ["code-review", "quality", "static-analysis", "verification"]
     },
     {
-      "name": "smart-workflow",
-      "description": "Agent effectiveness patterns from Anthropic research: task routing, evidence-based verification",
+      "name": "workflow",
+      "description": "Orchestration patterns: task routing, explore-plan-implement cycle, daily rituals",
       "version": "1.0.0",
-      "source": "./plugins/smart-workflow",
-      "category": "effectiveness",
-      "tags": ["workflow", "agent-patterns", "verification"]
+      "source": "./plugins/workflow",
+      "category": "orchestration",
+      "harness_layer": "orchestration",
+      "overhead": "zero",
+      "tags": ["workflow", "planning", "daily-rituals", "routing"]
     },
     {
-      "name": "focus-mode",
-      "description": "Scope enforcement: task boundaries, out-of-scope warnings, message timeboxing",
+      "name": "agents",
+      "description": "Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries",
       "version": "1.0.0",
-      "source": "./plugins/focus-mode",
-      "category": "effectiveness",
-      "tags": ["focus", "scope", "discipline"]
+      "source": "./plugins/agents",
+      "category": "multi-agent",
+      "harness_layer": "multi-agent-decomposition",
+      "overhead": "zero",
+      "tags": ["agents", "decomposition", "parallel", "pipeline"]
     },
     {
-      "name": "session-mastery",
-      "description": "Senior developer daily rituals: morning planning, EOD summary, weekly retrospective",
+      "name": "reference",
+      "description": "Power-user reference: extended thinking, unix pipes, parallel execution patterns",
       "version": "1.0.0",
-      "source": "./plugins/session-mastery",
-      "category": "workflow",
-      "tags": ["daily", "planning", "ritual"]
-    },
-    {
-      "name": "explore-plan-code",
-      "description": "Four-phase development workflow: explore with subagents, plan, implement, verify",
-      "version": "1.0.0",
-      "source": "./plugins/explore-plan-code",
-      "category": "workflow",
-      "tags": ["workflow", "planning", "subagents"]
-    },
-    {
-      "name": "power-user",
-      "description": "Hidden Claude Code features: ultrathink, parallel worktrees, unix pipes, context tricks",
-      "version": "1.0.0",
-      "source": "./plugins/power-user",
-      "category": "gems",
-      "tags": ["hidden-features", "tips", "advanced"]
-    },
-    {
-      "name": "quality-gates",
-      "description": "Code quality hooks: PHP (Larastan, migrations) and JS/TS (TypeScript, ESLint) static analysis, pre-commit reminders",
-      "version": "1.0.0",
-      "source": "./plugins/quality-gates",
-      "category": "gems",
-      "tags": ["php", "quality", "static-analysis", "hooks"]
-    },
-    {
-      "name": "edit-safety",
-      "description": "Enforces edit verification patterns to prevent stale-context edits",
-      "version": "1.0.0",
-      "source": "./plugins/edit-safety",
-      "category": "effectiveness",
-      "tags": ["edit", "safety", "verification", "context"]
+      "source": "./plugins/reference",
+      "category": "reference",
+      "harness_layer": "reference",
+      "overhead": "zero",
+      "tags": ["hidden-features", "tips", "advanced", "parallel"]
     }
   ]
 }
