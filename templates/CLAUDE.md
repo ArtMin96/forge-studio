@@ -1,8 +1,10 @@
 # Project Instructions
 
-<!-- Forge Studio plugins handle: anti-sycophancy, focus enforcement, destructive
-     command blocking, self-review nudging, context tracking, and quality gates.
-     This file covers what hooks CAN'T: personality, judgment, and project config. -->
+<!-- Forge Studio harness plugins handle: behavioral steering (anti-sycophancy,
+     focus, destructive command blocking, self-review), context management
+     (pressure tracking, edit safety), evaluation (static analysis, quality gates),
+     and multi-agent decomposition. This file covers what hooks CAN'T:
+     personality, judgment, and project config. -->
 
 ## Personality
 
@@ -54,24 +56,23 @@ When user pastes error logs, trace the actual error. Don't guess or chase theori
 - Don't create abstractions for one-time operations.
 - Three similar lines > premature abstraction.
 - Trust your types. Don't add defensive checks the type system covers.
-- Run the linter — never fix formatting manually.
 - Test behavior, not implementation. Minimize mocking.
 - Feature work and refactors: if architecture is flawed, state is duplicated, or patterns are inconsistent — propose structural fixes. Ask: "What would a senior dev reject in code review?"
-- Never report a task complete until running the project's type-checker and linter and fixing ALL resulting errors. If no checker is configured, state that explicitly.
+<!-- Linter/type-checker enforcement handled by evaluator plugin hooks (php-static-analysis.sh, js-static-analysis.sh) -->
 - No robotic comment blocks, no excessive section headers. Code should read like a human wrote it.
-- Re-read a file before every edit. Read again after to confirm. Never batch more than 3 edits to the same file without a verification read.
 - When renaming anything, search separately for: direct calls, type references, string literals, dynamic imports, re-exports, test files/mocks. Assume grep missed something.
 - Never fix a display problem by duplicating data or state. One source, everything else reads from it.
 
 ## Context Management
 
+<!-- Hooks handle: re-read warnings (track-edits.sh), context pressure (track-context-pressure.sh),
+     large file warnings (check-large-file.sh), truncation detection (warn-tool-truncation.sh).
+     This section covers strategies hooks can't enforce. -->
+
 - For tasks touching >5 independent files, launch parallel sub-agents (5-8 files per agent). Each gets its own context window. One agent processing 20 files sequentially guarantees context decay.
   - Inherit context (fork) for subtasks that need your current understanding.
   - Use worktree isolation for independent parallel work on the same repo.
   - Use run_in_background for long-running sub-agents. Don't poll their output mid-run — wait for completion.
-- After 10+ messages, re-read any file before editing. Auto-compaction may have silently destroyed context.
-- Each read is capped at 2,000 lines. For files >500 LOC, use offset/limit to read in chunks. Never assume a single read captured the complete file.
-- Tool results over 50,000 chars are silently truncated. If search results seem suspiciously few, re-run with narrower scope. State when you suspect truncation.
 - For complex multi-step tasks: write intermediate results and decisions to files. The filesystem survives compaction; your context window does not.
 
 ## Prompt Cache
