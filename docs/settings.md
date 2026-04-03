@@ -36,7 +36,7 @@ Set via `permissions.defaultMode`:
 ### Recommendation
 
 - **Interactive work**: `default` or `acceptEdits` + deny rules
-- **AFK / hands-off**: `auto` if available (Team/Enterprise plan), otherwise `bypassPermissions` + deny rules + iron-rules hooks
+- **AFK / hands-off**: `auto` if available (Team/Enterprise plan), otherwise `bypassPermissions` + deny rules + behavioral-core hooks
 - **CI/CD**: `bypassPermissions` in isolated containers
 
 ---
@@ -80,7 +80,7 @@ Deny rules block specific tool patterns regardless of permission mode. They use 
 | Matching | Glob patterns | Regex / arbitrary logic |
 | Evaluated | Before tool execution, at permission layer | After permission check, before execution |
 | Override | Cannot be overridden by any settings level | Can be bypassed by obfuscation |
-| Catches wrappers | No (`bash -c 'rm -rf /'` passes) | Yes (Layer 2 in iron-rules) |
+| Catches wrappers | No (`bash -c 'rm -rf /'` passes) | Yes (Layer 2 in behavioral-core) |
 | Configuration | settings.json | hooks.json + shell scripts |
 
 **Use both.** Deny rules are the safety net that can't be overridden. Hooks catch what deny rules miss.
@@ -191,7 +191,7 @@ cat templates/settings.json
 # Copy the deny rules and env vars into your existing settings.json
 ```
 
-The iron-rules plugin adds hook-based protection on top (4-layer detection: direct patterns, shell wrappers, pipe-to-shell, flag reordering).
+The behavioral-core plugin adds hook-based protection on top (4-layer detection: direct patterns, shell wrappers, pipe-to-shell, flag reordering).
 
 ---
 
@@ -217,20 +217,20 @@ Useful variables to set in `settings.json` under `"env"`:
 | `ENABLE_LSP_TOOL` | `"1"` | Enable LSP-based code intelligence |
 | `NODE_ENV` | `"development"` | Set Node environment |
 | `CLAUDE_CODE_AUTO_COMPACT_WINDOW` | `"33000"` | Compaction window size (tokens) |
+| `FORGE_CONTEXT_STAGE1` - `STAGE5` | `"8"/"15"/"22"/"30"/"40"` | Context pressure message-count thresholds |
+| `FORGE_CONTEXT_PCT1` - `PCT5` | `"50"/"65"/"75"/"85"/"92"` | Context pressure percentage thresholds |
+| `FORGE_LARGE_FILE_LINES` | `"500"` | Large file warning threshold (line count) |
+| `FORGE_TRACES_ENABLED` | `"1"` or `"0"` | Enable/disable execution trace collection |
 
 ---
 
-## Source Code Leak Insights (March 31, 2026)
+## Internal Behavior Notes
 
-A packaging error exposed Claude Code's source. Relevant findings for settings:
+Observations from Claude Code's documented and observed behavior relevant to settings:
 
-- **Auto-compact buffer** was reduced from 45K to 33K tokens internally
-- **14 cache-break vectors** tracked — explains why prompt caching matters
-- **Deny rules evaluated before hooks** — confirmed in the permission evaluation pipeline
-- **`opusplan` alias** discovered — uses Opus for planning, Sonnet for execution
-- **`effortLevel: "max"`** exists — deepest reasoning with no token limit (Opus 4.6 only)
-- **Frustration detection** — regex matching on user messages adjusts response tone
-- **Shell wrapper bypass** — `bash -c 'rm -rf /'` passes both deny rules and simple regex hooks, motivating the multi-layer detection in iron-rules
-- **`auto` mode classifier** — server-side safety classifier for Team/Enterprise plans
-
-See the full leak analysis for unreleased features (KAIROS, BUDDY, ULTRAPLAN, Swarms) and internal codenames.
+- **Auto-compact buffer**: The compaction window is approximately 33K tokens. Set `CLAUDE_CODE_AUTO_COMPACT_WINDOW` to tune this.
+- **Deny rules evaluated before hooks** — deny rules fire at the permission layer, before PreToolUse hooks. This means deny rules are the primary safety net.
+- **`opusplan` alias** — uses Opus for planning, Sonnet for execution. Useful for cost-efficient architectural work.
+- **`effortLevel: "max"`** — deepest reasoning with no token limit (Opus 4.6 only). Use for complex debugging and architecture.
+- **Shell wrapper bypass** — `bash -c 'rm -rf /'` passes both deny rules and simple regex hooks, motivating the multi-layer detection in behavioral-core.
+- **`auto` mode classifier** — server-side safety classifier available on Team/Enterprise plans.
