@@ -4,7 +4,7 @@
 
 Forge Studio implements harness principles as composable Claude Code plugins.
 
-7 plugins. 30 skills. 11 hooks. 4 agents.
+8 plugins. 32 skills. 17 hooks. 4 agents.
 
 ---
 
@@ -36,6 +36,9 @@ Forge Studio implements harness principles as composable Claude Code plugins.
 
 # Reference & Tips
 /plugin install reference@forge-studio
+
+# Execution Trace Collection
+/plugin install traces@forge-studio
 ```
 
 After installing, start a new session for plugins to load.
@@ -136,7 +139,7 @@ Implements the evaluator-optimizer pattern. Static analysis hooks run automatica
 
 | Skill | Purpose |
 |-------|---------|
-| `/challenge` | Critique your own work before presenting it |
+| `/challenge` | Draft Verification critique: self-review + git history comparison |
 | `/verify` | Evidence-based completion check before claiming done |
 | `/devils-advocate <decision>` | Argue against a design decision to find holes |
 | `/postmortem [bug]` | Structured bug autopsy: root cause, category, prevention |
@@ -152,7 +155,7 @@ Connected daily development lifecycle from morning planning through weekly retro
 | `/morning` | Daily planning: review yesterday, check handoffs, prioritize today |
 | `/eod` | End-of-day: capture progress, create daily log, trigger handoff |
 | `/weekly` | Weekly retro: patterns, wins, blockers, tech debt |
-| `/route <task>` | Pick the right workflow pattern for this task |
+| `/route <task>` | Pick the right workflow pattern and retrieval strategy for this task |
 | `/explore <what>` | Subagent exploration without polluting main context |
 | `/plan <task>` | Create implementation plan with files, changes, risks |
 | `/implement` | Execute plan step-by-step with scope checks |
@@ -174,6 +177,15 @@ Planner/Generator/Reviewer triad with tool-isolated capability boundaries. The p
 | generator | Read, Write, Edit, Bash, Glob, Grep | Implementation based on planner output |
 | reviewer | Read, Grep, Glob, Bash | Read-only critique and issue detection |
 
+### traces — Execution Trace Collection
+
+Collects structured execution traces (JSONL) across sessions. Based on the Meta-Harness paper's finding that full trace access produces a 43% relative improvement over compressed summaries (Table 3 ablation). Trace files live in `~/.claude/traces/` and are grep-searchable across sessions.
+
+| Skill | Purpose |
+|-------|---------|
+| `/trace-review` | Analyze recent traces for recurring failures, file hotspots, and session health trends |
+| `/trace-stats` | Quick statistics on recent sessions: command counts, error rates, files modified |
+
 ### reference — Power-User Tips
 
 Reference skills for hidden Claude Code features. Knowledge you look up when needed. All `disable-model-invocation: true` — zero tokens until invoked.
@@ -192,17 +204,23 @@ These fire automatically. No commands needed.
 
 | Event | Plugin | What it does |
 |-------|--------|-------------|
+| Session start | context-engine | Gathers environment snapshot: OS, memory, languages, package managers, project type, git state |
 | Every message | behavioral-core | Re-anchors behavioral rules from `rules.d/` (modular, user-editable) |
 | Every message | context-engine | 5-stage progressive context pressure warnings |
 | Before Bash | behavioral-core | Blocks `rm -rf`, `git push --force`, `git reset --hard`, `DROP TABLE` |
 | Before any tool | behavioral-core | Reminds of active scope boundaries (if a scope exists) |
 | Before `git commit` | evaluator | Reminds to run tests |
+| Before compaction | context-engine | Saves active scope, plan, handoff, and git state to recovery file |
+| After compaction | context-engine | Re-injects essential pointers from recovery file |
 | After Write/Edit | behavioral-core | Nudges: "Does this change do ONLY what was asked?" |
+| After Write/Edit | traces | Logs file path and change type to session trace |
 | After reading >500 lines | context-engine | Warns to extract what you need before compaction |
 | After writing .php | evaluator | Runs Larastan/PHPStan on the changed file |
 | After writing .js/.ts | evaluator | Runs tsc --noEmit and ESLint on the changed file |
+| After Bash | traces | Logs command, exit code, and output preview to session trace |
 | After Bash/Grep | context-engine | Warns if tool output approaching 50K char truncation boundary |
 | After Edit/Read | context-engine | Tracks edits per file; warns after 3 edits without re-reading |
+| Session end | traces | Writes session summary: total commands, errors, files modified |
 
 ---
 
@@ -332,7 +350,7 @@ For important changes, challenge your own work:
 /challenge
 ```
 
-Runs in isolation. Asks: could this be simpler? What breaks? What's the weakest part? Would a staff engineer approve?
+Two-stage Draft Verification: Stage 1 critiques your code (simplicity, risk, scope). Stage 2 retrieves similar past changes from git history — confirmers and challengers — to verify the assessment.
 
 ### Reviewing your discipline
 
@@ -382,13 +400,13 @@ Reads the week's daily logs. Surfaces patterns, wins, blockers, and accumulated 
 
 ## Design Principles
 
-**Agent = Model + Harness.** Research (Meta-Harness, 2025) shows the harness — not the model — is the primary lever for agent performance. Forge Studio structures the harness into composable layers.
+**Agent = Model + Harness.** Research (Meta-Harness, 2026) shows the harness — not the model — is the primary lever for agent performance. Forge Studio structures the harness into composable layers.
 
 **Hooks over instructions.** CLAUDE.md rules have ~80% compliance that degrades as context fills. Hooks fire deterministically at 100%. For non-negotiable behavior, use hooks.
 
 **`exit 2` blocks, `exit 1` warns.** Hook exit codes control enforcement level. `exit 2` actually prevents execution (used by destructive command blocker).
 
-**Zero cost until invoked.** All 30 skills use `disable-model-invocation: true`. They don't load into context until called. Installing all plugins adds near-zero overhead.
+**Zero cost until invoked.** All 32 skills use `disable-model-invocation: true`. They don't load into context until called. Installing all plugins adds near-zero overhead.
 
 **Capability isolation.** Agents have tool-restricted boundaries. Read-only agents can't modify code. Write agents can't skip review. This prevents error propagation between phases.
 
@@ -404,7 +422,11 @@ Reads the week's daily logs. Surfaces patterns, wins, blockers, and accumulated 
 
 **Add/remove behavioral rules:** Edit files in `plugins/behavioral-core/hooks/rules.d/`. Rules are numbered for priority ordering (10-no-sycophancy, 20-no-filler, etc.).
 
-**Adjust context pressure thresholds:** Edit `plugins/context-engine/hooks/track-context-pressure.sh`.
+**Adjust context pressure thresholds:** Set `FORGE_CONTEXT_STAGE1` through `FORGE_CONTEXT_STAGE5` in your `settings.json` env section (message-count triggers, defaults: 8/15/22/30/40). Or set `FORGE_CONTEXT_PCT1` through `FORGE_CONTEXT_PCT5` for percentage-based thresholds (defaults: 50/65/75/85/92).
+
+**Adjust large file warning:** Set `FORGE_LARGE_FILE_LINES` (default: 500).
+
+**Disable trace collection:** Set `FORGE_TRACES_ENABLED` to `"0"` in your `settings.json` env section.
 
 **Edit skill behavior:** Each SKILL.md is self-contained. Modify the instructions, add sections, or change the output format.
 
