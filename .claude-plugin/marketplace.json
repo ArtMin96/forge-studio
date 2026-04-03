@@ -1,12 +1,13 @@
 {
-  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "forge-studio",
   "version": "2.0.0",
-  "description": "Harness-aligned Claude Code marketplace: behavioral steering, context management, memory architecture, evaluation, orchestration, and multi-agent decomposition.",
   "owner": {
     "name": "Arthur"
   },
-  "harness_thesis": "Agent = Model + Harness. Changing only the harness can move a system from outside top-30 to top-5 on benchmarks. This marketplace implements the 7 harness components as composable plugins.",
+  "metadata": {
+    "description": "Harness-aligned Claude Code marketplace: behavioral steering, context management, memory architecture, evaluation, orchestration, and multi-agent decomposition.",
+    "version": "2.0.0"
+  },
   "plugins": [
     {
       "name": "behavioral-core",
@@ -14,9 +15,7 @@
       "version": "1.0.0",
       "source": "./plugins/behavioral-core",
       "category": "behavioral-steering",
-      "harness_layer": "behavioral-steering",
-      "overhead": "minimal",
-      "tags": ["behavioral", "hooks", "anti-sycophancy", "safety", "scope"]
+      "tags": ["behavioral", "hooks", "anti-sycophancy", "safety", "scope", "harness:behavioral-steering", "overhead:minimal"]
     },
     {
       "name": "context-engine",
@@ -24,9 +23,7 @@
       "version": "1.0.0",
       "source": "./plugins/context-engine",
       "category": "context-management",
-      "harness_layer": "context-management",
-      "overhead": "minimal",
-      "tags": ["context", "handoff", "session-management", "edit-safety"]
+      "tags": ["context", "handoff", "session-management", "edit-safety", "harness:context-management", "overhead:minimal"]
     },
     {
       "name": "memory",
@@ -34,9 +31,7 @@
       "version": "1.0.0",
       "source": "./plugins/memory",
       "category": "memory-architecture",
-      "harness_layer": "memory-architecture",
-      "overhead": "zero",
-      "tags": ["memory", "persistence", "recall"]
+      "tags": ["memory", "persistence", "recall", "harness:memory-architecture", "overhead:zero"]
     },
     {
       "name": "evaluator",
@@ -44,9 +39,7 @@
       "version": "1.0.0",
       "source": "./plugins/evaluator",
       "category": "evaluation",
-      "harness_layer": "evaluation",
-      "overhead": "moderate",
-      "tags": ["code-review", "quality", "static-analysis", "verification"]
+      "tags": ["code-review", "quality", "static-analysis", "verification", "harness:evaluation", "overhead:moderate"]
     },
     {
       "name": "workflow",
@@ -54,9 +47,7 @@
       "version": "1.0.0",
       "source": "./plugins/workflow",
       "category": "orchestration",
-      "harness_layer": "orchestration",
-      "overhead": "zero",
-      "tags": ["workflow", "planning", "daily-rituals", "routing"]
+      "tags": ["workflow", "planning", "daily-rituals", "routing", "harness:orchestration", "overhead:zero"]
     },
     {
       "name": "agents",
@@ -64,9 +55,7 @@
       "version": "1.0.0",
       "source": "./plugins/agents",
       "category": "multi-agent",
-      "harness_layer": "multi-agent-decomposition",
-      "overhead": "zero",
-      "tags": ["agents", "decomposition", "parallel", "pipeline"]
+      "tags": ["agents", "decomposition", "parallel", "pipeline", "harness:multi-agent-decomposition", "overhead:zero"]
     },
     {
       "name": "reference",
@@ -74,9 +63,15 @@
       "version": "1.0.0",
       "source": "./plugins/reference",
       "category": "reference",
-      "harness_layer": "reference",
-      "overhead": "zero",
-      "tags": ["hidden-features", "tips", "advanced", "parallel"]
+      "tags": ["hidden-features", "tips", "advanced", "parallel", "harness:reference", "overhead:zero"]
+    },
+    {
+      "name": "traces",
+      "description": "Execution trace collection and cross-session analysis. Stores structured JSONL traces for pattern detection.",
+      "version": "1.0.0",
+      "source": "./plugins/traces",
+      "category": "diagnostics",
+      "tags": ["traces", "execution-history", "diagnostics", "analytics", "harness:trace-analysis", "overhead:minimal"]
     }
   ]
 }
