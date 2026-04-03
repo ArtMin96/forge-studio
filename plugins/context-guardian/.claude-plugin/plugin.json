@@ -1,6 +1,0 @@
-{
-  "name": "context-guardian",
-  "description": "Context window management: session handoffs, drift detection, checkpoint system",
-  "version": "1.0.0",
-  "author": { "name": "Arthur" }
-}
