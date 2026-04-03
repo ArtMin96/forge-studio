@@ -4,7 +4,7 @@
 
 Forge Studio implements harness principles as composable Claude Code plugins.
 
-8 plugins. 32 skills. 17 hooks. 4 agents.
+8 plugins. 33 skills. 17 hooks. 4 agents.
 
 ---
 
@@ -142,6 +142,7 @@ Implements the evaluator-optimizer pattern. Static analysis hooks run automatica
 | `/challenge` | Draft Verification critique: self-review + git history comparison |
 | `/verify` | Evidence-based completion check before claiming done |
 | `/devils-advocate <decision>` | Argue against a design decision to find holes |
+| `/grill-me` | Stress-test a plan through relentless, systematic questioning |
 | `/postmortem [bug]` | Structured bug autopsy: root cause, category, prevention |
 | `/healthcheck [--quick\|--full]` | Run quality pipeline (auto-detects PHP and/or JS/TS) |
 | `/gate-report` | Aggregate all quality warnings before committing |
@@ -406,7 +407,7 @@ Reads the week's daily logs. Surfaces patterns, wins, blockers, and accumulated 
 
 **`exit 2` blocks, `exit 1` warns.** Hook exit codes control enforcement level. `exit 2` actually prevents execution (used by destructive command blocker).
 
-**Zero cost until invoked.** All 32 skills use `disable-model-invocation: true`. They don't load into context until called. Installing all plugins adds near-zero overhead.
+**Zero cost until invoked.** All 33 skills use `disable-model-invocation: true`. They don't load into context until called. Installing all plugins adds near-zero overhead.
 
 **Capability isolation.** Agents have tool-restricted boundaries. Read-only agents can't modify code. Write agents can't skip review. This prevents error propagation between phases.
 
