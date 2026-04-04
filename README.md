@@ -102,7 +102,7 @@ See [docs/architecture.md](docs/architecture.md) for the full design rationale.
 
 ### behavioral-core — Behavioral Steering
 
-Modular behavioral anchoring via `rules.d/` directory. Each rule is a separate file, priority-ordered by numeric prefix. Add, remove, or reorder rules by managing files. Hooks enforce 100% compliance where system prompt instructions degrade to ~80%.
+Re-injects behavioral rules on every message to prevent drift in long sessions. Rules live in `rules.d/` as individual files, priority-ordered by numeric prefix (10-no-sycophancy, 20-no-filler, etc.). Add, remove, or reorder rules by managing files. Hooks enforce ~100% compliance where system prompt instructions degrade to ~80%.
 
 | Skill | Purpose |
 |-------|---------|
@@ -285,7 +285,7 @@ Shows evidence: what changed, test output, edge case analysis. Either "VERIFIED"
 
 ### Long session management
 
-After ~8 messages, context-engine warns about working memory shrinking. At ~15, it suggests compaction. At ~22, it recommends compacting. Check drift:
+Context-engine uses two threshold systems: percentage-based (when Claude Code exposes actual context usage — preferred) and message-count based (fallback). With defaults, you'll see warnings around ~8 messages / ~50% context, escalating through 5 stages. Check drift:
 
 ```
 /checkpoint
@@ -405,7 +405,7 @@ Reads the week's daily logs. Surfaces patterns, wins, blockers, and accumulated 
 
 **Hooks over instructions.** CLAUDE.md rules have ~80% compliance that degrades as context fills. Hooks fire deterministically at 100%. For non-negotiable behavior, use hooks.
 
-**`exit 2` blocks, `exit 1` warns.** Hook exit codes control enforcement level. `exit 2` actually prevents execution (used by destructive command blocker).
+**`exit 2` blocks, `exit 1` warns.** Hook exit codes (shell exit codes from hook scripts) control enforcement level. `exit 2` actually prevents execution (used by destructive command blocker).
 
 **Zero cost until invoked.** All 33 skills use `disable-model-invocation: true`. They don't load into context until called. Installing all plugins adds near-zero overhead.
 
@@ -443,8 +443,19 @@ Reads the week's daily logs. Surfaces patterns, wins, blockers, and accumulated 
 
 ## Docs
 
-- [Architecture](docs/architecture.md) — Harness design, 7 components, why hooks beat instructions, memory tiers
-- [Workflow Lifecycle](plugins/workflow/LIFECYCLE.md) — Morning-to-weekly development cycle
-- [Budget Window Warmup](docs/warmup.md) — Anchor your 5-hour token budget window to predictable hours
-- [Settings Best Practices](docs/settings.md) — Recommended settings.json configuration, permission modes, deny rules
+**New to Forge Studio?** Read in this order:
+
+1. This README (overview + install)
+2. [Architecture](docs/architecture.md) — why it's designed this way, glossary of terms
+3. [Settings Best Practices](docs/settings.md) — configure your settings.json
+
+**When you're working:**
+
+- [Workflow Lifecycle](plugins/workflow/LIFECYCLE.md) — morning-to-weekly development cycle
+- [Budget Window Warmup](docs/warmup.md) — anchor your 5-hour token budget window to predictable hours
+
+**Advanced / optional:**
+
+- [Claude Code Source Analysis](docs/claude-code-analysis.md) — how Claude Code's internals affect performance, and how Forge Studio compensates
+- [Plan Mode Hooks](docs/plan-mode-hooks.md) — how plugins hook into plan mode entry (plugin developers)
 

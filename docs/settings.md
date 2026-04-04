@@ -33,6 +33,10 @@ Set via `permissions.defaultMode`:
 | `dontAsk` | Blocks all unapproved tools | No | Locked-down CI/pipelines |
 | `bypassPermissions` | Skips all prompts | Yes (risky) | Isolated VMs/containers |
 
+**Terminology:**
+- **AFK-safe**: Claude can run autonomously without prompting you for permissions while you're away from the keyboard
+- **Team/Enterprise**: Anthropic plan tiers at claude.ai — `auto` mode requires one of these plans
+
 ### Recommendation
 
 - **Interactive work**: `default` or `acceptEdits` + deny rules
@@ -84,6 +88,8 @@ Deny rules block specific tool patterns regardless of permission mode. They use 
 | Configuration | settings.json | hooks.json + shell scripts |
 
 **Use both.** Deny rules are the safety net that can't be overridden. Hooks catch what deny rules miss.
+
+See [Architecture: Why Hooks Beat Instructions](architecture.md#why-hooks-beat-instructions) for how hooks complement deny rules.
 
 ---
 
@@ -146,6 +152,8 @@ Enabled by default. **Never disable it.** Controls via env:
 Claude Code splits the system prompt at a `SYSTEM_PROMPT_DYNAMIC_BOUNDARY` marker. Everything before it gets globally cached (shared across sessions). Everything after is session-specific (ephemeral cache). See `docs/architecture.md` for details on what busts the cache.
 
 ### Model Aliases
+
+These are native Claude Code aliases, available via `--model` flag or `model` key in settings.json.
 
 | Alias | Resolves to |
 |-------|-------------|
@@ -280,11 +288,13 @@ After you approve a plan, offers "clear context" so implementation starts with a
 
 Forces the standard context window instead of the extended 1M window. Smaller context windows compact earlier but maintain better attention quality. Useful if you're not working on tasks that need massive context.
 
+See [Architecture: Prompt Cache](architecture.md#prompt-cache-architecture) for what busts the cache.
+
 ---
 
 ## Background Task Control
 
-Claude Code runs three fire-and-forget operations after every turn (`src/query/stopHooks.ts:136-157`):
+Three background operations that run asynchronously after every turn (they don't block your next message) (`src/query/stopHooks.ts:136-157`):
 
 1. `executePromptSuggestion()` — suggests next prompts
 2. `executeExtractMemories()` — auto-extracts and writes memory files
@@ -322,7 +332,7 @@ Disables telemetry and non-essential network calls. Reduces background noise.
 
 ### Anti-False-Claims Rule
 
-The most impactful behavioral finding from the source analysis. Anthropic gates this behind `USER_TYPE === 'ant'` (internal employees only) because false-claim rates jumped to 29-30% with Capybara v8.
+The most impactful behavioral finding from the source analysis. Anthropic gates this behind `USER_TYPE === 'ant'` — a flag that identifies internal Anthropic employees. External users don't receive this instruction. Anthropic added it after false-claim rates increased significantly in newer model versions.
 
 The instruction (replicated in `plugins/behavioral-core/hooks/rules.d/55-no-false-claims.txt`):
 
@@ -339,6 +349,8 @@ Replicated in `plugins/behavioral-core/hooks/rules.d/25-numeric-anchors.txt`:
 > Keep text between tool calls to 25 words or fewer. Keep final responses to 100 words or fewer unless the task requires more detail.
 
 Concrete numbers outperform vague "be brief" instructions because the model can actually measure against a target.
+
+See [Claude Code Analysis](claude-code-analysis.md) for the full source analysis that discovered these features.
 
 ---
 
@@ -392,7 +404,6 @@ Observations from Claude Code's source (`src/`) relevant to settings:
 - **Auto-compact buffer**: The compaction window is approximately 33K tokens. Set `CLAUDE_CODE_AUTO_COMPACT_WINDOW` to tune this.
 - **Deny rules evaluated before hooks** — deny rules fire at the permission layer, before PreToolUse hooks. This means deny rules are the primary safety net.
 - **`opusplan` alias** — uses Opus for planning, Sonnet for execution. Useful for cost-efficient architectural work.
-- **`effortLevel: "max"`** — deepest reasoning with no token limit (Opus 4.6 only). External users can't persist `max` in settings — use `CLAUDE_CODE_EFFORT_LEVEL=max` in env or set per-session.
 - **Shell wrapper bypass** — `bash -c 'rm -rf /'` passes both deny rules and simple regex hooks, motivating the multi-layer detection in behavioral-core.
 - **`auto` mode classifier** — server-side safety classifier available on Team/Enterprise plans.
 - **System prompt size: 14.5K-63.5K tokens** — assembled from 20+ conditional sections before the model sees any user message. Tool schemas are the largest contributor (30-54 tools x 300-2K tokens each).

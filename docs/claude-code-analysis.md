@@ -1,5 +1,11 @@
 # Claude Code Source Analysis
 
+This document is for users who want to understand how Claude Code's internal architecture affects model performance, and how Forge Studio compensates. It references Claude Code's source code — treat file path citations as supporting evidence, not required reading.
+
+**Audience:** Advanced users and plugin developers. If you're new to Forge Studio, start with [Architecture](architecture.md) instead.
+
+Terms like 'system-reminder', 'fire-and-forget', and 'ant-only' are defined in the [Glossary](architecture.md#glossary).
+
 Analysis of Claude Code's internal source (`src/`) to understand how the harness architecture creates model performance degradation, compared against Forge Studio's approach.
 
 ## Degradation Mechanisms
@@ -184,6 +190,16 @@ return {
 
 ## What Claude Code Does That Forge Studio Should Address
 
+### Addressed by Forge Studio
+
+- **Output style safety** — Claude Code allows styles to suppress core instructions. Forge Studio inherits this risk without mitigation — addressed via `rules.d/60-output-style-safety.txt`.
+
+- **Numeric length anchors** — Anthropic internally uses word-count targets (~1.2% token reduction). Replicated in `plugins/behavioral-core/hooks/rules.d/25-numeric-anchors.txt`.
+
+- **Function result clearing awareness** — Claude Code silently evicts old tool results under context pressure. The `track-edits` hook warns after 3 edits without re-reading, mitigating silent context eviction.
+
+### Open Gaps (not yet addressed)
+
 1. **Tool count/schema budget** — Claude Code actively manages tool count via deferred loading. Forge Studio doesn't monitor total tool burden.
 
 2. **Prompt cache awareness** — Claude Code has explicit cache boundary management. Forge Studio users don't know what actions bust their cache.
@@ -191,12 +207,6 @@ return {
 3. **System-reminder accumulation tracking** — Claude Code has within-message smooshing but no cross-message tracking. Neither does Forge Studio.
 
 4. **MCP instruction impact** — Claude Code marks MCP instructions as explicitly dangerous for caching. Forge Studio doesn't warn about MCP overhead.
-
-5. **Output style safety** — Claude Code allows styles to suppress core instructions. Forge Studio inherits this risk without mitigation.
-
-6. **Numeric length anchors** — Anthropic internally uses word-count targets (~1.2% token reduction). Forge Studio's behavioral rules use qualitative phrasing only.
-
-7. **Function result clearing** — Claude Code silently evicts old tool results under context pressure. Forge Studio's `track-edits` partially mitigates but doesn't explain the underlying mechanism.
 
 ---
 

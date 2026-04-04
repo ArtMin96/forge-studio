@@ -2,6 +2,8 @@
 
 How Claude Code handles plan mode internally, and how marketplace plugins can hook into it.
 
+**Audience:** Plugin developers and advanced users. You don't need this to use Forge Studio — it's reference material for understanding or extending plan mode behavior. For the hooks system in general, see [Architecture: Why Hooks Beat Instructions](architecture.md#why-hooks-beat-instructions).
+
 ---
 
 ## How Plan Mode Works in Claude Code
