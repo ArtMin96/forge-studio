@@ -59,6 +59,52 @@ Forge Studio uses hooks for:
 - **Context pressure** (`UserPromptSubmit`): Track and warn about context window exhaustion
 - **Edit safety** (`PostToolUse:Edit|Read`): Track file reads/edits to detect stale-context edits
 
+## Behavioral Rules (`rules.d/`)
+
+The `behavioral-core` plugin uses a modular rule system at `plugins/behavioral-core/hooks/rules.d/`. Each `.txt` file is a single behavioral rule — one line of instruction.
+
+### How it works
+
+```
+User sends message
+  → UserPromptSubmit event fires
+    → behavioral-anchor.sh runs
+      → reads every *.txt file in rules.d/ (sorted by filename)
+        → outputs all rules as a system-reminder
+          → model sees "BEHAVIORAL RULES (enforced every message):" + bullet list
+```
+
+The rules are re-injected on **every user message**. This is the core mechanism that prevents behavioral drift in long conversations — the model can't "forget" rules because they're re-delivered each turn.
+
+### File naming convention
+
+Files are numbered for sort order. Lower numbers fire first:
+
+| File | Rule |
+|------|------|
+| `10-no-sycophancy.txt` | No filler agreement phrases |
+| `20-no-filler.txt` | No apologies, no preamble, no trailing summaries |
+| `25-numeric-anchors.txt` | Word count targets (25 between tools, 100 final) |
+| `30-be-critical.txt` | Challenge own work before presenting |
+| `40-admit-uncertainty.txt` | Say "I don't know" when uncertain |
+| `50-verify-before-done.txt` | Evidence before assertions |
+| `55-no-false-claims.txt` | Never fabricate test results or claim work is done when it isn't |
+| `60-output-style-safety.txt` | Warn about keepCodingInstructions: false |
+
+### Adding or removing rules
+
+Drop a `.txt` file in the directory. It's picked up on the next message. No hook registration needed — `behavioral-anchor.sh` reads the directory dynamically.
+
+To disable a rule temporarily, rename it (e.g., `55-no-false-claims.txt.disabled`). The `*.txt` glob won't match it.
+
+### Token cost
+
+Each rule is ~10-30 tokens. The full set (~8 rules) costs ~150-200 tokens per message. This is the price of ~100% behavioral compliance vs ~80% from static system prompt instructions.
+
+### Scope-aware rules
+
+If `$CLAUDE_SESSION_SCOPE` is set and points to a scope file, `behavioral-anchor.sh` appends an additional rule: "SCOPE ACTIVE: Respect boundaries defined in {scope file}." This integrates with the `/scope` skill.
+
 ## Progressive Context Management
 
 Context is the bottleneck. The Meta-Harness paper found that full execution traces (10 MTok/iteration) massively outperform summaries. But within a single session, context is finite.
