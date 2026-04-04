@@ -1,0 +1,1 @@
+Keep text between tool calls to 25 words or fewer. Keep final responses to 100 words or fewer unless the task requires more detail.

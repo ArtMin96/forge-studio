@@ -104,6 +104,53 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   OUTPUT+="Git: branch=${BRANCH:-detached}, uncommitted=${DIRTY}"$'\n'
 fi
 
+# Tool count + prompt budget estimate
+TOOL_COUNT=0
+MCP_TOOL_COUNT=0
+
+# Count MCP servers from settings files
+for SETTINGS_FILE in "$HOME/.claude/settings.json" ".claude/settings.json" ".claude/settings.local.json"; do
+  if [[ -f "$SETTINGS_FILE" ]]; then
+    FILE_MCP=$(python3 -c "
+import json
+try:
+    d = json.load(open('$SETTINGS_FILE'))
+    print(len(d.get('mcpServers', {})))
+except: print(0)
+" 2>/dev/null)
+    MCP_TOOL_COUNT=$((MCP_TOOL_COUNT + ${FILE_MCP:-0}))
+  fi
+done
+
+# Count plugin-provided MCP servers
+PLUGIN_CACHE="$HOME/.claude/plugins/cache"
+if [[ -d "$PLUGIN_CACHE" ]]; then
+  PLUGIN_MCP=$(find "$PLUGIN_CACHE" -name ".mcp.json" 2>/dev/null | while read -r mcpfile; do
+    DIR=$(dirname "$mcpfile")
+    [[ -f "$DIR/.orphaned_at" ]] && continue
+    python3 -c "
+import json
+try:
+    d = json.load(open('$mcpfile'))
+    print(len(d))
+except: print(0)
+" 2>/dev/null
+  done | awk '{s+=$1} END {print s+0}')
+  MCP_TOOL_COUNT=$((MCP_TOOL_COUNT + ${PLUGIN_MCP:-0}))
+fi
+
+# Base tools (~20) + ~5 tools per MCP server (conservative estimate)
+TOOL_COUNT=$((20 + MCP_TOOL_COUNT * 5))
+
+# Prompt budget: ~4K base instructions + ~500 tokens per tool
+PROMPT_BUDGET=$((4000 + TOOL_COUNT * 500))
+
+if [[ $TOOL_COUNT -gt 40 ]]; then
+  OUTPUT+="Tools: ~${TOOL_COUNT} estimated (${MCP_TOOL_COUNT} MCP servers). WARNING: >40 tools consume ~${PROMPT_BUDGET} tokens of system prompt."$'\n'
+elif [[ $MCP_TOOL_COUNT -gt 0 ]]; then
+  OUTPUT+="Tools: ~${TOOL_COUNT} estimated (${MCP_TOOL_COUNT} MCP servers), ~${PROMPT_BUDGET} prompt tokens."$'\n'
+fi
+
 OUTPUT+="[/Environment Snapshot]"
 
 echo "$OUTPUT"

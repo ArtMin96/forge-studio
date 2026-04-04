@@ -83,6 +83,8 @@ Forge Studio implements 5-stage progressive warnings:
 
 Key principle: memory is hints, not ground truth. Every recalled memory includes a `Last verified:` date and is presented as "Previously noted (may be outdated)."
 
+**Auto-memory race condition:** Claude Code's `executeExtractMemories()` fires-and-forgets after each turn (`src/query/stopHooks.ts:149`). If the user sends the next message before extraction completes, the model reads stale memory. Forge Studio's 3-tier design mitigates this — the Tier 1 index is small and rarely changes mid-session. Don't rely on auto-memory being immediately available after the turn that triggered it.
+
 ## Planner/Generator/Reviewer Triad
 
 Multi-agent decomposition with **tool isolation**:
@@ -112,6 +114,42 @@ The `PreCompact` and `PostCompact` hooks in context-engine save and restore crit
 ## Environment Bootstrapping
 
 Based on the Meta-Harness TerminalBench-2 finding (+1.7% from environment snapshot), the `SessionStart` hook gathers OS info, available memory, available languages, package managers, project type, and git state. This eliminates 2-4 wasted turns agents typically spend discovering their environment.
+
+## Prompt Cache Architecture
+
+Claude Code splits the system prompt at a `SYSTEM_PROMPT_DYNAMIC_BOUNDARY` marker (`src/constants/prompts.ts:114`):
+
+| Segment | Cache Scope | Content | Token Cost |
+|---------|------------|---------|------------|
+| Before boundary | `global` (cross-user, 1-hour TTL) | Static instructions: intro, system, tasks, actions, tools, tone, efficiency | ~3,500 |
+| After boundary | `ephemeral` (session-specific) | Dynamic: session guidance, memory, env info, language, output style, MCP instructions | ~1,000-2,000 |
+
+**What busts the cache:**
+- MCP instructions — explicitly marked `DANGEROUS_uncachedSystemPromptSection`. Every MCP server connect/disconnect recomputes and invalidates.
+- CLAUDE.md changes — content is in the pre-boundary static section. Any edit busts the global cache for all subsequent turns.
+- Git status / current date — injected as system context, creates unique cache keys per session.
+
+**Implication for Forge Studio:** Hook outputs inject via `<system-reminder>` tags in user messages, which are after the boundary — this is correct by design and doesn't bust the static cache. Keep CLAUDE.md stable; use hooks for volatile behavioral rules.
+
+## Minimal Mode for Subagents
+
+Claude Code has an undocumented `CLAUDE_CODE_SIMPLE=1` environment variable (`src/constants/prompts.ts:450-453`) that reduces the entire system prompt to ~50 tokens:
+
+```
+You are Claude Code, Anthropic's official CLI for Claude.
+CWD: /path/to/project
+Date: 2026-04-03
+```
+
+This strips all behavioral guidance, tool usage instructions, and output style. Useful for subagents that only need to search or read — they don't need 60K tokens of instructions to run a grep.
+
+**Trade-off:** The subagent loses all Forge Studio behavioral steering. Only use for bulk mechanical tasks where behavioral compliance doesn't matter.
+
+## Function Result Clearing
+
+Under context pressure, Claude Code silently clears old tool results from the conversation (`getFunctionResultClearingSection` in `src/constants/prompts.ts`). The model is told this may happen, but the user isn't notified.
+
+This means file reads from 10+ turns ago may no longer be in context — the model has to re-read files to see their content again. Forge Studio's `track-edits` hook already mitigates by warning after 3 edits without re-reading, but this is the underlying mechanism that makes re-reading essential: it's not just about staleness, it's about actual context eviction.
 
 ## Design Principles
 

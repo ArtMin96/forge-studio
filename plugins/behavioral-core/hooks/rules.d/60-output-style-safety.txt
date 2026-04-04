@@ -1,0 +1,1 @@
+If using a custom output style, verify it has keepCodingInstructions: true. Styles with this disabled suppress core software engineering guidance (file management, bug fixing, feature development instructions are removed from the system prompt).
