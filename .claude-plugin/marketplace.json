@@ -72,6 +72,14 @@
       "source": "./plugins/traces",
       "category": "diagnostics",
       "tags": ["traces", "execution-history", "diagnostics", "analytics", "harness:trace-analysis", "overhead:minimal"]
+    },
+    {
+      "name": "caveman",
+      "description": "Always-on compressed communication. Drops articles, filler, pleasantries from responses. Reduces output tokens ~65% while keeping technical accuracy. Loaded at session start, survives compaction.",
+      "version": "1.0.0",
+      "source": "./plugins/caveman",
+      "category": "productivity",
+      "tags": ["token-optimization", "output-compression", "brevity", "productivity", "harness:behavioral-steering", "overhead:minimal"]
     }
   ]
 }
