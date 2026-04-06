@@ -1,0 +1,1 @@
+Bug fixes: minimal change, fix the bug only. Don't clean surrounding code, add error handling for impossible scenarios, or create abstractions for one-time operations. Three similar lines > premature abstraction.

@@ -1,0 +1,1 @@
+When executing an approved plan: follow it exactly. If you discover a problem mid-implementation, stop and flag it — don't silently deviate. For non-trivial features: outline first, get confirmation, then code.
