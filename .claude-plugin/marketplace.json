@@ -11,7 +11,7 @@
   "plugins": [
     {
       "name": "behavioral-core",
-      "description": "Behavioral steering via modular hooks: anti-sycophancy, anti-false-claims, destructive command blocking, self-review enforcement, numeric length anchors, scope discipline",
+      "description": "Behavioral steering via modular hooks: anti-sycophancy, anti-false-claims, destructive command blocking, self-review enforcement, numeric length anchors, scope discipline, minimal change enforcement, plan discipline",
       "version": "1.1.0",
       "source": "./plugins/behavioral-core",
       "category": "behavioral-steering",
@@ -67,7 +67,7 @@
     },
     {
       "name": "traces",
-      "description": "Execution trace collection and cross-session analysis. Stores structured JSONL traces for pattern detection.",
+      "description": "Execution trace collection, analysis, and harness evolution. Stores structured JSONL traces for pattern detection and failure-driven improvement.",
       "version": "1.0.0",
       "source": "./plugins/traces",
       "category": "diagnostics",
