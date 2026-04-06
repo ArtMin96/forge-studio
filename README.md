@@ -4,7 +4,7 @@
 
 Forge Studio implements harness principles as composable Claude Code plugins.
 
-8 plugins. 33 skills. 17 hooks. 4 agents.
+8 plugins. 34 skills. 20 hooks. 4 agents.
 
 ---
 
@@ -186,6 +186,7 @@ Collects structured execution traces (JSONL) across sessions. Based on the Meta-
 |-------|---------|
 | `/trace-review` | Analyze recent traces for recurring failures, file hotspots, and session health trends |
 | `/trace-stats` | Quick statistics on recent sessions: command counts, error rates, files modified |
+| `/trace-evolve` | Mine failure patterns from traces and propose harness improvements (rules, hooks, skills) |
 
 ### reference — Power-User Tips
 
@@ -206,8 +207,10 @@ These fire automatically. No commands needed.
 | Event | Plugin | What it does |
 |-------|--------|-------------|
 | Session start | context-engine | Gathers environment snapshot: OS, memory, languages, package managers, project type, git state |
+| Session start | context-engine | Monitors MCP server instruction token overhead |
 | Every message | behavioral-core | Re-anchors behavioral rules from `rules.d/` (modular, user-editable) |
 | Every message | context-engine | 5-stage progressive context pressure warnings |
+| Every message | context-engine | Tracks system-reminder injection patterns |
 | Before Bash | behavioral-core | Blocks `rm -rf`, `git push --force`, `git reset --hard`, `DROP TABLE` |
 | Before any tool | behavioral-core | Reminds of active scope boundaries (if a scope exists) |
 | Before `git commit` | evaluator | Reminds to run tests |
@@ -221,6 +224,7 @@ These fire automatically. No commands needed.
 | After Bash | traces | Logs command, exit code, and output preview to session trace |
 | After Bash/Grep | context-engine | Warns if tool output approaching 50K char truncation boundary |
 | After Edit/Read | context-engine | Tracks edits per file; warns after 3 edits without re-reading |
+| After entering plan mode | context-engine | Injects plugin-aware plan mode guidance |
 | Session end | traces | Writes session summary: total commands, errors, files modified |
 
 ---
@@ -407,7 +411,7 @@ Reads the week's daily logs. Surfaces patterns, wins, blockers, and accumulated 
 
 **`exit 2` blocks, `exit 1` warns.** Hook exit codes (shell exit codes from hook scripts) control enforcement level. `exit 2` actually prevents execution (used by destructive command blocker).
 
-**Zero cost until invoked.** All 33 skills use `disable-model-invocation: true`. They don't load into context until called. Installing all plugins adds near-zero overhead.
+**Zero cost until invoked.** All 34 skills use `disable-model-invocation: true`. They don't load into context until called. Installing all plugins adds near-zero overhead.
 
 **Capability isolation.** Agents have tool-restricted boundaries. Read-only agents can't modify code. Write agents can't skip review. This prevents error propagation between phases.
 
@@ -421,7 +425,7 @@ Reads the week's daily logs. Surfaces patterns, wins, blockers, and accumulated 
 
 ## Customization
 
-**Add/remove behavioral rules:** Edit files in `plugins/behavioral-core/hooks/rules.d/`. Rules are numbered for priority ordering (10-no-sycophancy, 20-no-filler, etc.).
+**Add/remove behavioral rules:** Edit files in `plugins/behavioral-core/hooks/rules.d/`. Rules are numbered for priority ordering (10-no-sycophancy, 20-no-filler, 25-numeric-anchors, 30-be-critical, 40-admit-uncertainty, 50-verify-before-done, 55-no-false-claims, 60-output-style-safety, 65-minimal-changes, 70-follow-plans).
 
 **Adjust context pressure thresholds:** Set `FORGE_CONTEXT_STAGE1` through `FORGE_CONTEXT_STAGE5` in your `settings.json` env section (message-count triggers, defaults: 8/15/22/30/40). Or set `FORGE_CONTEXT_PCT1` through `FORGE_CONTEXT_PCT5` for percentage-based thresholds (defaults: 50/65/75/85/92).
 
@@ -456,6 +460,7 @@ Reads the week's daily logs. Surfaces patterns, wins, blockers, and accumulated 
 
 **Advanced / optional:**
 
+- [Execution Traces](docs/traces.md) — trace collection, analysis skills, harness evolution loop, research background
 - [Claude Code Source Analysis](docs/claude-code-analysis.md) — how Claude Code's internals affect performance, and how Forge Studio compensates
 - [Plan Mode Hooks](docs/plan-mode-hooks.md) — how plugins hook into plan mode entry (plugin developers)
 
