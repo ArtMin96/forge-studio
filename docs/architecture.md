@@ -82,6 +82,8 @@ Files are numbered for sort order. Lower numbers fire first:
 | `50-verify-before-done.txt` | Evidence before assertions |
 | `55-no-false-claims.txt` | Never fabricate test results or claim work is done when it isn't |
 | `60-output-style-safety.txt` | Warn about keepCodingInstructions: false |
+| `65-minimal-changes.txt` | Bug fixes minimal; no over-abstraction |
+| `70-follow-plans.txt` | Follow approved plans exactly; flag deviations |
 
 ### Adding or removing rules
 
@@ -91,11 +93,24 @@ To disable a rule temporarily, rename it (e.g., `55-no-false-claims.txt.disabled
 
 ### Token cost
 
-Each rule is ~10-30 tokens. The full set (~8 rules) costs ~150-200 tokens per message. This is the price of ~100% behavioral compliance vs ~80% from static system prompt instructions.
+Each rule is ~10-30 tokens. The full set (~10 rules) costs ~200-300 tokens per message. This is the price of ~100% behavioral compliance vs ~80% from static system prompt instructions.
 
 ### Scope-aware rules
 
 If `$CLAUDE_SESSION_SCOPE` is set and points to a scope file, `behavioral-anchor.sh` appends an additional rule: "SCOPE ACTIVE: Respect boundaries defined in {scope file}." This integrates with the `/scope` skill.
+
+## Feedforward vs Feedback Controls
+
+Based on Bockeler's taxonomy (martinfowler.com, 2026):
+
+| Type | Execution | Examples | When |
+|------|-----------|----------|------|
+| Feedforward (Guides) | Computational | CLAUDE.md, skills, .editorconfig | Before action |
+| Feedforward (Guides) | Inferential | AI-generated plans, architecture specs | Before action |
+| Feedback (Sensors) | Computational | Linters, type checkers, tests, hooks | After action |
+| Feedback (Sensors) | Inferential | Adversarial reviewer, AI code review | After action |
+
+**Strategy:** Lean on computational controls (cheap, fast, deterministic) for continuous feedback. Reserve inferential controls (expensive, slow, non-deterministic) for periodic deeper analysis.
 
 ## Progressive Context Management
 
@@ -143,7 +158,7 @@ The Meta-Harness paper's ablation (Table 3) proves that full execution trace acc
 - **PostToolUse:Write|Edit** — logs file path and change type
 - **SessionEnd** — writes session summary (commands, errors, files modified)
 
-Traces stored in `~/.claude/traces/` are grep-searchable and analyzable via `/trace-review` and `/trace-stats` skills. This bridges the gap between Forge Studio's static harness and the paper's dynamic diagnostic feedback loop.
+Traces stored in `~/.claude/traces/` are grep-searchable and analyzable via `/trace-review`, `/trace-stats`, and `/trace-evolve` skills. The `/trace-evolve` skill closes the feedback loop by mining failure patterns from traces and proposing harness improvements — inspired by NeoSigma's self-improving loop (39.3% improvement from failure clustering + gated changes). See [docs/traces.md](traces.md) for the full trace architecture.
 
 ## Context Preservation Across Compaction
 
