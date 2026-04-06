@@ -4,7 +4,7 @@
 
 Forge Studio implements harness principles as composable Claude Code plugins.
 
-8 plugins. 34 skills. 20 hooks. 4 agents.
+9 plugins. 35 skills. 22 hooks. 4 agents.
 
 ---
 
@@ -39,6 +39,9 @@ Forge Studio implements harness principles as composable Claude Code plugins.
 
 # Execution Trace Collection
 /plugin install traces@forge-studio
+
+# Token-Optimized Output (always-on compressed communication)
+/plugin install caveman@forge-studio
 ```
 
 After installing, start a new session for plugins to load.
@@ -88,6 +91,7 @@ See [Settings Best Practices](docs/settings.md) for detailed documentation.
 │  workflow ─────────── Orchestration patterns│
 │  agents ───────────── Multi-agent triad     │
 │  reference ────────── Power-user tips       │
+│  caveman ──────────── Token-optimized output│
 │                                             │
 ├─────────────────────────────────────────────┤
 │              Claude Model                   │
@@ -198,6 +202,14 @@ Reference skills for hidden Claude Code features. Knowledge you look up when nee
 | `/unix-pipe` | Claude as CLI tool: headless mode, piping, output formats |
 | `/parallel-power` | Multi-session patterns: worktrees, fan-out, writer/reviewer |
 
+### caveman — Token-Optimized Output
+
+Always-on compressed communication loaded at session start. Drops articles, filler, pleasantries, and hedging from responses while keeping code blocks, technical terms, and error messages unchanged. Based on upstream [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman) — benchmarked at ~65% output token savings across 10 coding tasks. Survives compaction via PostCompact re-injection.
+
+| Skill | Purpose |
+|-------|---------|
+| `/caveman <lite\|full\|ultra>` | Switch intensity level (default: full, always active) |
+
 ---
 
 ## Active Hooks
@@ -208,6 +220,7 @@ These fire automatically. No commands needed.
 |-------|--------|-------------|
 | Session start | context-engine | Gathers environment snapshot: OS, memory, languages, package managers, project type, git state |
 | Session start | context-engine | Monitors MCP server instruction token overhead |
+| Session start | caveman | Loads compressed communication rules (articles, filler, pleasantries dropped) |
 | Every message | behavioral-core | Re-anchors behavioral rules from `rules.d/` (modular, user-editable) |
 | Every message | context-engine | 5-stage progressive context pressure warnings |
 | Every message | context-engine | Tracks system-reminder injection patterns |
@@ -216,6 +229,7 @@ These fire automatically. No commands needed.
 | Before `git commit` | evaluator | Reminds to run tests |
 | Before compaction | context-engine | Saves active scope, plan, handoff, and git state to recovery file |
 | After compaction | context-engine | Re-injects essential pointers from recovery file |
+| After compaction | caveman | Re-injects compressed communication rules |
 | After Write/Edit | behavioral-core | Nudges: "Does this change do ONLY what was asked?" |
 | After Write/Edit | traces | Logs file path and change type to session trace |
 | After reading >500 lines | context-engine | Warns to extract what you need before compaction |

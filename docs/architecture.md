@@ -14,7 +14,7 @@ This document expands on the Core Thesis from the README. If you haven't read it
 | 6 | Multi-Agent Decomposition | How work is split across agents | `agents` |
 | 7 | Behavioral Steering | Ongoing course correction | `behavioral-core` (hooks) |
 
-Cross-cutting: `evaluator` (quality gates), `workflow` (orchestration), `reference` (advanced patterns), `traces` (execution diagnostics).
+Cross-cutting: `evaluator` (quality gates), `workflow` (orchestration), `reference` (advanced patterns), `traces` (execution diagnostics), `caveman` (output token compression).
 
 ## Three-Layer Model
 
@@ -31,7 +31,7 @@ Cross-cutting: `evaluator` (quality gates), `workflow` (orchestration), `referen
 │  ├───────────┤  ├────────────────┤  │
 │  │ Workflow  │  │   Agents       │  │
 │  ├───────────┤  ├────────────────┤  │
-│  │ Reference │  │                │  │
+│  │ Reference │  │   Caveman      │  │
 │  └───────────┘  └────────────────┘  │
 ├─────────────────────────────────────┤
 │            Claude Model             │
