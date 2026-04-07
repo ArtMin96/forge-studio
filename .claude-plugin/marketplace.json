@@ -80,6 +80,14 @@
       "source": "./plugins/caveman",
       "category": "productivity",
       "tags": ["token-optimization", "output-compression", "brevity", "productivity", "harness:behavioral-steering", "overhead:minimal"]
+    },
+    {
+      "name": "token-efficiency",
+      "description": "Prevents token waste: duplicate read detection, large output warnings, session token audit",
+      "version": "1.0.0",
+      "source": "./plugins/token-efficiency",
+      "category": "context-management",
+      "tags": ["token-efficiency", "duplicate-reads", "output-size", "audit", "harness:context-management", "overhead:minimal"]
     }
   ]
 }
