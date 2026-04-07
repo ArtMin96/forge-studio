@@ -4,7 +4,7 @@
 
 Forge Studio implements harness principles as composable Claude Code plugins.
 
-9 plugins. 35 skills. 22 hooks. 4 agents.
+10 plugins. 37 skills. 24 hooks. 4 agents.
 
 ---
 
@@ -42,6 +42,9 @@ Forge Studio implements harness principles as composable Claude Code plugins.
 
 # Token-Optimized Output (always-on compressed communication)
 /plugin install caveman@forge-studio
+
+# Token Efficiency (duplicate read detection, large output warnings)
+/plugin install token-efficiency@forge-studio
 ```
 
 After installing, start a new session for plugins to load.
@@ -92,6 +95,7 @@ See [Settings Best Practices](docs/settings.md) for detailed documentation.
 │  agents ───────────── Multi-agent triad     │
 │  reference ────────── Power-user tips       │
 │  caveman ──────────── Token-optimized output│
+│  token-efficiency ─── Duplicate reads & size│
 │                                             │
 ├─────────────────────────────────────────────┤
 │              Claude Model                   │
@@ -175,6 +179,7 @@ Planner/Generator/Reviewer triad with tool-isolated capability boundaries. The p
 |-------|---------|
 | `/dispatch` | Analyze task, recommend single-agent vs fan-out vs pipeline |
 | `/fan-out` | Parallel batch processing with subagents |
+| `/lean-agents` | Reduce subagent token overhead with 4-layer isolation technique |
 
 | Agent | Tools | Purpose |
 |-------|-------|---------|
@@ -210,6 +215,14 @@ Always-on compressed communication loaded at session start. Drops articles, fill
 |-------|---------|
 | `/caveman <lite\|full\|ultra>` | Switch intensity level (default: full, always active) |
 
+### token-efficiency — Token Efficiency
+
+Prevents token waste at the session level. Tracks every file read so duplicate reads trigger a warning ("content may still be in context"). Monitors Bash output size and warns when a command produces over 100 lines. The `/token-audit` skill gives a full session overview: duplicate reads, edit churn, MCP overhead, and CLAUDE.md bloat.
+
+| Skill | Purpose |
+|-------|---------|
+| `/token-audit` | Audit session for duplicate reads, edit churn, MCP overhead, CLAUDE.md size |
+
 ---
 
 ## Active Hooks
@@ -239,6 +252,8 @@ These fire automatically. No commands needed.
 | After Bash/Grep | context-engine | Warns if tool output approaching 50K char truncation boundary |
 | After Edit/Read | context-engine | Tracks edits per file; warns after 3 edits without re-reading |
 | After entering plan mode | context-engine | Injects plugin-aware plan mode guidance |
+| Before Read | token-efficiency | Warns when the same file is read again (content may still be in context) |
+| After Bash | token-efficiency | Warns when command output exceeds 100 lines |
 | Session end | traces | Writes session summary: total commands, errors, files modified |
 
 ---
@@ -425,7 +440,7 @@ Reads the week's daily logs. Surfaces patterns, wins, blockers, and accumulated 
 
 **`exit 2` blocks, `exit 1` warns.** Hook exit codes (shell exit codes from hook scripts) control enforcement level. `exit 2` actually prevents execution (used by destructive command blocker).
 
-**Zero cost until invoked.** All 34 skills use `disable-model-invocation: true`. They don't load into context until called. Installing all plugins adds near-zero overhead.
+**Zero cost until invoked.** All 37 skills use `disable-model-invocation: true`. They don't load into context until called. Installing all plugins adds near-zero overhead.
 
 **Capability isolation.** Agents have tool-restricted boundaries. Read-only agents can't modify code. Write agents can't skip review. This prevents error propagation between phases.
 
@@ -474,6 +489,7 @@ Reads the week's daily logs. Surfaces patterns, wins, blockers, and accumulated 
 
 **Advanced / optional:**
 
+- [Token Optimization](docs/token-optimization.md) — where tokens go and how to spend fewer of them
 - [Execution Traces](docs/traces.md) — trace collection, analysis skills, harness evolution loop, research background
 - [Claude Code Source Analysis](docs/claude-code-analysis.md) — how Claude Code's internals affect performance, and how Forge Studio compensates
 - [Plan Mode Hooks](docs/plan-mode-hooks.md) — how plugins hook into plan mode entry (plugin developers)
