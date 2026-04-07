@@ -4,7 +4,7 @@
 
 Forge Studio implements harness principles as composable Claude Code plugins.
 
-10 plugins. 37 skills. 24 hooks. 4 agents.
+11 plugins. 39 skills. 25 hooks. 4 agents.
 
 ---
 
@@ -39,6 +39,9 @@ Forge Studio implements harness principles as composable Claude Code plugins.
 
 # Execution Trace Collection
 /plugin install traces@forge-studio
+
+# Codebase Health Scanning
+/plugin install diagnostics@forge-studio
 
 # Token-Optimized Output (always-on compressed communication)
 /plugin install caveman@forge-studio
@@ -95,6 +98,7 @@ See [Settings Best Practices](docs/settings.md) for detailed documentation.
 │  agents ───────────── Multi-agent triad     │
 │  reference ────────── Power-user tips       │
 │  caveman ──────────── Token-optimized output│
+│  diagnostics ──────── Codebase health scans │
 │  token-efficiency ─── Duplicate reads & size│
 │                                             │
 ├─────────────────────────────────────────────┤
@@ -179,6 +183,7 @@ Planner/Generator/Reviewer triad with tool-isolated capability boundaries. The p
 |-------|---------|
 | `/dispatch` | Analyze task, recommend single-agent vs fan-out vs pipeline |
 | `/fan-out` | Parallel batch processing with subagents |
+| `/contract` | Read and confirm sprint contract criteria before implementation begins |
 | `/lean-agents` | Reduce subagent token overhead with 4-layer isolation technique |
 
 | Agent | Tools | Purpose |
@@ -196,6 +201,14 @@ Collects structured execution traces (JSONL) across sessions. Based on the Meta-
 | `/trace-review` | Analyze recent traces for recurring failures, file hotspots, and session health trends |
 | `/trace-stats` | Quick statistics on recent sessions: command counts, error rates, files modified |
 | `/trace-evolve` | Mine failure patterns from traces and propose harness improvements (rules, hooks, skills) |
+
+### diagnostics — Codebase Health Scanning
+
+Detects drift between documentation and reality: plugin count mismatches, unregistered plugins, missing SKILL.md frontmatter, non-executable hooks, stale memory, and HARNESS_SPEC.md invariant violations. Run periodically (weekly recommended) or before releases. Reports only — never modifies files.
+
+| Skill | Purpose |
+|-------|---------|
+| `/entropy-scan` | Full 6-check health scan with structured report and proposed fixes |
 
 ### reference — Power-User Tips
 
@@ -240,6 +253,7 @@ These fire automatically. No commands needed.
 | Before Bash | behavioral-core | Blocks `rm -rf`, `git push --force`, `git reset --hard`, `DROP TABLE` |
 | Before any tool | behavioral-core | Reminds of active scope boundaries (if a scope exists) |
 | Before `git commit` | evaluator | Reminds to run tests |
+| Before `git commit` | evaluator | Warns if active plan exists but /verify not run (evaluation gate) |
 | Before compaction | context-engine | Saves active scope, plan, handoff, and git state to recovery file |
 | After compaction | context-engine | Re-injects essential pointers from recovery file |
 | After compaction | caveman | Re-injects compressed communication rules |
@@ -442,6 +456,8 @@ Reads the week's daily logs. Surfaces patterns, wins, blockers, and accumulated 
 
 **Zero cost until invoked.** All 37 skills use `disable-model-invocation: true`. They don't load into context until called. Installing all plugins adds near-zero overhead.
 
+**Sprint contracts.** Before the generator starts, the planner defines testable acceptance criteria. The generator confirms them (via `/contract`), and the reviewer checks compliance first. Negotiated done-criteria prevent misalignment between what's built and what's evaluated.
+
 **Capability isolation.** Agents have tool-restricted boundaries. Read-only agents can't modify code. Write agents can't skip review. This prevents error propagation between phases.
 
 **Progressive degradation.** Context pressure warnings escalate gradually, giving you time to compact or handoff before quality collapses.
@@ -462,6 +478,8 @@ Reads the week's daily logs. Surfaces patterns, wins, blockers, and accumulated 
 
 **Disable trace collection:** Set `FORGE_TRACES_ENABLED` to `"0"` in your `settings.json` env section.
 
+**Disable evaluation gate:** Set `FORGE_EVALUATION_GATE` to `"0"` in your `settings.json` env section. The gate warns (doesn't block) when committing planned work without running `/verify`.
+
 **Edit skill behavior:** Each SKILL.md is self-contained. Modify the instructions, add sections, or change the output format.
 
 **Add your own skills:** Create `skills/{name}/SKILL.md` with YAML frontmatter in any plugin directory.
@@ -480,7 +498,8 @@ Reads the week's daily logs. Surfaces patterns, wins, blockers, and accumulated 
 
 1. This README (overview + install)
 2. [Architecture](docs/architecture.md) — why it's designed this way, glossary of terms
-3. [Settings Best Practices](docs/settings.md) — configure your settings.json
+3. [Harness Specification](HARNESS_SPEC.md) — mechanical invariants, architectural primitives, protocols
+4. [Settings Best Practices](docs/settings.md) — configure your settings.json
 
 **When you're working:**
 

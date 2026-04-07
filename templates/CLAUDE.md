@@ -3,9 +3,11 @@
 <!-- Forge Studio harness plugins handle: behavioral steering (anti-sycophancy,
      focus, destructive command blocking, self-review, minimal changes, plan
      discipline, faithful reporting), context management (pressure tracking,
-     edit safety), evaluation (static analysis, quality gates), and multi-agent
-     decomposition. This file covers what hooks CAN'T: personality, judgment,
-     and project config. -->
+     edit safety, plan-vs-actual sync), evaluation (static analysis, quality
+     gates, evaluation gate before commit), multi-agent decomposition (sprint
+     contracts between planner/generator/reviewer), and diagnostics (entropy
+     scanning for documentation drift). This file covers what hooks CAN'T:
+     personality, judgment, and project config. -->
 
 ## Personality
 

@@ -88,6 +88,14 @@
       "source": "./plugins/token-efficiency",
       "category": "context-management",
       "tags": ["token-efficiency", "duplicate-reads", "output-size", "audit", "harness:context-management", "overhead:minimal"]
+    },
+    {
+      "name": "diagnostics",
+      "description": "Codebase health scanning: documentation drift, registration gaps, convention violations, stale memory, HARNESS_SPEC invariant compliance",
+      "version": "1.0.0",
+      "source": "./plugins/diagnostics",
+      "category": "diagnostics",
+      "tags": ["health", "entropy", "invariants", "validation", "harness:entropy-management", "overhead:zero"]
     }
   ]
 }

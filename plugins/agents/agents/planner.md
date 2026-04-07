@@ -47,6 +47,24 @@ Open questions: <decisions needing human input>
 Estimated complexity: <low/medium/high>
 ```
 
+## Contract
+
+When used in a Pipeline (Planner → Generator → Reviewer), your output **must** include a Contract section after the Plan:
+
+```
+## Contract
+What the generator must produce to satisfy this task:
+- [ ] {Criterion — must be testable, not vague}
+- [ ] {Criterion — observable, not "code is clean"}
+Verification method: {specific command, test, or check}
+```
+
+Contract rules:
+- Every criterion must be independently verifiable (a reviewer can check it without reading the whole codebase)
+- "Code is clean" or "follows best practices" are NOT valid criteria — be specific
+- Include at least one criterion about verification itself (e.g., "tests pass", "linter clean")
+- The verification method must be a runnable command, not "manual review"
+
 ## Rules
 
 - Never guess about code you haven't read

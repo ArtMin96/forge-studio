@@ -14,7 +14,7 @@ This document expands on the Core Thesis from the README. If you haven't read it
 | 6 | Multi-Agent Decomposition | How work is split across agents | `agents` |
 | 7 | Behavioral Steering | Ongoing course correction | `behavioral-core` (hooks) |
 
-Cross-cutting: `evaluator` (quality gates), `workflow` (orchestration), `reference` (advanced patterns), `traces` (execution diagnostics), `caveman` (output token compression).
+Cross-cutting: `evaluator` (quality gates), `workflow` (orchestration), `reference` (advanced patterns), `traces` (execution diagnostics), `diagnostics` (codebase health scanning), `caveman` (output token compression).
 
 ## Three-Layer Model
 
@@ -32,6 +32,8 @@ Cross-cutting: `evaluator` (quality gates), `workflow` (orchestration), `referen
 │  │ Workflow  │  │   Agents       │  │
 │  ├───────────┤  ├────────────────┤  │
 │  │ Reference │  │   Caveman      │  │
+│  ├───────────┤  ├────────────────┤  │
+│  │Diagnostics│  │ Token Effic.   │  │
 │  └───────────┘  └────────────────┘  │
 ├─────────────────────────────────────┤
 │            Claude Model             │
@@ -211,6 +213,49 @@ Under context pressure, Claude Code silently clears old tool results from the co
 
 This means file reads from 10+ turns ago may no longer be in context — the model has to re-read files to see their content again. Forge Studio's `track-edits` hook already mitigates by warning after 3 edits without re-reading, but this is the underlying mechanism that makes re-reading essential: it's not just about staleness, it's about actual context eviction.
 
+## Sprint Contract Protocol
+
+When the Planner → Generator → Reviewer pipeline is used, a formal handshake ensures alignment between phases:
+
+1. **Planner writes a `## Contract`** section in its output: testable criteria (not vague "code is clean") with a verification method (a runnable command).
+2. **Generator invokes `/contract`** before writing any code. This forces a mechanical `Read` of the plan file, loading criteria fresh into context rather than relying on decaying memory. If any criterion is ambiguous, the generator stops and reports.
+3. **Reviewer checks contract compliance first** — before correctness, security, or conventions. Each criterion is validated independently.
+
+This prevents the "built the wrong thing" failure mode. Research backing: Anthropic's Sprint 3 had 27 evaluation criteria negotiated before the generator started. Penligent extends this to formal hypothesis contracts with preconditions, evidence requirements, and exit conditions.
+
+## Mandatory Evaluation Gate
+
+Research unanimously shows self-evaluation is unreliable — agents confidently praise their own work. The evaluation gate adds a hook-enforced nudge to run `/verify` before committing planned work.
+
+**Mechanism:**
+- `pre-commit-gate.sh` fires on every `git commit` command
+- Checks if an active plan exists in `.claude/plans/` (modified within 24 hours)
+- Checks if `~/.claude/evaluation-gate.flag` contains the current plan name
+- Plan exists + gate not cleared → exit 1 (warn)
+- No plan active → exit 0 (silent — quick fixes bypass the gate automatically)
+
+**Clearing the gate:** The `/verify` skill writes the plan name to the flag file when the verdict is `VERIFIED: Yes`.
+
+**Configuration:** Set `FORGE_EVALUATION_GATE=0` in settings.json to disable.
+
+**Design choice:** Exit 1 (warn) rather than exit 2 (block) — non-destructive nudge. Workflows that mix planned and unplanned commits aren't disrupted.
+
+## Entropy Management
+
+Codebases drift over time as agents add plugins, modify hooks, and update skills. Documentation counts become stale, marketplace registrations fall out of sync, SKILL.md frontmatter degrades. The `diagnostics` plugin addresses this with periodic scanning.
+
+The `/entropy-scan` skill runs 6 validation checks:
+1. Plugin count drift (README counts vs actual)
+2. Marketplace registration gaps (marketplace.json vs directories)
+3. SKILL.md frontmatter completeness (required fields present)
+4. Hook script executability (chmod +x)
+5. Memory staleness (dates > 90 days)
+6. HARNESS_SPEC.md invariant compliance
+
+Output is a structured pass/fail report with proposed fixes. The skill never modifies files — report only.
+
+Research backing: NxCode recommends "periodic cleanup agents for documentation consistency, constraint violation scanning, pattern enforcement." Octopus Deploy describes "background agents scanning for deviations and auto-fixing." The canonical specification lives in [HARNESS_SPEC.md](../HARNESS_SPEC.md).
+
 ## Design Principles
 
 1. **Zero-cost until invoked**: All skills use `disable-model-invocation: true`. No tokens spent loading unused capabilities.
@@ -219,6 +264,7 @@ This means file reads from 10+ turns ago may no longer be in context — the mod
 4. **Exit codes as signals**: `exit 0` = info injected, `exit 1` = warning, `exit 2` = block the action.
 5. **Filesystem as substrate**: Memory, session state, and configuration all live in files — they survive context compaction.
 6. **Prefer additive changes**: The Meta-Harness TerminalBench-2 search (Appendix A.2) proved that purely additive modifications succeed where "fixing" fragile existing code fails. Six consecutive iterations modifying completion flow all regressed; the winning change was purely additive (environment bootstrapping). When extending harness behavior, add new hooks and skills rather than rewriting existing ones.
+7. **Mechanical invariants over conventions**: Rules that can be validated mechanically should be. The [HARNESS_SPEC.md](../HARNESS_SPEC.md) defines enforceable invariants (plugin structure, exit codes, frontmatter, tool boundaries) that `/entropy-scan` validates. Conventions that can't be mechanically checked belong in CLAUDE.md.
 
 ## Glossary
 

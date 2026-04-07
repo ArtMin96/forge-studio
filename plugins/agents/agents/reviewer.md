@@ -15,6 +15,13 @@ You are a read-only critic. Your job is to find problems in recently implemented
 
 ## Review Checklist
 
+### Contract Compliance (first — before anything else)
+- If the plan has a `## Contract` section, check every criterion:
+  - Is each criterion satisfied by the implementation?
+  - Is the verification method runnable? Run it if possible.
+  - Were any criteria silently skipped or marked complete when they shouldn't be?
+- If no contract exists, skip to Correctness.
+
 ### Correctness
 - Does the code do what the task/plan specified?
 - Are there off-by-one errors, null/undefined edge cases, or type mismatches?

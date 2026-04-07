@@ -25,6 +25,12 @@ Quick drift check: compare current work against the original plan. Keep this ana
    git log --oneline -10
    ```
 
+2b. **Plan-vs-actual file comparison** (if plan exists):
+   - Read the plan file found in step 1
+   - Extract file paths mentioned in the plan (look for backtick-quoted paths like `path/to/file.ext`, or paths in "Files to modify/create" sections)
+   - Compare against `git diff --stat` output
+   - Identify: files in diff but NOT in plan ("Unplanned"), and files in plan but NOT in diff ("Planned but untouched")
+
 3. **Compare and analyze** (be terse):
    - What was planned vs. what's been done
    - Any files changed that weren't part of the plan (scope creep)
@@ -38,7 +44,9 @@ Quick drift check: compare current work against the original plan. Keep this ana
    **Drift detected:** {Yes/No}
    **Planned:** {1-line summary of original task}
    **Completed:** {brief list of what's done}
-   **Unplanned work:** {any scope creep, or "None"}
+   **Unplanned files:** {files in diff but not in plan, or "None"}
+   **Planned but untouched:** {files in plan but not in diff, or "None"}
+   **Unplanned work:** {any scope creep beyond file drift, or "None"}
    **Context usage:** {rough estimate — low/medium/high based on session length}
 
    **Recommendation:** {one of:}

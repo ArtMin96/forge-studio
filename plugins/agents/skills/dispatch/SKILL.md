@@ -36,9 +36,9 @@ Analyze the task against these criteria:
 - Multiple phases with different concerns
 - Higher risk warrants review before completion
 - **Action:** Dispatch agents sequentially:
-  1. **Planner** (read-only): Explore codebase, identify patterns, propose approach
-  2. **Generator** (read-write): Implement based on planner's output
-  3. **Reviewer** (read-only): Challenge the implementation, find issues
+  1. **Planner** (read-only): Explore codebase, identify patterns, propose approach. **Must include a `## Contract` section** with testable criteria and verification method.
+  2. **Generator** (read-write): Invoke `/contract` to confirm criteria, then implement based on planner's output.
+  3. **Reviewer** (read-only): Check contract compliance first, then challenge the implementation.
 
 ## Output Format
 

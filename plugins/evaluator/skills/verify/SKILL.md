@@ -54,4 +54,15 @@ UNVERIFIED: Cannot verify this change.
 NEEDED: [What would be needed to verify — test command, expected output, etc.]
 ```
 
+## 6. Clear the Evaluation Gate (if applicable)
+
+If VERIFIED=Yes and an active plan exists in `.claude/plans/`:
+```bash
+# Write the plan name to the gate flag file
+echo "{plan-name}" > ~/.claude/evaluation-gate.flag
+```
+This clears the pre-commit evaluation gate for the current plan, allowing `git commit` to proceed without a warning.
+
+If UNVERIFIED, do NOT clear the gate — the warning serves its purpose.
+
 Never claim work is done without evidence. Evidence, not assertions.
