@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Evaluation Gate: Warn when committing planned work without running /verify.
-# Exit 1 = warn (non-blocking). Set FORGE_EVALUATION_GATE=0 to disable.
+# Pre-commit: Test reminder + evaluation gate.
+# Reminds about tests, warns when committing planned work without /verify.
+# Exit 1 = warn (non-blocking). Set FORGE_EVALUATION_GATE=0 to disable the gate check.
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
@@ -14,45 +15,38 @@ if ! echo "$COMMAND" | grep -qE '^git\s+commit'; then
   exit 0
 fi
 
-# Check if gate is disabled
-if [ "${FORGE_EVALUATION_GATE:-1}" = "0" ]; then
-  exit 0
-fi
+# Check evaluation gate (if not disabled)
+if [ "${FORGE_EVALUATION_GATE:-1}" != "0" ]; then
+  PLAN_DIR="${HOME}/.claude/plans"
+  if [ -d "$PLAN_DIR" ]; then
+    LATEST_PLAN=$(ls -t "$PLAN_DIR"/*.md 2>/dev/null | head -1)
+    if [ -n "$LATEST_PLAN" ]; then
+      PLAN_NAME=$(basename "$LATEST_PLAN" .md)
 
-# Find the most recent plan file
-PLAN_DIR="${HOME}/.claude/plans"
-if [ ! -d "$PLAN_DIR" ]; then
-  exit 0
-fi
+      # Check if plan is recent (modified within last 24 hours)
+      if [ "$(uname)" = "Darwin" ]; then
+        PLAN_AGE=$(( $(date +%s) - $(stat -f %m "$LATEST_PLAN") ))
+      else
+        PLAN_AGE=$(( $(date +%s) - $(stat -c %Y "$LATEST_PLAN") ))
+      fi
 
-LATEST_PLAN=$(ls -t "$PLAN_DIR"/*.md 2>/dev/null | head -1)
-if [ -z "$LATEST_PLAN" ]; then
-  exit 0
-fi
+      # Only gate on plans modified within last 24 hours (86400 seconds)
+      if [ "$PLAN_AGE" -le 86400 ]; then
+        GATE_FILE="${HOME}/.claude/evaluation-gate.flag"
+        CLEARED=""
+        if [ -f "$GATE_FILE" ]; then
+          CLEARED=$(cat "$GATE_FILE" 2>/dev/null)
+        fi
 
-PLAN_NAME=$(basename "$LATEST_PLAN" .md)
-
-# Check if plan is recent (modified within last 24 hours)
-if [ "$(uname)" = "Darwin" ]; then
-  PLAN_AGE=$(( $(date +%s) - $(stat -f %m "$LATEST_PLAN") ))
-else
-  PLAN_AGE=$(( $(date +%s) - $(stat -c %Y "$LATEST_PLAN") ))
-fi
-
-# Only gate on plans modified within last 24 hours (86400 seconds)
-if [ "$PLAN_AGE" -gt 86400 ]; then
-  exit 0
-fi
-
-# Check if gate has been cleared for this plan
-GATE_FILE="${HOME}/.claude/evaluation-gate.flag"
-if [ -f "$GATE_FILE" ]; then
-  CLEARED_PLAN=$(cat "$GATE_FILE" 2>/dev/null)
-  if [ "$CLEARED_PLAN" = "$PLAN_NAME" ]; then
-    exit 0
+        if [ "$CLEARED" != "$PLAN_NAME" ]; then
+          echo "Pre-commit: Active plan '${PLAN_NAME}' — /verify not run. Have you run tests? Consider /verify or /healthcheck before committing."
+          exit 1
+        fi
+      fi
+    fi
   fi
 fi
 
-# Gate not cleared — warn
-echo "Evaluation gate: Active plan '${PLAN_NAME}' detected but /verify not run. Consider /verify before committing."
-exit 1
+# No active plan or gate cleared/disabled — gentle reminder
+echo "Pre-commit reminder: Have you run tests? Consider /healthcheck before committing."
+exit 0

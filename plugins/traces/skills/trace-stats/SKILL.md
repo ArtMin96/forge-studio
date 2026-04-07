@@ -1,4 +1,5 @@
 ---
+name: trace-stats
 description: Quick statistics on recent session traces — command counts, error rates, files modified
 disable-model-invocation: true
 ---

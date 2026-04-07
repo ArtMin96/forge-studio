@@ -1,4 +1,5 @@
 ---
+name: trace-review
 description: Analyze recent execution traces to find recurring patterns, failures, and optimization opportunities
 disable-model-invocation: true
 ---

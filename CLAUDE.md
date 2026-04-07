@@ -35,6 +35,7 @@ name: skill-name
 description: One-line description
 argument-hint: <arg1> [arg2]           # optional
 disable-model-invocation: true         # optional, zero-cost until invoked
+context: fork                          # optional, runs in isolated subagent
 allowed-tools:                         # optional, capability isolation
   - Read
   - Bash

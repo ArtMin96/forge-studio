@@ -1,4 +1,5 @@
 ---
+name: trace-evolve
 description: Analyze execution traces to cluster failure patterns and propose harness improvements (rules, hooks, skills)
 disable-model-invocation: true
 ---

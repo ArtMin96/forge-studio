@@ -34,7 +34,9 @@ Cross-cutting: `evaluator` (quality gates), `workflow` (orchestration), `referen
 │  │ Reference │  │   Caveman      │  │
 │  ├───────────┤  ├────────────────┤  │
 │  │Diagnostics│  │ Token Effic.   │  │
-│  └───────────┘  └────────────────┘  │
+│  └───────────┘  ├────────────────┤  │
+│                 │   Traces       │  │
+│                 └────────────────┘  │
 ├─────────────────────────────────────┤
 │            Claude Model             │
 └─────────────────────────────────────┘

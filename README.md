@@ -4,7 +4,7 @@
 
 Forge Studio implements harness principles as composable Claude Code plugins.
 
-11 plugins. 39 skills. 25 hooks. 4 agents.
+11 plugins. 39 skills. 23 hooks. 4 agents.
 
 ---
 
@@ -97,6 +97,7 @@ See [Settings Best Practices](docs/settings.md) for detailed documentation.
 │  workflow ─────────── Orchestration patterns│
 │  agents ───────────── Multi-agent triad     │
 │  reference ────────── Power-user tips       │
+│  traces ───────────── Execution traces      │
 │  caveman ──────────── Token-optimized output│
 │  diagnostics ──────── Codebase health scans │
 │  token-efficiency ─── Duplicate reads & size│
@@ -191,6 +192,7 @@ Planner/Generator/Reviewer triad with tool-isolated capability boundaries. The p
 | planner | Read, Glob, Grep, Bash | Read-only exploration and approach design |
 | generator | Read, Write, Edit, Bash, Glob, Grep | Implementation based on planner output |
 | reviewer | Read, Grep, Glob, Bash | Read-only critique and issue detection |
+| adversarial-reviewer | Read, Grep, Glob | Skeptical review: edge cases, failure modes, hidden assumptions (evaluator plugin) |
 
 ### traces — Execution Trace Collection
 
@@ -230,7 +232,7 @@ Always-on compressed communication loaded at session start. Drops articles, fill
 
 ### token-efficiency — Token Efficiency
 
-Prevents token waste at the session level. Tracks every file read so duplicate reads trigger a warning ("content may still be in context"). Monitors Bash output size and warns when a command produces over 100 lines. The `/token-audit` skill gives a full session overview: duplicate reads, edit churn, MCP overhead, and CLAUDE.md bloat.
+Prevents token waste at the session level. Tracks every file read so duplicate reads trigger a warning ("content may still be in context"). The `/token-audit` skill gives a full session overview: duplicate reads, edit churn, MCP overhead, and CLAUDE.md bloat.
 
 | Skill | Purpose |
 |-------|---------|
@@ -252,8 +254,7 @@ These fire automatically. No commands needed.
 | Every message | context-engine | Tracks system-reminder injection patterns |
 | Before Bash | behavioral-core | Blocks `rm -rf`, `git push --force`, `git reset --hard`, `DROP TABLE` |
 | Before any tool | behavioral-core | Reminds of active scope boundaries (if a scope exists) |
-| Before `git commit` | evaluator | Reminds to run tests |
-| Before `git commit` | evaluator | Warns if active plan exists but /verify not run (evaluation gate) |
+| Before `git commit` | evaluator | Test reminder + evaluation gate: warns if active plan exists but /verify not run, always reminds about tests |
 | Before compaction | context-engine | Saves active scope, plan, handoff, and git state to recovery file |
 | After compaction | context-engine | Re-injects essential pointers from recovery file |
 | After compaction | caveman | Re-injects compressed communication rules |
@@ -263,11 +264,10 @@ These fire automatically. No commands needed.
 | After writing .php | evaluator | Runs Larastan/PHPStan on the changed file |
 | After writing .js/.ts | evaluator | Runs tsc --noEmit and ESLint on the changed file |
 | After Bash | traces | Logs command, exit code, and output preview to session trace |
-| After Bash/Grep | context-engine | Warns if tool output approaching 50K char truncation boundary |
+| After Bash/Grep | context-engine | Warns on large output (>100 lines) or near-truncation (>45K chars) |
 | After Edit/Read | context-engine | Tracks edits per file; warns after 3 edits without re-reading |
 | After entering plan mode | context-engine | Injects plugin-aware plan mode guidance |
 | Before Read | token-efficiency | Warns when the same file is read again (content may still be in context) |
-| After Bash | token-efficiency | Warns when command output exceeds 100 lines |
 | Session end | traces | Writes session summary: total commands, errors, files modified |
 
 ---
@@ -454,7 +454,7 @@ Reads the week's daily logs. Surfaces patterns, wins, blockers, and accumulated 
 
 **`exit 2` blocks, `exit 1` warns.** Hook exit codes (shell exit codes from hook scripts) control enforcement level. `exit 2` actually prevents execution (used by destructive command blocker).
 
-**Zero cost until invoked.** All 37 skills use `disable-model-invocation: true`. They don't load into context until called. Installing all plugins adds near-zero overhead.
+**Zero cost until invoked.** All 39 skills use `disable-model-invocation: true`. They don't load into context until called. Installing all plugins adds near-zero overhead.
 
 **Sprint contracts.** Before the generator starts, the planner defines testable acceptance criteria. The generator confirms them (via `/contract`), and the reviewer checks compliance first. Negotiated done-criteria prevent misalignment between what's built and what's evaluated.
 
