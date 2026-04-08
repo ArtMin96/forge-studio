@@ -96,6 +96,14 @@
       "source": "./plugins/diagnostics",
       "category": "diagnostics",
       "tags": ["health", "entropy", "invariants", "validation", "harness:entropy-management", "overhead:zero"]
+    },
+    {
+      "name": "research-gate",
+      "description": "Mechanical enforcement of read-before-edit: blocks Edit/Write on files not Read in the current session. Based on issue #42796 data showing 33.7% of edits made to unread files.",
+      "version": "1.0.0",
+      "source": "./plugins/research-gate",
+      "category": "behavioral-steering",
+      "tags": ["research-first", "read-before-edit", "enforcement", "PreToolUse", "harness:behavioral-steering", "overhead:minimal"]
     }
   ]
 }
