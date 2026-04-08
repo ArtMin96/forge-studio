@@ -9,3 +9,5 @@ LINES=$(wc -l < "$FILE_PATH")
 if [[ $LINES -gt $THRESHOLD ]]; then
   echo "Large file read (>${THRESHOLD} lines). Extract what you need — details may be lost during compaction."
 fi
+
+exit 0

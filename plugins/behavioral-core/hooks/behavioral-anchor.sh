@@ -5,7 +5,7 @@
 
 RULES_DIR="${CLAUDE_PLUGIN_ROOT}/hooks/rules.d"
 
-echo "BEHAVIORAL RULES (enforced every message):"
+echo "<behavioral_rules>"
 
 if [[ -d "$RULES_DIR" ]]; then
   for rule_file in "$RULES_DIR"/*.txt; do
@@ -21,5 +21,7 @@ fi
 if [[ -n "${CLAUDE_SESSION_SCOPE:-}" ]] && [[ -f "${CLAUDE_SESSION_SCOPE}" ]]; then
   echo "- SCOPE ACTIVE: Respect boundaries defined in $(basename "$CLAUDE_SESSION_SCOPE"). Warn before going out of scope."
 fi
+
+echo "</behavioral_rules>"
 
 exit 0

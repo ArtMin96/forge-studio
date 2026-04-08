@@ -29,12 +29,14 @@ if command -v vendor/bin/phpstan &>/dev/null && [ -f "phpstan.neon" -o -f "phpst
   if [ $? -ne 0 ] && [ -n "$RESULT" ]; then
     echo "PHPStan issues in $FILE:"
     echo "$RESULT" | head -10
+    exit 1
   fi
 elif command -v ./vendor/bin/phpstan &>/dev/null; then
   RESULT=$(./vendor/bin/phpstan analyse "$FILE" --no-progress --error-format=raw 2>/dev/null)
   if [ $? -ne 0 ] && [ -n "$RESULT" ]; then
     echo "PHPStan issues in $FILE:"
     echo "$RESULT" | head -10
+    exit 1
   fi
 fi
 

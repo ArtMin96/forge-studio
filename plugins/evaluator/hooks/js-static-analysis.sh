@@ -21,6 +21,7 @@ if [ -f "tsconfig.json" ] && command -v npx &>/dev/null; then
   if [ $? -ne 0 ] && [ -n "$RESULT" ]; then
     echo "TypeScript errors:"
     echo "$RESULT" | head -10
+    HAS_ISSUES=1
   fi
 fi
 
@@ -38,7 +39,12 @@ if [ -n "$ESLINT_CONFIG" ] && command -v npx &>/dev/null; then
   if [ $? -ne 0 ] && [ -n "$RESULT" ]; then
     echo "ESLint issues in $FILE:"
     echo "$RESULT" | head -10
+    HAS_ISSUES=1
   fi
+fi
+
+if [ "${HAS_ISSUES:-0}" = "1" ]; then
+  exit 1
 fi
 
 exit 0
