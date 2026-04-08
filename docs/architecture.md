@@ -14,7 +14,7 @@ This document expands on the Core Thesis from the README. If you haven't read it
 | 6 | Multi-Agent Decomposition | How work is split across agents | `agents` |
 | 7 | Behavioral Steering | Ongoing course correction | `behavioral-core` (hooks) |
 
-Cross-cutting: `evaluator` (quality gates), `workflow` (orchestration), `reference` (advanced patterns), `traces` (execution diagnostics), `diagnostics` (codebase health scanning), `caveman` (output token compression).
+Cross-cutting: `evaluator` (quality gates), `workflow` (orchestration), `reference` (advanced patterns), `traces` (execution diagnostics), `diagnostics` (codebase health scanning), `caveman` (output token compression), `research-gate` (read-before-edit enforcement).
 
 ## Three-Layer Model
 
@@ -34,9 +34,10 @@ Cross-cutting: `evaluator` (quality gates), `workflow` (orchestration), `referen
 │  │ Reference │  │   Caveman      │  │
 │  ├───────────┤  ├────────────────┤  │
 │  │Diagnostics│  │ Token Effic.   │  │
-│  └───────────┘  ├────────────────┤  │
-│                 │   Traces       │  │
-│                 └────────────────┘  │
+│  ├───────────┤  ├────────────────┤  │
+│  │Research   │  │   Traces       │  │
+│  │Gate       │  │                │  │
+│  └───────────┘  └────────────────┘  │
 ├─────────────────────────────────────┤
 │            Claude Model             │
 └─────────────────────────────────────┘
@@ -54,6 +55,7 @@ Forge Studio uses hooks for:
 - **Quality gates** (`PostToolUse:Write|Edit`): Run static analysis after every code change
 - **Context pressure** (`UserPromptSubmit`): Track and warn about context window exhaustion
 - **Edit safety** (`PostToolUse:Edit|Read`): Track file reads/edits to detect stale-context edits
+- **Research gate** (`PreToolUse:Edit|Write`): Block edits to files not Read in the current session — mechanical enforcement of "research first"
 
 ## Behavioral Rules (`rules.d/`)
 

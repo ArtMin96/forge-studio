@@ -4,7 +4,7 @@
 
 Forge Studio implements harness principles as composable Claude Code plugins.
 
-11 plugins. 39 skills. 23 hooks. 4 agents.
+12 plugins. 39 skills. 25 hooks. 4 agents.
 
 ---
 
@@ -48,6 +48,9 @@ Forge Studio implements harness principles as composable Claude Code plugins.
 
 # Token Efficiency (duplicate read detection, large output warnings)
 /plugin install token-efficiency@forge-studio
+
+# Research Gate (blocks Edit/Write on unread files)
+/plugin install research-gate@forge-studio
 ```
 
 After installing, start a new session for plugins to load.
@@ -101,6 +104,7 @@ See [Settings Best Practices](docs/settings.md) for detailed documentation.
 │  caveman ──────────── Token-optimized output│
 │  diagnostics ──────── Codebase health scans │
 │  token-efficiency ─── Duplicate reads & size│
+│  research-gate ────── Read-before-edit gate │
 │                                             │
 ├─────────────────────────────────────────────┤
 │              Claude Model                   │
@@ -230,6 +234,10 @@ Always-on compressed communication loaded at session start. Drops articles, fill
 |-------|---------|
 | `/caveman <lite\|full\|ultra>` | Switch intensity level (default: full, always active) |
 
+### research-gate — Read-Before-Edit Enforcement
+
+Blocks Edit/Write on files not Read in the current session via `PreToolUse` exit 2 (non-bypassable). No skills, zero per-message overhead. See [docs/research-gate.md](docs/research-gate.md) for the full design rationale and data.
+
 ### token-efficiency — Token Efficiency
 
 Prevents token waste at the session level. Tracks every file read so duplicate reads trigger a warning ("content may still be in context"). The `/token-audit` skill gives a full session overview: duplicate reads, edit churn, MCP overhead, and CLAUDE.md bloat.
@@ -267,6 +275,8 @@ These fire automatically. No commands needed.
 | After Bash/Grep | context-engine | Warns on large output (>100 lines) or near-truncation (>45K chars) |
 | After Edit/Read | context-engine | Tracks edits per file; warns after 3 edits without re-reading |
 | After entering plan mode | context-engine | Injects plugin-aware plan mode guidance |
+| Before Edit/Write | research-gate | **Blocks** edit/write if file not Read in session (exit 2) |
+| After Read | research-gate | Records file read for the edit gate |
 | Before Read | token-efficiency | Warns when the same file is read again (content may still be in context) |
 | Session end | traces | Writes session summary: total commands, errors, files modified |
 
