@@ -26,7 +26,7 @@ if [ "$TOOL_NAME" = "Write" ] && [ ! -f "$FILE_PATH" ]; then
 fi
 
 SESSION_ID="${CLAUDE_SESSION_ID:-$(echo "$(pwd)-$(date +%Y%m%d)" | md5sum | cut -c1-8)}"
-TRACKDIR="/tmp/claude-research-gate-${SESSION_ID}"
+TRACKDIR="${CLAUDE_PLUGIN_DATA:-/tmp/claude-research-gate}/${SESSION_ID}"
 SAFE_NAME=$(echo "$FILE_PATH" | md5sum | cut -c1-16)
 
 if [ -f "${TRACKDIR}/${SAFE_NAME}" ]; then

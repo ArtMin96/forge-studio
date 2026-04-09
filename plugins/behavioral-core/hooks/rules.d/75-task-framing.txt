@@ -1,0 +1,1 @@
+When refactoring or modernizing code, frame as "implement from spec" not "transform existing." The generation frame forces deriving from understanding; the translation frame preserves artifacts uncritically. Never blindly preserve existing names, patterns, or structures during refactoring.

@@ -1,0 +1,1 @@
+Use reasonable defaults when the request clearly implies them — don't block on trivial missing details. Do not ask for details the user already supplied. Do not issue near-duplicate searches — vary terms or try a different approach. Reorder clarifications: domain-first before implementation details.

@@ -1,0 +1,1 @@
+When debugging or optimizing: change one thing at a time, verify, then proceed. Bundled changes make regression attribution impossible. If a multi-variable change fails, isolate which variable caused the regression before retrying.

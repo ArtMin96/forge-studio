@@ -1,6 +1,6 @@
 # Forge Studio — Harness Specification
 
-> Canonical specification of mechanical invariants and architectural primitives. Machine-readable section headers enable automated validation via `/entropy-scan`. Last updated: 2026-04-07.
+> Canonical specification of mechanical invariants and architectural primitives. Machine-readable section headers enable automated validation via `/entropy-scan`. Last updated: 2026-04-09.
 
 ## Research Basis
 
@@ -21,7 +21,7 @@ Synthesized from 10 industry sources (2026): Anthropic Engineering, Fowler/Thoug
 | 5 | Handoff Artifact | Structured file-based state transfer between agents/phases | `.claude/handoffs/`, `.claude/plans/` |
 | 6 | Guide (Feedforward) | Pre-execution instructions, conventions, architectural rules | `behavioral-core/rules.d/*.txt`, CLAUDE.md |
 | 7 | Sensor (Feedback) | Post-execution observation (computational or inferential) | Static analysis hooks, `/gate-report` |
-| 8 | Policy Kernel | External enforcement of action classification (allow/deny/defer/ask) | `behavioral-core/block-destructive.sh`, settings.json deny list |
+| 8 | Policy Kernel | External enforcement of action classification (allow/deny/defer/ask) | `behavioral-core/block-destructive.sh`, `research-gate/require-read-before-edit.sh`, `research-gate/exploration-depth-gate.sh`, settings.json deny list |
 | 9 | Entropy Collector | Periodic scanning agent restoring codebase invariants | `diagnostics/entropy-scan` |
 | 10 | Progressive Disclosure | Context loaded on-demand, not upfront | `disable-model-invocation: true` on all skills |
 | 11 | Sprint Contract | Negotiated agreement on done-criteria before execution begins | `## Contract` in planner output, `/contract` skill |

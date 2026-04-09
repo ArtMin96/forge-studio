@@ -75,8 +75,8 @@ When user pastes error logs, trace the actual error. Don't guess or chase theori
 ## Self-Evaluation
 
 <!-- Re-read/verify enforcement handled by rules.d/50-verify-before-done.txt + self-review-nudge.sh -->
+<!-- 2-attempt debugging stop handled by rules.d/80-explore-before-act.txt (re-injected every message) -->
 - After fixing a bug, explain why it happened and what could prevent that category of bug in the future.
-- If a fix fails after 2 attempts, stop. Read the entire relevant section. Figure out where your mental model was wrong. Propose something fundamentally different.
 
 ## Housekeeping
 

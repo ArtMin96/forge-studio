@@ -3,6 +3,7 @@
     "PostToolUse": [
       {
         "matcher": "Write|Edit",
+        "if": "Edit(*.php)|Write(*.php)",
         "hooks": [
           {
             "type": "command",
@@ -13,11 +14,32 @@
       },
       {
         "matcher": "Write|Edit",
+        "if": "Edit(*.js)|Edit(*.ts)|Edit(*.tsx)|Write(*.js)|Write(*.ts)|Write(*.tsx)",
         "hooks": [
           {
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/js-static-analysis.sh",
             "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/test-nudge.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/test-nudge-reset.sh",
+            "timeout": 5
           }
         ]
       }

@@ -1,0 +1,1 @@
+Before editing any file: read it, search for related files, understand the surrounding design. After editing, run tests — don't just re-read to verify. When debugging: stop after 2 failed attempts, re-read the entire relevant section, find where your mental model broke.

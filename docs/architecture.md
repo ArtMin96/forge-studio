@@ -1,11 +1,15 @@
 # Forge Studio Architecture
 
-This document expands on the Core Thesis from the README. If you haven't read it, start there.
+Design rationale, component model, hook mechanics. For research citations, see [research.md](research.md). For mechanical invariants, see [HARNESS_SPEC.md](../HARNESS_SPEC.md).
+
+---
 
 ## The 7 Harness Components
 
-| # | Component | What It Controls | Forge Studio Plugin |
-|---|-----------|-----------------|---------------------|
+**Agent = Model + Harness.** Changing only the harness produces a 6x performance gap. These are the 7 levers:
+
+| # | Component | What It Controls | Plugin |
+|---|-----------|-----------------|--------|
 | 1 | System Prompts | Base behavior and personality | `behavioral-core` |
 | 2 | Tool System | What actions the agent can take | `agents` (tool isolation) |
 | 3 | Permission System | What the agent is allowed to do | `behavioral-core` (block-destructive) |
@@ -14,7 +18,9 @@ This document expands on the Core Thesis from the README. If you haven't read it
 | 6 | Multi-Agent Decomposition | How work is split across agents | `agents` |
 | 7 | Behavioral Steering | Ongoing course correction | `behavioral-core` (hooks) |
 
-Cross-cutting: `evaluator` (quality gates), `workflow` (orchestration), `reference` (advanced patterns), `traces` (execution diagnostics), `diagnostics` (codebase health scanning), `caveman` (output token compression), `research-gate` (read-before-edit enforcement).
+Cross-cutting plugins: `evaluator`, `workflow`, `reference`, `traces`, `diagnostics`, `caveman`, `token-efficiency`, `research-gate`.
+
+---
 
 ## Three-Layer Model
 
@@ -23,60 +29,103 @@ Cross-cutting: `evaluator` (quality gates), `workflow` (orchestration), `referen
 │            User / IDE               │
 ├─────────────────────────────────────┤
 │         Harness (Forge Studio)      │
-│  ┌───────────┐  ┌────────────────┐  │
-│  │ Behavioral│  │   Context      │  │
-│  │ Steering  │  │   Engine       │  │
-│  ├───────────┤  ├────────────────┤  │
-│  │ Evaluator │  │   Memory       │  │
-│  ├───────────┤  ├────────────────┤  │
-│  │ Workflow  │  │   Agents       │  │
-│  ├───────────┤  ├────────────────┤  │
-│  │ Reference │  │   Caveman      │  │
-│  ├───────────┤  ├────────────────┤  │
-│  │Diagnostics│  │ Token Effic.   │  │
-│  ├───────────┤  ├────────────────┤  │
-│  │Research   │  │   Traces       │  │
-│  │Gate       │  │                │  │
-│  └───────────┘  └────────────────┘  │
+│                                     │
+│  ┌─ Discipline ──┐ ┌─ Awareness ──┐│
+│  │ behavioral-   │ │ context-     ││
+│  │ core          │ │ engine       ││
+│  │ evaluator     │ │ memory       ││
+│  │ research-gate │ │ traces       ││
+│  │ token-        │ │ diagnostics  ││
+│  │ efficiency    │ │              ││
+│  └───────────────┘ └──────────────┘│
+│  ┌─ Action ──────┐ ┌─ Style ─────┐│
+│  │ workflow      │ │ caveman     ││
+│  │ agents        │ │ reference   ││
+│  └───────────────┘ └─────────────┘│
 ├─────────────────────────────────────┤
 │            Claude Model             │
 └─────────────────────────────────────┘
 ```
 
+---
+
+## Hook Event Reference
+
+32 hooks across 7 plugins. Hooks fire automatically on events — no commands needed.
+
+### Session Lifecycle
+
+| Event | Plugin | Hook | What It Does |
+|-------|--------|------|-------------|
+| SessionStart | context-engine | env-bootstrap.sh | OS, memory, languages, tools, git state snapshot |
+| SessionStart | context-engine | mcp-instruction-monitor.sh | MCP server instruction token monitoring |
+| SessionStart | caveman | caveman-init.sh | Load compressed communication rules |
+| PreCompact | context-engine | pre-compact.sh | Save scope, plan, handoff, git state, tasks to recovery file |
+| PostCompact | context-engine | post-compact.sh | Re-inject scope, plan, tasks, modified files from recovery |
+| PostCompact | caveman | caveman-restore.sh | Re-inject compressed communication rules |
+| SessionEnd | traces | session-summary.sh | Write session summary to trace file |
+
+### Every User Message (UserPromptSubmit)
+
+| Plugin | Hook | What It Does |
+|--------|------|-------------|
+| behavioral-core | behavioral-anchor.sh | Re-anchor all behavioral rules from `rules.d/` |
+| context-engine | track-context-pressure.sh | 5-stage progressive context pressure warnings |
+| context-engine | track-system-reminders.sh | Track system-reminder injection patterns |
+| context-engine | task-guardian.sh | Remind about incomplete tasks |
+
+### Before Tool Use (PreToolUse)
+
+| Matcher | Plugin | Hook | What It Does |
+|---------|--------|------|-------------|
+| Bash | behavioral-core | block-destructive.sh | Block `rm -rf`, `git push --force`, etc. |
+| * | behavioral-core | scope-reminder.sh | Remind of active scope boundaries |
+| Edit\|Write | research-gate | require-read-before-edit.sh | **Block** edit/write if file not Read in session (exit 2) |
+| Edit\|Write | research-gate | exploration-depth-gate.sh | Warn if insufficient exploration before first edit |
+| Bash | evaluator | pre-commit-gate.sh | Warn if plan exists but `/verify` not run |
+| Read | token-efficiency | track-duplicate-reads.sh | Warn on duplicate reads |
+
+### After Tool Use (PostToolUse)
+
+| Matcher | Plugin | Hook | What It Does |
+|---------|--------|------|-------------|
+| Write\|Edit | behavioral-core | self-review-nudge.sh | "Does this change do ONLY what was asked?" |
+| Read | context-engine | check-large-file.sh | Warn on files >500 lines |
+| Bash\|Grep | context-engine | warn-tool-truncation.sh | Warn on large output or near-truncation |
+| Edit\|Read | context-engine | track-edits.sh | Track edits per file; warn after 3 without re-reading |
+| Edit | context-engine | detect-thrashing.sh | Detect thrashing (5+ edits same file, oscillating regions) |
+| EnterPlanMode | context-engine | plan-mode-enter.sh | Inject plugin-aware plan mode guidance |
+| Write\|Edit (.php) | evaluator | php-static-analysis.sh | Run PHPStan on changed file |
+| Write\|Edit (.js/.ts) | evaluator | js-static-analysis.sh | Run tsc + ESLint on changed file |
+| Edit\|Write | evaluator | test-nudge.sh | Nudge to run tests after every 3rd edit |
+| Bash | evaluator | test-nudge-reset.sh | Reset test-nudge counter when tests detected |
+| Write\|Edit | traces | collect-file-trace.sh | Log file change to session trace |
+| Bash | traces | collect-bash-trace.sh | Log command, exit code, output to session trace |
+| Read | research-gate | track-file-reads.sh | Record file read for edit gate |
+| Read\|Grep\|Glob | research-gate | track-exploration.sh | Track exploration depth |
+
+### Task Lifecycle
+
+| Event | Plugin | Hook | What It Does |
+|-------|--------|------|-------------|
+| TaskCreated | context-engine | task-guardian-log.sh | Log task for progress guardian |
+
+---
+
 ## Why Hooks Beat Instructions
 
-System prompt instructions achieve ~70% compliance. They get diluted in long conversations as the model's attention drifts.
+| Mechanism | Compliance | Why |
+|-----------|-----------|-----|
+| CLAUDE.md instructions | ~70% | Diluted over long conversations as attention drifts |
+| Hooks (event-driven) | ~100% | Re-injected at decision points; model can't "forget" |
 
-Hooks achieve ~100% compliance because they're **event-driven** — they fire at decision points (every user message, every tool use) and inject fresh reminders directly into the context. The model can't "forget" a hook because it's re-injected each time.
+Forge Studio uses hooks for enforcement, skills for guidance. Anything that must always happen goes in a hook. Anything opt-in goes in a skill.
 
-Forge Studio uses hooks for:
-- **Behavioral anchoring** (`UserPromptSubmit`): Re-inject behavioral rules every message
-- **Destructive command blocking** (`PreToolUse:Bash`): Intercept dangerous commands before execution
-- **Quality gates** (`PostToolUse:Write|Edit`): Run static analysis after every code change
-- **Context pressure** (`UserPromptSubmit`): Track and warn about context window exhaustion
-- **Edit safety** (`PostToolUse:Edit|Read`): Track file reads/edits to detect stale-context edits
-- **Research gate** (`PreToolUse:Edit|Write`): Block edits to files not Read in the current session — mechanical enforcement of "research first"
+---
 
 ## Behavioral Rules (`rules.d/`)
 
-The `behavioral-core` plugin uses a modular rule system at `plugins/behavioral-core/hooks/rules.d/`. Each `.txt` file is a single behavioral rule — one line of instruction.
-
-### How it works
-
-```
-User sends message
-  → UserPromptSubmit event fires
-    → behavioral-anchor.sh runs
-      → reads every *.txt file in rules.d/ (sorted by filename)
-        → outputs all rules as a system-reminder
-          → model sees "BEHAVIORAL RULES (enforced every message):" + bullet list
-```
-
-The rules are re-injected on **every user message**. This is the core mechanism that prevents behavioral drift in long conversations — the model can't "forget" rules because they're re-delivered each turn.
-
-### File naming convention
-
-Files are numbered for sort order. Lower numbers fire first:
+14 rules in `plugins/behavioral-core/hooks/rules.d/`. Each `.txt` file = one behavioral rule. Re-injected every message via `behavioral-anchor.sh`.
 
 | File | Rule |
 |------|------|
@@ -86,198 +135,150 @@ Files are numbered for sort order. Lower numbers fire first:
 | `30-be-critical.txt` | Challenge own work before presenting |
 | `40-admit-uncertainty.txt` | Say "I don't know" when uncertain |
 | `50-verify-before-done.txt` | Evidence before assertions |
-| `55-no-false-claims.txt` | Never fabricate test results or claim work is done when it isn't |
+| `55-no-false-claims.txt` | Never fabricate test results |
 | `60-output-style-safety.txt` | Warn about keepCodingInstructions: false |
 | `65-minimal-changes.txt` | Bug fixes minimal; no over-abstraction |
 | `70-follow-plans.txt` | Follow approved plans exactly; flag deviations |
+| `75-task-framing.txt` | Generation frame > translation frame for refactoring |
+| `80-explore-before-act.txt` | Read/search before editing; run tests after |
+| `85-no-redundant-exploration.txt` | Reasonable defaults; no duplicate searches |
+| `90-single-variable-changes.txt` | Change one thing, verify, proceed |
 
-### Adding or removing rules
+**Adding rules**: Drop a `.txt` in the directory. Picked up on next message. Rename to `.txt.disabled` to disable.
 
-Drop a `.txt` file in the directory. It's picked up on the next message. No hook registration needed — `behavioral-anchor.sh` reads the directory dynamically.
+**Token cost**: ~200-300 tokens/message for the full set. The price of ~100% compliance.
 
-To disable a rule temporarily, rename it (e.g., `55-no-false-claims.txt.disabled`). The `*.txt` glob won't match it.
-
-### Token cost
-
-Each rule is ~10-30 tokens. The full set (~10 rules) costs ~200-300 tokens per message. This is the price of ~100% behavioral compliance vs ~80% from static system prompt instructions.
-
-### Scope-aware rules
-
-If `$CLAUDE_SESSION_SCOPE` is set and points to a scope file, `behavioral-anchor.sh` appends an additional rule: "SCOPE ACTIVE: Respect boundaries defined in {scope file}." This integrates with the `/scope` skill.
+---
 
 ## Feedforward vs Feedback Controls
 
-Based on Bockeler's taxonomy (martinfowler.com, 2026):
-
 | Type | Execution | Examples | When |
 |------|-----------|----------|------|
-| Feedforward (Guides) | Computational | CLAUDE.md, skills, .editorconfig | Before action |
-| Feedforward (Guides) | Inferential | AI-generated plans, architecture specs | Before action |
-| Feedback (Sensors) | Computational | Linters, type checkers, tests, hooks | After action |
-| Feedback (Sensors) | Inferential | Adversarial reviewer, AI code review | After action |
+| Feedforward (Guide) | Computational | CLAUDE.md, .editorconfig, skills | Before action |
+| Feedforward (Guide) | Inferential | Plans, architecture specs | Before action |
+| Feedback (Sensor) | Computational | Linters, hooks, tests | After action |
+| Feedback (Sensor) | Inferential | Adversarial reviewer, code review | After action |
 
-**Strategy:** Lean on computational controls (cheap, fast, deterministic) for continuous feedback. Reserve inferential controls (expensive, slow, non-deterministic) for periodic deeper analysis.
+**Strategy**: Lean on computational controls (cheap, deterministic) for continuous feedback. Reserve inferential controls (expensive, non-deterministic) for periodic deeper analysis.
+
+---
+
+## Agent Tool Boundaries
+
+Capability isolation prevents error propagation between phases:
+
+| Agent | Tools | Role | Plugin |
+|-------|-------|------|--------|
+| planner | Read, Glob, Grep, Bash | Read-only exploration + design | agents |
+| generator | Read, Write, Edit, Bash, Glob, Grep | Implementation | agents |
+| reviewer | Read, Grep, Glob, Bash | Read-only critique | agents |
+| adversarial-reviewer | Read, Grep, Glob | Skeptical security/edge-case review | evaluator |
+
+Self-evaluation is unreliable — agents confidently praise their own work. Separate agents with separate tool sets prevent this.
+
+---
 
 ## Progressive Context Management
 
-Context is the bottleneck. The Meta-Harness paper found that full execution traces (10 MTok/iteration) massively outperform summaries. But within a single session, context is finite.
+5-stage warnings as context fills:
 
-Forge Studio implements 5-stage progressive warnings:
+| Stage | Action |
+|-------|--------|
+| Notice (~50%) | Re-read files before editing |
+| Moderate (~65%) | Consider /compact |
+| Elevated (~75%) | Recommend compacting now |
+| High (~85%) | Strongly recommend /handoff |
+| Critical (~92%) | /handoff now or risk incoherent output |
 
-| Stage | ~Context Used | Action |
-|-------|--------------|--------|
-| Notice | ~50% | Re-read files before editing |
-| Moderate | ~65% | Consider /compact |
-| Elevated | ~75% | Recommend compacting now |
-| High | ~85% | Strongly recommend /handoff |
-| Critical | ~92% | /handoff now or risk incoherent output |
+Configurable via `FORGE_CONTEXT_STAGE1`-`STAGE5` (message counts) or `FORGE_CONTEXT_PCT1`-`PCT5` (percentages).
 
-## Three-Tier Memory Architecture
+---
+
+## Context Preservation Across Compaction
+
+`PreCompact` saves, `PostCompact` restores:
+- Active scope and plan
+- Handoff state
+- Git branch and uncommitted files
+- Active task list (from task guardian)
+- Files modified in session (from trace data)
+
+---
+
+## Three-Tier Memory
 
 | Tier | Storage | Loaded | Size |
 |------|---------|--------|------|
 | 1: Pointers | `.claude/memory/index.md` | Always | ~50 lines |
 | 2: Topics | `.claude/memory/topics/*.md` | On demand | ~50 lines each |
-| 3: Transcripts | Session files | Never whole (grep only) | Unbounded |
+| 3: Transcripts | Session files | Grep only | Unbounded |
 
-Key principle: memory is hints, not ground truth. Every recalled memory includes a `Last verified:` date and is presented as "Previously noted (may be outdated)."
+Memory is hints, not ground truth. Every recalled memory includes a `Last verified:` date.
 
-**Auto-memory race condition:** Claude Code's auto-memory extraction runs asynchronously after each turn. If the user sends the next message before extraction completes, the model reads stale memory. Forge Studio's 3-tier design mitigates this — the Tier 1 index is small and rarely changes mid-session. Don't rely on auto-memory being immediately available after the turn that triggered it.
+---
 
-## Planner/Generator/Reviewer Triad
+## Execution Traces
 
-Multi-agent decomposition with **tool isolation**:
+JSONL traces collected per session:
+- **PostToolUse:Bash** — command, exit code, output preview
+- **PostToolUse:Write|Edit** — file path and change type
+- **SessionEnd** — session summary
 
-| Agent | Tools | Capability | Isolation Purpose |
-|-------|-------|-----------|------------------|
-| Planner | Read, Glob, Grep, Bash | Read-only exploration | Can't accidentally modify code during planning |
-| Generator | Read, Write, Edit, Bash, Glob, Grep | Full implementation | Has write access but follows planner's output |
-| Reviewer | Read, Grep, Glob, Bash | Read-only critique | Can't rubber-stamp by editing — must honestly evaluate |
+Traces stored in `~/.claude/traces/`. Analyzable via `/trace-compile` (structured views) and `/trace-evolve` (failure mining + harness improvement proposals).
 
-This mirrors the Meta-Harness finding that capability isolation prevents error propagation between phases.
+---
 
-## Execution Trace Collection
+## Exploration Depth Enforcement
 
-The Meta-Harness paper's ablation (Table 3) proves that full execution trace access produces a 43% relative improvement over compressed summaries (50.0 vs 34.9 median accuracy). The `traces` plugin implements this by collecting structured JSONL traces across sessions:
+Two-layer enforcement preventing premature editing:
 
-- **PostToolUse:Bash** — logs command, exit code, output preview
-- **PostToolUse:Write|Edit** — logs file path and change type
-- **SessionEnd** — writes session summary (commands, errors, files modified)
+| Layer | Hook | Behavior | Severity |
+|-------|------|----------|----------|
+| Read gate | require-read-before-edit.sh | Block edit/write if file not Read in session | **Block** (exit 2) |
+| Depth gate | exploration-depth-gate.sh | Warn if total exploratory calls < threshold | Warning (exit 1) |
 
-Traces stored in `~/.claude/traces/` are grep-searchable and analyzable via `/trace-review`, `/trace-stats`, and `/trace-evolve` skills. The `/trace-evolve` skill closes the feedback loop by mining failure patterns from traces and proposing harness improvements — inspired by NeoSigma's self-improving loop (39.3% improvement from failure clustering + gated changes). See [docs/traces.md](traces.md) for the full trace architecture.
+Default threshold: 6 exploratory calls (Read/Grep/Glob). Configurable via `FORGE_EXPLORE_DEPTH`.
 
-## Context Preservation Across Compaction
-
-The `PreCompact` and `PostCompact` hooks in context-engine save and restore critical state (active scope, plan, handoff, git state) across compaction events. This prevents the model from losing track of what it was doing when context gets compressed.
-
-## Environment Bootstrapping
-
-Based on the Meta-Harness TerminalBench-2 finding (+1.7% from environment snapshot), the `SessionStart` hook gathers OS info, available memory, available languages, package managers, project type, and git state. This eliminates 2-4 wasted turns agents typically spend discovering their environment.
+---
 
 ## Prompt Cache Architecture
 
-Claude Code splits the system prompt at a `SYSTEM_PROMPT_DYNAMIC_BOUNDARY` marker (`src/constants/prompts.ts:114`):
+| Segment | Cache Scope | Content |
+|---------|------------|---------|
+| Before boundary | Global (cross-user, 1-hour TTL) | Static instructions (~3,500 tokens) |
+| After boundary | Ephemeral (session-specific) | Dynamic: memory, env, MCP instructions |
 
-| Segment | Cache Scope | Content | Token Cost |
-|---------|------------|---------|------------|
-| Before boundary | `global` (cross-user, 1-hour TTL) | Static instructions: intro, system, tasks, actions, tools, tone, efficiency | ~3,500 |
-| After boundary | `ephemeral` (session-specific) | Dynamic: session guidance, memory, env info, language, output style, MCP instructions | ~1,000-2,000 |
+**What busts the cache**: MCP server changes, CLAUDE.md edits, git state changes.
 
-**What busts the cache:**
-- MCP instructions — explicitly marked `DANGEROUS_uncachedSystemPromptSection`. Every MCP server connect/disconnect recomputes and invalidates.
-- CLAUDE.md changes — content is in the pre-boundary static section. Any edit busts the global cache for all subsequent turns.
-- Git status / current date — injected as system context, creates unique cache keys per session.
+**Hook outputs inject via `<system-reminder>` tags** — after the boundary, so they don't bust the static cache.
 
-**Implication for Forge Studio:** Hook outputs inject via `<system-reminder>` tags in user messages, which are after the boundary — this is correct by design and doesn't bust the static cache. Keep CLAUDE.md stable; use hooks for volatile behavioral rules.
-
-**What this means for you:**
-- Don't modify CLAUDE.md frequently mid-session — each edit busts the global cache
-- Don't connect/disconnect MCP servers during a session — each change recomputes ~20K tokens
-- Hook outputs (system-reminders) are injected after the boundary — they don't bust the static cache
-
-## Minimal Mode for Subagents
-
-Claude Code has an undocumented `CLAUDE_CODE_SIMPLE=1` environment variable (`src/constants/prompts.ts:450-453`) that reduces the entire system prompt to ~50 tokens:
-
-```
-You are Claude Code, Anthropic's official CLI for Claude.
-CWD: /path/to/project
-Date: 2026-04-03
-```
-
-This strips all behavioral guidance, tool usage instructions, and output style. Useful for subagents that only need to search or read — they don't need 60K tokens of instructions to run a grep.
-
-**Trade-off:** The subagent loses all Forge Studio behavioral steering. Only use for bulk mechanical tasks where behavioral compliance doesn't matter.
-
-**Warning:** This is for internal subagent dispatch only. Do not set `CLAUDE_CODE_SIMPLE=1` globally — it disables all behavioral steering, tool usage guidance, and Forge Studio hooks.
-
-## Function Result Clearing
-
-Under context pressure, Claude Code silently clears old tool results from the conversation. The model is told this may happen, but the user isn't notified.
-
-This means file reads from 10+ turns ago may no longer be in context — the model has to re-read files to see their content again. Forge Studio's `track-edits` hook already mitigates by warning after 3 edits without re-reading, but this is the underlying mechanism that makes re-reading essential: it's not just about staleness, it's about actual context eviction.
-
-## Sprint Contract Protocol
-
-When the Planner → Generator → Reviewer pipeline is used, a formal handshake ensures alignment between phases:
-
-1. **Planner writes a `## Contract`** section in its output: testable criteria (not vague "code is clean") with a verification method (a runnable command).
-2. **Generator invokes `/contract`** before writing any code. This forces a mechanical `Read` of the plan file, loading criteria fresh into context rather than relying on decaying memory. If any criterion is ambiguous, the generator stops and reports.
-3. **Reviewer checks contract compliance first** — before correctness, security, or conventions. Each criterion is validated independently.
-
-This prevents the "built the wrong thing" failure mode. Research backing: Anthropic's Sprint 3 had 27 evaluation criteria negotiated before the generator started. Penligent extends this to formal hypothesis contracts with preconditions, evidence requirements, and exit conditions.
-
-## Mandatory Evaluation Gate
-
-Research unanimously shows self-evaluation is unreliable — agents confidently praise their own work. The evaluation gate adds a hook-enforced nudge to run `/verify` before committing planned work.
-
-**Mechanism:**
-- `pre-commit-gate.sh` fires on every `git commit` command
-- Checks if an active plan exists in `.claude/plans/` (modified within 24 hours)
-- Checks if `~/.claude/evaluation-gate.flag` contains the current plan name
-- Plan exists + gate not cleared → exit 1 (warn)
-- No plan active → exit 0 (silent — quick fixes bypass the gate automatically)
-
-**Clearing the gate:** The `/verify` skill writes the plan name to the flag file when the verdict is `VERIFIED: Yes`.
-
-**Configuration:** Set `FORGE_EVALUATION_GATE=0` in settings.json to disable.
-
-**Design choice:** Exit 1 (warn) rather than exit 2 (block) — non-destructive nudge. Workflows that mix planned and unplanned commits aren't disrupted.
-
-## Entropy Management
-
-Codebases drift over time as agents add plugins, modify hooks, and update skills. Documentation counts become stale, marketplace registrations fall out of sync, SKILL.md frontmatter degrades. The `diagnostics` plugin addresses this with periodic scanning.
-
-The `/entropy-scan` skill runs 6 validation checks:
-1. Plugin count drift (README counts vs actual)
-2. Marketplace registration gaps (marketplace.json vs directories)
-3. SKILL.md frontmatter completeness (required fields present)
-4. Hook script executability (chmod +x)
-5. Memory staleness (dates > 90 days)
-6. HARNESS_SPEC.md invariant compliance
-
-Output is a structured pass/fail report with proposed fixes. The skill never modifies files — report only.
-
-Research backing: NxCode recommends "periodic cleanup agents for documentation consistency, constraint violation scanning, pattern enforcement." Octopus Deploy describes "background agents scanning for deviations and auto-fixing." The canonical specification lives in [HARNESS_SPEC.md](../HARNESS_SPEC.md).
+---
 
 ## Design Principles
 
-1. **Zero-cost until invoked**: All skills use `disable-model-invocation: true`. No tokens spent loading unused capabilities.
-2. **Hooks for enforcement, skills for guidance**: Hooks are mandatory (fire on events). Skills are opt-in (invoked by name).
-3. **Fork for read-only**: Expensive analysis skills use `context: fork` to avoid polluting the main conversation.
-4. **Exit codes as signals**: `exit 0` = info injected, `exit 1` = warning, `exit 2` = block the action.
-5. **Filesystem as substrate**: Memory, session state, and configuration all live in files — they survive context compaction.
-6. **Prefer additive changes**: The Meta-Harness TerminalBench-2 search (Appendix A.2) proved that purely additive modifications succeed where "fixing" fragile existing code fails. Six consecutive iterations modifying completion flow all regressed; the winning change was purely additive (environment bootstrapping). When extending harness behavior, add new hooks and skills rather than rewriting existing ones.
-7. **Mechanical invariants over conventions**: Rules that can be validated mechanically should be. The [HARNESS_SPEC.md](../HARNESS_SPEC.md) defines enforceable invariants (plugin structure, exit codes, frontmatter, tool boundaries) that `/entropy-scan` validates. Conventions that can't be mechanically checked belong in CLAUDE.md.
+- **Zero-cost until invoked**: All skills use `disable-model-invocation: true`
+- **Hooks for enforcement, skills for guidance**: Hooks are mandatory (fire on events). Skills are opt-in.
+- **Fork for read-only**: Expensive analysis skills use `context: fork` to avoid polluting main conversation
+- **Exit codes as signals**: 0 = info, 1 = warning, 2 = block
+- **Filesystem as substrate**: Memory, session state, configuration all live in files — they survive context compaction
+- **Prefer additive changes**: Add new hooks/skills rather than rewriting existing ones
+- **Mechanical invariants over conventions**: Rules that can be validated mechanically should be (see [HARNESS_SPEC.md](../HARNESS_SPEC.md))
+- **Silent on success, verbose on failure**: Hooks produce no output when conditions are normal
+- **Single-variable changes**: When debugging or optimizing, change one thing at a time and verify
+- **Persistent session state**: Use `${CLAUDE_PLUGIN_DATA}` for state that must survive reconnects
+
+---
 
 ## Glossary
 
-- **Harness**: Everything in an AI agent except the model — prompts, hooks, memory, tools, and context management
-- **System-reminder**: A `<system-reminder>` tag injected into the conversation by hooks. The model treats these as authoritative context.
-- **Hook**: A shell script that fires on specific events (user message, tool use, compaction). Outputs are injected as system-reminders.
-- **Hook exit codes**: `exit 0` = inject output as info, `exit 1` = inject as warning, `exit 2` = block the tool from executing (PreToolUse only)
-- **MCP (Model Context Protocol)**: Protocol for connecting external tools/data sources to Claude Code. Each MCP server adds tools and instructions to the system prompt.
-- **Fire-and-forget**: A background operation that runs without waiting for completion. If the user acts before it finishes, they see stale state.
-- **Ant-only / `USER_TYPE === 'ant'`**: Features gated to Anthropic internal employees. Forge Studio replicates the most impactful ones (anti-false-claims, numeric anchors) via hooks.
-- **Context compaction**: When the context window fills up, Claude Code compresses older messages to free space. Information may be lost.
-- **JSONL**: JSON Lines format — one JSON object per line. Used by the traces plugin for execution logs.
+| Term | Definition |
+|------|-----------|
+| Harness | Everything in an AI agent except the model — prompts, hooks, memory, tools, context management |
+| System-reminder | `<system-reminder>` tag injected by hooks. Model treats these as authoritative context |
+| Hook | Shell script firing on events. Outputs injected as system-reminders |
+| Exit codes | 0 = info, 1 = warning, 2 = block (PreToolUse only) |
+| Context compaction | Claude Code compresses older messages when context fills. Information may be lost |
+| JSONL | JSON Lines — one JSON object per line. Used for execution traces |
+| Policy kernel | External enforcement of action classification (allow/deny/defer) |
+| Context firewall | Sub-agent isolation preventing intermediate results from polluting parent |
+| Sprint contract | Negotiated done-criteria between planner and evaluator before execution |

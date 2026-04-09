@@ -6,79 +6,71 @@ disable-model-invocation: true
 
 # Trace Evolve
 
-Periodic harness evolution skill inspired by NeoSigma's self-improving loop (39.3% improvement from failure mining + clustering + gated changes). Run weekly or when you suspect recurring patterns.
+Periodic harness evolution skill. Run weekly or when you suspect recurring patterns.
 
 **This skill analyzes and proposes only. It does NOT modify harness files.**
 
 ## Process
 
-### Phase 1: Failure Mining
+### Phase 1: Progressive Trace Loading
 
-1. **Read recent traces**: `ls -t ~/.claude/traces/*.jsonl | head -14` (last ~2 weeks)
-2. **Extract failures**: Filter for entries where `exit_code != "0"` or output contains error keywords (`Error`, `Exception`, `FATAL`, `failed`, `denied`, `not found`)
-3. **Build failure records**: For each failure, extract:
-   - Command or file operation
-   - Error message (from output_preview)
-   - Working directory (context)
-   - Timestamp (for frequency analysis)
+Use the three-view pattern (VCC paper, arXiv 2603.29678) to avoid loading raw JSONL directly:
 
-### Phase 2: Failure Clustering
+1. **Check for compiled views**: `ls ~/.claude/traces/*-summary.md` — if recent summaries exist, start there
+2. **If no summaries**: Run `/trace-compile` first, then return here
+3. **Read summary views** for session orientation (most recent 2 weeks)
+4. **Read error views** for failure patterns
+5. **Follow specific entries** to full JSONL only when root cause needs raw context
 
-Group failures by **root cause mechanism**, not individual error messages:
+### Phase 2: Failure Categorization
 
-| Cluster Type | Signal | Example |
-|-------------|--------|---------|
-| Tool misuse | Same command pattern fails repeatedly | `git push` blocked 5 times |
-| Stale context | Edit failures after many edits without reads | 3+ edit-without-read sequences |
-| Environment | Missing binary or wrong path | `command not found` patterns |
-| Test regression | Same test fails across sessions | `test_X` fails in 4/7 sessions |
-| Permission | Blocked by hooks or denied by user | `BLOCKED:` in output |
-| Workflow | Repeated manual corrections after agent actions | Reverts, re-dos |
+Categorize each failure using IDE-Bench's taxonomy (arXiv 2601.20886):
 
-Prioritize clusters by: `total_failures` (high) and `sessions_affected` (high).
+| Category | Signal | IDE-Bench Frequency |
+|----------|--------|-------------------|
+| **Premature editing** | Edit before sufficient reads/searches | 63% of failures |
+| **Thrashing** | Same file edited 5+ times, oscillating regions | 28.2% of failures |
+| **Context loss** | Re-reading already-read files, contradicting earlier conclusions | 27.6% of failures |
+| **Specification compliance** | Tests fail on formatting, ordering, edge cases — not core logic | Variable |
+| **Tool misuse** | Same command pattern fails repeatedly | Variable |
+| **Environment** | Missing binary, wrong path, permission issues | Variable |
 
-### Phase 3: Propose Changes
+Prioritize by: `total_failures` (high) and `sessions_affected` (high).
 
-For each cluster (top 5 max), propose ONE of:
+### Phase 3: Propose Single-Variable Changes
 
-- **New `rules.d/` rule** — if the failure is a behavioral pattern (agent keeps doing X when it shouldn't)
-- **New hook condition** — if the failure could be caught/prevented at a tool-use boundary
-- **Skill enhancement** — if the failure reveals a workflow gap
-- **No change** — if it's environmental, one-off, or already addressed
+For each cluster (top 5 max), propose ONE change (VeRO paper: single-variable changes prevent regression):
 
-For each proposal, include:
+- **New `rules.d/` rule** — if behavioral pattern (agent keeps doing X)
+- **New hook condition** — if catchable at tool-use boundary
+- **Skill enhancement** — if workflow gap
+- **No change** — if environmental, one-off, or already addressed
+
+For each proposal:
 - What specifically to change
-- Why this addresses the root cause (not just the symptom)
-- Estimated token impact (rules.d/ additions cost ~30-50 chars/message)
-- Risk of regression (could this break existing behavior?)
+- Why this addresses root cause
+- Token impact estimate (rules.d/ ~ 30-50 chars/message)
+- Regression risk
 
 ### Phase 4: Report
-
-## Output Format
 
 ```markdown
 ## Harness Evolution Report
 
 **Period:** [date range]
 **Sessions analyzed:** N
-**Total trace entries:** N
-**Failures found:** N (N% error rate)
+**Method:** [summary views | raw JSONL | mixed]
 
 ---
 
-### Cluster 1: [descriptive name]
-- **Type:** [tool misuse | stale context | environment | test regression | permission | workflow]
+### Cluster 1: [name]
+- **Category:** [premature editing | thrashing | context loss | spec compliance | tool misuse | environment]
 - **Frequency:** N occurrences across M sessions
-- **Example traces:**
-  ```
-  [2-3 representative trace entries]
-  ```
-- **Root cause:** [mechanism explanation]
+- **Example traces:** [2-3 representative entries]
+- **Root cause:** [mechanism]
 - **Proposed change:** [specific suggestion with file path]
-- **Token impact:** [estimated additional chars/message if rules.d/ change]
+- **Token impact:** [estimated]
 - **Regression risk:** [low | medium | high] — [why]
-
-### Cluster 2: ...
 
 ---
 
@@ -86,19 +78,18 @@ For each proposal, include:
 | Metric | Value |
 |--------|-------|
 | Clusters found | N |
-| Proposed rule changes | N |
-| Proposed hook changes | N |
-| Proposed skill changes | N |
-| No action needed | N |
+| By category | premature editing: N, thrashing: N, context loss: N, other: N |
+| Proposed changes | rules: N, hooks: N, skills: N, none: N |
 
 ### Next Steps
-- [prioritized list of what to implement first]
+- [prioritized implementation list]
 - [suggested re-analysis date]
 ```
 
 ## Guidelines
 
-- **Don't propose changes for one-off failures.** Minimum 3 occurrences across 2+ sessions before clustering.
-- **Don't propose removing existing rules/hooks.** This skill adds, not subtracts. Removal requires separate analysis.
-- **Estimate token impact honestly.** Every rules.d/ addition costs tokens on every message. Only propose rules for patterns that cause real damage.
-- **Distinguish harness failures from code failures.** A test failing because of a bug is not a harness issue. A test failing because the agent wrote code without reading the file first IS a harness issue.
+- Minimum 3 occurrences across 2+ sessions before clustering
+- Don't propose removing existing rules/hooks — additions only
+- Estimate token impact honestly — every rules.d/ line costs tokens per message
+- Distinguish harness failures from code bugs
+- Use summary/error views first — don't load full JSONL unless needed
