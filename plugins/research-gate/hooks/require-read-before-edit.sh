@@ -36,5 +36,5 @@ fi
 
 # File was NOT read — block
 BASENAME=$(basename "$FILE_PATH")
-echo "BLOCKED: You must Read ${BASENAME} before editing. Research the file first, understand its content, then retry your edit."
+echo "BLOCKED: You must Read ${BASENAME} before editing. Research the file first, understand its content, then retry your edit." >&2
 exit 2
