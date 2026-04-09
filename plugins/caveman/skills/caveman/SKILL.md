@@ -4,6 +4,7 @@ description: >
   Switch caveman intensity level. Default "full" is always active via hooks.
   Use /caveman lite for professional-tight, /caveman ultra for maximum compression.
 argument-hint: <lite|full|ultra>
+disable-model-invocation: true
 ---
 
 Switch caveman intensity. Current session default: **full** (loaded at session start).
