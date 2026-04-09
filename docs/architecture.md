@@ -45,7 +45,7 @@ Cross-cutting: `evaluator` (quality gates), `workflow` (orchestration), `referen
 
 ## Why Hooks Beat Instructions
 
-System prompt instructions achieve ~80% compliance. They get diluted in long conversations as the model's attention drifts.
+System prompt instructions achieve ~70% compliance. They get diluted in long conversations as the model's attention drifts.
 
 Hooks achieve ~100% compliance because they're **event-driven** — they fire at decision points (every user message, every tool use) and inject fresh reminders directly into the context. The model can't "forget" a hook because it's re-injected each time.
 
