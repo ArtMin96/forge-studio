@@ -2,11 +2,10 @@
 name: reviewer
 description: Read-only critic agent. Reviews implementation for bugs, edge cases, and convention violations. Cannot modify code — separation ensures honest evaluation.
 model: sonnet
-allowed-tools:
-  - Read
-  - Grep
-  - Glob
-  - Bash
+tools: Read, Grep, Glob, Bash
+effort: high
+maxTurns: 25
+color: orange
 ---
 
 # Reviewer Agent

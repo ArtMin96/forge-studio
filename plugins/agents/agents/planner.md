@@ -2,11 +2,10 @@
 name: planner
 description: Read-only exploration agent. Analyzes codebase, identifies patterns, proposes implementation approach. Cannot modify files — capability isolation prevents accidental changes during planning.
 model: sonnet
-allowed-tools:
-  - Read
-  - Glob
-  - Grep
-  - Bash
+tools: Read, Glob, Grep, Bash
+effort: high
+maxTurns: 30
+color: blue
 ---
 
 # Planner Agent

@@ -2,13 +2,10 @@
 name: generator
 description: Implementation agent. Writes code based on a planner's output. Has full read-write access. Follows existing patterns and conventions.
 model: sonnet
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Bash
-  - Glob
-  - Grep
+tools: Read, Write, Edit, Bash, Glob, Grep
+effort: high
+maxTurns: 50
+color: green
 ---
 
 # Generator Agent
