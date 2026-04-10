@@ -51,7 +51,7 @@ Cross-cutting plugins: `evaluator`, `workflow`, `reference`, `traces`, `diagnost
 
 ## Hook Event Reference
 
-32 hooks across 7 plugins. Hooks fire automatically on events — no commands needed.
+34 hooks across 7 plugins. Hooks fire automatically on events — no commands needed.
 
 ### Session Lifecycle
 
