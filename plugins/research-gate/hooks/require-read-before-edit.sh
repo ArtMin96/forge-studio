@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # PreToolUse(Edit|Write): Block edits to files not read in this session.
-# Exit 2 = block the tool call. Exit 0 = allow.
+# Uses JSON permissionDecision output for blocking.
 #
 # Logic:
 #   Edit  → always requires prior Read (edits only target existing files)
@@ -34,7 +34,13 @@ if [ -f "${TRACKDIR}/${SAFE_NAME}" ]; then
   exit 0
 fi
 
-# File was NOT read — block
+# File was NOT read — block with JSON output
 BASENAME=$(basename "$FILE_PATH")
-echo "BLOCKED: You must Read ${BASENAME} before editing. Research the file first, understand its content, then retry your edit." >&2
-exit 2
+jq -n --arg reason "You must Read ${BASENAME} before editing. Research the file first, understand its content, then retry your edit." '{
+  hookSpecificOutput: {
+    hookEventName: "PreToolUse",
+    permissionDecision: "deny",
+    permissionDecisionReason: $reason
+  }
+}'
+exit 0

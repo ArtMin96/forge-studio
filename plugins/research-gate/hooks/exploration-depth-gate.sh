@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # PreToolUse(Edit|Write): Warn if editing before sufficient exploration.
 # IDE-Bench: 8+ exploratory calls before first edit = 8.7x success rate.
-# Non-blocking (exit 1 = warning). Read-before-edit remains the hard block.
+# Non-blocking (JSON additionalContext warning). Read-before-edit remains the hard block.
 # Disables after first edit passes (only initial exploration matters).
 # Configurable threshold via FORGE_EXPLORE_DEPTH (default 6).
 
@@ -38,11 +38,17 @@ fi
 THRESHOLD="${FORGE_EXPLORE_DEPTH:-6}"
 
 if [ "$COUNT" -lt "$THRESHOLD" ]; then
-  echo "Only ${COUNT}/${THRESHOLD} exploratory calls before first edit. IDE-Bench: 8+ exploration calls = 8.7x success rate. Consider reading more files."
+  # Warn via JSON additionalContext (injected into Claude's context)
+  jq -n --arg ctx "Only ${COUNT}/${THRESHOLD} exploratory calls before first edit. IDE-Bench: 8+ exploration calls = 8.7x success rate. Consider reading more files before editing." '{
+    hookSpecificOutput: {
+      hookEventName: "PreToolUse",
+      additionalContext: $ctx
+    }
+  }'
   # Mark gate as passed (warn once, don't nag)
   mkdir -p "$DEPTHDIR"
   touch "$GATEFILE"
-  exit 1
+  exit 0
 fi
 
 # Sufficient exploration — mark gate as passed
