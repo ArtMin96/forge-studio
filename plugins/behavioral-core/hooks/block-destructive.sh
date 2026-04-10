@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Behavioral Core: Block destructive commands.
-# exit 2 = BLOCK the command. exit 1 = warn only. exit 0 = allow.
+# Uses JSON permissionDecision output (exit 0) for blocking.
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
@@ -9,11 +9,21 @@ if [ -z "$COMMAND" ]; then
   exit 0
 fi
 
+deny_command() {
+  jq -n --arg reason "$1" '{
+    hookSpecificOutput: {
+      hookEventName: "PreToolUse",
+      permissionDecision: "deny",
+      permissionDecisionReason: $reason
+    }
+  }'
+  exit 0
+}
+
 # Layer 1: Direct destructive patterns
 if echo "$COMMAND" | grep -qEi '(rm\s+-rf\s+[/~]|git\s+push\s+--force|git\s+push\s+-f\b|git\s+reset\s+--hard|DROP\s+TABLE|DROP\s+DATABASE|TRUNCATE\s+|git\s+checkout\s+\.\s*$|git\s+clean\s+-f|git\s+branch\s+-D)'; then
   MATCHED=$(echo "$COMMAND" | grep -oEi '(rm\s+-rf\s+[/~]|git\s+push\s+--force|git\s+push\s+-f\b|git\s+reset\s+--hard|DROP\s+TABLE|DROP\s+DATABASE|TRUNCATE\s+|git\s+checkout\s+\.\s*$|git\s+clean\s+-f|git\s+branch\s+-D)' | head -1)
-  echo "BLOCKED: Destructive command detected: '$MATCHED'. If you genuinely need this, ask the user to run it manually."
-  exit 2
+  deny_command "Destructive command detected: '${MATCHED}'. Ask the user to run it manually if genuinely needed."
 fi
 
 # Layer 2: Shell wrapper obfuscation (bash -c '...', sh -c "...")
@@ -21,22 +31,19 @@ if echo "$COMMAND" | grep -qE '(bash|sh|zsh)\s+-c\s'; then
   INNER=$(echo "$COMMAND" | grep -oP "(?<=-c\s')[^']*" 2>/dev/null || echo "$COMMAND" | grep -oP '(?<=-c\s")[^"]*' 2>/dev/null || echo "$COMMAND" | grep -oP '(?<=-c\s)\S+' 2>/dev/null)
   if [ -n "$INNER" ]; then
     if echo "$INNER" | grep -qEi '(rm\s+-r|git\s+push.*(-f|--force)|git\s+reset\s+--hard|DROP\s+TABLE|DROP\s+DATABASE|TRUNCATE|git\s+clean|git\s+branch\s+-D)'; then
-      echo "BLOCKED: Destructive command hidden in shell wrapper. If you genuinely need this, ask the user to run it manually."
-      exit 2
+      deny_command "Destructive command hidden in shell wrapper. Ask the user to run it manually if genuinely needed."
     fi
   fi
 fi
 
 # Layer 3: Pipe-to-shell patterns
 if echo "$COMMAND" | grep -qE '\|\s*(bash|sh|zsh)\b'; then
-  echo "BLOCKED: Pipe-to-shell detected. This pattern can execute arbitrary code. If you genuinely need this, ask the user to run it manually."
-  exit 2
+  deny_command "Pipe-to-shell detected. This pattern can execute arbitrary code. Ask the user to run it manually if genuinely needed."
 fi
 
 # Layer 4: Flag reordering (rm -r -f /, rm -f -r /)
 if echo "$COMMAND" | grep -qE 'rm\s+(-[a-z]*r[a-z]*\s+-[a-z]*f|-[a-z]*f[a-z]*\s+-[a-z]*r)\s+[/~]'; then
-  echo "BLOCKED: Recursive forced deletion detected (reordered flags). If you genuinely need this, ask the user to run it manually."
-  exit 2
+  deny_command "Recursive forced deletion detected (reordered flags). Ask the user to run it manually if genuinely needed."
 fi
 
 exit 0
