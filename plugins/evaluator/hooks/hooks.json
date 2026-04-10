@@ -8,7 +8,8 @@
           {
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/php-static-analysis.sh",
-            "timeout": 30
+            "timeout": 30,
+            "statusMessage": "Running PHPStan analysis..."
           }
         ]
       },
@@ -19,7 +20,8 @@
           {
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/js-static-analysis.sh",
-            "timeout": 30
+            "timeout": 30,
+            "statusMessage": "Running TypeScript/ESLint analysis..."
           }
         ]
       },
