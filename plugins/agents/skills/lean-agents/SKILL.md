@@ -25,7 +25,7 @@ Source: DEV Community token trace analysis, Anthropic subagent docs.
 ## The 4-Layer Isolation Technique
 
 ### Layer 1: Tool restriction
-Use `allowed-tools` in agent definitions to limit which tools load. Fewer tools = fewer tool schemas in context. A grep-only agent doesn't need `Write`, `Edit`, or `Bash`.
+Use `tools` in agent definitions to limit which tools load. Fewer tools = fewer tool schemas in context. A grep-only agent doesn't need `Write`, `Edit`, or `Bash`.
 
 ### Layer 2: Prompt minimization
 Write short, specific agent prompts. Include file paths, line numbers, and exact instructions. Don't repeat background the agent doesn't need. Project history belongs in the parent, not the child.
