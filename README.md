@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-12 plugins. 40 skills. 32 hooks. 4 agents. 14 behavioral rules.
+12 plugins. 40 skills. 34 hooks. 4 agents. 14 behavioral rules.
 
 ---
 
@@ -45,13 +45,13 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | Plugin | Purpose | Hooks | Skills |
 |--------|---------|-------|--------|
 | **behavioral-core** | Behavioral steering via modular `rules.d/` rules, destructive command blocking, scope discipline | 4 | 3 |
-| **context-engine** | Progressive context pressure, session handoffs, edit safety, environment bootstrap, compaction recovery, task tracking | 12 | 6 |
+| **context-engine** | Progressive context pressure, session handoffs, edit safety, environment bootstrap, compaction recovery, task tracking | 13 | 6 |
 | **memory** | Three-tier memory: pointer index → topic files → searchable transcripts | 0 | 3 |
 | **evaluator** | Static analysis gates (PHP/JS/TS), adversarial review, verification, test nudge | 5 | 7 |
 | **workflow** | Daily lifecycle (morning → eod → weekly), task routing, explore/plan/implement cycle | 0 | 7 |
 | **agents** | Planner/Generator/Reviewer triad with tool-isolated capability boundaries | 0 | 4 |
 | **reference** | Hidden Claude Code features: thinking modes, parallel patterns, CLI piping | 0 | 3 |
-| **traces** | JSONL execution traces, compiled views, failure mining, harness evolution | 3 | 4 |
+| **traces** | JSONL execution traces, compiled views, failure mining, harness evolution | 5 | 4 |
 | **diagnostics** | Documentation drift, registration gaps, convention violations, stale memory | 0 | 1 |
 | **caveman** | Always-on compressed output (~65% token savings). Survives compaction. | 2 | 1 |
 | **token-efficiency** | Duplicate read detection, session token audit | 1 | 1 |
@@ -137,7 +137,9 @@ Hooks fire automatically. No commands needed.
 | PostToolUse:Read | research-gate | Record file read for edit gate |
 | PostToolUse:Read\|Grep\|Glob | research-gate | Track exploration depth |
 | PostToolUse:Read | token-efficiency | Warn on duplicate reads |
+| PostToolUseFailure:* | traces | Log tool failures to session trace |
 | TaskCreated | context-engine | Log task for progress guardian |
+| StopFailure | traces | Log API errors and rate limits to session trace |
 
 ---
 

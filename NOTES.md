@@ -27,9 +27,18 @@ Karpathy's LLM Wiki pattern: three-layer compounding knowledge (Raw Sources → 
 ### HTTP Hooks for External Integrations
 Hook type `"type": "http"` (v2.1.63) POSTs JSON to URLs. Enables webhook integrations for trace collection, notifications, CI triggers. Requires external infrastructure — out of scope for local-first marketplace.
 
-### New Hook Events to Explore
-- `StopFailure` (v2.1.78) — log/analyze why sessions fail
+### Hook Events — Implemented
+- `PostToolUseFailure` — ✅ Added to traces plugin (collect-failure-trace.sh)
+- `StopFailure` (v2.1.78) — ✅ Added to traces plugin (log-stop-failure.sh)
+
+### Hook Events — Ready to Implement
 - `CwdChanged` (v2.1.83) — inject context when changing directories
-- `FileChanged` (v2.1.83) — detect external file modifications
-- `Elicitation`/`ElicitationResult` (v2.1.76) — monitor questions asked to user
-- `PermissionDenied` (v2.1.89) — suggest alternatives on denied actions
+- `FileChanged` (v2.1.83) — detect external file modifications (`.env`, `composer.lock`)
+- `SubagentStop` (v2.1.71) — verify agent output meets contract requirements
+- `PermissionDenied` (v2.1.89) — suggest alternative approaches on denied actions
+- `Elicitation`/`ElicitationResult` (v2.1.76) — monitor MCP questions asked to user
+
+### Skill Frontmatter Opportunities
+- `context: fork` + `agent: Explore` — for exploration skills (`/explore`, `/audit-context`)
+- `!command` dynamic injection — for `/morning` (auto-inject git log, handoffs)
+- `argument-hint` — for skills accepting `$ARGUMENTS` without hints

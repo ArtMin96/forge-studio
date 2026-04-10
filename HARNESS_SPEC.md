@@ -71,9 +71,23 @@ Hook scripts communicate via shell exit codes:
 
 | Exit Code | Meaning | When to Use |
 |-----------|---------|------------|
-| 0 | Info | Inject information into context. Silent when nothing to report. |
-| 1 | Warning | Non-blocking alert. Agent sees the message but proceeds. |
-| 2 | Block | Prevent tool execution. **Only valid for PreToolUse hooks.** |
+| 0 | Info/JSON | Inject information into context. Stdout parsed for JSON. Silent when nothing to report. |
+| 1 | Warning | Non-blocking alert. First line of **stderr** displayed. Stdout goes to debug log only. |
+| 2 | Block | Prevent tool execution. **Only valid for PreToolUse hooks.** Stdout ignored; stderr fed to Claude. |
+
+**Preferred approach for PreToolUse blocking**: Exit 0 with JSON `permissionDecision` output instead of exit 2. Provides richer feedback via `permissionDecisionReason` and `additionalContext`.
+
+```bash
+# JSON deny (preferred)
+jq -n --arg reason "Explanation" '{
+  hookSpecificOutput: {
+    hookEventName: "PreToolUse",
+    permissionDecision: "deny",
+    permissionDecisionReason: $reason
+  }
+}'
+exit 0
+```
 
 **Validation**: No hook outside `PreToolUse` should exit with code 2.
 
@@ -97,7 +111,7 @@ Agent capability isolation prevents error propagation between phases:
 
 **Rationale** (Anthropic, 2026): "When asked to evaluate work they've produced, agents tend to respond by confidently praising the work — even when quality is obviously mediocre." Capability isolation ensures reviewers evaluate honestly rather than rubber-stamping by editing.
 
-**Validation**: Agent `.md` frontmatter `allowed-tools` must match these boundaries.
+**Validation**: Agent `.md` frontmatter `tools` must match these boundaries.
 
 ## Invariant: Evaluation Separation
 
