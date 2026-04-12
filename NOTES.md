@@ -38,6 +38,15 @@ Hook type `"type": "http"` (v2.1.63) POSTs JSON to URLs. Enables webhook integra
 - `PermissionDenied` (v2.1.89) — suggest alternative approaches on denied actions
 - `Elicitation`/`ElicitationResult` (v2.1.76) — monitor MCP questions asked to user
 
+### allowManagedHooksOnly (v2.1.101)
+Enterprise setting that restricts which hooks can run. Plugin hooks are silently skipped when enabled. Marketplace plugins should gracefully handle being blocked — hooks must not assume they always execute. Worth adding a diagnostic check: detect when hooks aren't firing and surface a warning.
+
+### Subagent MCP Tool Inheritance (v2.1.101)
+Fixed: subagents now inherit MCP tools from parent. Previously they didn't, which broke agent contracts that assumed MCP availability. The agents plugin's planner/generator/reviewer triad should work correctly with MCP tools now — verify sprint contracts don't need MCP-awareness updates.
+
+### Bash Permission Hardening (v2.1.98)
+Significant hardening of Bash permission checks: backslash-escaped flags, compound commands, env-var prefixes all now properly validated. The `PermissionDenied` hook event (v2.1.89, listed above) is more valuable now — when permission denials happen, they're more likely intentional security boundaries rather than false positives.
+
 ### Skill Frontmatter Opportunities
 - `context: fork` + `agent: Explore` — for exploration skills (`/explore`, `/audit-context`)
 - `!command` dynamic injection — for `/morning` (auto-inject git log, handoffs)

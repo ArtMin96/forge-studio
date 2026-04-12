@@ -137,10 +137,14 @@ else
     pct_used=0
 fi
 
-effort="default"
-settings_path="$HOME/.claude/settings.json"
-if [ -f "$settings_path" ]; then
-    effort=$(jq -r '.effortLevel // "default"' "$settings_path" 2>/dev/null)
+effort=$(echo "$input" | jq -r '.session.effort_level // empty')
+if [ -z "$effort" ] || [ "$effort" = "null" ]; then
+    settings_path="$HOME/.claude/settings.json"
+    if [ -f "$settings_path" ]; then
+        effort=$(jq -r '.effortLevel // "high"' "$settings_path" 2>/dev/null)
+    else
+        effort="high"
+    fi
 fi
 
 # ── LINE 1: Model │ Context % │ Directory (branch) │ Session │ Thinking ──
@@ -182,6 +186,11 @@ line1+="${sep}"
 line1+="${cyan}${dirname}${reset}"
 if [ -n "$git_branch" ]; then
     line1+=" ${green}(${git_branch}${red}${git_dirty}${green})${reset}"
+fi
+git_worktree=$(echo "$input" | jq -r '.workspace.git_worktree // empty')
+if [ -n "$git_worktree" ] && [ "$git_worktree" != "null" ]; then
+    wt_name=$(basename "$git_worktree")
+    line1+=" ${magenta}⊟ ${wt_name}${reset}"
 fi
 if [ -n "$session_duration" ]; then
     line1+="${sep}"
@@ -266,7 +275,7 @@ if $needs_refresh; then
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $token" \
             -H "anthropic-beta: oauth-2025-04-20" \
-            -H "User-Agent: claude-code/2.1.34" \
+            -H "User-Agent: claude-code-statusline" \
             "https://api.anthropic.com/api/oauth/usage" 2>/dev/null)
         if [ -n "$response" ] && echo "$response" | jq -e '.five_hour' >/dev/null 2>&1; then
             usage_data="$response"

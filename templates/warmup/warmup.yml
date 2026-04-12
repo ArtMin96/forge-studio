@@ -30,7 +30,7 @@ jobs:
     timeout-minutes: 2
     steps:
       - name: Install Claude Code
-        run: npm install -g @anthropic-ai/claude-code
+        run: npm install -g @anthropic-ai/claude-code@latest
 
       - name: Ping Claude
         env:

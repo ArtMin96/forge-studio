@@ -60,6 +60,12 @@ When user pastes error logs, trace the actual error. Don't guess or chase theori
 - When renaming anything, search separately for: direct calls, type references, string literals, dynamic imports, re-exports, test files/mocks. Assume grep missed something.
 - Never fix a display problem by duplicating data or state. One source, everything else reads from it.
 
+## Useful Shortcuts
+
+- Focus View (`Ctrl+O`): toggles condensed view showing prompts, tool summaries, and responses — scan long sessions fast
+- Resume by name: `claude --resume "session title"` — name sessions with `/rename`, resume by title
+- Team onboarding: `claude team-onboard` — generates ramp-up guides from local usage patterns
+
 ## Context Management
 
 <!-- Hooks handle: re-read warnings (track-edits.sh), context pressure (track-context-pressure.sh),

@@ -16,7 +16,8 @@
     "FORGE_CONTEXT_STAGE2": "15",
     "FORGE_CONTEXT_STAGE3": "22",
     "FORGE_CONTEXT_STAGE4": "30",
-    "FORGE_CONTEXT_STAGE5": "40"
+    "FORGE_CONTEXT_STAGE5": "40",
+    "CLAUDE_CODE_SCRIPT_CAPS": "50"
   },
   "includeCoAuthoredBy": false,
   "includeGitInstructions": false,
@@ -44,7 +45,8 @@
   "alwaysThinkingEnabled": true,
   "statusLine": {
     "type": "command",
-    "command": "bash \"$HOME/.claude/statusline.sh\""
+    "command": "bash \"$HOME/.claude/statusline.sh\"",
+    "refreshInterval": 60
   },
   "cleanupPeriodDays": 90
 }

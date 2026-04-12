@@ -5,6 +5,7 @@ description: >
   Use /caveman lite for professional-tight, /caveman ultra for maximum compression.
 argument-hint: <lite|full|ultra>
 disable-model-invocation: true
+keepCodingInstructions: true
 ---
 
 Switch caveman intensity. Current session default: **full** (loaded at session start).
