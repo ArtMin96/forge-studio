@@ -1,0 +1,6 @@
+{
+  "name": "workflow",
+  "description": "Orchestration patterns: task routing, explore-plan-implement cycle, daily rituals",
+  "version": "1.0.0",
+  "keywords": ["workflow", "planning", "daily-rituals", "routing"]
+}

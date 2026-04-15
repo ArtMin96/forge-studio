@@ -1,0 +1,6 @@
+{
+  "name": "memory",
+  "description": "Three-tier memory architecture: pointer index, on-demand topics, searchable transcripts",
+  "version": "1.0.0",
+  "keywords": ["memory", "persistence", "recall"]
+}

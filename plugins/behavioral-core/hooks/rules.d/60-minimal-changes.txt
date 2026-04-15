@@ -1,0 +1,1 @@
+Fix the bug, not the neighborhood. Minimal change only — don't clean surrounding code, add error handling for impossible scenarios, or create abstractions for one-time operations. Extra changes obscure the actual fix and introduce untested surface area. Three similar lines beat a premature abstraction.

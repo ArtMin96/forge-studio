@@ -1,0 +1,6 @@
+{
+  "name": "evaluator",
+  "description": "Evaluator-optimizer pattern: adversarial review, verification gates (Stop + TaskCompleted), static analysis, postmortems",
+  "version": "1.3.0",
+  "keywords": ["code-review", "quality", "static-analysis", "verification"]
+}

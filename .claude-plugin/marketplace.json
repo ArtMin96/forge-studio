@@ -1,0 +1,108 @@
+{
+  "name": "forge-studio",
+  "owner": {
+    "name": "Arthur"
+  },
+  "metadata": {
+    "description": "Harness-aligned Claude Code marketplace: behavioral steering, context management, memory architecture, evaluation, orchestration, and multi-agent decomposition.",
+    "version": "2.0.0"
+  },
+  "plugins": [
+    {
+      "name": "behavioral-core",
+      "description": "Behavioral steering via modular hooks: 8 principle-based rules, destructive command blocking, scope compliance guard, self-review enforcement, output style safety",
+      "version": "1.4.0",
+      "source": "./plugins/behavioral-core",
+      "category": "behavioral-steering",
+      "keywords": ["behavioral", "hooks", "anti-sycophancy", "anti-hallucination", "safety", "scope", "harness:behavioral-steering", "overhead:minimal", "role:guide-computational"]
+    },
+    {
+      "name": "context-engine",
+      "description": "Context management: progressive pressure tracking, session handoffs, drift detection, edit safety, large-file warnings, plan mode hooks, MCP monitoring, prompt budget awareness",
+      "version": "1.3.0",
+      "source": "./plugins/context-engine",
+      "category": "context-management",
+      "keywords": ["context", "handoff", "session-management", "edit-safety", "plan-mode", "mcp-monitoring", "harness:context-management", "overhead:minimal", "role:sensor-computational"]
+    },
+    {
+      "name": "memory",
+      "description": "Three-tier memory architecture: pointer index, on-demand topics, searchable transcripts",
+      "version": "1.0.0",
+      "source": "./plugins/memory",
+      "category": "memory-architecture",
+      "keywords": ["memory", "persistence", "recall", "harness:memory-architecture", "overhead:zero", "role:guide-inferential"]
+    },
+    {
+      "name": "evaluator",
+      "description": "Evaluator-optimizer pattern: adversarial review, verification gates (Stop + TaskCompleted), static analysis, postmortems",
+      "version": "1.3.0",
+      "source": "./plugins/evaluator",
+      "category": "evaluation",
+      "keywords": ["code-review", "quality", "static-analysis", "verification", "harness:evaluation", "overhead:moderate", "role:sensor-computational", "role:sensor-inferential"]
+    },
+    {
+      "name": "workflow",
+      "description": "Orchestration patterns: task routing, explore-plan-implement cycle, daily rituals",
+      "version": "1.0.0",
+      "source": "./plugins/workflow",
+      "category": "orchestration",
+      "keywords": ["workflow", "planning", "daily-rituals", "routing", "harness:orchestration", "overhead:zero", "role:guide-inferential"]
+    },
+    {
+      "name": "agents",
+      "description": "Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries",
+      "version": "1.1.0",
+      "source": "./plugins/agents",
+      "category": "multi-agent",
+      "keywords": ["agents", "decomposition", "parallel", "pipeline", "harness:multi-agent-decomposition", "overhead:zero", "role:guide-inferential"]
+    },
+    {
+      "name": "reference",
+      "description": "Power-user reference: extended thinking, unix pipes, parallel execution patterns",
+      "version": "1.0.0",
+      "source": "./plugins/reference",
+      "category": "reference",
+      "keywords": ["hidden-features", "tips", "advanced", "parallel", "harness:reference", "overhead:zero", "role:guide-computational"]
+    },
+    {
+      "name": "traces",
+      "description": "Execution trace collection, analysis, and harness evolution. Stores structured JSONL traces for pattern detection and failure-driven improvement.",
+      "version": "1.1.0",
+      "source": "./plugins/traces",
+      "category": "diagnostics",
+      "keywords": ["traces", "execution-history", "diagnostics", "analytics", "harness:trace-analysis", "overhead:minimal", "role:sensor-computational"]
+    },
+    {
+      "name": "caveman",
+      "description": "Always-on compressed communication. Drops articles, filler, pleasantries from responses. Reduces output tokens ~65% while keeping technical accuracy. Loaded at session start, survives compaction.",
+      "version": "1.0.0",
+      "source": "./plugins/caveman",
+      "category": "productivity",
+      "keywords": ["token-optimization", "output-compression", "brevity", "productivity", "harness:behavioral-steering", "overhead:minimal", "role:guide-computational"]
+    },
+    {
+      "name": "token-efficiency",
+      "description": "Prevents token waste: duplicate read detection, large output warnings, session token audit",
+      "version": "1.0.0",
+      "source": "./plugins/token-efficiency",
+      "category": "context-management",
+      "keywords": ["token-efficiency", "duplicate-reads", "output-size", "audit", "harness:context-management", "overhead:minimal", "role:sensor-computational"]
+    },
+    {
+      "name": "diagnostics",
+      "description": "Codebase health scanning: documentation drift, registration gaps, convention violations, stale memory, HARNESS_SPEC invariant compliance",
+      "version": "1.0.0",
+      "source": "./plugins/diagnostics",
+      "category": "diagnostics",
+      "keywords": ["health", "entropy", "invariants", "validation", "harness:entropy-management", "overhead:zero", "role:sensor-computational"]
+    },
+    {
+      "name": "research-gate",
+      "description": "Mechanical enforcement of read-before-edit: blocks Edit/Write on files not Read in the current session. Based on issue #42796 data showing 33.7% of edits made to unread files.",
+      "version": "1.1.0",
+      "source": "./plugins/research-gate",
+      "category": "behavioral-steering",
+      "keywords": ["research-first", "read-before-edit", "enforcement", "PreToolUse", "harness:behavioral-steering", "overhead:minimal", "role:guide-computational"]
+    }
+  ]
+}

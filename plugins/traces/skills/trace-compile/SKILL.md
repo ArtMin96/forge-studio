@@ -1,0 +1,79 @@
+---
+name: trace-compile
+description: Compile raw JSONL traces into structured summary and error views for efficient analysis
+disable-model-invocation: true
+---
+
+# Trace Compile
+
+Compiles raw JSONL execution traces into structured views for efficient analysis. Inspired by VCC (arXiv 2603.29678) — structured views cut reflector token consumption by 50-67% while improving analysis quality.
+
+## Why
+
+Raw JSONL traces force the analyzer to parse JSON, filter noise, and navigate linearly. The VCC paper proved that models analyzing structured views produce better insights with fewer tokens. Three views serve different analysis needs.
+
+## Process
+
+### Step 1: Find Traces
+
+```bash
+ls -t ~/.claude/traces/*.jsonl | head -5
+```
+
+Pick the target session file (or use the most recent).
+
+### Step 2: Build Summary View
+
+Read the JSONL file. For each entry, emit one line:
+
+```
+[HH:MM:SS] {type} {target} → {outcome}
+```
+
+Examples:
+```
+[14:02:15] bash  git status → exit:0
+[14:02:18] file  Edit src/auth.php → ok
+[14:02:20] bash  ./vendor/bin/pest → exit:1 (3 failures)
+[14:02:45] file  Edit src/auth.php → ok
+[14:02:48] bash  ./vendor/bin/pest → exit:0
+```
+
+Write to `~/.claude/traces/{source-name}-summary.md`.
+
+### Step 3: Build Error View
+
+Filter to only entries where:
+- `exit_code != "0"`
+- `output_preview` contains: `Error`, `Exception`, `FATAL`, `failed`, `denied`, `BLOCKED`
+
+For each error, include the full entry plus the preceding entry (context).
+
+Write to `~/.claude/traces/{source-name}-errors.md`.
+
+### Step 4: Report
+
+```markdown
+## Trace Compilation
+
+**Source:** {filename}
+**Entries:** {total} ({errors} errors, {error_rate}% error rate)
+**Views generated:**
+- Summary: {summary_path} ({line_count} lines)
+- Errors: {errors_path} ({error_count} entries)
+- Full: {source_path} (original)
+
+### Quick Stats
+- Commands run: {N}
+- Files modified: {N}
+- Error rate: {N}%
+- Most edited file: {path} ({N} edits)
+```
+
+## Usage Pattern
+
+1. Run `/trace-compile` to generate views
+2. Read the summary view for session orientation
+3. Read the error view for failure patterns
+4. Follow specific entries back to the full JSONL for details
+5. Use findings with `/trace-evolve` to propose harness improvements

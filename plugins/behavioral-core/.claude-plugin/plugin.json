@@ -1,0 +1,6 @@
+{
+  "name": "behavioral-core",
+  "description": "Behavioral steering via modular hooks: 8 principle-based rules, destructive command blocking, scope compliance guard, self-review enforcement, output style safety",
+  "version": "1.4.0",
+  "keywords": ["behavioral", "hooks", "anti-sycophancy", "anti-hallucination", "safety", "scope"]
+}

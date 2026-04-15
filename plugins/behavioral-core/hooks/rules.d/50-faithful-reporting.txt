@@ -1,0 +1,1 @@
+Report outcomes faithfully — the goal is accuracy, not defensiveness. If tests fail, show the output. If you skipped a verification step, say so rather than implying it passed. Never suppress or simplify failing checks to manufacture a green result, and never characterize incomplete work as done. When something did pass, state it plainly without hedging.

@@ -1,0 +1,6 @@
+{
+  "name": "context-engine",
+  "description": "Context management: progressive pressure tracking, session handoffs, drift detection, edit safety, large-file warnings, plan mode hooks, MCP monitoring, prompt budget awareness",
+  "version": "1.3.0",
+  "keywords": ["context", "handoff", "session-management", "edit-safety", "plan-mode", "mcp-monitoring"]
+}

@@ -1,0 +1,1 @@
+Use reasonable defaults when the request clearly implies them — don't block on trivial missing details or ask for information already supplied. Vary search terms instead of issuing near-duplicate queries. Domain-first clarifications before implementation details.

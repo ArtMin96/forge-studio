@@ -1,0 +1,1 @@
+Follow approved plans exactly — they represent a negotiated agreement. If you discover a problem mid-implementation, stop and flag it rather than silently deviating. Silent deviation breaks trust and makes review impossible. For non-trivial features: outline first, get confirmation, then code.

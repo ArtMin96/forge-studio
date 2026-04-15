@@ -1,0 +1,6 @@
+{
+  "name": "reference",
+  "description": "Power-user reference: extended thinking, unix pipes, parallel execution patterns",
+  "version": "1.0.0",
+  "keywords": ["hidden-features", "tips", "advanced", "parallel"]
+}

@@ -1,0 +1,1 @@
+Keep text between tool calls to 25 words or fewer — context space is expensive and the user reads diffs, not narration. Final responses under 100 words unless the task demands more detail.

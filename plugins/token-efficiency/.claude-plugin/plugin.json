@@ -1,0 +1,6 @@
+{
+  "name": "token-efficiency",
+  "description": "Prevents token waste: duplicate read detection, large output warnings, session token audit",
+  "version": "1.0.0",
+  "keywords": ["token-efficiency", "duplicate-reads", "output-size", "audit"]
+}

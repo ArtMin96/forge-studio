@@ -1,0 +1,55 @@
+{
+  "env": {
+    "ENABLE_LSP_TOOL": "1",
+    "ENABLE_TOOL_SEARCH": "true",
+    "CLAUDE_CODE_NO_FLICKER": "1",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "75",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "CLAUDE_CODE_ATTRIBUTION_HEADER": "0",
+    "CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION": "false",
+    "FORGE_TRACES_ENABLED": "1",
+    "FORGE_EVALUATION_GATE": "1",
+    "FORGE_LARGE_FILE_LINES": "500",
+    "FORGE_EXPLORE_DEPTH": "6",
+    "FORGE_TEST_NUDGE_INTERVAL": "3",
+    "FORGE_SELF_REVIEW_INTERVAL": "3",
+    "FORGE_TEST_ESCALATION_INTERVAL": "6",
+    "FORGE_FAILURE_THRESHOLD": "3",
+    "FORGE_CONTEXT_STAGE1": "8",
+    "FORGE_CONTEXT_STAGE2": "15",
+    "FORGE_CONTEXT_STAGE3": "22",
+    "FORGE_CONTEXT_STAGE4": "30",
+    "FORGE_CONTEXT_STAGE5": "40",
+    "CLAUDE_CODE_SCRIPT_CAPS": "50"
+  },
+  "includeCoAuthoredBy": false,
+  "includeGitInstructions": false,
+  "promptSuggestionEnabled": false,
+  "showClearContextOnPlanAccept": true,
+  "permissions": {
+    "allow": [],
+    "deny": [
+      "Bash(rm -rf /*)",
+      "Bash(rm -rf ~*)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git reset --hard*)",
+      "Bash(git checkout .)",
+      "Bash(git clean -f*)",
+      "Bash(git branch -D*)",
+      "Bash(*DROP TABLE*)",
+      "Bash(*DROP DATABASE*)",
+      "Bash(*TRUNCATE *)"
+    ],
+    "defaultMode": "bypassPermissions"
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "effortLevel": "max",
+  "alwaysThinkingEnabled": true,
+  "statusLine": {
+    "type": "command",
+    "command": "bash \"$HOME/.claude/statusline.sh\"",
+    "refreshInterval": 60
+  },
+  "cleanupPeriodDays": 90
+}
