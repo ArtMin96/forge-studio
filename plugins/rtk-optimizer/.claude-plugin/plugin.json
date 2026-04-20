@@ -1,0 +1,6 @@
+{
+  "name": "rtk-optimizer",
+  "description": "Auto-install rtk-ai/rtk and register its global Bash rewrite hook for 60-90% token reduction on shell commands.",
+  "version": "1.0.0",
+  "keywords": ["token-optimization", "external-tool:rtk"]
+}

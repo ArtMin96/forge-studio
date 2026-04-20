@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-12 plugins. 37 skills. 46 hooks. 4 agents. 8 behavioral rules.
+13 plugins. 37 skills. 47 hooks. 4 agents. 8 behavioral rules.
 
 ---
 
@@ -25,6 +25,7 @@
 /plugin install caveman@forge-studio             # Token-optimized output
 /plugin install token-efficiency@forge-studio    # Duplicate read detection
 /plugin install research-gate@forge-studio       # Read-before-edit enforcement
+/plugin install rtk-optimizer@forge-studio       # Auto-installs rtk binary + registers global hook
 ```
 
 Start a new session after installing for plugins to load.
@@ -56,6 +57,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | **caveman** | Always-on compressed output (~65% token savings). Survives compaction. | 2 | 1 |
 | **token-efficiency** | Duplicate read detection, session token audit | 1 | 1 |
 | **research-gate** | Blocks Edit/Write on unread files + exploration depth warnings | 4 | 0 |
+| **rtk-optimizer** | Auto-installs [rtk-ai/rtk](https://github.com/rtk-ai/rtk) on first session and runs `rtk init -g`. 60-90% token reduction on shell commands. Opt-out: `FORGE_RTK_DISABLED=1`. | 1 | 0 |
 
 ### Key Skills
 
@@ -104,6 +106,7 @@ Hooks fire automatically. No commands needed.
 | SessionStart | caveman | Load compressed communication rules |
 | SessionStart | behavioral-core | One-time check for unsafe output styles |
 | SessionStart | workflow | Surface latest handoff + unchecked plan items (agentic workflow bootstrap) |
+| SessionStart | rtk-optimizer | First session: install `rtk` binary + run `rtk init -g`. Subsequent sessions: no-op. |
 | PreCompact | context-engine | Guard: block compaction when uncommitted work has no handoff or tasks are in-progress |
 | PreCompact | context-engine | Save scope, plan, handoff, git state to recovery file |
 | PreCompact | workflow | Advisory nudge to run `/handoff` before auto-compaction |

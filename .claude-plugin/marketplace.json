@@ -103,6 +103,14 @@
       "source": "./plugins/research-gate",
       "category": "behavioral-steering",
       "keywords": ["research-first", "read-before-edit", "enforcement", "PreToolUse", "harness:behavioral-steering", "overhead:minimal", "role:guide-computational"]
+    },
+    {
+      "name": "rtk-optimizer",
+      "description": "Auto-install rtk-ai/rtk (Rust token killer) on first session and register its global Bash rewrite hook. Opt-out: FORGE_RTK_DISABLED=1.",
+      "version": "1.0.0",
+      "source": "./plugins/rtk-optimizer",
+      "category": "context-management",
+      "keywords": ["rtk", "token-optimization", "external-tool", "harness:context-management", "overhead:moderate"]
     }
   ]
 }
