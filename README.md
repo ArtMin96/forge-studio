@@ -46,9 +46,9 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 |--------|---------|-------|--------|
 | **behavioral-core** | Behavioral steering via modular `rules.d/` rules, destructive command blocking, scope discipline | 5 | 3 |
 | **context-engine** | Context management: progressive pressure, session handoffs, edit safety, environment bootstrap, compaction recovery, task tracking, failure escalation | 15 | 6 |
-| **memory** | Three-tier memory: pointer index → topic files → searchable transcripts | 0 | 3 |
-| **evaluator** | Static analysis gates (PHP/JS/TS), adversarial review, verification, test nudge, test output filtering | 8 | 7 |
-| **workflow** | Hook-driven agentic orchestrator: auto-routing (shell/hybrid/LLM), sprint-contract enforcement, TDD loop, handoff nudges | 5 | 4 |
+| **memory** | Three-tier memory: pointer index → topic files → searchable transcripts, version-aware updates | 0 | 3 |
+| **evaluator** | Static analysis gates (PHP/JS/TS), adversarial review, verification, test nudge, self-evolution assessment | 8 | 8 |
+| **workflow** | Hook-driven agentic orchestrator: auto-routing (shell/hybrid/LLM), sprint-contract enforcement, TDD loop, handoff nudges, self-evolution loop (propose→assess→commit→rollback) | 5 | 9 |
 | **agents** | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries | 1 | 4 |
 | **reference** | Hidden Claude Code features: thinking modes, parallel patterns, CLI piping | 0 | 3 |
 | **traces** | JSONL execution traces, compiled views, failure mining, harness evolution | 5 | 4 |
@@ -74,6 +74,12 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | `/healthcheck` | evaluator | Run quality pipeline (Pint + Larastan + optional tests) |
 | `/audit-context` | context-engine | Analyze token overhead from CLAUDE.md, plugins, MCP servers |
 | `/entropy-scan` | diagnostics | Full 6-check codebase health scan |
+| `/evolve` | workflow | Self-evolution cycle: propose → assess → user approval → commit (Autogenesis protocol) |
+| `/assess-proposal` | evaluator | Adversarial 4-criteria review of a self-evolution proposal |
+| `/commit-proposal` | workflow | Apply an approved proposal; snapshot prior version to `.claude/lineage/` |
+| `/rollback` | workflow | Reverse a commit; restore prior snapshot; logged append-only |
+| `/reflect` | workflow | Three-line Reflect-Memorize insight after TDD loop → memory |
+| `/router-tune` | workflow | Analyze router miss-fires, emit threshold/regex proposals |
 
 ### Agents
 

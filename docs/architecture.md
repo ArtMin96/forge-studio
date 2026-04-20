@@ -4,9 +4,9 @@ Design rationale, component model, hook mechanics. For research citations, see [
 
 ---
 
-## The 7 Harness Components
+## The 8 Harness Components
 
-**Agent = Model + Harness.** Changing only the harness produces a 6x performance gap. These are the 7 levers:
+**Agent = Model + Harness.** Changing only the harness produces a 6x performance gap. These are the 8 levers:
 
 | # | Component | What It Controls | Plugin |
 |---|-----------|-----------------|--------|
@@ -17,8 +17,11 @@ Design rationale, component model, hook mechanics. For research citations, see [
 | 5 | Memory Architecture | What persists across sessions | `memory` |
 | 6 | Multi-Agent Decomposition | How work is split across agents | `agents` |
 | 7 | Behavioral Steering | Ongoing course correction | `behavioral-core` (hooks) |
+| 8 | Self-Evolution | Auditable propose → assess → commit → rollback over versioned resources | `workflow` + `evaluator` + `memory` (ledger at `.claude/lineage/`) |
 
 Cross-cutting plugins: `evaluator`, `workflow`, `reference`, `traces`, `diagnostics`, `caveman`, `token-efficiency`, `research-gate`.
+
+Component 8 is drawn from *Autogenesis: A Self-Evolving Agent Protocol* (arXiv:2604.15034, Apr 2026). See `docs/lineage.md` for the protocol and `HARNESS_SPEC.md` §Self-Evolution Protocol for invariants.
 
 ---
 

@@ -10,13 +10,13 @@ Synthesized from 10 industry sources (2026): Anthropic Engineering, Fowler/Thoug
 
 ## Architectural Primitives
 
-12 building blocks that appear across multiple sources, abstracted from domain-specific implementations:
+13 building blocks that appear across multiple sources, abstracted from domain-specific implementations:
 
 | # | Primitive | What It Does | Forge Studio Implementation |
 |---|-----------|-------------|---------------------------|
 | 1 | Planner | Decomposes intent into structured, bounded work units | `agents/planner` (read-only) |
 | 2 | Generator/Worker | Executes bounded work with restricted tool access | `agents/generator` (read-write) |
-| 3 | Evaluator/Verifier | Independently assesses output against criteria (never self-evaluation) | `evaluator/adversarial-reviewer` + `/verify` + `/challenge` |
+| 3 | Evaluator/Verifier | Independently assesses output against criteria (never self-evaluation) | `evaluator/adversarial-reviewer` + `/verify` + `/challenge` + `/assess-proposal` |
 | 4 | Context Firewall | Isolates sub-task context from parent orchestration context | Sub-agents with `context: fork` |
 | 5 | Handoff Artifact | Structured file-based state transfer between agents/phases | `.claude/handoffs/`, `.claude/plans/` |
 | 6 | Guide (Feedforward) | Pre-execution instructions, conventions, architectural rules | `behavioral-core/rules.d/*.txt` (8 rules), CLAUDE.md |
@@ -26,6 +26,7 @@ Synthesized from 10 industry sources (2026): Anthropic Engineering, Fowler/Thoug
 | 10 | Progressive Disclosure | Context loaded on-demand, not upfront | `disable-model-invocation: true` on all skills |
 | 11 | Sprint Contract | Negotiated agreement on done-criteria before execution begins | `## Contract` in planner output, `/contract` skill |
 | 12 | Trace Telemetry | Persistent log of all agent actions for audit and sync | `traces/` JSONL collection |
+| 13 | Self-Evolution Loop | Auditable propose → assess → commit operator over versioned resources, with rollback | `workflow/evolve` + `workflow/commit-proposal` + `workflow/rollback` + `evaluator/assess-proposal`; ledger at `.claude/lineage/ledger.jsonl` |
 
 ---
 
@@ -375,6 +376,59 @@ Periodic scanning to detect drift between documentation and reality.
 **Invocation**: `/entropy-scan` (manual, zero-cost until invoked)
 
 **Output**: Structured report showing pass/fail per check with proposed fixes. No writes — report only.
+
+---
+
+## Self-Evolution Protocol
+
+Source: *Autogenesis: A Self-Evolving Agent Protocol* (Wentao Zhang, arXiv:2604.15034, Apr 2026). Protocol detail: `docs/lineage.md`.
+
+Two layers:
+- **RSPL** (Resource Substrate Protocol Layer) — resources the loop may touch: rules, skills, hooks, memory topics, env vars. Each resolves to a stable slug.
+- **SEPL** (Self Evolution Protocol Layer) — four operators over those resources: `propose`, `assess`, `commit`, `rollback`. Every operator appends to an append-only ledger.
+
+### Resource Slug Registry
+
+| Kind | Slug | On-disk path |
+|---|---|---|
+| Rule | `rules.d/<f>` | `plugins/behavioral-core/hooks/rules.d/<f>` |
+| Skill | `skills/<plugin>/<name>` | `plugins/<plugin>/skills/<name>/SKILL.md` |
+| Hook | `hooks/<plugin>/<script>` | `plugins/<plugin>/hooks/<script>` |
+| Memory topic | `memory/topics/<slug>` | `.claude/memory/topics/<slug>.md` |
+| Env var | `env/<VAR>` | `.claude/settings.json` key `env.<VAR>` |
+
+Adding a new kind requires amending this table and `docs/lineage.md`.
+
+### Ledger Invariants
+
+- Location: `.claude/lineage/ledger.jsonl`. One JSON object per line. Append-only.
+- Every `commit` entry has a matching earlier `propose` and `assess` (verdict pass) on the same resource + target version.
+- Every `commit` and `rollback` has a snapshot file at `.claude/lineage/versions/<slug>/<prev-or-target>`.
+- `reject` entries prevent a given proposal artifact from being re-committed without a new propose+assess cycle.
+
+### Operator Ownership
+
+| Operator | Skill | Plugin |
+|---|---|---|
+| propose | `/evolve`, `/router-tune`, `/remember` (for memory topics) | workflow, memory |
+| assess | `/assess-proposal` | evaluator |
+| commit | `/commit-proposal` | workflow |
+| rollback | `/rollback` | workflow |
+
+Evaluator owns `assess` for the same reason it owns `/verify` — honest evaluation requires separation from proposal authorship.
+
+### Validation Additions for `/entropy-scan`
+
+When the diagnostics plugin is updated to cover self-evolution, add:
+1. Every `commit`/`rollback` in the ledger has a matching snapshot file on disk.
+2. Every `commit` has a preceding `assess` with verdict `pass` in the same resource lineage.
+3. Ledger file is append-only (check via mtime heuristic or git history if available).
+
+### No-Go List
+
+- No auto-commit of file resources. `WORKFLOW_EVOLVE_AUTOCOMMIT=1` is limited to `env/<VAR>` numeric deltas within ±20%.
+- No destructive branch. Rollbacks are themselves logged — the ledger is the source of truth.
+- No cross-repo sync. Ledger stays local to `.claude/`.
 
 ---
 
