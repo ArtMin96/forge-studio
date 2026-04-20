@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-12 plugins. 41 skills. 41 hooks. 4 agents. 8 behavioral rules.
+12 plugins. 37 skills. 46 hooks. 4 agents. 8 behavioral rules.
 
 ---
 
@@ -48,7 +48,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | **context-engine** | Context management: progressive pressure, session handoffs, edit safety, environment bootstrap, compaction recovery, task tracking, failure escalation | 15 | 6 |
 | **memory** | Three-tier memory: pointer index → topic files → searchable transcripts | 0 | 3 |
 | **evaluator** | Static analysis gates (PHP/JS/TS), adversarial review, verification, test nudge, test output filtering | 8 | 7 |
-| **workflow** | Daily lifecycle (morning → eod → weekly), task routing, explore/plan/implement cycle | 0 | 8 |
+| **workflow** | Hook-driven agentic orchestrator: auto-routing (shell/hybrid/LLM), sprint-contract enforcement, TDD loop, handoff nudges | 5 | 4 |
 | **agents** | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries | 1 | 4 |
 | **reference** | Hidden Claude Code features: thinking modes, parallel patterns, CLI piping | 0 | 3 |
 | **traces** | JSONL execution traces, compiled views, failure mining, harness evolution | 5 | 4 |
@@ -61,14 +61,13 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 
 | Skill | Plugin | What it does |
 |-------|--------|-------------|
-| `/morning` | workflow | Daily planning: review yesterday, check handoffs, prioritize today |
-| `/plan <task>` | workflow | Create implementation plan with files, changes, risks |
-| `/implement` | workflow | Execute plan step-by-step with scope checks |
+| `/orchestrate [pattern]` | workflow | Manually dispatch agentic pattern (single/pipeline/fan-out/tdd/auto) |
+| `/tdd-loop <desc>` | workflow | RED→GREEN→REFACTOR with real-command completion gates |
+| `/status` | workflow | Snapshot of plan, handoff, traces, context pressure, router stats |
 | `/verify` | evaluator | Evidence-based completion check before claiming done |
 | `/scope <task>` | behavioral-core | Define task boundaries and acceptance criteria |
 | `/handoff [topic]` | context-engine | Generate session transfer document |
 | `/resume` | context-engine | Pick up from latest handoff |
-| `/explore <what>` | workflow | Subagent exploration without polluting main context |
 | `/dispatch` | agents | Analyze task, recommend single-agent vs fan-out vs pipeline |
 | `/trace-compile` | traces | Compile raw JSONL traces into summary and error views |
 | `/trace-evolve` | traces | Mine failure patterns, propose harness improvements |
@@ -98,8 +97,10 @@ Hooks fire automatically. No commands needed.
 | SessionStart | context-engine | MCP server instruction token monitoring |
 | SessionStart | caveman | Load compressed communication rules |
 | SessionStart | behavioral-core | One-time check for unsafe output styles |
+| SessionStart | workflow | Surface latest handoff + unchecked plan items (agentic workflow bootstrap) |
 | PreCompact | context-engine | Guard: block compaction when uncommitted work has no handoff or tasks are in-progress |
 | PreCompact | context-engine | Save scope, plan, handoff, git state to recovery file |
+| PreCompact | workflow | Advisory nudge to run `/handoff` before auto-compaction |
 | PostCompact | context-engine | Re-inject scope, plan, tasks, modified files from recovery |
 | PostCompact | caveman | Re-inject compressed communication rules |
 | SessionEnd | traces | Write session summary to trace file |
@@ -111,6 +112,7 @@ Hooks fire automatically. No commands needed.
 | UserPromptSubmit | context-engine | 5-stage progressive context pressure warnings |
 | UserPromptSubmit | context-engine | Track system-reminder injection patterns |
 | UserPromptSubmit | context-engine | Remind about incomplete tasks |
+| UserPromptSubmit | workflow | Agentic router: classify prompt (shell/hybrid/LLM), nudge pattern |
 
 ### Before Tool Use
 | Event | Plugin | What it does |
@@ -150,11 +152,13 @@ Hooks fire automatically. No commands needed.
 | Event | Plugin | What it does |
 |-------|--------|-------------|
 | SubagentStop | agents | Warn if sprint contract criteria not verified by reviewer |
+| SubagentStop | workflow | Nudge next phase in planner→generator→reviewer→/verify chain |
 
 ### Turn Completion
 
 | Event | Plugin | Hook | What It Does |
 |-------|--------|------|-------------|
+| Stop | workflow | turn-gate.sh | Every N turns: remind about unchecked plan items and context pressure |
 | TaskCompleted | evaluator | task-completion-gate.sh | Warn if task marked done without verification evidence |
 
 ---
@@ -186,4 +190,5 @@ Hooks fire automatically. No commands needed.
 | [Token Optimization](docs/token-optimization.md) | Where tokens go and how to reduce spend |
 | [Execution Traces](docs/traces.md) | Trace collection, analysis, harness evolution |
 | [Research Gate](docs/research-gate.md) | Read-before-edit enforcement design and data |
-| [Workflow Lifecycle](plugins/workflow/LIFECYCLE.md) | Morning-to-weekly development cycle |
+| [Agentic Workflow](AGENTIC_WORKFLOW.md) | Hook-driven orchestrator: architecture, diagrams, cost/reliability model |
+| [Workflow Lifecycle](plugins/workflow/LIFECYCLE.md) | Event-driven development cycle + migration from the old manual ritual |

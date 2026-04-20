@@ -32,7 +32,6 @@ Hook type `"type": "http"` (v2.1.63) POSTs JSON to URLs. Enables webhook integra
 - `StopFailure` (v2.1.78) — ✅ Added to traces plugin (log-stop-failure.sh)
 - `SubagentStop` — ✅ Added to agents plugin (contract-check.sh)
 - `TaskCompleted` — ✅ Added to evaluator plugin (task-completion-gate.sh)
-- `Stop` — ✅ Added to evaluator plugin (verify-before-complete.sh)
 
 ### Hook Events — Ready to Implement
 - `InstructionsLoaded` (v2.1.69) — validate rule integrity on instruction load/reload
@@ -72,6 +71,6 @@ Fixed: subagents now inherit MCP tools from parent. Previously they didn't, whic
 Significant hardening of Bash permission checks: backslash-escaped flags, compound commands, env-var prefixes all now properly validated. The `PermissionDenied` hook event (v2.1.89, listed above) is more valuable now — when permission denials happen, they're more likely intentional security boundaries rather than false positives.
 
 ### Skill Frontmatter Opportunities
-- `context: fork` + `agent: Explore` — for exploration skills (`/explore`, `/audit-context`)
-- `!command` dynamic injection — for `/morning` (auto-inject git log, handoffs)
+- `context: fork` + `agent: Explore` — for exploration skills (`/audit-context`, `/tdd-loop` phases)
+- `!command` dynamic injection — for session-bootstrap-adjacent skills that need live git/handoff state
 - `argument-hint` — for skills accepting `$ARGUMENTS` without hints
