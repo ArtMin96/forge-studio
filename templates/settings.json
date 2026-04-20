@@ -20,7 +20,12 @@
     "FORGE_CONTEXT_STAGE3": "22",
     "FORGE_CONTEXT_STAGE4": "30",
     "FORGE_CONTEXT_STAGE5": "40",
-    "CLAUDE_CODE_SCRIPT_CAPS": "50"
+    "CLAUDE_CODE_SCRIPT_CAPS": "50",
+    "WORKFLOW_ROUTER_MODE": "shell",
+    "WORKFLOW_ROUTER_LLM_MODEL": "claude-haiku-4-5-20251001",
+    "WORKFLOW_ROUTER_CONFIDENCE_THRESHOLD": "0.75",
+    "WORKFLOW_TURN_GATE_INTERVAL": "3",
+    "WORKFLOW_HANDOFF_PCT": "75"
   },
   "includeCoAuthoredBy": false,
   "includeGitInstructions": false,
