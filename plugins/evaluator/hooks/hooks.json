@@ -68,17 +68,6 @@
         ]
       }
     ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/verify-before-complete.sh",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
     "TaskCompleted": [
       {
         "hooks": [
