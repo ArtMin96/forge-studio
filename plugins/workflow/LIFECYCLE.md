@@ -1,58 +1,99 @@
 # Workflow Lifecycle
 
-The daily development workflow as a connected cycle:
+The development cycle as an **event-driven pipeline**. Hooks fire automatically; skills are manual escape hatches. This replaces the previous manual ritual (`/morning`, `/eod`, `/weekly`, `/route`, `/plan`, `/implement`, `/explore`) with composition of existing plugins.
+
+## How It Runs
 
 ```
-/morning ─── Review yesterday, plan today
-    │
-    ▼
-/route ──── Analyze task, pick complexity pattern
-    │
-    ├── Simple Fix ──────────── Just do it
-    ├── Prompt Chaining ─────── Sequential steps
-    ├── Routing ─────────────── Branch by type
-    ├── Orchestrator-Workers ── Parallel subagents
-    └── Evaluator-Optimizer ─── Challenge + refine
-    │
-    ▼
-/explore ── Subagent exploration, map the territory
-    │
-    ▼
-/plan ───── Design approach, get approval
-    │
-    ▼
-/implement ─ Execute the plan, verify each step
-    │
-    ▼
-/verify ─── Challenge the work (evaluator plugin)
-    │
-    ▼
-/eod ────── Summarize day, note blockers
-    │
-    ▼
-/weekly ─── Retrospective, patterns, improvements
+SessionStart ─► session-bootstrap.sh
+                 ├─ surface latest handoff (context-engine)
+                 └─ list unchecked items in active plan
+
+UserPromptSubmit ─► route-prompt.sh (shell classifier)
+                     ├─ tdd intent      → nudge /tdd-loop
+                     ├─ feature build   → nudge /dispatch → planner→generator→reviewer
+                     ├─ batch same-op   → nudge /fan-out
+                     ├─ narrow change   → nudge execute-directly
+                     └─ low confidence  → optional LLM fallback (route-prompt-llm.sh)
+
+SubagentStop ─► after-subagent.sh
+                 ├─ planner done    → generator next (contract must be written)
+                 ├─ generator done  → reviewer next (self-review is unreliable)
+                 └─ reviewer done   → run /verify before claiming done
+
+Stop ─► turn-gate.sh (every 3 turns)
+         ├─ unchecked plan items   → reconcile before done
+         └─ context pressure ≥75%  → /handoff nudge
+
+PreCompact ─► pre-compact-handoff.sh
+               └─ auto-compact imminent → /handoff nudge (advisory; does NOT block)
 ```
 
-## Skill Reference
+## Hook ↔ Composed Plugin Map
+
+| Event | Hook (this plugin) | Composed plugins | Result |
+|---|---|---|---|
+| Session starts | `session-bootstrap.sh` | `context-engine:/resume`, plan file globs | Prior handoff surfaced; active plan shown |
+| Prompt submitted | `route-prompt.sh` | `agents:/dispatch`, `agents:/fan-out`, this plugin's `/tdd-loop` | Pattern auto-selected |
+| Subagent finishes | `after-subagent.sh` | `agents:/contract`, `evaluator:/verify` | Sprint-contract protocol enforced |
+| Turn ends | `turn-gate.sh` | `context-engine:/handoff` (nudge) | Plan + budget reconciled |
+| Auto-compact pending | `pre-compact-handoff.sh` | `context-engine:/handoff` | State persisted before potential loss |
+
+## Skills Retained (Manual Entry Points)
 
 | Skill | Plugin | Purpose |
-|-------|--------|---------|
-| `/morning` | workflow | Review previous session, set today's goals, check blockers |
-| `/route` | workflow | Analyze task complexity, recommend agent pattern |
-| `/explore` | workflow | Launch subagents for codebase exploration |
-| `/plan` | workflow | Design implementation approach, output plan for approval |
-| `/implement` | workflow | Execute approved plan with verification at each step |
-| `/verify` | evaluator | Challenge completed work via adversarial review |
-| `/eod` | workflow | End-of-day summary: what was done, what's blocked, what's next |
-| `/weekly` | workflow | Weekly retrospective: patterns, improvements, lessons |
+|---|---|---|
+| `/orchestrate` | workflow | Manually choose a pattern (single / pipeline / fan-out / tdd / auto) |
+| `/tdd-loop` | workflow | RED → GREEN → REFACTOR with real-command gates |
+| `/status` | workflow | On-demand snapshot: plan, handoff, traces, pressure, router stats |
+| `/zoom-out` | workflow | "Give me the map" — higher-level perspective on unfamiliar code |
 
-## When to Use What
+## Composed Skills (Live Elsewhere, Invoked by This Plugin)
 
-- **Starting the day:** `/morning` → sets context, reviews state
-- **New task arrives:** `/route` → determines complexity level
-- **Unfamiliar code:** `/explore` → safe read-only exploration before planning
-- **Non-trivial feature:** `/plan` → get alignment before implementation
-- **Executing plan:** `/implement` → structured execution with verification
-- **After implementation:** `/verify` or `/challenge` → find problems before the user does
-- **Wrapping up:** `/eod` → capture state for tomorrow's `/morning`
-- **End of week:** `/weekly` → step back, see patterns, improve process
+| Skill | Plugin | When the workflow leans on it |
+|---|---|---|
+| `/dispatch` | agents | Pattern routing when the router says `pipeline` |
+| `/contract` | agents | Re-read plan's `## Contract` before implementing |
+| `/fan-out` | agents | Parallel batch (3–5 workers per Anthropic guidance) |
+| `/verify` | evaluator | Evidence-based completion check |
+| `/challenge` | evaluator | Draft verification critique |
+| `/healthcheck` | evaluator | Auto-detect test/lint pipeline |
+| `/handoff` | context-engine | Durable state capture |
+| `/resume` | context-engine | Load latest handoff |
+| `/remember` | memory | Persist decisions across sessions |
+
+## Configuration
+
+Set in `~/.claude/settings.json` or project `.claude/settings.json` under the `env` key:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `WORKFLOW_ROUTER_MODE` | `shell` | `shell` / `hybrid` / `llm`. Controls the UserPromptSubmit classifier. |
+| `WORKFLOW_ROUTER_LLM_MODEL` | `claude-haiku-4-5-20251001` | Model used by the LLM fallback when escalated. |
+| `WORKFLOW_ROUTER_CONFIDENCE_THRESHOLD` | `0.75` | In `hybrid` mode, escalate to LLM when shell confidence falls below this. |
+| `WORKFLOW_TURN_GATE_INTERVAL` | `3` | Turn-gate fires every N turns (reduces nag cadence). |
+| `WORKFLOW_HANDOFF_PCT` | `75` | Context-pressure threshold triggering `/handoff` nudge. |
+
+Router traces are written to `/tmp/claude-router-<session_id>/classifications.jsonl` — useful for auditing classification quality and tuning the shell ruleset.
+
+## Migration From Manual Ritual
+
+| Old skill | Replacement |
+|---|---|
+| `/morning` | `SessionStart` hook + `context-engine:/resume` |
+| `/route` | `UserPromptSubmit` classifier + `agents:/dispatch` |
+| `/explore` | Built-in `Explore` subagent (invoke via Task tool or `/orchestrate`) |
+| `/plan` | `agents:planner` subagent + `.claude/plans/` file |
+| `/implement` | `agents:generator` subagent + `agents:/contract` re-read |
+| `/eod` | `Stop` hook + `context-engine:/handoff` when pressure is high |
+| `/weekly` | Trigger via the harness `schedule` skill (reference plugin) with a cron expression, or run `/trace-evolve` from the traces plugin on demand |
+
+Nothing is silently dropped — everything the old skills did is now either automated or covered by a more specialized plugin.
+
+## Design Rationale
+
+- **Hooks enforce, skills guide** (see `docs/architecture.md`). Mandatory steps go in hooks so model attention drift can't skip them.
+- **Compose, don't duplicate**. Rebuilding `/verify`, `/handoff`, or the planner/generator/reviewer triad here would violate the single-source principle the other plugins already own.
+- **File-based contracts survive compaction**. The plan's `## Contract` section is the durable steering signal — corroborated by *How to Train Your Advisor* (arXiv 2510.02453): small, file-backed advice docs transfer gains across model sizes.
+- **Shell classifier first**. Zero token cost on the 95% of prompts where simple regex suffices. The LLM fallback exists for ambiguous cases and is opt-in via `WORKFLOW_ROUTER_MODE`.
+- **Advisory over blocking**. None of these hooks exit 2 (no blocking). Blocking is owned by `behavioral-core` (destructive commands) and `research-gate` (read-before-edit); this plugin is orchestration, not enforcement.
