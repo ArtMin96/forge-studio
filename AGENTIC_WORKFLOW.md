@@ -126,22 +126,22 @@ sequenceDiagram
   H->>A: /dispatch (when route=pipeline)
   A->>A: planner (read-only)
   A->>H: SubagentStop(planner)
-  H->>W: after-subagent.sh → "generator next; check contract"
+  H->>W: after-subagent.sh — generator next, check contract
   A->>A: generator (read-write, re-reads /contract)
   A->>H: SubagentStop(generator)
-  H->>W: after-subagent.sh → "reviewer next"
+  H->>W: after-subagent.sh — reviewer next
   A->>A: reviewer (read-only)
   A->>H: SubagentStop(reviewer)
-  H->>W: after-subagent.sh → "run /verify"
+  H->>W: after-subagent.sh — run /verify
   H->>E: /verify (evidence-based)
   E-->>H: verdict
-  H->>W: Stop → turn-gate.sh
-  alt unchecked plan items OR pressure ≥ threshold
+  H->>W: Stop triggers turn-gate.sh
+  alt unchecked plan items OR pressure at/over threshold
     W-->>H: nudge /handoff
     H->>C: /handoff
   end
   opt auto-compact imminent
-    H->>W: PreCompact → pre-compact-handoff.sh
+    H->>W: PreCompact triggers pre-compact-handoff.sh
     W-->>H: advisory nudge /handoff
   end
 ```
