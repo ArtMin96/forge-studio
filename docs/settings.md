@@ -401,6 +401,11 @@ Useful variables to set in `settings.json` under `"env"`:
 | `FORGE_EXPLORE_DEPTH` | `"6"` | Exploratory calls before edit gate lifts (IDE-Bench recommends 8+) |
 | `FORGE_EVALUATION_GATE` | `"1"` or `"0"` | Enable/disable pre-commit evaluation gate |
 | `FORGE_RESEARCH_GATE` | `"1"` or `"0"` | Enable/disable read-before-edit enforcement |
+| `WORKFLOW_ROUTER_MODE` | `"shell"` \| `"hybrid"` \| `"llm"` | Agentic-workflow router: `shell` = regex only (zero tokens), `hybrid` = shell-first then Haiku on low confidence, `llm` = always Haiku |
+| `WORKFLOW_ROUTER_LLM_MODEL` | model ID | Model used by the LLM fallback (default `claude-haiku-4-5-20251001`) |
+| `WORKFLOW_ROUTER_CONFIDENCE_THRESHOLD` | `"0.75"` | In `hybrid` mode, shell results below this escalate to the LLM |
+| `WORKFLOW_TURN_GATE_INTERVAL` | `"3"` | Stop-hook nudges fire every N turns (plan items + context pressure) |
+| `WORKFLOW_HANDOFF_PCT` | `"75"` | Context pressure threshold that triggers a `/handoff` nudge |
 
 ---
 
