@@ -39,7 +39,7 @@ if ! command -v rtk >/dev/null 2>&1; then
 fi
 
 if command -v rtk >/dev/null 2>&1; then
-  rtk init -g >/dev/null 2>&1 || echo "rtk-optimizer: 'rtk init -g' failed; run it manually to activate." >&2
+  rtk init -g --auto-patch >/dev/null 2>&1 || echo "rtk-optimizer: 'rtk init -g --auto-patch' failed; run it manually to activate." >&2
   mkdir -p "$STATE_DIR" 2>/dev/null || true
   touch "$INIT_MARKER" 2>/dev/null || true
 fi
