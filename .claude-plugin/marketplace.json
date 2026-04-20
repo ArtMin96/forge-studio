@@ -26,27 +26,27 @@
     },
     {
       "name": "memory",
-      "description": "Three-tier memory architecture: pointer index, on-demand topics, searchable transcripts",
-      "version": "1.0.0",
+      "description": "Three-tier memory architecture: pointer index, on-demand topics, searchable transcripts. Version-aware updates snapshot prior topic contents to the lineage ledger.",
+      "version": "1.1.0",
       "source": "./plugins/memory",
       "category": "memory-architecture",
-      "keywords": ["memory", "persistence", "recall", "harness:memory-architecture", "overhead:zero", "role:guide-inferential"]
+      "keywords": ["memory", "persistence", "recall", "versioned", "harness:memory-architecture", "harness:self-evolution", "overhead:zero", "role:guide-inferential"]
     },
     {
       "name": "evaluator",
-      "description": "Evaluator-optimizer pattern: adversarial review, verification gates (TaskCompleted), static analysis, postmortems",
-      "version": "1.3.0",
+      "description": "Evaluator-optimizer pattern: adversarial review, verification gates (TaskCompleted), static analysis, postmortems, self-evolution proposal assessment.",
+      "version": "1.4.0",
       "source": "./plugins/evaluator",
       "category": "evaluation",
-      "keywords": ["code-review", "quality", "static-analysis", "verification", "harness:evaluation", "overhead:moderate", "role:sensor-computational", "role:sensor-inferential"]
+      "keywords": ["code-review", "quality", "static-analysis", "verification", "harness:evaluation", "harness:self-evolution", "overhead:moderate", "role:sensor-computational", "role:sensor-inferential"]
     },
     {
       "name": "workflow",
-      "description": "Hook-driven agentic workflow orchestrator. Automatic routing (shell or LLM-hybrid), sprint-contract enforcement, TDD loop, session bootstrap, handoff nudges. Composes agents/evaluator/context-engine/memory rather than duplicating them.",
-      "version": "2.0.0",
+      "description": "Hook-driven agentic workflow orchestrator. Automatic routing (shell or LLM-hybrid), sprint-contract enforcement, TDD loop, session bootstrap, handoff nudges. Self-evolution SEPL loop (propose/assess/commit/rollback) over versioned resources. Composes agents/evaluator/context-engine/memory rather than duplicating them.",
+      "version": "2.1.0",
       "source": "./plugins/workflow",
       "category": "orchestration",
-      "keywords": ["workflow", "agentic", "orchestration", "router", "tdd", "sprint-contract", "harness:orchestration", "overhead:minimal", "role:guide-inferential"]
+      "keywords": ["workflow", "agentic", "orchestration", "router", "tdd", "sprint-contract", "self-evolution", "autogenesis", "harness:orchestration", "harness:self-evolution", "overhead:minimal", "role:guide-inferential"]
     },
     {
       "name": "agents",
@@ -66,11 +66,11 @@
     },
     {
       "name": "traces",
-      "description": "Execution trace collection, analysis, and harness evolution. Stores structured JSONL traces for pattern detection and failure-driven improvement.",
-      "version": "1.1.0",
+      "description": "Execution trace collection, analysis, and harness evolution. Stores structured JSONL traces for pattern detection and failure-driven improvement. Feeds /evolve as a proposal source.",
+      "version": "1.2.0",
       "source": "./plugins/traces",
       "category": "diagnostics",
-      "keywords": ["traces", "execution-history", "diagnostics", "analytics", "harness:trace-analysis", "overhead:minimal", "role:sensor-computational"]
+      "keywords": ["traces", "execution-history", "diagnostics", "analytics", "harness:trace-analysis", "harness:self-evolution", "overhead:minimal", "role:sensor-computational"]
     },
     {
       "name": "caveman",
