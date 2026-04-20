@@ -24,11 +24,26 @@ Create `.claude/memory/topics/<slug>.md`:
 # <Topic Title>
 
 Last verified: YYYY-MM-DD
+Version: v1
+Previous: (none)
 
 <Content: decisions, patterns, context, rationale>
 ```
 
 Keep it scannable. Use bullet points. Include **why**, not just **what**.
+
+**If the topic already exists** (update, not create):
+
+1. Read the current file. Record its `Version:` value as `prev` (e.g. `v2`).
+2. Snapshot it: copy the current contents to `.claude/lineage/versions/memory/topics/<slug>/v<prev>` (create parent directories as needed).
+3. Write the new contents with `Version: v<prev+1>` and `Previous: v<prev>`.
+4. Append to `.claude/lineage/ledger.jsonl`:
+
+   ```json
+   {"ts":"<UTC>","operator":"commit","resource":"memory/topics/<slug>","version":"v<prev+1>","prev":"v<prev>","trigger":"remember","evidence":".claude/memory/topics/<slug>.md","actor":"memory:/remember"}
+   ```
+
+New topics (Version: v1, no prior snapshot) do not write a ledger entry — there is nothing to reverse. Versioning begins at the first update.
 
 ### Step 2: Add pointer to index
 
