@@ -1,6 +1,6 @@
 {
   "name": "traces",
-  "description": "Execution trace collection, analysis, and harness evolution. Stores structured JSONL traces for pattern detection and failure-driven improvement.",
-  "version": "1.1.0",
-  "keywords": ["traces", "execution-history", "diagnostics", "analytics"]
+  "description": "Execution trace collection, analysis, and harness evolution. Stores structured JSONL traces for pattern detection and failure-driven improvement. Feeds /evolve as a proposal source.",
+  "version": "1.2.0",
+  "keywords": ["traces", "execution-history", "diagnostics", "analytics", "self-evolution"]
 }
