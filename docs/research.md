@@ -64,9 +64,68 @@ Guzman Lorenzo. Tests LLM deobfuscation of adversarially-named code.
 
 **Marketplace impact**: `75-task-framing.txt` rule (generation frame over translation frame).
 
+### Speculative Decoding (arXiv 2211.17192) + Hierarchical Speculative Decoding (arXiv 2510.19705)
+
+Leviathan et al.; Mohri et al. Draft-and-verify inference pattern with provably-equivalent outputs.
+
+- Smaller "draft" model proposes tokens; larger "verifier" accepts or rejects in parallel
+- 2–3× speedup on T5-XXL; HSD extends to stacked drafts for further 1.2× gain
+- Core insight: **hierarchical verification is cheaper than monolithic generation when each tier has the minimum-capable tooling it needs**
+
+**Marketplace impact**: validates the planner→generator→reviewer→`/verify` chain used by the workflow plugin. Each agent runs with restricted tools (read-only planner/reviewer, read-write generator) so later tiers cannot undo earlier decisions silently.
+
+### Advisor Models (arXiv 2510.02453)
+
+Asawa et al. Small open-weight "advisor" models that generate per-instance natural-language guidance for frontier black-box LLMs.
+
+- **71% gain on RuleArena (Taxes)** for GPT-5 when advised by a trained open model
+- 24.6% fewer steps for Gemini 3 Pro on SWE agent tasks
+- Advisors trained with a cheap student model transfer gains to frontier models without access
+
+**Marketplace impact**: corroborates the sprint-contract protocol used by the workflow plugin. A file-backed `## Contract` section in the plan is the durable advisory signal — re-read by every agent from disk so it survives context compaction.
+
 ---
 
 ## Community Sources
+
+### Anthropic — Building Effective Agents
+
+Orchestrator/worker pattern catalog. Five canonical patterns: prompt chaining, routing, parallelization, orchestrator-workers, evaluator-optimizer.
+
+- **Router pattern cuts LLM inference cost ~40%** with <2% quality loss when routing accuracy ≥ 95%
+- "Start simple. Add complexity only when it demonstrably improves outcomes."
+
+**Marketplace impact**: `route-prompt.sh` in the workflow plugin — shell-first router that classifies prompts to one of simple / pipeline / fan-out / tdd-loop before any model call.
+
+### Anthropic — How We Built Our Multi-Agent Research System
+
+Scaling rules for multi-agent orchestration.
+
+- **1 agent** for simple fact-finding (3–10 tool calls); **2–4** for comparisons; **10+** only for complex research
+- Multi-agent uses ~15× more tokens than chat; **token usage alone explains 80% of performance variance**
+- Parallel subagents cut wall-clock time by up to 90% on heavy tasks
+
+**Marketplace impact**: fan-out batch size of 3–5 (workflow plugin), per-phase context isolation to keep token counts sublinear.
+
+### Anthropic — Infrastructure Noise in Agentic Coding Evals
+
+Runtime configuration variance dominates model-capability differences on evals.
+
+- 6pp gap from infra alone on Terminal-Bench 2.0 — larger than most leaderboard gaps
+- Separating guaranteed resource floor from kill threshold (3× headroom) cut infra error rate from 5.8% → 2.1%
+- Principle: **graceful degradation over hard fail; resume over restart**
+
+**Marketplace impact**: workflow-plugin hooks are advisory (no exit-2 blocks), LLM router fallback silently degrades when the CLI is absent, state lives on disk so retries resume from last known-good.
+
+### mattpocock/skills `tdd` + alexop.dev *Custom TDD Workflow for Vue*
+
+Test-first development loop with fresh-context per phase.
+
+- Vertical slicing: one behavior → one test → one implementation; never batch
+- Public-interface assertions only — avoid mocking internals
+- **Per-phase subagent context isolation raised skill activation from ~20% to ~84%** (alexop)
+
+**Marketplace impact**: `/tdd-loop` skill (workflow plugin). RED/GREEN/REFACTOR phases each run in a forked subagent context with a real-command completion gate (`./vendor/bin/pest` or project test runner).
 
 ### LangChain — Harness Hill-Climbing with Evals
 
