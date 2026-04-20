@@ -184,6 +184,7 @@ Hooks fire automatically. No commands needed.
 - **Disable research gate**: Set `FORGE_RESEARCH_GATE` to `"0"`.
 - **Self-review interval**: Set `FORGE_SELF_REVIEW_INTERVAL` (default 3 edits).
 - **Failure threshold**: Set `FORGE_FAILURE_THRESHOLD` (default 3 consecutive failures).
+- **Disable rtk auto-install**: Set `FORGE_RTK_DISABLED` to `"1"` (see [rtk-optimizer docs](docs/rtk-optimizer.md)).
 - **Disable a plugin**: `/plugin disable {name}@forge-studio`
 
 ---
@@ -199,5 +200,6 @@ Hooks fire automatically. No commands needed.
 | [Token Optimization](docs/token-optimization.md) | Where tokens go and how to reduce spend |
 | [Execution Traces](docs/traces.md) | Trace collection, analysis, harness evolution |
 | [Research Gate](docs/research-gate.md) | Read-before-edit enforcement design and data |
+| [RTK Optimizer](docs/rtk-optimizer.md) | Auto-bundled rtk-ai/rtk: bootstrap flow, verification, uninstall |
 | [Agentic Workflow](docs/agentic-workflow.md) | Workflow plugin usage, configuration, skills, worked examples |
 | [Workflow Lifecycle](plugins/workflow/LIFECYCLE.md) | Event → hook → composed-plugin map |
