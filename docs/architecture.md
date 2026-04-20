@@ -51,7 +51,7 @@ Cross-cutting plugins: `evaluator`, `workflow`, `reference`, `traces`, `diagnost
 
 ## Hook Event Reference
 
-40 hooks across 8 plugins. Hooks fire automatically on events — no commands needed.
+46 hooks across 9 plugins. Hooks fire automatically on events — no commands needed.
 
 ### Session Lifecycle
 
@@ -61,8 +61,10 @@ Cross-cutting plugins: `evaluator`, `workflow`, `reference`, `traces`, `diagnost
 | SessionStart | context-engine | mcp-instruction-monitor.sh | MCP server instruction token monitoring |
 | SessionStart | caveman | caveman-init.sh | Load compressed communication rules |
 | SessionStart | behavioral-core | output-style-check.sh | One-time check for unsafe output styles |
+| SessionStart | workflow | session-bootstrap.sh | Surface latest handoff + unchecked plan items (agentic workflow bootstrap) |
 | PreCompact | context-engine | pre-compact-guard.sh | Block compaction when uncommitted work has no handoff or tasks in-progress |
 | PreCompact | context-engine | pre-compact.sh | Save scope, plan, handoff, git state, tasks to recovery file |
+| PreCompact | workflow | pre-compact-handoff.sh | Advisory nudge to run `/handoff` before auto-compaction |
 | PostCompact | context-engine | post-compact.sh | Re-inject scope, plan, tasks, modified files from recovery |
 | PostCompact | caveman | caveman-restore.sh | Re-inject compressed communication rules |
 | SessionEnd | traces | session-summary.sh | Write session summary to trace file |
@@ -75,6 +77,7 @@ Cross-cutting plugins: `evaluator`, `workflow`, `reference`, `traces`, `diagnost
 | context-engine | track-context-pressure.sh | 5-stage progressive context pressure warnings |
 | context-engine | track-system-reminders.sh | Track system-reminder injection patterns |
 | context-engine | task-guardian.sh | Remind about incomplete tasks |
+| workflow | route-prompt.sh | Agentic router: classify prompt (shell/hybrid/LLM), nudge pattern |
 
 ### Before Tool Use (PreToolUse)
 
@@ -112,10 +115,18 @@ Cross-cutting plugins: `evaluator`, `workflow`, `reference`, `traces`, `diagnost
 |-------|--------|------|-------------|
 | TaskCreated | context-engine | task-guardian-log.sh | Log task for progress guardian |
 
+### Agent Lifecycle
+
+| Event | Plugin | Hook | What It Does |
+|-------|--------|------|-------------|
+| SubagentStop | agents | contract-check.sh | Warn if sprint contract criteria not verified by reviewer |
+| SubagentStop | workflow | after-subagent.sh | Nudge next phase in planner→generator→reviewer→/verify chain |
+
 ### Turn Completion & Task Events
 
 | Event | Plugin | Hook | What It Does |
 |-------|--------|------|-------------|
+| Stop | workflow | turn-gate.sh | Every N turns: remind about unchecked plan items and context pressure |
 | TaskCompleted | evaluator | task-completion-gate.sh | Warn if task marked done without verification evidence |
 
 ---
