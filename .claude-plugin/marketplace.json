@@ -42,11 +42,11 @@
     },
     {
       "name": "workflow",
-      "description": "Orchestration patterns: task routing, explore-plan-implement cycle, daily rituals",
-      "version": "1.0.0",
+      "description": "Hook-driven agentic workflow orchestrator. Automatic routing (shell or LLM-hybrid), sprint-contract enforcement, TDD loop, session bootstrap, handoff nudges. Composes agents/evaluator/context-engine/memory rather than duplicating them.",
+      "version": "2.0.0",
       "source": "./plugins/workflow",
       "category": "orchestration",
-      "keywords": ["workflow", "planning", "daily-rituals", "routing", "harness:orchestration", "overhead:zero", "role:guide-inferential"]
+      "keywords": ["workflow", "agentic", "orchestration", "router", "tdd", "sprint-contract", "harness:orchestration", "overhead:minimal", "role:guide-inferential"]
     },
     {
       "name": "agents",
