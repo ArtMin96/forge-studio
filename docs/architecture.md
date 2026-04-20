@@ -116,7 +116,6 @@ Cross-cutting plugins: `evaluator`, `workflow`, `reference`, `traces`, `diagnost
 
 | Event | Plugin | Hook | What It Does |
 |-------|--------|------|-------------|
-| Stop | evaluator | verify-before-complete.sh | Warn if edits made without test/verification evidence |
 | TaskCompleted | evaluator | task-completion-gate.sh | Warn if task marked done without verification evidence |
 
 ---
