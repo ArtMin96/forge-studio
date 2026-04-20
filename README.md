@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-12 plugins. 40 skills. 40 hooks. 4 agents. 8 behavioral rules.
+12 plugins. 41 skills. 40 hooks. 4 agents. 8 behavioral rules.
 
 ---
 
@@ -48,7 +48,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | **context-engine** | Context management: progressive pressure, session handoffs, edit safety, environment bootstrap, compaction recovery, task tracking, failure escalation | 15 | 6 |
 | **memory** | Three-tier memory: pointer index → topic files → searchable transcripts | 0 | 3 |
 | **evaluator** | Static analysis gates (PHP/JS/TS), adversarial review, verification, test nudge, test output filtering | 8 | 7 |
-| **workflow** | Daily lifecycle (morning → eod → weekly), task routing, explore/plan/implement cycle | 0 | 7 |
+| **workflow** | Daily lifecycle (morning → eod → weekly), task routing, explore/plan/implement cycle | 0 | 8 |
 | **agents** | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries | 1 | 4 |
 | **reference** | Hidden Claude Code features: thinking modes, parallel patterns, CLI piping | 0 | 3 |
 | **traces** | JSONL execution traces, compiled views, failure mining, harness evolution | 5 | 4 |
@@ -155,7 +155,6 @@ Hooks fire automatically. No commands needed.
 
 | Event | Plugin | Hook | What It Does |
 |-------|--------|------|-------------|
-| Stop | evaluator | verify-before-complete.sh | Warn if edits made without test/verification evidence |
 | TaskCompleted | evaluator | task-completion-gate.sh | Warn if task marked done without verification evidence |
 
 ---
