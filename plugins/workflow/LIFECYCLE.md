@@ -44,9 +44,43 @@ PreCompact ─► pre-compact-handoff.sh
 | Skill | Plugin | Purpose |
 |---|---|---|
 | `/orchestrate` | workflow | Manually choose a pattern (single / pipeline / fan-out / tdd / auto) |
-| `/tdd-loop` | workflow | RED → GREEN → REFACTOR with real-command gates |
+| `/tdd-loop` | workflow | RED → GREEN → REFACTOR with real-command gates (+ optional Phase 4 Reflect) |
 | `/status` | workflow | On-demand snapshot: plan, handoff, traces, pressure, router stats |
 | `/zoom-out` | workflow | "Give me the map" — higher-level perspective on unfamiliar code |
+| `/evolve` | workflow | SEPL orchestrator: propose → assess → commit self-improvement cycle |
+| `/commit-proposal` | workflow | Apply an approved proposal; snapshot prior version; ledger entry |
+| `/rollback` | workflow | Reverse a commit; restore prior snapshot; ledger entry |
+| `/reflect` | workflow | Reflect-Memorize: three-line sprint insight → memory topic |
+| `/router-tune` | workflow | Analyze router miss-fires, emit threshold/regex proposals |
+
+## Self-Evolution Loop (SEPL)
+
+Closed-loop operator from *Autogenesis: A Self-Evolving Agent Protocol* (arXiv:2604.15034). See `docs/lineage.md` for the full protocol.
+
+```
+signal source ──► /trace-evolve (traces)         propose draft
+                  or /router-tune (workflow)     ─────────┐
+                                                          ▼
+                  /evolve (workflow) ──► writes propose ledger entry
+                                                          │
+                                                          ▼
+                  /assess-proposal (evaluator, forked reviewer)
+                  ├─ pass → user approval prompt
+                  ├─ fail → report, loop continues
+                  └─ writes assess ledger entry
+                                                          │
+                                                          ▼
+                  on approval: /commit-proposal
+                  ├─ snapshot prior version to .claude/lineage/versions/
+                  ├─ apply change
+                  └─ writes commit ledger entry
+                                                          │
+                                              (reversible any time)
+                                                          ▼
+                                                      /rollback
+```
+
+Ledger: `.claude/lineage/ledger.jsonl` (append-only). Snapshots: `.claude/lineage/versions/<slug>/<version>`. Proposals: `.claude/lineage/proposals/`. Verdicts: `.claude/lineage/verdicts/`.
 
 ## Composed Skills (Live Elsewhere, Invoked by This Plugin)
 
@@ -73,6 +107,8 @@ Set in `~/.claude/settings.json` or project `.claude/settings.json` under the `e
 | `WORKFLOW_ROUTER_CONFIDENCE_THRESHOLD` | `0.75` | In `hybrid` mode, escalate to LLM when shell confidence falls below this. |
 | `WORKFLOW_TURN_GATE_INTERVAL` | `3` | Turn-gate fires every N turns (reduces nag cadence). |
 | `WORKFLOW_HANDOFF_PCT` | `75` | Context-pressure threshold triggering `/handoff` nudge. |
+| `WORKFLOW_TDD_REFLECT` | `0` | When `1`, `/tdd-loop` runs a Phase 4 Reflect step after REFACTOR succeeds. |
+| `WORKFLOW_EVOLVE_AUTOCOMMIT` | `0` | When `1`, `/commit-proposal` skips the approval prompt for `env/<VAR>` numeric deltas within ±20%. Off by default — enable only after the ledger is battle-tested. |
 
 Router traces are written to `/tmp/claude-router-<session_id>/classifications.jsonl` — useful for auditing classification quality and tuning the shell ruleset.
 
