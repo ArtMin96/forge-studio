@@ -84,6 +84,14 @@ Instructions:
 
 Run the **full** suite, not just the new test — refactors can break neighbors. Gate passes iff exit code is zero.
 
+## Phase 4 — REFLECT (optional)
+
+**Goal**: compress the sprint into a durable, three-line insight (worked / surprised / watch) routed to memory.
+
+Gated by `WORKFLOW_TDD_REFLECT=1`. Default is off — don't nag on quick fixes. Invoke `/reflect` with the active plan path. It handles deduplication against existing memory topics and skips silently when the insight adds nothing.
+
+Why this phase exists: without it, every RED→GREEN→REFACTOR cycle is thrown away. The Autogenesis paper (arXiv:2604.15034) and MUSE both argue that reflection-to-memory is the missing half of experience-driven agents. This phase is that half.
+
 ## After the Loop
 
 - If this implements a plan item, mark it `[x]` in the plan file (so `turn-gate.sh` stops nudging).
