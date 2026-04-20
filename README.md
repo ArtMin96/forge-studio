@@ -190,5 +190,5 @@ Hooks fire automatically. No commands needed.
 | [Token Optimization](docs/token-optimization.md) | Where tokens go and how to reduce spend |
 | [Execution Traces](docs/traces.md) | Trace collection, analysis, harness evolution |
 | [Research Gate](docs/research-gate.md) | Read-before-edit enforcement design and data |
-| [Agentic Workflow](AGENTIC_WORKFLOW.md) | Hook-driven orchestrator: architecture, diagrams, cost/reliability model |
-| [Workflow Lifecycle](plugins/workflow/LIFECYCLE.md) | Event-driven development cycle + migration from the old manual ritual |
+| [Agentic Workflow](docs/agentic-workflow.md) | Workflow plugin usage, configuration, skills, worked examples |
+| [Workflow Lifecycle](plugins/workflow/LIFECYCLE.md) | Event → hook → composed-plugin map |
