@@ -5,9 +5,11 @@
      discipline, faithful reporting), context management (pressure tracking,
      edit safety, plan-vs-actual sync), evaluation (static analysis, quality
      gates, evaluation gate before commit), multi-agent decomposition (sprint
-     contracts between planner/generator/reviewer), and diagnostics (entropy
-     scanning for documentation drift). This file covers what hooks CAN'T:
-     personality, judgment, and project config. -->
+     contracts between planner/generator/reviewer), diagnostics (entropy
+     scanning for documentation drift), and self-evolution (auditable
+     propose → assess → commit → rollback over versioned resources; see
+     docs/self-evolution.md and docs/lineage.md). This file covers what
+     hooks CAN'T: personality, judgment, and project config. -->
 
 ## Personality
 

@@ -25,7 +25,9 @@
     "WORKFLOW_ROUTER_LLM_MODEL": "claude-haiku-4-5-20251001",
     "WORKFLOW_ROUTER_CONFIDENCE_THRESHOLD": "0.75",
     "WORKFLOW_TURN_GATE_INTERVAL": "3",
-    "WORKFLOW_HANDOFF_PCT": "75"
+    "WORKFLOW_HANDOFF_PCT": "75",
+    "WORKFLOW_TDD_REFLECT": "0",
+    "WORKFLOW_EVOLVE_AUTOCOMMIT": "0"
   },
   "includeCoAuthoredBy": false,
   "includeGitInstructions": false,
