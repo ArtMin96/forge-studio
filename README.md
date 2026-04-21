@@ -59,7 +59,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | **token-efficiency** | Duplicate read detection, session token audit | 1 | 1 |
 | **research-gate** | Blocks Edit/Write on unread files + exploration depth warnings | 4 | 0 |
 | **rtk-optimizer** | Auto-installs [rtk-ai/rtk](https://github.com/rtk-ai/rtk) on first session and runs `rtk init -g`. 60-90% token reduction on shell commands. Opt-out: `FORGE_RTK_DISABLED=1`. | 1 | 0 |
-| **code-graph** | Auto-installs [tirth8205/code-review-graph](https://github.com/tirth8205/code-review-graph). Registers a Tree-sitter MCP graph per repo so Claude Code queries blast-radius context (measured 200-440 tokens per response, ~55-120x smaller than reading the affected files) instead of re-reading files. Claude Code only. Opt-out: `FORGE_CODE_GRAPH_DISABLED=1`. | 2 | 0 |
+| **code-graph** | Auto-installs [tirth8205/code-review-graph](https://github.com/tirth8205/code-review-graph). Registers a Tree-sitter MCP graph per repo so Claude Code queries structural context instead of re-reading files. Claude Code only. Opt-out: `FORGE_CODE_GRAPH_DISABLED=1`. | 2 | 0 |
 
 ### Key Skills
 
@@ -109,7 +109,7 @@ Hooks fire automatically. No commands needed.
 | SessionStart | behavioral-core | One-time check for unsafe output styles |
 | SessionStart | workflow | Surface latest handoff + unchecked plan items (agentic workflow bootstrap) |
 | SessionStart | rtk-optimizer | First session: install `rtk` binary + run `rtk init -g`. Subsequent sessions: no-op. |
-| SessionStart | code-graph | First host: `pipx install code-review-graph`. First repo: `install --platform claude-code` + background `build`. Otherwise: fast path. |
+| SessionStart | code-graph | Install `code-review-graph` and register its MCP server for the current repo on first run. Subsequent sessions: no-op. |
 | PreCompact | context-engine | Guard: block compaction when uncommitted work has no handoff or tasks are in-progress |
 | PreCompact | context-engine | Save scope, plan, handoff, git state to recovery file |
 | PreCompact | workflow | Advisory nudge to run `/handoff` before auto-compaction |
@@ -153,7 +153,7 @@ Hooks fire automatically. No commands needed.
 | PostToolUse:Read | research-gate | Record file read for edit gate |
 | PostToolUse:Read\|Grep\|Glob | research-gate | Track exploration depth |
 | PostToolUse:Read | token-efficiency | Warn on duplicate reads |
-| PostToolUse:Bash | code-graph | Fire-and-forget `code-review-graph update` after git HEAD-moving commands (`commit`/`merge`/`rebase`/`pull`/`checkout`/`reset`/`cherry-pick`). Upstream `update` diffs vs HEAD~1, so uncommitted edits don't reach the graph — only committed ones do. |
+| PostToolUse:Bash | code-graph | Refresh the graph after `git commit`/`merge`/`rebase`/`pull`/`checkout`/`reset`/`cherry-pick`. |
 | PostToolUse:Bash (.test) | evaluator | Backpressure: replace verbose passing test output with summary |
 | PostToolUse:* | context-engine | Reset consecutive failure counter on success |
 | PostToolUseFailure:* | traces | Log tool failures to session trace |
