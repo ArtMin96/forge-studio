@@ -27,7 +27,8 @@
     "WORKFLOW_TURN_GATE_INTERVAL": "3",
     "WORKFLOW_HANDOFF_PCT": "75",
     "WORKFLOW_TDD_REFLECT": "0",
-    "WORKFLOW_EVOLVE_AUTOCOMMIT": "0"
+    "WORKFLOW_EVOLVE_AUTOCOMMIT": "0",
+    "FORGE_CODE_GRAPH_DISABLED": "0"
   },
   "includeCoAuthoredBy": false,
   "includeGitInstructions": false,
