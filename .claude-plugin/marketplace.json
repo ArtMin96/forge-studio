@@ -111,6 +111,14 @@
       "source": "./plugins/rtk-optimizer",
       "category": "context-management",
       "keywords": ["rtk", "token-optimization", "external-tool", "harness:context-management", "overhead:moderate"]
+    },
+    {
+      "name": "code-graph",
+      "description": "Auto-install tirth8205/code-review-graph MCP server. Registers a Tree-sitter structural graph per repo so Claude Code pulls blast-radius context (~100 tokens) instead of re-reading entire files. Claude Code only. Opt-out: FORGE_CODE_GRAPH_DISABLED=1.",
+      "version": "1.0.0",
+      "source": "./plugins/code-graph",
+      "category": "context-management",
+      "keywords": ["code-graph", "mcp", "tree-sitter", "blast-radius", "external-tool", "harness:context-management", "overhead:moderate"]
     }
   ]
 }

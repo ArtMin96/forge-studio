@@ -1,0 +1,6 @@
+{
+  "name": "code-graph",
+  "description": "Auto-install tirth8205/code-review-graph and register its MCP server so Claude Code queries a Tree-sitter graph instead of re-reading full files.",
+  "version": "1.0.0",
+  "keywords": ["context-management", "mcp", "external-tool:code-review-graph", "tree-sitter"]
+}

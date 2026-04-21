@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-13 plugins. 37 skills. 47 hooks. 4 agents. 8 behavioral rules.
+14 plugins. 37 skills. 49 hooks. 4 agents. 8 behavioral rules.
 
 ---
 
@@ -26,6 +26,7 @@
 /plugin install token-efficiency@forge-studio    # Duplicate read detection
 /plugin install research-gate@forge-studio       # Read-before-edit enforcement
 /plugin install rtk-optimizer@forge-studio       # Auto-installs rtk binary + registers global hook
+/plugin install code-graph@forge-studio          # Auto-installs code-review-graph + registers MCP for Tree-sitter code graph
 ```
 
 Start a new session after installing for plugins to load.
@@ -58,6 +59,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | **token-efficiency** | Duplicate read detection, session token audit | 1 | 1 |
 | **research-gate** | Blocks Edit/Write on unread files + exploration depth warnings | 4 | 0 |
 | **rtk-optimizer** | Auto-installs [rtk-ai/rtk](https://github.com/rtk-ai/rtk) on first session and runs `rtk init -g`. 60-90% token reduction on shell commands. Opt-out: `FORGE_RTK_DISABLED=1`. | 1 | 0 |
+| **code-graph** | Auto-installs [tirth8205/code-review-graph](https://github.com/tirth8205/code-review-graph). Registers a Tree-sitter MCP graph per repo so Claude Code pulls blast-radius context (~100 tokens) instead of re-reading files. Claude Code only. Opt-out: `FORGE_CODE_GRAPH_DISABLED=1`. | 2 | 0 |
 
 ### Key Skills
 
@@ -107,6 +109,7 @@ Hooks fire automatically. No commands needed.
 | SessionStart | behavioral-core | One-time check for unsafe output styles |
 | SessionStart | workflow | Surface latest handoff + unchecked plan items (agentic workflow bootstrap) |
 | SessionStart | rtk-optimizer | First session: install `rtk` binary + run `rtk init -g`. Subsequent sessions: no-op. |
+| SessionStart | code-graph | First host: `pipx install code-review-graph`. First repo: `install --platform claude-code` + background `build`. Otherwise: fast path. |
 | PreCompact | context-engine | Guard: block compaction when uncommitted work has no handoff or tasks are in-progress |
 | PreCompact | context-engine | Save scope, plan, handoff, git state to recovery file |
 | PreCompact | workflow | Advisory nudge to run `/handoff` before auto-compaction |
@@ -150,6 +153,7 @@ Hooks fire automatically. No commands needed.
 | PostToolUse:Read | research-gate | Record file read for edit gate |
 | PostToolUse:Read\|Grep\|Glob | research-gate | Track exploration depth |
 | PostToolUse:Read | token-efficiency | Warn on duplicate reads |
+| PostToolUse:Edit\|Write | code-graph | Fire-and-forget `code-review-graph update` to keep the Tree-sitter graph current. |
 | PostToolUse:Bash (.test) | evaluator | Backpressure: replace verbose passing test output with summary |
 | PostToolUse:* | context-engine | Reset consecutive failure counter on success |
 | PostToolUseFailure:* | traces | Log tool failures to session trace |
@@ -185,6 +189,7 @@ Hooks fire automatically. No commands needed.
 - **Self-review interval**: Set `FORGE_SELF_REVIEW_INTERVAL` (default 3 edits).
 - **Failure threshold**: Set `FORGE_FAILURE_THRESHOLD` (default 3 consecutive failures).
 - **Disable rtk auto-install**: Set `FORGE_RTK_DISABLED` to `"1"` (see [rtk-optimizer docs](docs/rtk-optimizer.md)).
+- **Disable code-graph auto-install**: Set `FORGE_CODE_GRAPH_DISABLED` to `"1"` (see [code-graph docs](docs/code-graph.md)).
 - **Disable a plugin**: `/plugin disable {name}@forge-studio`
 
 ---
@@ -201,5 +206,6 @@ Hooks fire automatically. No commands needed.
 | [Execution Traces](docs/traces.md) | Trace collection, analysis, harness evolution |
 | [Research Gate](docs/research-gate.md) | Read-before-edit enforcement design and data |
 | [RTK Optimizer](docs/rtk-optimizer.md) | Auto-bundled rtk-ai/rtk: bootstrap flow, verification, uninstall |
+| [Code Graph](docs/code-graph.md) | Auto-bundled tirth8205/code-review-graph: MCP registration, Tree-sitter graph, update cadence |
 | [Agentic Workflow](docs/agentic-workflow.md) | Workflow plugin usage, configuration, skills, worked examples |
 | [Workflow Lifecycle](plugins/workflow/LIFECYCLE.md) | Event → hook → composed-plugin map |
