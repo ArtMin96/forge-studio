@@ -2,7 +2,7 @@
 
 Wraps [tirth8205/code-review-graph](https://github.com/tirth8205/code-review-graph) as a forge-studio plugin. Installs the `code-review-graph` Python package on first session, registers its MCP server with Claude Code for the current repo, runs an initial `build`, and keeps the graph fresh on every Edit/Write.
 
-The assistant then queries blast-radius context (~100 tokens per lookup) through MCP instead of re-reading full files on every task.
+The assistant then queries blast-radius context through MCP (measured 200–440 tokens per response on Forge Studio's own `plugins/` tree, ~55–120× smaller than reading the affected files raw) instead of re-reading full files on every task.
 
 **Claude Code only.** Every upstream install call is pinned to `--platform claude-code` — this plugin never touches Cursor, Windsurf, Zed, Continue, or Codex configs even when the binary detects them.
 
@@ -58,6 +58,7 @@ The asymmetry still matters: **uninstalling `code-graph@forge-studio` does not u
 5. Per-repo marker at `<repo>/.code-review-graph/.forge-studio-initialized`. If missing:
    - `code-review-graph install --platform claude-code` in the repo (writes `.mcp.json`, `.claude/settings.json`, `.claude/skills/`, `CLAUDE.md`, `.gitignore`).
    - Rewrite `.mcp.json`'s `mcpServers.code-review-graph.command` from `uvx` to the absolute path of the installed binary so Claude Code can start the server without `uvx`.
+   - Patch `CLAUDE.md` via `plugins/code-graph/hooks/patch-claudemd-tool-names.py`: upstream references bare tool names (`query_graph`, `detect_changes`, …) but the actual MCP tools are suffixed (`query_graph_tool`, …). The script appends `_tool` to any backticked bare name it knows about. `refactor_tool` (already suffixed) and unbacktick'd pattern strings like `tests_for` are left alone.
    - Launch `code-review-graph build` with `nohup … & disown` — initial parse doesn't block session start on large monorepos.
    - Touch the marker so subsequent sessions take the fast path.
 
@@ -67,14 +68,19 @@ Every exit is `0`. A failed install degrades to "graph not active" rather than "
 
 ## Incremental update flow
 
-`plugins/code-graph/hooks/code-graph-update.sh` runs after every `Edit` and `Write` (`PostToolUse` matcher `Edit|Write`), 5 s timeout. Logic:
+`plugins/code-graph/hooks/code-graph-update.sh` runs on `PostToolUse` with matcher `Bash`, 5 s timeout. It only triggers `code-review-graph update` when the Bash command moves HEAD — upstream `update` diffs the working tree against `HEAD~1`, so uncommitted `Edit`/`Write` edits have nothing to pick up.
+
+Logic:
 
 1. `FORGE_CODE_GRAPH_DISABLED=1` → exit 0.
-2. No `<repo>/.code-review-graph/` → exit 0. Protects against stray edits outside the project root (e.g., `~/.claude/*`).
-3. No `code-review-graph` binary on PATH → exit 0.
-4. `nohup code-review-graph update … & disown` — fire-and-forget. The hook returns in <50 ms regardless of graph size.
+2. No `<repo>/.code-review-graph/` → exit 0. Protects against stray commands outside the project root.
+3. Parse `tool_input.command` from stdin JSON. If it is not one of `git commit`, `git merge`, `git rebase`, `git pull`, `git checkout`, `git reset`, `git cherry-pick` → exit 0.
+4. No `code-review-graph` binary on PATH → exit 0.
+5. `nohup code-review-graph update … & disown` — fire-and-forget. The hook returns in <50 ms regardless of graph size.
 
 Upstream claims a 2,900-file project re-indexes in under 2 s; detached execution means the hook itself is effectively free.
+
+**Consequence.** Between two commits, the graph is stale with respect to the working tree. Claude Code will see yesterday's structure until you commit. If that matters for a session, commit early and often, or re-run `code-review-graph build` manually.
 
 ---
 
@@ -122,7 +128,9 @@ See [upstream README](https://github.com/tirth8205/code-review-graph) for the co
 - **Upstream creates `.mcp.json`, `.claude/settings.json`, `.claude/skills/`, `.gitignore`** in the project root. Check them into git (or add them to your top-level ignore) deliberately.
 - **Background `build` on huge monorepos.** The first assistant query immediately after bootstrap may find an empty graph. Wait a few seconds or run `code-review-graph build` yourself and watch it finish.
 - **Offline first session.** No pipx/venv/PyPI → one stderr line, exit 0. Rerun on reconnect or install manually.
-- **PostToolUse fires on every Edit/Write.** Script guards with `test -d .code-review-graph` so edits outside the project directory are no-ops. Subagents editing the same repo share the graph.
+- **Update hook only fires after git HEAD moves.** Upstream `code-review-graph update` compares against `HEAD~1`; uncommitted edits never reach the graph. The hook filters on `git commit|merge|rebase|pull|checkout|reset|cherry-pick` to avoid wasted invocations.
+- **Upstream CLAUDE.md uses stale tool names.** Upstream writes references to `query_graph`, `detect_changes`, etc.; the running MCP server exposes them as `query_graph_tool`, `detect_changes_tool`, etc. The plugin's bootstrap runs a patcher (`patch-claudemd-tool-names.py`) to append `_tool` to backticked bare names inside the upstream-managed block. If upstream renames tools in a future release, the patcher becomes a no-op and the CLAUDE.md block will need to be resynced.
+- **Upstream `serverInfo.version` mismatch.** `code-review-graph --version` reports `2.3.2` but the MCP `initialize` response advertises `2.14.7`. Harmless upstream inconsistency.
 - **Language coverage is finite.** Tree-sitter grammars cover 23 languages + Jupyter (see upstream README). Unsupported files contribute no nodes; the graph falls back to whole-file reads for those paths.
 
 ---

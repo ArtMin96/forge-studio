@@ -95,6 +95,14 @@ if srv:
 PY
   fi
 
+  # Upstream's injected CLAUDE.md block references bare tool names (e.g.
+  # `query_graph`), but the actual MCP tool names have a `_tool` suffix.
+  # Patch the block in-place so Claude Code calls names that exist.
+  CLAUDE_MD="$PROJECT_DIR/CLAUDE.md"
+  if [ -f "$CLAUDE_MD" ]; then
+    python3 "${CLAUDE_PLUGIN_ROOT}/hooks/patch-claudemd-tool-names.py" "$CLAUDE_MD" 2>/dev/null || true
+  fi
+
   mkdir -p "$PROJECT_DIR/.code-review-graph" 2>/dev/null || true
   nohup bash -c "cd '$PROJECT_DIR' && code-review-graph build" >/dev/null 2>&1 &
   disown 2>/dev/null || true
