@@ -1,5 +1,2 @@
 # Added by code-review-graph
 .code-review-graph/
-
-# Claude Code runtime state
-.claude/scheduled_tasks.lock
