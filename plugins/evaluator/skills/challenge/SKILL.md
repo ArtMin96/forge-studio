@@ -13,7 +13,7 @@ allowed-tools:
 
 # Challenge: Draft Verification Critique
 
-Two-stage review inspired by Meta-Harness's Draft Verification pattern (arXiv 2603.28052). Stage 1 is your self-critique (the draft). Stage 2 retrieves historical evidence — both confirmers and challengers — to verify or refute the draft assessment.
+Two-stage review. Stage 1 is your self-critique (the draft). Stage 2 retrieves historical evidence — both confirmers and challengers — to verify or refute the draft assessment.
 
 ## Stage 1: Self-Critique (Draft)
 

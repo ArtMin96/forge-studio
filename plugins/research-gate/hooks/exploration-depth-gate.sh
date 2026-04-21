@@ -39,7 +39,7 @@ THRESHOLD="${FORGE_EXPLORE_DEPTH:-6}"
 
 if [ "$COUNT" -lt "$THRESHOLD" ]; then
   # Warn via JSON additionalContext (injected into Claude's context)
-  jq -n --arg ctx "Only ${COUNT}/${THRESHOLD} exploratory calls before first edit. IDE-Bench: 8+ exploration calls = 8.7x success rate. Consider reading more files before editing." '{
+  jq -n --arg ctx "Only ${COUNT}/${THRESHOLD} exploratory calls before first edit. Low exploration depth is the largest driver of premature-edit failures. Consider reading more files before editing." '{
     hookSpecificOutput: {
       hookEventName: "PreToolUse",
       additionalContext: $ctx

@@ -55,7 +55,7 @@ PreCompact ─► pre-compact-handoff.sh
 
 ## Self-Evolution Loop (SEPL)
 
-Closed-loop operator from *Autogenesis: A Self-Evolving Agent Protocol* (arXiv:2604.15034). See `docs/lineage.md` for the full protocol.
+Closed-loop propose → assess → commit operator over versioned resources. See `docs/lineage.md` for the full protocol.
 
 ```
 signal source ──► /trace-evolve (traces)         propose draft
@@ -130,6 +130,6 @@ Nothing is silently dropped — everything the old skills did is now either auto
 
 - **Hooks enforce, skills guide** (see `docs/architecture.md`). Mandatory steps go in hooks so model attention drift can't skip them.
 - **Compose, don't duplicate**. Rebuilding `/verify`, `/handoff`, or the planner/generator/reviewer triad here would violate the single-source principle the other plugins already own.
-- **File-based contracts survive compaction**. The plan's `## Contract` section is the durable steering signal — corroborated by *How to Train Your Advisor* (arXiv 2510.02453): small, file-backed advice docs transfer gains across model sizes.
+- **File-based contracts survive compaction**. The plan's `## Contract` section is the durable steering signal that still reaches the model after context compaction drops intermediate reasoning.
 - **Shell classifier first**. Zero token cost on the 95% of prompts where simple regex suffices. The LLM fallback exists for ambiguous cases and is opt-in via `WORKFLOW_ROUTER_MODE`.
 - **Advisory over blocking**. None of these hooks exit 2 (no blocking). Blocking is owned by `behavioral-core` (destructive commands) and `research-gate` (read-before-edit); this plugin is orchestration, not enforcement.

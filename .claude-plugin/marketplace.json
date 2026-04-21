@@ -26,8 +26,8 @@
     },
     {
       "name": "memory",
-      "description": "Three-tier memory architecture: pointer index, on-demand topics, searchable transcripts. Version-aware updates snapshot prior topic contents to the lineage ledger.",
-      "version": "1.1.0",
+      "description": "Three-tier memory architecture: pointer index, on-demand topics, searchable transcripts. Version-aware updates snapshot prior topic contents to the lineage ledger. Includes /lineage-audit for ledger invariant inspection.",
+      "version": "1.2.0",
       "source": "./plugins/memory",
       "category": "memory-architecture",
       "keywords": ["memory", "persistence", "recall", "versioned", "harness:memory-architecture", "harness:self-evolution", "overhead:zero", "role:guide-inferential"]
@@ -50,8 +50,8 @@
     },
     {
       "name": "agents",
-      "description": "Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries",
-      "version": "1.1.0",
+      "description": "Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries. Includes /worktree-team for physical worktree isolation, directory-ownership enforcement (opt-in), and output-schema checks on generator exit.",
+      "version": "1.2.0",
       "source": "./plugins/agents",
       "category": "multi-agent",
       "keywords": ["agents", "decomposition", "parallel", "pipeline", "harness:multi-agent-decomposition", "overhead:zero", "role:guide-inferential"]
@@ -90,8 +90,8 @@
     },
     {
       "name": "diagnostics",
-      "description": "Codebase health scanning: documentation drift, registration gaps, convention violations, stale memory, HARNESS_SPEC invariant compliance",
-      "version": "1.0.0",
+      "description": "Codebase health scanning: documentation drift, registration gaps, convention violations, stale memory, HARNESS_SPEC invariant compliance. /validate-marketplace performs pre-commit mechanical correctness checks (distinct from /entropy-scan).",
+      "version": "1.1.0",
       "source": "./plugins/diagnostics",
       "category": "diagnostics",
       "keywords": ["health", "entropy", "invariants", "validation", "harness:entropy-management", "overhead:zero", "role:sensor-computational"]

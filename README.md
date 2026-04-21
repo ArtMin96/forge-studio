@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-14 plugins. 37 skills. 49 hooks. 4 agents. 8 behavioral rules.
+14 plugins. 46 skills. 47 hooks. 4 agents. 8 behavioral rules.
 
 ---
 
@@ -48,13 +48,13 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 |--------|---------|-------|--------|
 | **behavioral-core** | Behavioral steering via modular `rules.d/` rules, destructive command blocking, scope discipline | 5 | 3 |
 | **context-engine** | Context management: progressive pressure, session handoffs, edit safety, environment bootstrap, compaction recovery, task tracking, failure escalation | 15 | 6 |
-| **memory** | Three-tier memory: pointer index → topic files → searchable transcripts, version-aware updates | 0 | 3 |
+| **memory** | Three-tier memory: pointer index → topic files → searchable transcripts, version-aware updates, ledger audit | 0 | 4 |
 | **evaluator** | Static analysis gates (PHP/JS/TS), adversarial review, verification, test nudge, self-evolution assessment | 8 | 8 |
 | **workflow** | Hook-driven agentic orchestrator: auto-routing (shell/hybrid/LLM), sprint-contract enforcement, TDD loop, handoff nudges, self-evolution loop (propose→assess→commit→rollback) | 5 | 9 |
-| **agents** | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries | 1 | 4 |
+| **agents** | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries, worktree-team orchestration, directory-ownership + output-schema checks | 3 | 5 |
 | **reference** | Hidden Claude Code features: thinking modes, parallel patterns, CLI piping | 0 | 3 |
 | **traces** | JSONL execution traces, compiled views, failure mining, harness evolution | 5 | 4 |
-| **diagnostics** | Documentation drift, registration gaps, convention violations, stale memory | 0 | 1 |
+| **diagnostics** | Documentation drift (`/entropy-scan`) + pre-commit mechanical correctness (`/validate-marketplace`) | 0 | 2 |
 | **caveman** | Always-on compressed output (~65% token savings). Survives compaction. | 2 | 1 |
 | **token-efficiency** | Duplicate read detection, session token audit | 1 | 1 |
 | **research-gate** | Blocks Edit/Write on unread files + exploration depth warnings | 4 | 0 |
@@ -78,6 +78,9 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | `/healthcheck` | evaluator | Run quality pipeline (Pint + Larastan + optional tests) |
 | `/audit-context` | context-engine | Analyze token overhead from CLAUDE.md, plugins, MCP servers |
 | `/entropy-scan` | diagnostics | Full 6-check codebase health scan |
+| `/validate-marketplace` | diagnostics | Pre-commit mechanical validator (JSON, frontmatter, hook exec, skill size) |
+| `/lineage-audit` | memory | Audit `.claude/lineage/ledger.jsonl` for protocol invariants |
+| `/worktree-team <roles>` | agents | Bootstrap N parallel agents in git worktrees with role-scoped CLAUDE.md |
 | `/evolve` | workflow | Self-evolution cycle: propose → assess → user approval → commit (Autogenesis protocol) |
 | `/assess-proposal` | evaluator | Adversarial 4-criteria review of a self-evolution proposal |
 | `/commit-proposal` | workflow | Apply an approved proposal; snapshot prior version to `.claude/lineage/` |
@@ -165,6 +168,8 @@ Hooks fire automatically. No commands needed.
 | Event | Plugin | What it does |
 |-------|--------|-------------|
 | SubagentStop | agents | Warn if sprint contract criteria not verified by reviewer |
+| SubagentStop | agents | Warn if generator finished without producing artifacts declared in plan Contract/Output Schema |
+| PreToolUse:Edit\|Write | agents | Directory-ownership guard for worktree-team (opt-in: `FORGE_DIRECTORY_OWNERSHIP=1`) |
 | SubagentStop | workflow | Nudge next phase in planner→generator→reviewer→/verify chain |
 
 ### Turn Completion
@@ -190,6 +195,7 @@ Hooks fire automatically. No commands needed.
 - **Failure threshold**: Set `FORGE_FAILURE_THRESHOLD` (default 3 consecutive failures).
 - **Disable rtk auto-install**: Set `FORGE_RTK_DISABLED` to `"1"` (see [rtk-optimizer docs](docs/rtk-optimizer.md)).
 - **Disable code-graph auto-install**: Set `FORGE_CODE_GRAPH_DISABLED` to `"1"` (see [code-graph docs](docs/code-graph.md)).
+- **Enable directory-ownership guard**: Set `FORGE_DIRECTORY_OWNERSHIP` to `"1"` (activates only inside a worktree-team session with an `active-roles.json` registry).
 - **Disable a plugin**: `/plugin disable {name}@forge-studio`
 
 ---
@@ -198,7 +204,8 @@ Hooks fire automatically. No commands needed.
 
 | Doc | Purpose |
 |-----|---------|
-| [Architecture](docs/architecture.md) | Design rationale, 7-component model, hook mechanics |
+| [Architecture](docs/architecture.md) | Design rationale, 8-component model, hook mechanics |
+| [2026 Improvement Report](docs/research/2026-marketplace-improvement-report.md) | Marketplace gap analysis + recommendations synthesized from Claude Code research |
 | [Research](docs/research.md) | Research papers and findings backing each design decision |
 | [Harness Spec](HARNESS_SPEC.md) | Mechanical invariants, architectural primitives, protocols |
 | [Settings](docs/settings.md) | settings.json best practices |

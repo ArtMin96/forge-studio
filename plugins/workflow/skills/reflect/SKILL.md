@@ -13,7 +13,7 @@ allowed-tools:
 
 # /reflect — Reflect-Memorize Step
 
-MUSE-style Plan-Execute-**Reflect-Memorize** closure (Zhao et al., 2025). The plan + tests + diff are the raw experience; this skill compresses them into durable, scannable lessons.
+The Reflect-Memorize closure that turns a completed sprint into durable memory. The plan + tests + diff are the raw experience; this skill compresses them into scannable lessons and hands them to `/remember`.
 
 Runs in ~30 seconds. Skip when the sprint is trivial (one-line fix, no new contract). Trigger automatically at the end of `/tdd-loop` Phase 3 when `WORKFLOW_TDD_REFLECT=1`.
 

@@ -6,11 +6,11 @@ disable-model-invocation: true
 
 # Trace Compile
 
-Compiles raw JSONL execution traces into structured views for efficient analysis. Inspired by VCC (arXiv 2603.29678) — structured views cut reflector token consumption by 50-67% while improving analysis quality.
+Compiles raw JSONL execution traces into structured views for efficient analysis.
 
 ## Why
 
-Raw JSONL traces force the analyzer to parse JSON, filter noise, and navigate linearly. The VCC paper proved that models analyzing structured views produce better insights with fewer tokens. Three views serve different analysis needs.
+Raw JSONL traces force the analyzer to parse JSON, filter noise, and navigate linearly. Structured views cut token consumption and improve analysis quality. Three views — summary, errors, and raw — serve different analysis needs.
 
 ## Process
 

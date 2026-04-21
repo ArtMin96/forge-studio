@@ -14,7 +14,7 @@ Periodic harness evolution skill. Run weekly or when you suspect recurring patte
 
 ### Phase 1: Progressive Trace Loading
 
-Use the three-view pattern (VCC paper, arXiv 2603.29678) to avoid loading raw JSONL directly:
+Load structured views first so analysis doesn't drown in raw JSONL:
 
 1. **Check for compiled views**: `ls ~/.claude/traces/*-summary.md` — if recent summaries exist, start there
 2. **If no summaries**: Run `/trace-compile` first, then return here
@@ -24,13 +24,13 @@ Use the three-view pattern (VCC paper, arXiv 2603.29678) to avoid loading raw JS
 
 ### Phase 2: Failure Categorization
 
-Categorize each failure using IDE-Bench's taxonomy (arXiv 2601.20886):
+Categorize each failure into one of the common failure shapes:
 
-| Category | Signal | IDE-Bench Frequency |
+| Category | Signal | Typical Frequency |
 |----------|--------|-------------------|
-| **Premature editing** | Edit before sufficient reads/searches | 63% of failures |
-| **Thrashing** | Same file edited 5+ times, oscillating regions | 28.2% of failures |
-| **Context loss** | Re-reading already-read files, contradicting earlier conclusions | 27.6% of failures |
+| **Premature editing** | Edit before sufficient reads/searches | Common |
+| **Thrashing** | Same file edited 5+ times, oscillating regions | Common |
+| **Context loss** | Re-reading already-read files, contradicting earlier conclusions | Common |
 | **Specification compliance** | Tests fail on formatting, ordering, edge cases — not core logic | Variable |
 | **Tool misuse** | Same command pattern fails repeatedly | Variable |
 | **Environment** | Missing binary, wrong path, permission issues | Variable |
@@ -39,7 +39,7 @@ Prioritize by: `total_failures` (high) and `sessions_affected` (high).
 
 ### Phase 3: Propose Single-Variable Changes
 
-For each cluster (top 5 max), propose ONE change (VeRO paper: single-variable changes prevent regression):
+For each cluster (top 5 max), propose ONE change — single-variable changes keep regression attribution possible:
 
 - **New `rules.d/` rule** — if behavioral pattern (agent keeps doing X)
 - **New hook condition** — if catchable at tool-use boundary
