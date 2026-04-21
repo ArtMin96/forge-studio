@@ -104,7 +104,7 @@ PY
   fi
 
   mkdir -p "$PROJECT_DIR/.code-review-graph" 2>/dev/null || true
-  nohup bash -c "cd '$PROJECT_DIR' && code-review-graph build" >/dev/null 2>&1 &
+  nohup bash -c "cd '$PROJECT_DIR' && code-review-graph build && bash '${CLAUDE_PLUGIN_ROOT}/hooks/sanitize-graph.sh' '$PROJECT_DIR'" >/dev/null 2>&1 &
   disown 2>/dev/null || true
 
   touch "$REPO_MARKER" 2>/dev/null || true

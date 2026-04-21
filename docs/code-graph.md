@@ -72,6 +72,38 @@ See [upstream README](https://github.com/tirth8205/code-review-graph) for the co
 
 ---
 
+## Known upstream quirks
+
+Tracked here so you don't chase them as plugin bugs. Filed upstream where relevant.
+
+- **Orphan-target pivots in `get_impact_radius_tool` (worked around).** Upstream's extractor records CALLS edges for every call-shaped token — including shell builtins like `printf`, `grep`, `echo`, `jq`, `date`. These have no matching node, but the recursive BFS treats them as pivots, so every function that calls `printf` appears as impacted by every other function that does. This plugin runs a one-line sanitizer (`plugins/code-graph/hooks/sanitize-graph.sh`) after every `build` and `update` that deletes CALLS edges whose target has no matching node. Without the sanitizer the tool returns heavy false positives on any language with many external/builtin calls (shell, C with libc, etc.).
+- **`query_graph_tool` returns one result row per call site.** A function that calls another nine times shows nine identical rows. Cosmetic; costs tokens.
+- **Semantic search is keyword-only by default.** `semantic_search_nodes_tool` falls back to FTS until embeddings are populated — see the next section.
+
+---
+
+## Enabling semantic search (optional)
+
+Out of the box `semantic_search_nodes_tool` runs keyword-only — it returns nothing (or very low scores) for queries that don't match file/symbol text. To get vector search, install the extras and embed the graph once.
+
+Pick the install location you already use (pipx shim or this plugin's venv):
+
+```bash
+# If installed via pipx
+pipx inject code-review-graph sentence-transformers
+
+# Or if installed via this plugin's venv fallback
+~/.local/share/code-review-graph/venv/bin/pip install sentence-transformers
+```
+
+Then in a Claude Code session, ask the model to call `embed_graph_tool` once per repo. It downloads `all-MiniLM-L6-v2` (~90 MB) on first use, then embeds every node. Re-embedding only touches new/changed nodes.
+
+Override the model with `CRG_EMBEDDING_MODEL=<huggingface-id>` before the session if you want something other than the default.
+
+Skip this if you only use the graph for structural queries (`query_graph_tool`, `get_impact_radius_tool`, `detect_changes_tool`) — they don't need embeddings.
+
+---
+
 ## Uninstall
 
 Per repo:

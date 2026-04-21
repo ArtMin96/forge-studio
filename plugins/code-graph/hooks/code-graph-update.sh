@@ -35,7 +35,7 @@ esac
 export PATH="$HOME/.local/bin:$PATH"
 command -v code-review-graph >/dev/null 2>&1 || exit 0
 
-nohup bash -c "cd '$PROJECT_DIR' && code-review-graph update" >/dev/null 2>&1 &
+nohup bash -c "cd '$PROJECT_DIR' && code-review-graph update && bash '${CLAUDE_PLUGIN_ROOT}/hooks/sanitize-graph.sh' '$PROJECT_DIR'" >/dev/null 2>&1 &
 disown 2>/dev/null || true
 
 exit 0
