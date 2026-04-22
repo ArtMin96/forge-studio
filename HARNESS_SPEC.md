@@ -517,6 +517,18 @@ Some patterns discussed in external harness literature are intentionally **not**
 
 **Why Forge Studio does not ship this**: Claude Code loads `CLAUDE.md` natively. Supporting two parallel files fragments user configuration and creates synchronization burden. When the Claude Code host itself adopts `AGENTS.md`, Forge inherits it for free.
 
+### Multi-sample consensus / Semantic Triangulation
+
+**What it is**: Fan-out a single task to N workers, then pick the consensus answer. Source: *Semantic Triangulation* (arXiv 2511.12288v3) reports pass-rate improvements on CodeForces/CodeElo/LiveCodeBench via "just-tri-it" N-sample consensus.
+
+**Why Forge Studio does not ship this**: The maintainer runs Opus end-to-end. N-sample consensus multiplies Opus token cost linearly in N without an equivalent cost-recovery path (no downgrade to a cheap draft model). `agents/worktree-team` already provides parallelism, but as *task decomposition* — each worker owns different files — not as duplicate-and-vote over the same task. If the maintainer switches to a draft-plus-verify model split later, this belongs in a new `triangulate` skill inside `agents/`; for now it stays deferred.
+
+### Streaming / token-level hallucination detection
+
+**What it is**: Real-time token-level or activation-based hallucination detection during generation, as in *Streaming Hallucination Detection in Long CoT* (arXiv 2601.02170v1) and *DAIReS* syndrome-decoding (arXiv 2602.06532).
+
+**Why Forge Studio does not ship this**: Both require hooks into the model's own token stream or embedding space. Claude Code plugins run at the turn boundary (PreToolUse, PostToolUse, UserPromptSubmit, etc.) — there is no marketplace surface for sub-token observation. The turn-level analog — challenging claims before committing to them — is already covered by `/verify`, `/challenge`, and `/verify-refs`.
+
 ---
 
 ## Glossary

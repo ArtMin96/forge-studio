@@ -10,8 +10,8 @@
   "plugins": [
     {
       "name": "behavioral-core",
-      "description": "Behavioral steering via modular hooks: 8 principle-based rules, destructive command blocking, scope compliance guard, self-review enforcement, output style safety",
-      "version": "1.4.0",
+      "description": "Behavioral steering via modular hooks: 9 principle-based rules, destructive command blocking, scope compliance guard, self-review enforcement, output style safety",
+      "version": "1.5.0",
       "source": "./plugins/behavioral-core",
       "category": "behavioral-steering",
       "keywords": ["behavioral", "hooks", "anti-sycophancy", "anti-hallucination", "safety", "scope", "harness:behavioral-steering", "overhead:minimal", "role:guide-computational"]
@@ -34,8 +34,8 @@
     },
     {
       "name": "evaluator",
-      "description": "Evaluator-optimizer pattern: adversarial review, verification gates (TaskCompleted), static analysis, postmortems, self-evolution proposal assessment.",
-      "version": "1.4.0",
+      "description": "Evaluator-optimizer pattern: adversarial review, verification gates (TaskCompleted), static analysis, postmortems, reference-fidelity check, self-evolution proposal assessment.",
+      "version": "1.5.0",
       "source": "./plugins/evaluator",
       "category": "evaluation",
       "keywords": ["code-review", "quality", "static-analysis", "verification", "harness:evaluation", "harness:self-evolution", "overhead:moderate", "role:sensor-computational", "role:sensor-inferential"]

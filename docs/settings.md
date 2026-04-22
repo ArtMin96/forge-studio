@@ -290,6 +290,24 @@ Forces the standard context window instead of the extended 1M window. Smaller co
 
 See [Architecture: Prompt Cache](architecture.md#prompt-cache-architecture) for what busts the cache.
 
+### Tuning Context Pressure for 1M Windows
+
+`track-context-pressure.sh` defaults (`PCT1–5 = 50/65/75/85/92`) were calibrated for the 200K window. On a 1M window, Stage 1 does not fire until ~500K tokens — well past the point where Opus attention quality begins to degrade in practice. A lower profile surfaces warnings earlier:
+
+```json
+{
+  "env": {
+    "FORGE_CONTEXT_PCT1": "18",
+    "FORGE_CONTEXT_PCT2": "28",
+    "FORGE_CONTEXT_PCT3": "40",
+    "FORGE_CONTEXT_PCT4": "55",
+    "FORGE_CONTEXT_PCT5": "72"
+  }
+}
+```
+
+These are **heuristics**, not paper-backed. They fire Stage 1 around 180K tokens on a 1M window (close to the 200K boundary where the standard window would already be flashing Stage 1). Tune to your own degradation threshold — the stage bash script (`plugins/context-engine/hooks/track-context-pressure.sh`) reads the env vars directly, no restart needed beyond a new session.
+
 ---
 
 ## Background Task Control

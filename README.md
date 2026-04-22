@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-14 plugins. 47 skills. 51 hooks. 4 agents. 8 behavioral rules.
+14 plugins. 48 skills. 51 hooks. 4 agents. 9 behavioral rules.
 
 ---
 
@@ -49,7 +49,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | **behavioral-core** | Behavioral steering via modular `rules.d/` rules, destructive command blocking, scope discipline | 5 | 3 |
 | **context-engine** | Context management: progressive pressure, session handoffs, edit safety, environment bootstrap, compaction recovery, task tracking, failure escalation | 15 | 6 |
 | **memory** | Three-tier memory: pointer index → topic files → searchable transcripts, version-aware updates, ledger audit | 0 | 4 |
-| **evaluator** | Static analysis gates (PHP/JS/TS), adversarial review, verification, test nudge, self-evolution assessment | 8 | 8 |
+| **evaluator** | Static analysis gates (PHP/JS/TS), adversarial review, verification, reference-fidelity check, test nudge, self-evolution assessment | 8 | 9 |
 | **workflow** | Hook-driven agentic orchestrator: auto-routing (shell/hybrid/LLM), sprint-contract enforcement, TDD loop, handoff nudges, self-evolution loop (propose→assess→commit→rollback) | 5 | 9 |
 | **agents** | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries, worktree-team orchestration, directory-ownership + output-schema checks | 3 | 5 |
 | **reference** | Hidden Claude Code features: thinking modes, parallel patterns, CLI piping | 0 | 3 |
@@ -69,6 +69,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | `/tdd-loop <desc>` | workflow | RED→GREEN→REFACTOR with real-command completion gates |
 | `/status` | workflow | Snapshot of plan, handoff, traces, context pressure, router stats |
 | `/verify` | evaluator | Evidence-based completion check before claiming done |
+| `/verify-refs` | evaluator | Cross-check file paths, symbols, URLs in prior turn against the repo; advisory warning on fabricated references |
 | `/scope <task>` | behavioral-core | Define task boundaries and acceptance criteria |
 | `/handoff [topic]` | context-engine | Generate session transfer document |
 | `/resume` | context-engine | Pick up from latest handoff |

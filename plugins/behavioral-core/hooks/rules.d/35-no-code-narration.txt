@@ -1,0 +1,1 @@
+Default to no comments in code. Only add one when the WHY is non-obvious — a hidden constraint, a subtle invariant, a workaround for a specific bug, behavior that would surprise a reader. Don't narrate WHAT the code does, reference the current task/fix/callers, or write changelog-style notes into source files. Those belong in the PR description and rot as the codebase evolves.

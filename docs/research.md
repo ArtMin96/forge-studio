@@ -84,6 +84,37 @@ Asawa et al. Small open-weight "advisor" models that generate per-instance natur
 
 **Marketplace impact**: corroborates the sprint-contract protocol used by the workflow plugin. A file-backed `## Contract` section in the plan is the durable advisory signal — re-read by every agent from disk so it survives context compaction.
 
+### Engineering Pitfalls in AI Coding Tools (arXiv 2603.20847, FSE '26)
+
+Zhang, Dai, Pham, Uddin, Yang, Wang. Empirical study of 3.8K publicly reported bugs in Claude Code, Codex, and Gemini CLI.
+
+- **67%+ of reported bugs are functionality defects** (not infra or UI)
+- **36.9% trace to API, integration, or configuration errors**
+- Most failures manifest at **tool invocation (37.2%)** and **command execution (24.7%)** stages
+
+**Marketplace impact**: direct empirical backing for `research-gate` (read-before-edit), `evaluator` static-analysis hooks, and the PreToolUse guardrails in `behavioral-core`. Note: summary is taken from the paper abstract; full-PDF methodology was not independently verified.
+
+### Detecting and Correcting Reference Hallucinations (arXiv 2604.03173)
+
+Rao, Wong, Callison-Burch. Citation-fidelity study across commercial LLMs and deep-research agents.
+
+- **3–13% of citation URLs are hallucinated** (non-existent target); 5–18% fail to resolve overall
+- Deep research agents emit more citations **and** hallucinate at higher rates than search-augmented LLMs
+- `urlhealth` self-correction loop plus Wayback Machine disambiguation reduces non-resolving URLs 6–79× to <1%
+- Benchmarks: **DRBench** (53,090 URLs, 10 models), **ExpertQA** (168,021 URLs, 32 fields)
+
+**Marketplace impact**: motivates the new `/verify-refs` skill in the evaluator plugin. Advisory-only — per the EACL alignment-tradeoff finding below, hard blocks on reference fidelity risk regressing other safety properties. Summary from abstract only; detection implementation not re-derived.
+
+### The Unintended Trade-off of AI Alignment (EACL 2026 Findings, aclanthology 2026.findings-eacl.53)
+
+Mahmoud, Khalil, Karimpanal, Semage, Rana. Shows hallucination-mitigation and safety alignment share model components — pushing one down often pushes the other down.
+
+- Overlapping features encode both hallucination and refusal behavior
+- Fine-tuning on benign data degrades alignment as a side effect
+- Proposed mitigations: sparse-autoencoder feature disentanglement, subspace orthogonalization
+
+**Marketplace impact**: rationale for keeping Forge's reliability-oriented gates (research-gate, `/verify-refs`, evaluator gates) **advisory** rather than hard blocks. Prompt-level anti-hallucination pressure is deliberately delegated to model providers; the marketplace adds procedural checks (separate agents, evidence requirements) that don't alter alignment weights. Summary from HTML abstract after PDF extraction failed.
+
 ---
 
 ## Community Sources
