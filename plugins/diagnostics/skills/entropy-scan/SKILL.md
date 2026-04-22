@@ -17,7 +17,7 @@ Detect drift between documentation and reality. Run periodically (weekly recomme
 
 ## Instructions
 
-Run all 7 checks. Report results in the structured format below. **Do not modify any files** — report issues and propose fixes only.
+Run all 9 checks. Report results in the structured format below. **Do not modify any files** — report issues and propose fixes only.
 
 ### Check 1: Plugin Count Drift
 
@@ -126,6 +126,72 @@ Thresholds:
 
 Skills survive compaction with first 5,000 tokens per skill, shared 25,000-token budget across all invoked skills.
 
+### Check 8: Rule Provenance (Ratchet Discipline)
+
+Every rule in `plugins/behavioral-core/hooks/rules.d/*.txt` (excluding `archive/`) should declare its origin on its first non-blank line:
+
+```
+# origin: <source>
+```
+
+Accepted sources: `postmortem:<id>`, `trace:<session-id-or-slug>`, `ledger:<entry-id>`, `external:<short-reason>`.
+
+```bash
+for f in plugins/behavioral-core/hooks/rules.d/*.txt; do
+  [ -f "$f" ] || continue
+  first=$(grep -m1 -v '^\s*$' "$f" 2>/dev/null)
+  case "$first" in
+    \#\ origin:*) ;;
+    *) echo "UNPROVENANCED: $f" ;;
+  esac
+done
+```
+
+**Rationale** (Osmani, 2026 — Agent Harness Engineering): *"Every rule must trace to a specific past failure or external constraint."* Rule bloat accumulates when constraints are brainstormed without being earned by a real failure. Advisory only — do not block.
+
+Authors mark external-policy rules as `external:<reason>` (e.g., `external: tone preference`). The goal is traceability, not gatekeeping.
+
+### Check 9: Tool-Menu Inflation
+
+For each agent definition (`plugins/*/agents/*.md`) and each SKILL.md, count entries in `tools:` / `allowed-tools:` frontmatter. Warn if the count exceeds `FORGE_TOOL_MENU_MAX` (default 10).
+
+```bash
+python3 - <<'PY'
+import os, glob, re
+MAX = int(os.environ.get('FORGE_TOOL_MENU_MAX', '10'))
+def count_tools(path, field_names):
+    try:
+        text = open(path).read()
+    except Exception: return None
+    if not text.startswith('---'):
+        return None
+    fm = text.split('---', 2)[1] if text.count('---') >= 2 else ''
+    for field in field_names:
+        # Try block list first: `field:\n  - Tool1\n  - Tool2`
+        block = re.search(rf'^{field}[ \t]*:[ \t]*\n((?:[ \t]*-[ \t]+.+\n?)+)', fm, re.M)
+        if block:
+            return len(re.findall(r'^[ \t]*-[ \t]+\S', block.group(1), re.M))
+        # Inline: `field: Tool1, Tool2` or `field: [Tool1, Tool2]`
+        m = re.search(rf'^{field}[ \t]*:[ \t]*([^\n]+)$', fm, re.M)
+        if m:
+            inline = m.group(1).strip().strip('[]')
+            parts = [p.strip() for p in re.split(r'[,\s]+', inline) if p.strip()]
+            return len(parts) if parts else None
+    return None
+
+for path in sorted(glob.glob('plugins/*/agents/*.md')):
+    n = count_tools(path, ['tools', 'allowed-tools'])
+    if n and n > MAX:
+        print(f"TOOL-BLOAT: {path} declares {n} tools (max {MAX})")
+for path in sorted(glob.glob('plugins/*/skills/*/SKILL.md')):
+    n = count_tools(path, ['allowed-tools'])
+    if n and n > MAX:
+        print(f"TOOL-BLOAT: {path} declares {n} tools (max {MAX})")
+PY
+```
+
+**Rationale** (Osmani, 2026): *"Ten sharp tools beat fifty overlapping ones."* Large tool menus compete for the model's working memory and degrade tool-selection accuracy. Advisory only — some agents legitimately need more tools.
+
 ## Output Format
 
 ```
@@ -163,6 +229,14 @@ Actual: {N} plugins, {N} skills, {N} hooks, {N} agents
 ### Check 7: Skill Token Weight
 **Status:** {PASS / {N} oversized}
 {List of SKILL.md files exceeding 2,000 tokens with approximate size}
+
+### Check 8: Rule Provenance
+**Status:** {PASS / {N} unprovenanced}
+{List of rules.d/*.txt files missing an `# origin:` header}
+
+### Check 9: Tool-Menu Inflation
+**Status:** {PASS / {N} over threshold}
+{List of agent/skill files declaring more than FORGE_TOOL_MENU_MAX tools}
 
 ### Proposed Fixes
 {For each issue, one-line fix command or description}

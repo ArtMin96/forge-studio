@@ -206,7 +206,7 @@ return {
 
 3. **System-reminder accumulation tracking** — Claude Code has within-message smooshing but no cross-message tracking. Neither does Forge Studio.
 
-4. **MCP instruction impact** — Claude Code marks MCP instructions as explicitly dangerous for caching. Forge Studio doesn't warn about MCP overhead.
+4. **MCP instruction impact** — Claude Code marks MCP instructions as explicitly dangerous for caching. Forge Studio warns about server count / overhead and scans server config JSON for injection patterns via `context-engine/mcp-instruction-monitor.sh`, but cannot inspect runtime instruction text (delivered after SessionStart).
 
 ---
 

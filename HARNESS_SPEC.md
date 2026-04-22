@@ -362,7 +362,7 @@ A hook-enforced nudge to run `/verify` before committing planned work.
 
 Periodic scanning to detect drift between documentation and reality.
 
-**Six checks**:
+**Nine checks**:
 
 | # | Check | What It Validates |
 |---|-------|------------------|
@@ -372,6 +372,9 @@ Periodic scanning to detect drift between documentation and reality.
 | 4 | Hook script executability | All `plugins/*/hooks/*.sh` have `chmod +x` |
 | 5 | Memory staleness | `.claude/memory/` topic files with dates > 90 days |
 | 6 | Invariant compliance | Plugin structure rules from this spec |
+| 7 | Skill token weight | SKILL.md files exceeding 2,000-token compaction-safe ceiling |
+| 8 | Rule provenance | `rules.d/*.txt` entries declare an `# origin:` header (advisory) |
+| 9 | Tool-menu inflation | Agent/skill tool lists within `FORGE_TOOL_MENU_MAX` (default 10) |
 
 **Invocation**: `/entropy-scan` (manual, zero-cost until invoked)
 
@@ -465,6 +468,54 @@ When the diagnostics plugin is updated to cover self-evolution, add:
 1. Changes must preserve tool boundary invariants
 2. Review `## Contract` section compatibility
 3. Update `docs/architecture.md` if agent roles change
+
+---
+
+## Convention: Rule Provenance (Advisory)
+
+Rules in `plugins/behavioral-core/hooks/rules.d/*.txt` should declare their origin on the first non-blank line:
+
+```
+# origin: <source>
+# <rule text follows>
+```
+
+Accepted sources:
+
+| Source form | Meaning |
+|---|---|
+| `postmortem:<id>` | Derived from a specific `/postmortem` artifact |
+| `trace:<slug>` | Derived from a failure pattern surfaced by `traces/trace-evolve` |
+| `ledger:<entry-id>` | Committed via the self-evolution loop (SEPL) |
+| `external:<short-reason>` | Externally sourced preference or policy |
+
+**Rationale** (Osmani, 2026 — *Agent Harness Engineering*): *"Every rule must trace to a specific past failure or external constraint."* Constraints that accumulate without provenance are the primary cause of rule-file bloat and context degradation.
+
+**Enforcement**: Advisory. `/entropy-scan` Check 8 reports missing provenance but does not block. New rules added through the self-evolution loop naturally acquire `ledger:` provenance; legacy rules can be backfilled incrementally.
+
+---
+
+## Deliberate Non-Features
+
+Some patterns discussed in external harness literature are intentionally **not** implemented. Documented here to preempt future "why isn't this here?" questions.
+
+### Ralph-loop / auto-continuation hook
+
+**What it is**: A `Stop` hook that re-injects the original prompt into a fresh context window on each turn-end, driving long-horizon tasks to completion without human intervention.
+
+**Why Forge Studio does not ship this**: Every Forge self-evolution step is explicitly human-gated (`propose → assess → commit`, ledger-audited). An auto-continuation primitive conflicts with this discipline — the loop runs work past the operator's attention boundary and can burn budget on a degraded path. `workflow/turn-gate.sh` + manual `/handoff` / `/resume` give the same long-horizon capability with the human kept in the loop.
+
+### Sandbox / execution isolation primitive
+
+**What it is**: A dedicated plugin imposing process/network/filesystem sandboxing on agent-spawned commands.
+
+**Why Forge Studio does not ship this**: The Claude Code host already owns permission gating, allowlists, and worktree isolation. `agents/worktree-team` provides filesystem isolation at the git level; `behavioral-core/block-destructive.sh` and `settings.json` deny rules cover command-level gating. A marketplace-level sandbox would duplicate the host boundary and can only weaken, not strengthen, the existing security model.
+
+### Parallel "AGENTS.md" support
+
+**What it is**: Reading `AGENTS.md` in addition to `CLAUDE.md` to match an emerging cross-vendor convention.
+
+**Why Forge Studio does not ship this**: Claude Code loads `CLAUDE.md` natively. Supporting two parallel files fragments user configuration and creates synchronization burden. When the Claude Code host itself adopts `AGENTS.md`, Forge inherits it for free.
 
 ---
 

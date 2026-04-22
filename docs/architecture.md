@@ -61,7 +61,7 @@ Component 8 is drawn from *Autogenesis: A Self-Evolving Agent Protocol* (arXiv:2
 | Event | Plugin | Hook | What It Does |
 |-------|--------|------|-------------|
 | SessionStart | context-engine | env-bootstrap.sh | OS, memory, languages, tools, git state snapshot |
-| SessionStart | context-engine | mcp-instruction-monitor.sh | MCP server instruction token monitoring |
+| SessionStart | context-engine | mcp-instruction-monitor.sh | MCP server token overhead + config injection-pattern scan |
 | SessionStart | caveman | caveman-init.sh | Load compressed communication rules |
 | SessionStart | behavioral-core | output-style-check.sh | One-time check for unsafe output styles |
 | SessionStart | workflow | session-bootstrap.sh | Surface latest handoff + unchecked plan items (agentic workflow bootstrap) |
