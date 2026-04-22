@@ -1,6 +1,7 @@
 ---
 name: fan-out
-description: Parallel batch processing with subagents. Apply the same operation to multiple files or components simultaneously.
+description: Apply the same operation to multiple files or components simultaneously using parallel subagents.
+when_to_use: When the same operation must be applied to multiple independent files (e.g., bulk migration, batch refactor across controllers).
 disable-model-invocation: true
 ---
 

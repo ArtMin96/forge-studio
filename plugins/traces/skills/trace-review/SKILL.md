@@ -1,7 +1,10 @@
 ---
 name: trace-review
-description: Analyze recent execution traces to find recurring patterns, failures, and optimization opportunities
+description: Analyze recent execution traces to find recurring patterns, failures, and optimization opportunities.
+when_to_use: After compiling traces with `/trace-compile`, or when investigating why a session had a high error rate.
 disable-model-invocation: true
+paths:
+  - ".claude/traces/*.jsonl"
 ---
 
 # Trace Review

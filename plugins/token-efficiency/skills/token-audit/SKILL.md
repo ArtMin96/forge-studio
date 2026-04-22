@@ -2,6 +2,7 @@
 name: token-audit
 description: Audit current session for token waste patterns. Identifies duplicate reads, large outputs, excessive tool calls, and recommends optimizations.
 disable-model-invocation: true
+model: haiku
 allowed-tools:
   - Read
   - Bash

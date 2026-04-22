@@ -1,7 +1,9 @@
 ---
 name: memory-index
-description: List, audit, and clean up stored memories. Use to maintain memory hygiene and remove stale entries.
+description: List, audit, and clean up stored memories.
+when_to_use: To maintain memory hygiene, remove stale entries, or verify a specific memory against current state.
 disable-model-invocation: true
+model: haiku
 ---
 
 # /memory-index — Audit Memory

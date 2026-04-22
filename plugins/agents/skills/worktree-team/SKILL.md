@@ -1,8 +1,10 @@
 ---
 name: worktree-team
-description: Bootstrap N parallel agents each in an isolated git worktree with a role-scoped CLAUDE.md. Use when multiple agents must edit the same repo in parallel without stepping on each other. Complements /fan-out (in-session parallelism) and /dispatch (single-session orchestration). Max 5 roles.
+description: Bootstrap N parallel agents each in an isolated git worktree with a role-scoped CLAUDE.md, so multiple agents can edit the same repo without stepping on each other.
+when_to_use: When two or more streams of work must not interleave edits, or when long-running parallel research and implementation splits need full isolation. Max 5 roles.
 disable-model-invocation: true
 argument-hint: <role1,role2,...> [--owned <role>:<path>,<role>:<path>]
+effort: high
 allowed-tools:
   - Bash
   - Read

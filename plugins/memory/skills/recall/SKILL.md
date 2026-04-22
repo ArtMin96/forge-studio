@@ -1,6 +1,7 @@
 ---
 name: recall
-description: Search and retrieve stored memories. Load topic files on demand. Use when you need context from previous sessions.
+description: Search and retrieve stored memories. Load topic files on demand.
+when_to_use: When you need context from previous sessions, or before starting work on a topic that may have been explored before.
 disable-model-invocation: true
 ---
 

@@ -1,6 +1,7 @@
 ---
 name: checkpoint
-description: Mid-session drift check. Compare current work against original task. Detect scope creep and context bloat. Use periodically during long sessions.
+description: Mid-session drift check. Compare current work against original task. Detect scope creep and context bloat.
+when_to_use: Periodically during long sessions, or any time the work feels like it may have drifted from the original plan.
 disable-model-invocation: true
 allowed-tools:
   - Read

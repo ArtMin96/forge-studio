@@ -1,7 +1,9 @@
 ---
 name: status
 description: On-demand snapshot of where the session stands — active plan, last handoff, recent traces, context pressure. Composes existing plugins; no new persistence.
+when_to_use: Anytime you want a quick situational report on session state without creating new artifacts.
 disable-model-invocation: true
+model: haiku
 allowed-tools:
   - Read
   - Bash

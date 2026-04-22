@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-14 plugins. 46 skills. 47 hooks. 4 agents. 8 behavioral rules.
+14 plugins. 47 skills. 51 hooks. 4 agents. 8 behavioral rules.
 
 ---
 
@@ -54,7 +54,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | **agents** | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries, worktree-team orchestration, directory-ownership + output-schema checks | 3 | 5 |
 | **reference** | Hidden Claude Code features: thinking modes, parallel patterns, CLI piping | 0 | 3 |
 | **traces** | JSONL execution traces, compiled views, failure mining, harness evolution | 5 | 4 |
-| **diagnostics** | Documentation drift (`/entropy-scan`) + pre-commit mechanical correctness (`/validate-marketplace`) | 0 | 2 |
+| **diagnostics** | Documentation drift (`/entropy-scan`), pre-commit mechanical correctness (`/validate-marketplace`), project docs QA (`/docs-maintenance`) | 0 | 3 |
 | **caveman** | Always-on compressed output (~65% token savings). Survives compaction. | 2 | 1 |
 | **token-efficiency** | Duplicate read detection, session token audit | 1 | 1 |
 | **research-gate** | Blocks Edit/Write on unread files + exploration depth warnings | 4 | 0 |
@@ -78,7 +78,8 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | `/healthcheck` | evaluator | Run quality pipeline (Pint + Larastan + optional tests) |
 | `/audit-context` | context-engine | Analyze token overhead from CLAUDE.md, plugins, MCP servers |
 | `/entropy-scan` | diagnostics | Full 6-check codebase health scan |
-| `/validate-marketplace` | diagnostics | Pre-commit mechanical validator (JSON, frontmatter, hook exec, skill size) |
+| `/validate-marketplace` | diagnostics | Pre-commit validator: marketplace JSON, SKILL.md schema (2026 fields), hook exec, agent preload coherence, skill size |
+| `/docs-maintenance [mode]` | diagnostics | Project docs QA: audit freshness, validate links/images, enforce style, optimize structure. Modes: `--audit`, `--validate`, `--optimize`, `--update`, `--comprehensive` |
 | `/lineage-audit` | memory | Audit `.claude/lineage/ledger.jsonl` for protocol invariants |
 | `/worktree-team <roles>` | agents | Bootstrap N parallel agents in git worktrees with role-scoped CLAUDE.md |
 | `/evolve` | workflow | Self-evolution cycle: propose → assess → user approval → commit (Autogenesis protocol) |

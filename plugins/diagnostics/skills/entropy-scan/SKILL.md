@@ -1,7 +1,9 @@
 ---
 name: entropy-scan
 description: Scan the marketplace for documentation drift, registration gaps, convention violations, stale memory, and HARNESS_SPEC invariant compliance. Reports only — no writes.
+when_to_use: Run weekly or before releases to catch drift between documentation and reality.
 disable-model-invocation: true
+effort: high
 allowed-tools:
   - Read
   - Bash
@@ -19,7 +21,7 @@ Run all 7 checks. Report results in the structured format below. **Do not modify
 
 ### Check 1: Plugin Count Drift
 
-Compare README.md header line (e.g., "11 plugins. 39 skills. 25 hooks. 4 agents.") against actual counts:
+Compare README.md header line (e.g., "14 plugins. 47 skills. 51 hooks. 4 agents.") against actual counts:
 
 ```bash
 # Plugins
@@ -66,11 +68,14 @@ Report: directories without marketplace entries, and marketplace entries without
 ### Check 3: SKILL.md Frontmatter Completeness
 
 For each SKILL.md found via `find plugins -name "SKILL.md"`:
-- Verify `name:` field exists
-- Verify `description:` field exists
-- Verify `disable-model-invocation: true` is present
+- Verify `description:` field exists (official 2026 schema — only `description` is strongly recommended; `name` defaults to directory name if omitted)
+- If any of these fields are present, verify they use valid values:
+  - `effort`: must be one of `low|medium|high|xhigh|max`
+  - `context`: if `fork`, an `agent:` field is strongly recommended (defaults to `general-purpose` otherwise)
+- Flag any unknown frontmatter keys (authoritative list: `name, description, when_to_use, argument-hint, arguments, disable-model-invocation, user-invocable, allowed-tools, model, effort, context, agent, hooks, paths, shell`)
+- Flag any agent whose `skills:` preload list references a skill with `disable-model-invocation: true` (silently skipped per official docs)
 
-Report any SKILL.md missing required fields.
+Report any SKILL.md failing these checks. `disable-model-invocation` is optional, not required — use it only when the skill should be user-invoke-only.
 
 ### Check 4: Hook Script Executability
 

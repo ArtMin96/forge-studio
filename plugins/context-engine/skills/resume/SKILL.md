@@ -1,6 +1,7 @@
 ---
 name: resume
-description: Resume work from the latest handoff document. Use at the start of a new session to pick up where you left off.
+description: Resume work from the latest handoff document, briefing the new session on state, uncommitted changes, and next steps.
+when_to_use: At the start of a new session to pick up where you left off.
 disable-model-invocation: true
 allowed-tools:
   - Read

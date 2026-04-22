@@ -1,6 +1,7 @@
 ---
 name: remember
-description: Store a decision, pattern, or insight to persistent memory. Use when you learn something that should survive session boundaries.
+description: Store a decision, pattern, or insight to persistent memory.
+when_to_use: When you learn something that should survive session boundaries — architectural decisions, user preferences, non-obvious constraints.
 disable-model-invocation: true
 ---
 

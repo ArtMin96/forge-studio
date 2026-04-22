@@ -1,9 +1,11 @@
 ---
 name: challenge
-description: "Draft Verification critique: self-review + git history comparison. Run after completing complex features or security-sensitive code, before marking complete."
+description: "Draft Verification critique: self-review + git history comparison."
+when_to_use: After completing complex features or security-sensitive code, before marking complete.
 disable-model-invocation: true
-effort: high
+effort: xhigh
 context: fork
+agent: general-purpose
 allowed-tools:
   - Read
   - Grep

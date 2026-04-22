@@ -1,7 +1,11 @@
 ---
 name: trace-evolve
-description: Analyze execution traces to cluster failure patterns and propose harness improvements (rules, hooks, skills)
+description: Analyze execution traces to cluster failure patterns and propose harness improvements (rules, hooks, skills).
+when_to_use: Run weekly or when you suspect recurring failure patterns across sessions. Requires compiled trace views — run `/trace-compile` first if summaries are absent.
 disable-model-invocation: true
+effort: xhigh
+paths:
+  - ".claude/traces/*.jsonl"
 ---
 
 # Trace Evolve

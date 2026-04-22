@@ -1,7 +1,9 @@
 ---
 name: postmortem
-description: Structured bug autopsy after fixing a bug. Analyzes root cause, classifies the bug, and recommends prevention. Run after any non-trivial bug fix.
+description: Structured bug autopsy after fixing a bug. Analyzes root cause, classifies the bug, and recommends prevention.
+when_to_use: After any non-trivial bug fix.
 disable-model-invocation: true
+effort: xhigh
 argument-hint: [description of the bug]
 allowed-tools:
   - Read

@@ -1,6 +1,7 @@
 ---
 name: lean-claude-md
-description: Trim a CLAUDE.md file to only the lines that change behavior. Applies the 30-line principle from Claude Code's creator. Use when CLAUDE.md feels bloated.
+description: Trim a CLAUDE.md file to only the lines that change behavior. Applies the 30-line principle from Claude Code's creator.
+when_to_use: When CLAUDE.md feels bloated, compliance has dropped, or the file has grown beyond 100 lines.
 disable-model-invocation: true
 argument-hint: [path-to-claude-md]
 allowed-tools:

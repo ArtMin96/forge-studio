@@ -1,8 +1,7 @@
 ---
 name: caveman
-description: >
-  Switch caveman intensity level. Default "full" is always active via hooks.
-  Use /caveman lite for professional-tight, /caveman ultra for maximum compression.
+description: Switch caveman intensity level (lite, full, or ultra). Full is the default active via hooks.
+when_to_use: When the user wants to change token-compression aggressiveness mid-session.
 argument-hint: <lite|full|ultra>
 disable-model-invocation: true
 ---

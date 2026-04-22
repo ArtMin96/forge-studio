@@ -1,6 +1,7 @@
 ---
 name: handoff
-description: Generate a structured session handoff document for seamless context transfer to a fresh session. Use when ending a session, switching tasks, or context is getting full.
+description: Generate a structured session handoff document for seamless context transfer to a fresh session.
+when_to_use: When ending a session, switching tasks, or when context is getting full (>70% capacity).
 disable-model-invocation: true
 argument-hint: [topic]
 allowed-tools:

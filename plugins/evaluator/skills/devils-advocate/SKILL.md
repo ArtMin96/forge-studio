@@ -1,10 +1,9 @@
 ---
 name: devils-advocate
-description: Argue against a design decision or implementation approach. Forces consideration of alternatives before committing. Use when evaluating architecture or design choices.
+description: Argue against a design decision or implementation approach.
+when_to_use: When evaluating architecture or design choices, before committing to an approach.
 disable-model-invocation: true
-effort: high
 argument-hint: <decision-or-approach>
-context: fork
 allowed-tools:
   - Read
   - Grep

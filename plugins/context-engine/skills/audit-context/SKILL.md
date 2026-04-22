@@ -1,6 +1,7 @@
 ---
 name: audit-context
-description: Analyze your current context token overhead. Find waste from bloated CLAUDE.md, unnecessary skills, and idle MCP servers. Use to optimize your setup.
+description: Analyze your current context token overhead. Find waste from bloated CLAUDE.md, unnecessary skills, and idle MCP servers.
+when_to_use: When your sessions feel slow, CLAUDE.md has grown unwieldy, or you want to audit token overhead before a large task.
 disable-model-invocation: true
 allowed-tools:
   - Read

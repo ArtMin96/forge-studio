@@ -1,6 +1,10 @@
 ---
 name: lineage-audit
-description: Audit .claude/lineage/ledger.jsonl for protocol invariants — operator sequence, registry slugs, snapshot presence, append-only discipline. Reports only. Use before trusting self-evolution history or diagnosing a rollback failure.
+description: Audit .claude/lineage/ledger.jsonl for protocol invariants — operator sequence, registry slugs, snapshot presence, append-only discipline. Reports only.
+when_to_use: Before trusting self-evolution history, diagnosing a rollback failure, or as a periodic sanity check.
+paths:
+  - ".claude/lineage/*"
+  - ".claude/lineage/ledger.jsonl"
 disable-model-invocation: true
 allowed-tools:
   - Read

@@ -1,6 +1,7 @@
 ---
 name: parallel-power
-description: Multi-session and parallel execution patterns. Worktrees, fan-out, writer/reviewer splits. Use when you need to work on multiple things simultaneously.
+description: Multi-session and parallel execution patterns. Worktrees, fan-out, writer/reviewer splits.
+when_to_use: When you need to work on multiple independent things simultaneously, or want to parallelize a large task across subagents.
 disable-model-invocation: true
 ---
 

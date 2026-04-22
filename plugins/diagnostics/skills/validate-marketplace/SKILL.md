@@ -1,6 +1,7 @@
 ---
 name: validate-marketplace
-description: Pre-commit mechanical validator. Parses marketplace.json, checks every plugin is registered, every SKILL.md has required frontmatter, every hook script is executable, every skill fits the token budget. Complements /entropy-scan (which focuses on drift); this skill focuses on correctness. Safe to run before every commit that touches plugins/.
+description: Pre-commit mechanical validator — checks plugin registration, SKILL.md frontmatter, hook executability, and token budget. Focuses on correctness; complements `/entropy-scan` which focuses on drift.
+when_to_use: Before committing changes that touch `plugins/`, after editing `marketplace.json` or any SKILL.md, or as a CI gate before a version bump.
 disable-model-invocation: true
 allowed-tools:
   - Read
@@ -67,33 +68,51 @@ print('SOURCE_PATH_MISMATCH:', source_mismatch)
 PY
 ```
 
-### Check 3 — SKILL.md Frontmatter Completeness
+### Check 3 — SKILL.md Frontmatter Schema
 
-Every SKILL.md must have `name`, `description`, and `disable-model-invocation: true`.
+Every SKILL.md must have `description`. Only the 2026 official fields are allowed; unknown keys are flagged.
+
+Allowed fields (per code.claude.com/docs/en/skills, 2026 schema):
+`name`, `description`, `when_to_use`, `argument-hint`, `arguments`,
+`disable-model-invocation`, `user-invocable`, `allowed-tools`, `model`,
+`effort`, `context`, `agent`, `hooks`, `paths`, `shell`.
 
 ```bash
 python3 << 'PY'
-import re, glob
+import re, glob, yaml
 
-required = ['name', 'description', 'disable-model-invocation']
+ALLOWED = {
+    'name', 'description', 'when_to_use', 'argument-hint', 'arguments',
+    'disable-model-invocation', 'user-invocable', 'allowed-tools', 'model',
+    'effort', 'context', 'agent', 'hooks', 'paths', 'shell',
+}
 failures = []
 
 for path in sorted(glob.glob('plugins/*/skills/*/SKILL.md')):
     content = open(path).read()
-    # Extract frontmatter
     m = re.match(r'^---\n(.*?)\n---', content, re.DOTALL)
     if not m:
         failures.append((path, 'no frontmatter'))
         continue
-    fm = m.group(1)
-    missing = [k for k in required if not re.search(rf'^{k}:', fm, re.MULTILINE)]
-    if missing:
-        failures.append((path, f'missing: {", ".join(missing)}'))
+    try:
+        fm = yaml.safe_load(m.group(1)) or {}
+    except yaml.YAMLError as e:
+        failures.append((path, f'yaml error: {e}'))
         continue
-    # disable-model-invocation must be true
-    dmi = re.search(r'^disable-model-invocation:\s*(\S+)', fm, re.MULTILINE)
-    if dmi and dmi.group(1).strip() != 'true':
-        failures.append((path, f'disable-model-invocation={dmi.group(1)} (expected true)'))
+    if 'description' not in fm:
+        failures.append((path, 'missing description'))
+        continue
+    unknown = sorted(set(fm) - ALLOWED)
+    if unknown:
+        failures.append((path, f'unknown keys: {", ".join(unknown)}'))
+        continue
+    # description + when_to_use combined cap (1536 chars per official listing budget)
+    combined = (fm.get('description') or '') + ' ' + (fm.get('when_to_use') or '')
+    if len(combined) > 1536:
+        failures.append((path, f'description+when_to_use={len(combined)} chars (>1536 cap)'))
+    # context: fork requires a task body — flag but don't fail
+    if fm.get('context') == 'fork' and 'agent' not in fm:
+        failures.append((path, 'context: fork without agent (defaults to general-purpose — OK but explicit is better)'))
 
 print('FRONTMATTER_FAILURES:', failures if failures else 'none')
 PY
@@ -130,7 +149,63 @@ print('HOOKS_JSON_FAILURES:', failures if failures else 'none')
 PY
 ```
 
-### Check 6 — Skill Size Budget
+### Check 6 — Agent Schema + Skill Preload Coherence
+
+Every agent `.md` in `plugins/*/agents/` must have valid frontmatter and any skill it preloads
+must NOT have `disable-model-invocation: true` (per official docs: disabled skills cannot be
+preloaded into a subagent — Claude Code silently skips them).
+
+```bash
+python3 << 'PY'
+import re, glob, yaml, os
+
+failures = []
+
+# Collect all skill names with their disable-model-invocation flag
+skills_dmi = {}
+for path in sorted(glob.glob('plugins/*/skills/*/SKILL.md')):
+    content = open(path).read()
+    m = re.match(r'^---\n(.*?)\n---', content, re.DOTALL)
+    if not m:
+        continue
+    try:
+        fm = yaml.safe_load(m.group(1)) or {}
+    except yaml.YAMLError:
+        continue
+    name = fm.get('name') or os.path.basename(os.path.dirname(path))
+    skills_dmi[name] = bool(fm.get('disable-model-invocation'))
+
+# Validate each agent
+for path in sorted(glob.glob('plugins/*/agents/*.md')):
+    content = open(path).read()
+    m = re.match(r'^---\n(.*?)\n---', content, re.DOTALL)
+    if not m:
+        failures.append((path, 'no frontmatter'))
+        continue
+    try:
+        fm = yaml.safe_load(m.group(1)) or {}
+    except yaml.YAMLError as e:
+        failures.append((path, f'yaml error: {e}'))
+        continue
+    if 'name' not in fm or 'description' not in fm:
+        failures.append((path, 'missing name or description'))
+        continue
+    # Plugin agents cannot use hooks, mcpServers, permissionMode (silently ignored per docs)
+    for banned in ('hooks', 'mcpServers', 'permissionMode'):
+        if banned in fm:
+            failures.append((path, f'plugin agent uses unsupported field: {banned}'))
+    # Preloaded skills must not be disabled
+    for sk in fm.get('skills') or []:
+        if sk not in skills_dmi:
+            failures.append((path, f'preloads unknown skill: {sk}'))
+        elif skills_dmi[sk]:
+            failures.append((path, f'preloads disabled skill: {sk} (has disable-model-invocation: true — will be silently skipped)'))
+
+print('AGENT_FAILURES:', failures if failures else 'none')
+PY
+```
+
+### Check 7 — Skill Size Budget
 
 Skills should stay under the compaction survival budget.
 
@@ -184,7 +259,11 @@ Status: {CLEAN / {N} non-executable}
 Status: {CLEAN / {N} failures}
 {list}
 
-### Check 6 — Skill Size Budget
+### Check 6 — Agent Schema + Skill Preload Coherence
+Status: {CLEAN / {N} failures}
+{list — flags unknown fields, banned fields (hooks/mcpServers/permissionMode), and disabled-skill preloads}
+
+### Check 7 — Skill Size Budget
 Status: {CLEAN / {N} warn / {N} fail}
 Oversized-fail (>5,000 tokens, will be dropped): {list}
 Oversized-warn (>2,000 tokens, truncation risk): {list}

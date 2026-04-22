@@ -1,6 +1,7 @@
 ---
 name: rules-audit
-description: Audit the current session for behavioral rule violations. Use when asked to review session discipline, check for sycophancy, or evaluate behavioral compliance.
+description: Audit the current session for behavioral rule violations — sycophancy, apologies, scope creep, focus violations, and filler language.
+when_to_use: When asked to review session discipline, check for sycophancy, or evaluate behavioral compliance.
 disable-model-invocation: true
 allowed-tools:
   - Read

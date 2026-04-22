@@ -1,7 +1,9 @@
 ---
 name: router-tune
-description: Analyze router classification history, cluster miss-fires, emit a proposal artifact tweaking route-prompt.sh thresholds or regex rules. Feeds /evolve. First concrete end-to-end SEPL loop in Forge Studio.
+description: Analyze router classification history, cluster miss-fires, emit a proposal artifact tweaking route-prompt.sh thresholds or regex rules. Feeds /evolve.
+when_to_use: When the router has logged enough classifications to identify misfire patterns and you want to generate a tuning proposal.
 disable-model-invocation: true
+effort: xhigh
 allowed-tools:
   - Read
   - Write

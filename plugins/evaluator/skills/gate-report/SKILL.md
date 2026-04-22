@@ -1,7 +1,9 @@
 ---
 name: gate-report
-description: Aggregate all quality warnings from the current session. Use before committing to see a summary of all hook-generated warnings.
+description: Aggregate all quality warnings from the current session into a summary of hook-generated warnings.
+when_to_use: Before committing, to see a consolidated view of all session quality warnings.
 disable-model-invocation: true
+model: haiku
 allowed-tools:
   - Read
   - Bash

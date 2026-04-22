@@ -1,6 +1,7 @@
 ---
 name: timebox
-description: Set a message budget for the current task. Forces efficiency by tracking progress against budget. Use when you want focused, fast work.
+description: Set a message budget for the current task and track progress against it to enforce efficiency.
+when_to_use: When you want focused, fast work with a hard message limit.
 disable-model-invocation: true
 argument-hint: [message-count]
 allowed-tools:

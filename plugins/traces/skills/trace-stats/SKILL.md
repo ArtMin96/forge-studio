@@ -1,7 +1,11 @@
 ---
 name: trace-stats
-description: Quick statistics on recent session traces — command counts, error rates, files modified
+description: Quick statistics on recent session traces — command counts, error rates, files modified.
+when_to_use: When you want a fast numeric summary of recent sessions without deep analysis.
 disable-model-invocation: true
+model: haiku
+paths:
+  - ".claude/traces/*.jsonl"
 ---
 
 # Trace Stats

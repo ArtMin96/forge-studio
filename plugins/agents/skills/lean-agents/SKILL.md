@@ -1,7 +1,9 @@
 ---
 name: lean-agents
-description: Reduce subagent token overhead from ~50K to ~5K per turn. Covers 4-layer isolation, CLAUDE_CODE_SIMPLE mode, and agent dispatch guidelines.
+description: Reduce subagent token overhead from ~50K to ~5K per turn using 4-layer isolation, CLAUDE_CODE_SIMPLE mode, and dispatch guidelines.
+when_to_use: Before spawning subagents when token budget is a concern, or when diagnosing high per-turn cost in multi-agent workflows.
 disable-model-invocation: true
+model: haiku
 ---
 
 # /lean-agents — Subagent Token Optimization

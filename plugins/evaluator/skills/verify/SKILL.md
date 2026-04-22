@@ -1,8 +1,9 @@
 ---
 name: verify
-description: Evidence-based completion check. Run before committing, merging, or claiming any task is done. Prevents the trust-then-verify gap.
+description: Evidence-based completion check. Prevents the trust-then-verify gap.
+when_to_use: Before committing, merging, or claiming any task is done.
 disable-model-invocation: true
-effort: high
+effort: xhigh
 allowed-tools:
   - Read
   - Bash

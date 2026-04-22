@@ -1,6 +1,7 @@
 ---
 name: dispatch
-description: Analyze a task and recommend agent decomposition level. Routes to single-agent, fan-out, or planner-generator-reviewer pipeline.
+description: Analyze a task and recommend how to decompose it across agents (single-agent, fan-out, or planner→generator→reviewer pipeline).
+when_to_use: Before starting work on a feature that may touch 5+ files or has independent sub-tasks worth parallelizing.
 disable-model-invocation: true
 ---
 

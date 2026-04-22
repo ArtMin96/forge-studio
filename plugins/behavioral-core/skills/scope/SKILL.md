@@ -1,6 +1,7 @@
 ---
 name: scope
-description: Create a task scope before starting work. Defines boundaries, acceptance criteria, and file limits to prevent scope creep. Use before any non-trivial task.
+description: Create a task scope with boundaries, acceptance criteria, and file limits to prevent scope creep.
+when_to_use: Before any non-trivial task (3+ steps, multiple files, or unclear requirements).
 disable-model-invocation: true
 argument-hint: <task-description>
 allowed-tools:

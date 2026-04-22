@@ -1,7 +1,9 @@
 ---
 name: healthcheck
-description: Run a full project health check. Auto-detects PHP and/or JS/TS projects and runs the appropriate quality pipeline. Use before committing or when you want a quality snapshot.
+description: Run a full project health check. Auto-detects PHP and/or JS/TS projects and runs the appropriate quality pipeline.
+when_to_use: Before committing or when you want a quality snapshot.
 disable-model-invocation: true
+effort: high
 argument-hint: [--quick|--full]
 allowed-tools:
   - Bash

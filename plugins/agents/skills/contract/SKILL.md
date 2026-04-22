@@ -1,7 +1,7 @@
 ---
 name: contract
 description: Read and confirm the sprint contract from the active plan before implementation begins. Prevents context decay by forcing a fresh Read of criteria.
-disable-model-invocation: true
+when_to_use: Before any non-trivial implementation step, especially when working inside a planner→generator→reviewer pipeline or when plan criteria may have decayed from long context.
 allowed-tools:
   - Read
   - Glob

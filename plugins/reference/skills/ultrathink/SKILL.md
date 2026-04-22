@@ -1,7 +1,9 @@
 ---
 name: ultrathink
-description: Guide on when and how to use Claude Code's thinking modes and effort levels. Use when tackling complex problems that need deep reasoning.
+description: Guide on when and how to use Claude Code's thinking modes and effort levels.
+when_to_use: When tackling complex problems that need deep reasoning, or to learn which effort level suits the task at hand.
 disable-model-invocation: true
+model: haiku
 ---
 
 # Ultrathink: Master Claude's Reasoning Modes

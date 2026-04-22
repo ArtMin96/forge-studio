@@ -1,6 +1,7 @@
 ---
 name: tdd-loop
-description: Red-Green-Refactor loop with real-command completion gates. Use when building features or reproducing bugs test-first. Each phase runs in an isolated subagent context to prevent pollution.
+description: Red-Green-Refactor loop with real-command completion gates. Each phase runs in an isolated subagent context to prevent pollution.
+when_to_use: When building a new feature or reproducing a bug test-first.
 disable-model-invocation: true
 argument-hint: <feature-or-bug-description>
 allowed-tools:

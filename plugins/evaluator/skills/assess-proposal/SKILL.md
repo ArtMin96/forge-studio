@@ -1,7 +1,9 @@
 ---
 name: assess-proposal
 description: Adversarial review of a self-evolution proposal artifact. Emits a pass/fail verdict against four criteria. Pure read — never mutates harness files.
+when_to_use: After /evolve generates a proposal, before user approval and /commit-proposal.
 disable-model-invocation: true
+effort: xhigh
 argument-hint: <proposal-path>
 context: fork
 agent: reviewer

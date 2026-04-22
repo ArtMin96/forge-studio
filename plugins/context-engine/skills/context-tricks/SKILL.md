@@ -1,6 +1,7 @@
 ---
 name: context-tricks
-description: Advanced context window management techniques. Guided compaction, partial compaction, side questions, checkpoints, session discipline. Use to master context management.
+description: Advanced context window management techniques. Guided compaction, partial compaction, side questions, checkpoints, session discipline.
+when_to_use: When you want to master context management, reduce waste, or learn techniques for long or complex sessions.
 disable-model-invocation: true
 ---
 

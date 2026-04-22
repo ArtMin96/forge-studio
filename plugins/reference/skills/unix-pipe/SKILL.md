@@ -1,6 +1,7 @@
 ---
 name: unix-pipe
-description: Use Claude Code as a Unix utility. Headless mode, piping, CI/CD integration, output formats. Use when automating Claude into scripts or pipelines.
+description: Use Claude Code as a Unix utility. Headless mode, piping, CI/CD integration, output formats.
+when_to_use: When automating Claude into scripts, pipelines, or CI/CD workflows.
 disable-model-invocation: true
 ---
 

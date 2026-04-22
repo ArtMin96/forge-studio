@@ -1,9 +1,9 @@
 ---
 name: planner
-description: Read-only exploration agent. Analyzes codebase, identifies patterns, proposes implementation approach. Cannot modify files — capability isolation prevents accidental changes during planning.
+description: Read-only exploration agent that analyzes the codebase and proposes an implementation approach. Use proactively when planning a non-trivial feature, before any multi-file change, or whenever a task needs investigation before code is written. Cannot modify files — capability isolation prevents accidents during planning.
 model: sonnet
 tools: Read, Glob, Grep, Bash
-effort: high
+effort: xhigh
 maxTurns: 30
 skills:
   - contract
