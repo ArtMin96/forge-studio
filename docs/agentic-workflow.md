@@ -15,7 +15,8 @@ Recommended companion plugins (the workflow leans on their skills):
 ```bash
 /plugin install agents@forge-studio           # planner / generator / reviewer + /dispatch /fan-out /contract
 /plugin install evaluator@forge-studio        # /verify /challenge /healthcheck
-/plugin install context-engine@forge-studio   # /handoff /resume /checkpoint
+/plugin install context-engine@forge-studio   # /checkpoint /audit-context /token-pipeline
+/plugin install long-session@forge-studio     # /progress-log /session-resume /init-sh /feature-list
 /plugin install memory@forge-studio           # /remember /recall
 ```
 
@@ -49,7 +50,7 @@ Five hook events drive the pipeline:
 | `UserPromptSubmit` | Classifies the prompt (shell regex, optional Haiku fallback) and suggests the right pattern. |
 | `SubagentStop` | Points the conversation at the next phase (planner → generator → reviewer → `/verify`). |
 | `Stop` | Every N turns, reminds about unchecked plan items and context pressure. |
-| `PreCompact` | Advises `/handoff` before auto-compaction. |
+| `PreCompact` | Advises `/progress-log` before auto-compaction. |
 
 Every hook is advisory. Nothing blocks. The model stays in charge.
 
@@ -157,7 +158,7 @@ Router classifies `pipeline`. Behavior you'll see:
 
 5. `SubagentStop` → hook nudges `/verify`. The evaluator plugin runs the contract's verification command and returns an evidence-backed verdict.
 
-6. If `$CLAUDE_CONTEXT_WINDOW_USED_PCT ≥ 75`, the `Stop` hook suggests `/handoff` so the decisions persist into the next session.
+6. If `$CLAUDE_CONTEXT_WINDOW_USED_PCT ≥ 75`, the `Stop` hook suggests `/progress-log` so the decisions persist into the next session.
 
 ### 3. Fan-out — parallel batch
 
@@ -207,17 +208,17 @@ Near the end of a long session, `Stop` fires after a turn and the hook emits:
 
 ```
 [workflow] Plan subscription-upgrade.md has 2 unchecked items. Update the plan or reconcile before claiming done.
-[workflow] Context at 78%. Run /handoff (context-engine) before compaction risks information loss.
+[workflow] Context at 78%. Run /progress-log (context-engine) before compaction risks information loss.
 ```
 
-You run `/handoff billing-upgrade`. A `.claude/handoffs/2026-04-20-billing-upgrade.md` is written with done / in-progress / blockers / decisions / next-steps. Next session, `SessionStart` surfaces it:
+You run `/progress-log billing-upgrade`. A `.claude/progress-logs/2026-04-20-billing-upgrade.md` is written with done / in-progress / blockers / decisions / next-steps. Next session, `SessionStart` surfaces it:
 
 ```
-[workflow] Last handoff: 2026-04-20-billing-upgrade.md (0d ago). Run /resume to load it.
+[workflow] Last handoff: 2026-04-20-billing-upgrade.md (0d ago). Run /session-resume to load it.
 [workflow] Active plan: subscription-upgrade.md (2 unchecked items).
 ```
 
-`/resume` picks up where you left off.
+`/session-resume` picks up where you left off.
 
 ### 6. Asking for an override
 
@@ -241,7 +242,7 @@ Typical output:
 
 ```
 Plan:     subscription-upgrade.md (0d old, 5/7 done)
-Handoff:  2026-04-20-billing-upgrade.md (0d ago) — /resume to load
+Handoff:  2026-04-20-billing-upgrade.md (0d ago) — /session-resume to load
 Traces:   31 events, last: Bash pest --filter=SubscriptionUpgrade
 Pressure: 62% (Moderate) — consider /compact
 Router:   pipeline:3 single-agent:2 tdd-loop:1
@@ -260,7 +261,7 @@ Silent sections are omitted — no "None" spam.
 | Plan has no `## Contract` section | Subagent-transition nudges still fire, but carry less information. | Add the section. Contract-backed runs survive compaction; loose plans do not. |
 | Subagent crashes mid-pipeline | State is on disk (`.claude/plans/*.md`). Nothing is lost. | Next turn, re-dispatch from the plan — don't restart. |
 | `turn-gate.sh` warns every 3 turns and it's noisy | Bump `WORKFLOW_TURN_GATE_INTERVAL` to `5` or `10`. | Setting takes effect next session. |
-| Auto-compaction imminent, handoff not yet written | `pre-compact-handoff.sh` emits an advisory. | Run `/handoff` before the compaction fires. The hook does not block compaction. |
+| Auto-compaction imminent, handoff not yet written | `pre-compact-handoff.sh` emits an advisory. | Run `/progress-log` before the compaction fires. The hook does not block compaction. |
 
 Hooks are advisory — none exit with code 2. They surface signals; the decision stays with you and Claude.
 

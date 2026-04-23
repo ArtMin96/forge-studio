@@ -18,11 +18,19 @@
     },
     {
       "name": "context-engine",
-      "description": "Context management: progressive pressure tracking, session handoffs, drift detection, edit safety, large-file warnings, plan mode hooks, MCP monitoring, prompt budget awareness",
-      "version": "1.3.0",
+      "description": "Context management: progressive pressure tracking, drift detection, edit safety, large-file warnings, plan mode hooks, MCP monitoring, prompt budget awareness, failure-escalation with safe-mode flag.",
+      "version": "1.4.0",
       "source": "./plugins/context-engine",
       "category": "context-management",
-      "keywords": ["context", "handoff", "session-management", "edit-safety", "plan-mode", "mcp-monitoring", "harness:context-management", "overhead:minimal", "role:sensor-computational"]
+      "keywords": ["context", "session-management", "edit-safety", "plan-mode", "mcp-monitoring", "harness:context-management", "overhead:minimal", "role:sensor-computational"]
+    },
+    {
+      "name": "long-session",
+      "description": "Long-running session continuity: init.sh bootstrap, append-only claude-progress.txt log, features.json testable-requirements list, /session-resume briefing.",
+      "version": "1.0.0",
+      "source": "./plugins/long-session",
+      "category": "context-management",
+      "keywords": ["long-session", "session-continuity", "init.sh", "progress-log", "features", "harness:context-management", "overhead:minimal", "role:sensor-computational"]
     },
     {
       "name": "memory",
@@ -95,6 +103,14 @@
       "source": "./plugins/diagnostics",
       "category": "diagnostics",
       "keywords": ["health", "entropy", "invariants", "validation", "harness:entropy-management", "overhead:zero", "role:sensor-computational"]
+    },
+    {
+      "name": "policy-gateway",
+      "description": "Policy Gateway (TRAE §5.2.4) between planner and execution: PII/secrets scan, prompt-injection detection, sensitive-ops audit. Same permissionDecision:deny contract as behavioral-core block-destructive. Rules live in rules.d/ so SEPL can evolve them.",
+      "version": "1.0.0",
+      "source": "./plugins/policy-gateway",
+      "category": "behavioral-steering",
+      "keywords": ["policy", "security", "secrets", "injection", "audit", "harness:behavioral-steering", "overhead:minimal", "role:guide-computational"]
     },
     {
       "name": "research-gate",

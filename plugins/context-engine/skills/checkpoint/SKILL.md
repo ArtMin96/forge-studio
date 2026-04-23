@@ -54,7 +54,7 @@ Quick drift check: compare current work against the original plan. Keep this ana
    - "On track. Keep going."
    - "Minor drift. Refocus on: {specific task}."
    - "Significant drift. Consider `/compact` to reclaim context."
-   - "Session is heavy. Create `/handoff` and start fresh."
+   - "Session is heavy. Run `/progress-log` and start fresh."
    ```
 
 5. **Keep the entire output under 150 words.** This checkpoint should not itself contribute to context bloat.

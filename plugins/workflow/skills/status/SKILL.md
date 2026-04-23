@@ -1,6 +1,6 @@
 ---
 name: status
-description: On-demand snapshot of where the session stands — active plan, last handoff, recent traces, context pressure. Composes existing plugins; no new persistence.
+description: On-demand snapshot of where the session stands — active plan, last progress-log entry, recent traces, context pressure. Composes existing plugins; no new persistence.
 when_to_use: Anytime you want a quick situational report on session state without creating new artifacts.
 disable-model-invocation: true
 model: haiku
@@ -26,14 +26,14 @@ ls -t .claude/plans/*.md 2>/dev/null | head -1
 If found: basename, age (days), count of `- [ ]` unchecked items, count of `- [x]` checked items.
 If none: `No active plan.`
 
-### 2. Last handoff
+### 2. Last progress entry
 
 ```bash
-ls -t .claude/handoffs/*.md 2>/dev/null | head -1
+ls -t claude-progress.txt 2>/dev/null | head -1
 ```
 
-If found: basename + age. Suggest `/resume` if the user hasn't loaded it yet (check whether the session started today vs days ago).
-If none: `No handoffs recorded.`
+If found: file age + tail 1 entry. Suggest `/session-resume` if the user hasn't loaded it yet (check whether the session started today vs days ago).
+If none: `No progress recorded.`
 
 ### 3. Recent execution traces
 
@@ -63,7 +63,7 @@ Six lines max. Example:
 
 ```
 Plan:     refactor-billing.md (2d old, 3/7 done)
-Handoff:  2026-04-18-billing.md (2d ago) — /resume to load
+Progress: claude-progress.txt (2d ago) — /session-resume to load
 Traces:   42 events, last: Bash grep "Subscription"
 Pressure: 58% (Moderate) — consider /compact
 Router:   pipeline:5 single-agent:3 tdd-loop:2

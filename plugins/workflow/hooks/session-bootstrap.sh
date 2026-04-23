@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# SessionStart: surface the latest handoff and active plan so the session resumes
-# in-context without the user typing /resume. Silent when there's nothing to report.
+# SessionStart: surface recent progress + active plan so the session resumes
+# in-context without the user typing /session-resume. Silent when nothing to report.
 #
-# Composes context-engine's handoff artifacts instead of duplicating their logic.
+# Composes long-session's claude-progress.txt instead of duplicating its logic.
 
 INPUT=$(cat 2>/dev/null || true)
 SOURCE=$(echo "$INPUT" | jq -r '.source // "startup"' 2>/dev/null)
@@ -15,15 +15,11 @@ fi
 
 MSG=""
 
-# Most recent handoff, if any.
-HANDOFFS_DIR=".claude/handoffs"
-if [ -d "$HANDOFFS_DIR" ]; then
-  LATEST_HANDOFF=$(find "$HANDOFFS_DIR" -maxdepth 1 -name '*.md' -printf '%T@ %p\n' 2>/dev/null \
-    | sort -rn | head -1 | cut -d' ' -f2-)
-  if [ -n "$LATEST_HANDOFF" ]; then
-    AGE_DAYS=$(( ( $(date +%s) - $(stat -c %Y "$LATEST_HANDOFF" 2>/dev/null || echo 0) ) / 86400 ))
-    MSG="${MSG}[workflow] Last handoff: $(basename "$LATEST_HANDOFF") (${AGE_DAYS}d ago). Run /resume to load it."$'\n'
-  fi
+# Most recent progress-log entry, if any.
+PROGRESS_FILE="claude-progress.txt"
+if [ -f "$PROGRESS_FILE" ]; then
+  AGE_DAYS=$(( ( $(date +%s) - $(stat -c %Y "$PROGRESS_FILE" 2>/dev/null || echo 0) ) / 86400 ))
+  MSG="${MSG}[workflow] claude-progress.txt updated ${AGE_DAYS}d ago. Run /session-resume for full briefing."$'\n'
 fi
 
 # Active plan + unchecked item count.

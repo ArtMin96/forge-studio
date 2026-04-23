@@ -5,14 +5,14 @@
 #
 # Blocks when:
 #   1. State file is currently being written (race condition)
-#   2. Uncommitted changes exist with no handoff (data loss risk)
+#   2. Uncommitted changes exist with no recent /progress-log entry (data loss risk)
 #   3. Active plan has incomplete tasks (work in progress)
 #
 # Silent when safe (back-pressure principle).
 
 STATE_DIR="${HOME}/.claude"
 STATE_FILE="${STATE_DIR}/pre-compact-state.md"
-HANDOFF_DIR="${STATE_DIR}/handoffs"
+PROGRESS_FILE="claude-progress.txt"
 PLAN_DIR="${STATE_DIR}/plans"
 
 block() {
@@ -34,13 +34,12 @@ fi
 if command -v git &>/dev/null && git rev-parse --is-inside-work-tree &>/dev/null 2>&1; then
   DIRTY=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
   if [[ "${DIRTY:-0}" -gt 5 ]]; then
-    HAS_HANDOFF=false
-    if [[ -d "$HANDOFF_DIR" ]]; then
-      LATEST_HANDOFF=$(find "$HANDOFF_DIR" -maxdepth 1 -name '*.md' -mmin -60 2>/dev/null | head -1)
-      [[ -n "$LATEST_HANDOFF" ]] && HAS_HANDOFF=true
+    HAS_PROGRESS=false
+    if [[ -f "$PROGRESS_FILE" ]] && find "$PROGRESS_FILE" -mmin -60 2>/dev/null | grep -q .; then
+      HAS_PROGRESS=true
     fi
-    if [[ "$HAS_HANDOFF" == "false" ]]; then
-      block "Compaction blocked: ${DIRTY} uncommitted changes with no recent handoff. Run /handoff first to preserve context, then compact."
+    if [[ "$HAS_PROGRESS" == "false" ]]; then
+      block "Compaction blocked: ${DIRTY} uncommitted changes with no recent claude-progress.txt entry. Run /progress-log first to preserve context, then compact."
     fi
   fi
 fi
@@ -53,7 +52,7 @@ if [[ -d "$PLAN_DIR" ]] && [[ -f "$TASKFILE" ]]; then
   if [[ -n "$LATEST_PLAN" ]]; then
     INCOMPLETE=$(jq -r '[.[] | select(.status != "completed")] | length' "$TASKFILE" 2>/dev/null)
     if [[ "${INCOMPLETE:-0}" -gt 3 ]]; then
-      block "Compaction blocked: active plan with ${INCOMPLETE} incomplete tasks. Complete current phase or /handoff before compacting."
+      block "Compaction blocked: active plan with ${INCOMPLETE} incomplete tasks. Complete current phase or /progress-log before compacting."
     fi
   fi
 fi

@@ -18,10 +18,10 @@ Synthesized from 10 industry sources (2026): Anthropic Engineering, Fowler/Thoug
 | 2 | Generator/Worker | Executes bounded work with restricted tool access | `agents/generator` (read-write) |
 | 3 | Evaluator/Verifier | Independently assesses output against criteria (never self-evaluation) | `evaluator/adversarial-reviewer` + `/verify` + `/challenge` + `/assess-proposal` |
 | 4 | Context Firewall | Isolates sub-task context from parent orchestration context | Sub-agents with `context: fork` |
-| 5 | Handoff Artifact | Structured file-based state transfer between agents/phases | `.claude/handoffs/`, `.claude/plans/` |
+| 5 | Handoff Artifact | Structured file-based state transfer between agents/phases | `.claude/plans/`, `.claude/spec.md` (living spec), `claude-progress.txt` (append-only session log), `.claude/features.json` |
 | 6 | Guide (Feedforward) | Pre-execution instructions, conventions, architectural rules | `behavioral-core/rules.d/*.txt` (8 rules), CLAUDE.md |
 | 7 | Sensor (Feedback) | Post-execution observation (computational or inferential) | Static analysis hooks, `/gate-report` |
-| 8 | Policy Kernel | External enforcement of action classification (allow/deny/defer/ask) | `behavioral-core/block-destructive.sh`, `research-gate/require-read-before-edit.sh`, `research-gate/exploration-depth-gate.sh`, settings.json deny list |
+| 8 | Policy Kernel | External enforcement of action classification (allow/deny/defer/ask) | `behavioral-core/block-destructive.sh` (incl. Layer 5 safe-mode gate), `research-gate/require-read-before-edit.sh`, `research-gate/exploration-depth-gate.sh`, `policy-gateway/scan-secrets.sh`, `policy-gateway/scan-injection.sh`, settings.json deny list |
 | 9 | Entropy Collector | Periodic scanning agent restoring codebase invariants | `diagnostics/entropy-scan` |
 | 10 | Progressive Disclosure | Context loaded on-demand, not upfront | `disable-model-invocation: true` on all skills |
 | 11 | Sprint Contract | Negotiated agreement on done-criteria before execution begins | `## Contract` in planner output, `/contract` skill |
@@ -215,13 +215,16 @@ Command-specific: `command`, `async`, `asyncRewake`, `shell`.
 | `shell` | string | `bash` (default) or `powershell`. |
 | `statusMessage` | string | Custom spinner message while hook runs. |
 
-## Invariant: Consecutive-Error Escalation
+## Invariant: Consecutive-Error Escalation + Graceful Degradation
 
-Track consecutive tool failures. After 3 consecutive failures without a successful tool use, inject a deterministic warning to break retry loops.
+Track consecutive tool failures. Two thresholds:
 
-**Rationale** (12-Factor Agent, HumanLayer, 2026): Agents with 50+ turns commonly lose focus and repeat failed approaches. Deterministic escalation after 2-3 failures prevents infinite retry loops.
+1. **Warn threshold** (`FORGE_FAILURE_THRESHOLD`, default 3): inject a deterministic message to break retry loops. Non-blocking.
+2. **Safe-mode threshold** (`FORGE_SAFE_MODE_THRESHOLD`, default 5): write `.claude/safe-mode` flag + emit `safe-mode-enter` ledger entry. `behavioral-core/block-destructive.sh` Layer 5 reads the flag and denies all Bash/Edit/Write mutations until the user runs `/safe-mode off` (which clears the flag, emits `safe-mode-exit`, and suggests `/postmortem`).
 
-**Validation**: `PostToolUseFailure` hook must track consecutive count, warn at threshold, reset on `PostToolUse` success.
+**Rationale** (TRAE §5.2.4 "Graceful Degradation" + 12-Factor Agent, HumanLayer, 2026): After repeated failures, "downshift to a weak-but-safe mode" rather than continuing to attempt mutations. The forced human checkpoint is the value.
+
+**Validation**: `PostToolUseFailure` hook must track consecutive count, warn at warn threshold, write flag + ledger entry at safe-mode threshold. `block-destructive.sh` must check the flag on every `PreToolUse`. `/safe-mode off` must clear the flag, counter, and emit a matching ledger `safe-mode-exit` entry.
 
 ## Invariant: Skill Size Budget
 
@@ -495,6 +498,45 @@ Accepted sources:
 
 ---
 
+## Long-Session Protocol
+
+Long-running sessions (multi-hour / multi-day / cross-session) rely on a durable artifact triad at the repo root + `.claude/`:
+
+| Artifact | Role | Producer | Consumer |
+|---|---|---|---|
+| `init.sh` | Replayable dev-env bootstrap (install, build, test commands) | `/init-sh` | Fresh-context agents; `surface-progress.sh` surfaces its presence |
+| `claude-progress.txt` (repo root) | Append-only session log: `Done / In progress / Blockers / Next` per session | `/progress-log`, `pre-compact-handoff.sh`, `turn-gate.sh` | `surface-progress.sh` (SessionStart), `/session-resume`, `/token-pipeline`, `/rest-audit` |
+| `.claude/spec.md` | Living spec — evolves as planner→generator→reviewer complete | `/living-spec`, `plugins/workflow/hooks/after-subagent.sh` | reviewer step, `/verify`, `/rest-audit` |
+| `.claude/features.json` | Testable requirements expanded from `## Contract` | `/feature-list`, `after-subagent.sh` | `/tdd-loop`, `/verify`, `/rest-audit` |
+
+**Mechanics**:
+1. Planner writes `.claude/plans/{topic}.md` with `## Contract`.
+2. `/feature-list` expands Contract bullets into `features.json` with `verify_cmd` per item.
+3. `/living-spec` initializes `spec.md` from the Contract.
+4. Generator runs; `after-subagent.sh` (SubagentStop) appends a delta block to `spec.md` and flips matching `features.json` items to `done` when commit subjects cite `F<n>` ids.
+5. At session end: `/progress-log` appends to `claude-progress.txt` and emits ledger entry (same SEPL schema).
+6. Next session: `surface-progress.sh` (SessionStart) surfaces the tail.
+
+**Source**: Anthropic — *"Effective harnesses for long-running agents"* (init.sh + claude-progress.txt + feature-list JSON pattern); Augment — *"Intent"* blog (living-spec concept, Coordinator/Specialists/Verifier).
+
+---
+
+## Policy Gateway Protocol
+
+Policy Gateway sits between planner and execution (TRAE §5.2.4). Three layers, all non-destructive to the existing `block-destructive` + `research-gate` chain — same `permissionDecision:deny` JSON contract; same ledger:
+
+| Hook | Event | Role |
+|---|---|---|
+| `scan-secrets.sh` | PreToolUse:Edit\|Write | Regex-match new content against `rules.d/secrets.txt`; deny + emit `policy-block` ledger entry |
+| `scan-injection.sh` | PreToolUse:Bash\|Edit\|Write | Regex-match tool input against `rules.d/injection.txt`; deny + ledger entry |
+| `audit-sensitive-ops.sh` | PostToolUse:Edit\|Write | Non-blocking; append `sensitive-op-audit` ledger entry when writes target `.env`, `secrets/`, `credentials/`, `keys/`, `.pem`, `.key`, `.p12`, `.pfx`, `id_rsa*`, `id_ed25519*` |
+
+**Evolvability**: rule files live in `plugins/policy-gateway/rules.d/` and register as SEPL resources under the slug `hooks/policy-gateway/rules.d/<file>` — `/evolve` can propose additions.
+
+**Deep-dive skill**: `/policy-audit` replays ledger entries + scans the working tree. Invoked by `/rest-audit` Security axis.
+
+---
+
 ## Deliberate Non-Features
 
 Some patterns discussed in external harness literature are intentionally **not** implemented. Documented here to preempt future "why isn't this here?" questions.
@@ -503,7 +545,19 @@ Some patterns discussed in external harness literature are intentionally **not**
 
 **What it is**: A `Stop` hook that re-injects the original prompt into a fresh context window on each turn-end, driving long-horizon tasks to completion without human intervention.
 
-**Why Forge Studio does not ship this**: Every Forge self-evolution step is explicitly human-gated (`propose → assess → commit`, ledger-audited). An auto-continuation primitive conflicts with this discipline — the loop runs work past the operator's attention boundary and can burn budget on a degraded path. `workflow/turn-gate.sh` + manual `/handoff` / `/resume` give the same long-horizon capability with the human kept in the loop.
+**Why Forge Studio does not ship this**: Every Forge self-evolution step is explicitly human-gated (`propose → assess → commit`, ledger-audited). An auto-continuation primitive conflicts with this discipline — the loop runs work past the operator's attention boundary and can burn budget on a degraded path. `workflow/turn-gate.sh` + the long-session artifacts (`init.sh` + `claude-progress.txt` + `features.json` + `spec.md`) give the same long-horizon capability with the human kept in the loop.
+
+### Training-time self-evolution
+
+**What it is**: Agent self-improvement via reward-free world-knowledge exploration (arXiv 2604.18131) or continual-learning approaches (self-distillation, gradient projections, replay, KL penalties — as sketched in Ilija Lichkovski's "Defining Continual Learning" thread).
+
+**Why Forge Studio does not ship this**: These are **training-time** techniques — they modify model weights. Forge Studio's harness is a **runtime** layer between Claude Code and the user's work. Self-evolution at the harness layer means evolving rules / hooks / skills / memory topics / env vars via SEPL (propose → assess → commit → rollback). The two are complementary, not substitutable.
+
+### Managed Agents API port (Session / Harness / Sandbox split)
+
+**What it is**: Anthropic's April 9 2026 Claude Managed Agents introduced a "meta-harness" decomposition — Session (append-only event log), Harness (model loop + tool router), Sandbox (execution env) — exposed as composable production APIs.
+
+**Why Forge Studio does not ship this**: Production API concern, not plugin-marketplace concern. Claude Code itself is already a harness; Forge Studio customizes *that* harness. Re-creating the Session/Harness/Sandbox split inside plugins would duplicate the host layer. Where the idea applies — append-only session events — is already covered by `.claude/lineage/ledger.jsonl` (SEPL) and `claude-progress.txt` (long-session).
 
 ### Sandbox / execution isolation primitive
 

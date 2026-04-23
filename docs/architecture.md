@@ -19,9 +19,33 @@ Design rationale, component model, hook mechanics. For research citations, see [
 | 7 | Behavioral Steering | Ongoing course correction | `behavioral-core` (hooks) |
 | 8 | Self-Evolution | Auditable propose → assess → commit → rollback over versioned resources | `workflow` + `evaluator` + `memory` (ledger at `.claude/lineage/`) |
 
-Cross-cutting plugins: `evaluator`, `workflow`, `reference`, `traces`, `diagnostics`, `caveman`, `token-efficiency`, `research-gate`.
+Cross-cutting plugins: `evaluator`, `workflow`, `reference`, `traces`, `diagnostics`, `caveman`, `token-efficiency`, `research-gate`, `long-session`, `policy-gateway`.
 
 Component 8 is drawn from *Autogenesis: A Self-Evolving Agent Protocol* (arXiv:2604.15034, Apr 2026). See `docs/lineage.md` for the protocol and `HARNESS_SPEC.md` §Self-Evolution Protocol for invariants.
+
+### TRAE Harness-Engineering Framings (overlays, not replacements)
+
+The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive Guide to Harness Engineering" (2026) provides orthogonal *outcomes* and *mechanics* framings useful for audit and design:
+
+**R.E.S.T. objectives** (outcome axes — use `/rest-audit`):
+- **Reliability** — fault recovery (long-session `init.sh` + `claude-progress.txt`), idempotency (SEPL snapshots), graceful degradation (`.claude/safe-mode` flag)
+- **Efficiency** — token budgeting (`/timebox`, caveman, `/token-pipeline`), rtk optimizer, code-graph instead of re-reads
+- **Security** — `behavioral-core/block-destructive` Layer 5 (safe-mode) + layers 1–4 (patterns), `research-gate`, `policy-gateway` (secrets + injection + sensitive-op audit)
+- **Traceability** — `.claude/lineage/ledger.jsonl` (SEPL + policy-block + safe-mode + progress-log), `traces/` JSONL collection, `claude-progress.txt`
+
+**PPAF loop** (agent cycle):
+- **Perception** — context-engine, long-session SessionStart surface-progress
+- **Planning** — workflow/orchestrate, agents/planner, `/feature-list`, `/living-spec`
+- **Action** — agents/generator, evaluator skills
+- **Feedback/Reflection** — traces, `/verify` (now executes features.json verify_cmds), `/reflect`, memory, `/rest-audit`
+
+**REPL container model** (harness as deterministic shell around stochastic LLM):
+- *Read* — context-engine assembles structured prompt from CLAUDE.md + MCP + turns + memory + progress tail
+- *Eval* — PreToolUse hooks intercept tool calls (block-destructive, research-gate, policy-gateway)
+- *Print* — PostToolUse hooks wrap outputs as observations (static analysis, traces, thrashing detection)
+- *Loop* — workflow orchestrates phase transitions; SubagentStop updates `spec.md` + `features.json`
+
+**State Separation Principle**: Claude Code is treated as a stateless compute unit; all cross-turn state lives in files (`.claude/plans/`, `.claude/spec.md`, `.claude/features.json`, `.claude/lineage/ledger.jsonl`, `.claude/memory/`, `.claude/safe-mode`, `claude-progress.txt`). Forcing the LLM to maintain state via prompt engineering is the anti-pattern.
 
 ---
 
@@ -39,7 +63,9 @@ Component 8 is drawn from *Autogenesis: A Self-Evolving Agent Protocol* (arXiv:2
 │  │ evaluator     │ │ memory       ││
 │  │ research-gate │ │ traces       ││
 │  │ token-        │ │ diagnostics  ││
-│  │ efficiency    │ │              ││
+│  │ efficiency    │ │ long-session ││
+│  │ policy-       │ │              ││
+│  │ gateway       │ │              ││
 │  └───────────────┘ └──────────────┘│
 │  ┌─ Action ──────┐ ┌─ Style ─────┐│
 │  │ workflow      │ │ caveman     ││
@@ -64,10 +90,11 @@ Component 8 is drawn from *Autogenesis: A Self-Evolving Agent Protocol* (arXiv:2
 | SessionStart | context-engine | mcp-instruction-monitor.sh | MCP server token overhead + config injection-pattern scan |
 | SessionStart | caveman | caveman-init.sh | Load compressed communication rules |
 | SessionStart | behavioral-core | output-style-check.sh | One-time check for unsafe output styles |
-| SessionStart | workflow | session-bootstrap.sh | Surface latest handoff + unchecked plan items (agentic workflow bootstrap) |
+| SessionStart | workflow | session-bootstrap.sh | Surface active plan + unchecked items + recent progress (agentic workflow bootstrap) |
+| SessionStart | long-session | surface-progress.sh | Tail `claude-progress.txt`, `features.json` status, `spec.md` delta, `init.sh` presence |
 | PreCompact | context-engine | pre-compact-guard.sh | Block compaction when uncommitted work has no handoff or tasks in-progress |
 | PreCompact | context-engine | pre-compact.sh | Save scope, plan, handoff, git state, tasks to recovery file |
-| PreCompact | workflow | pre-compact-handoff.sh | Advisory nudge to run `/handoff` before auto-compaction |
+| PreCompact | workflow | pre-compact-handoff.sh | Advisory nudge to run `/progress-log` before auto-compaction (freshness check on `claude-progress.txt`) |
 | PostCompact | context-engine | post-compact.sh | Re-inject scope, plan, tasks, modified files from recovery |
 | PostCompact | caveman | caveman-restore.sh | Re-inject compressed communication rules |
 | SessionEnd | traces | session-summary.sh | Write session summary to trace file |
@@ -86,10 +113,12 @@ Component 8 is drawn from *Autogenesis: A Self-Evolving Agent Protocol* (arXiv:2
 
 | Matcher | Plugin | Hook | What It Does |
 |---------|--------|------|-------------|
-| Bash | behavioral-core | block-destructive.sh | Block `rm -rf`, `git push --force`, etc. |
+| Bash | behavioral-core | block-destructive.sh | **Block** safe-mode-flagged sessions (Layer 5) + `rm -rf`, `git push --force`, etc. |
 | Edit\|Write | behavioral-core | scope-guard.sh | Warn when editing files outside active scope |
 | Edit\|Write | research-gate | require-read-before-edit.sh | **Block** edit/write if file not Read in session (exit 2) |
 | Edit\|Write | research-gate | exploration-depth-gate.sh | Warn if insufficient exploration before first edit |
+| Edit\|Write | policy-gateway | scan-secrets.sh | **Block** on secret pattern match (`rules.d/secrets.txt`); ledger `policy-block` |
+| Bash\|Edit\|Write | policy-gateway | scan-injection.sh | **Block** on prompt-injection pattern (`rules.d/injection.txt`); ledger `policy-block` |
 | Bash | evaluator | pre-commit-gate.sh | Warn if plan exists but `/verify` not run |
 | Read | token-efficiency | track-duplicate-reads.sh | Warn on duplicate reads |
 

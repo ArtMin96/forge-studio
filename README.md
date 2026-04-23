@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-14 plugins. 48 skills. 51 hooks. 4 agents. 9 behavioral rules.
+16 plugins. 56 skills. 51 hooks. 4 agents. 9 behavioral rules.
 
 ---
 
@@ -15,6 +15,7 @@
 # Install by layer — pick what you need
 /plugin install behavioral-core@forge-studio    # Behavioral steering (start here)
 /plugin install context-engine@forge-studio      # Context window management
+/plugin install long-session@forge-studio        # Long-running sessions: init.sh + claude-progress.txt + features.json
 /plugin install memory@forge-studio              # Cross-session recall
 /plugin install evaluator@forge-studio           # Quality gates & review
 /plugin install workflow@forge-studio            # Orchestration patterns
@@ -25,6 +26,7 @@
 /plugin install caveman@forge-studio             # Token-optimized output
 /plugin install token-efficiency@forge-studio    # Duplicate read detection
 /plugin install research-gate@forge-studio       # Read-before-edit enforcement
+/plugin install policy-gateway@forge-studio      # Secrets + prompt-injection scan, sensitive-ops audit
 /plugin install rtk-optimizer@forge-studio       # Auto-installs rtk binary + registers global hook
 /plugin install code-graph@forge-studio          # Auto-installs code-review-graph + registers MCP for Tree-sitter code graph
 ```
@@ -46,18 +48,20 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 
 | Plugin | Purpose | Hooks | Skills |
 |--------|---------|-------|--------|
-| **behavioral-core** | Behavioral steering via modular `rules.d/` rules, destructive command blocking, scope discipline | 5 | 3 |
-| **context-engine** | Context management: progressive pressure, session handoffs, edit safety, environment bootstrap, compaction recovery, task tracking, failure escalation | 15 | 6 |
+| **behavioral-core** | Modular `rules.d/` steering, destructive command blocking, safe-mode layer (gated by `.claude/safe-mode`), scope discipline | 5 | 4 |
+| **context-engine** | Context management: progressive pressure, edit safety, environment bootstrap, compaction recovery, task tracking, failure escalation, safe-mode trigger | 13 | 5 |
+| **long-session** | Long-running sessions: `init.sh` bootstrap, append-only `claude-progress.txt`, `features.json` testable requirements, `surface-progress` SessionStart hook, `/session-resume` briefing. | 1 | 4 |
 | **memory** | Three-tier memory: pointer index → topic files → searchable transcripts, version-aware updates, ledger audit | 0 | 4 |
-| **evaluator** | Static analysis gates (PHP/JS/TS), adversarial review, verification, reference-fidelity check, test nudge, self-evolution assessment | 8 | 9 |
-| **workflow** | Hook-driven agentic orchestrator: auto-routing (shell/hybrid/LLM), sprint-contract enforcement, TDD loop, handoff nudges, self-evolution loop (propose→assess→commit→rollback) | 5 | 9 |
-| **agents** | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries, worktree-team orchestration, directory-ownership + output-schema checks | 3 | 5 |
+| **evaluator** | Static analysis gates (PHP/JS/TS), adversarial review, verification (+features.json execution), reference-fidelity check, test nudge, self-evolution assessment | 7 | 9 |
+| **workflow** | Hook-driven agentic orchestrator: auto-routing, sprint-contract, TDD, /progress-log nudges, self-evolution loop, **/living-spec** (auto-updating spec via after-subagent) | 5 | 10 |
+| **agents** | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries, worktree-team orchestration, directory-ownership + output-schema checks | 2 | 5 |
 | **reference** | Hidden Claude Code features: thinking modes, parallel patterns, CLI piping | 0 | 3 |
 | **traces** | JSONL execution traces, compiled views, failure mining, harness evolution | 5 | 4 |
-| **diagnostics** | Documentation drift (`/entropy-scan`), pre-commit mechanical correctness (`/validate-marketplace`), project docs QA (`/docs-maintenance`) | 0 | 3 |
+| **diagnostics** | `/entropy-scan` + `/validate-marketplace` + `/docs-maintenance` + **`/rest-audit`** (R.E.S.T. outcomes) + **`/claude-md-structure`** (Karpathy 4-section audit) | 0 | 5 |
 | **caveman** | Always-on compressed output (~65% token savings). Survives compaction. | 2 | 1 |
 | **token-efficiency** | Duplicate read detection, session token audit | 1 | 1 |
 | **research-gate** | Blocks Edit/Write on unread files + exploration depth warnings | 4 | 0 |
+| **policy-gateway** | PreToolUse secrets scan + prompt-injection scan + sensitive-ops audit. Same `permissionDecision:deny` contract as block-destructive. Rules live in `rules.d/` so SEPL can evolve them. | 3 | 1 |
 | **rtk-optimizer** | Auto-installs [rtk-ai/rtk](https://github.com/rtk-ai/rtk) on first session and runs `rtk init -g`. 60-90% token reduction on shell commands. Opt-out: `FORGE_RTK_DISABLED=1`. | 1 | 0 |
 | **code-graph** | Auto-installs [tirth8205/code-review-graph](https://github.com/tirth8205/code-review-graph). Registers a Tree-sitter MCP graph per repo so Claude Code queries structural context instead of re-reading files. Claude Code only. Opt-out: `FORGE_CODE_GRAPH_DISABLED=1`. | 2 | 0 |
 
@@ -71,8 +75,16 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | `/verify` | evaluator | Evidence-based completion check before claiming done |
 | `/verify-refs` | evaluator | Cross-check file paths, symbols, URLs in prior turn against the repo; advisory warning on fabricated references |
 | `/scope <task>` | behavioral-core | Define task boundaries and acceptance criteria |
-| `/handoff [topic]` | context-engine | Generate session transfer document |
-| `/resume` | context-engine | Pick up from latest handoff |
+| `/progress-log [topic]` | long-session | Append session outcomes to `claude-progress.txt`; emits ledger entry |
+| `/session-resume` | long-session | Brief the current session from progress log + spec.md + features.json |
+| `/init-sh` | long-session | Generate executable `init.sh` so fresh sessions can bootstrap the dev env in one command |
+| `/feature-list` | long-session | Expand a plan's `## Contract` into `.claude/features.json` (testable requirements consumed by /tdd-loop and /verify) |
+| `/living-spec` | workflow | Initialize `.claude/spec.md` from the plan; after-subagent appends deltas per phase |
+| `/token-pipeline` | context-engine | 5-stage Collection→Ranking→Compression→Budgeting→Assembly report with a concrete next-action recommendation |
+| `/rest-audit` | diagnostics | R.E.S.T. outcomes audit (Reliability · Efficiency · Security · Traceability) |
+| `/claude-md-structure` | diagnostics | Audit/scaffold CLAUDE.md against Karpathy's 4-section template |
+| `/safe-mode <on\|off\|status>` | behavioral-core | Toggle `.claude/safe-mode` — block mutations after the consecutive-failure threshold |
+| `/policy-audit` | policy-gateway | Report secret/injection blocks from ledger + live repo scan |
 | `/dispatch` | agents | Analyze task, recommend single-agent vs fan-out vs pipeline |
 | `/trace-compile` | traces | Compile raw JSONL traces into summary and error views |
 | `/trace-evolve` | traces | Mine failure patterns, propose harness improvements |
@@ -112,12 +124,13 @@ Hooks fire automatically. No commands needed.
 | SessionStart | context-engine | MCP server instruction token monitoring |
 | SessionStart | caveman | Load compressed communication rules |
 | SessionStart | behavioral-core | One-time check for unsafe output styles |
-| SessionStart | workflow | Surface latest handoff + unchecked plan items (agentic workflow bootstrap) |
+| SessionStart | workflow | Surface active plan + unchecked items + recent progress (agentic workflow bootstrap) |
+| SessionStart | long-session | Surface tail of `claude-progress.txt` + features.json status + spec.md delta + init.sh presence hint |
 | SessionStart | rtk-optimizer | First session: install `rtk` binary + run `rtk init -g`. Subsequent sessions: no-op. |
 | SessionStart | code-graph | Install `code-review-graph` and register its MCP server for the current repo on first run. Subsequent sessions: no-op. |
-| PreCompact | context-engine | Guard: block compaction when uncommitted work has no handoff or tasks are in-progress |
-| PreCompact | context-engine | Save scope, plan, handoff, git state to recovery file |
-| PreCompact | workflow | Advisory nudge to run `/handoff` before auto-compaction |
+| PreCompact | context-engine | Guard: block compaction when uncommitted work has no progress entry or tasks are in-progress |
+| PreCompact | context-engine | Save scope, plan, progress, git state to recovery file |
+| PreCompact | workflow | Advisory nudge to run `/progress-log` before auto-compaction (replaces old /handoff nudge) |
 | PostCompact | context-engine | Re-inject scope, plan, tasks, modified files from recovery |
 | PostCompact | caveman | Re-inject compressed communication rules |
 | SessionEnd | traces | Write session summary to trace file |
@@ -134,10 +147,12 @@ Hooks fire automatically. No commands needed.
 ### Before Tool Use
 | Event | Plugin | What it does |
 |-------|--------|-------------|
-| PreToolUse:Bash | behavioral-core | Block destructive commands (`rm -rf`, `git push --force`, etc.) |
+| PreToolUse:Bash | behavioral-core | **Block** safe-mode-flagged sessions (Layer 5) + destructive commands (`rm -rf`, `git push --force`, etc.) |
 | PreToolUse:Edit\|Write | behavioral-core | Warn when editing files outside active scope |
 | PreToolUse:Edit\|Write | research-gate | **Block** edit/write if file not Read in session (exit 2) |
 | PreToolUse:Edit\|Write | research-gate | Warn if insufficient exploration before first edit |
+| PreToolUse:Edit\|Write | policy-gateway | **Block** on secret pattern match (rules in `rules.d/secrets.txt`); emits `policy-block` ledger entry |
+| PreToolUse:Bash\|Edit\|Write | policy-gateway | **Block** on prompt-injection pattern match (rules in `rules.d/injection.txt`) |
 | PreToolUse:Bash | evaluator | Evaluation gate: warn if plan exists but `/verify` not run |
 
 ### After Tool Use
@@ -162,7 +177,8 @@ Hooks fire automatically. No commands needed.
 | PostToolUse:Bash (.test) | evaluator | Backpressure: replace verbose passing test output with summary |
 | PostToolUse:* | context-engine | Reset consecutive failure counter on success |
 | PostToolUseFailure:* | traces | Log tool failures to session trace |
-| PostToolUseFailure:* | context-engine | Warn after 3 consecutive tool failures |
+| PostToolUseFailure:* | context-engine | Warn at `FORGE_FAILURE_THRESHOLD` (default 3); write `.claude/safe-mode` + ledger `safe-mode-enter` at `FORGE_SAFE_MODE_THRESHOLD` (default 5) |
+| PostToolUse:Edit\|Write | policy-gateway | Audit writes to `.env` / `secrets/` / `credentials/` / key files; ledger `sensitive-op-audit` |
 | TaskCreated | context-engine | Log task for progress guardian |
 | StopFailure | traces | Log API errors and rate limits to session trace |
 
@@ -172,7 +188,7 @@ Hooks fire automatically. No commands needed.
 | SubagentStop | agents | Warn if sprint contract criteria not verified by reviewer |
 | SubagentStop | agents | Warn if generator finished without producing artifacts declared in plan Contract/Output Schema |
 | PreToolUse:Edit\|Write | agents | Directory-ownership guard for worktree-team (opt-in: `FORGE_DIRECTORY_OWNERSHIP=1`) |
-| SubagentStop | workflow | Nudge next phase in planner→generator→reviewer→/verify chain |
+| SubagentStop | workflow | Nudge next phase in planner→generator→reviewer→/verify chain; if `.claude/spec.md` present, append delta block; if `.claude/features.json` present, flip matching items to `done` based on recent commit subjects |
 
 ### Turn Completion
 
@@ -194,7 +210,8 @@ Hooks fire automatically. No commands needed.
 - **Disable evaluation gate**: Set `FORGE_EVALUATION_GATE` to `"0"`.
 - **Disable research gate**: Set `FORGE_RESEARCH_GATE` to `"0"`.
 - **Self-review interval**: Set `FORGE_SELF_REVIEW_INTERVAL` (default 3 edits).
-- **Failure threshold**: Set `FORGE_FAILURE_THRESHOLD` (default 3 consecutive failures).
+- **Failure threshold**: Set `FORGE_FAILURE_THRESHOLD` (default 3 consecutive failures — warning only).
+- **Safe-mode threshold**: Set `FORGE_SAFE_MODE_THRESHOLD` (default 5 consecutive failures — writes `.claude/safe-mode`, blocks mutations until `/safe-mode off`).
 - **Disable rtk auto-install**: Set `FORGE_RTK_DISABLED` to `"1"` (see [rtk-optimizer docs](docs/rtk-optimizer.md)).
 - **Disable code-graph auto-install**: Set `FORGE_CODE_GRAPH_DISABLED` to `"1"` (see [code-graph docs](docs/code-graph.md)).
 - **Enable directory-ownership guard**: Set `FORGE_DIRECTORY_OWNERSHIP` to `"1"` (activates only inside a worktree-team session with an `active-roles.json` registry).

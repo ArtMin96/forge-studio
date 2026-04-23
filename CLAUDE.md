@@ -4,6 +4,17 @@
 
 A marketplace of composable Claude Code plugins implementing harness principles: behavioral steering, context management, memory, evaluation, orchestration, multi-agent decomposition, and execution traces.
 
+## The Codebase Is Not A Changelog
+
+Shipped files (`.sh`, `.md`, `.json`) must not carry process metadata. Never write:
+
+- Sprint/phase/task markers — `# Sprint 2 wiring`, `(Sprint 9)`, `Post-Sprint 3: X replaced Y`
+- References to plans, PRs, research, or "the negotiation" inside source
+- Changelog-style notes — `Previously X`, `Replaced in vN`, `Was /handoff, now /progress-log`, `(modified in Sprint K)`
+- Dangling references to components that no longer exist
+
+Comments explain **why the code is what it is** (hidden constraints, subtle invariants, workarounds for specific bugs). Not when or why it changed. The plan file, PR description, and git history carry that. Source files rot when they reference external process state that evolves without them.
+
 ## Completeness Requirements
 
 Every change must be complete. Before calling work done:

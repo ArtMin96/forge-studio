@@ -23,10 +23,22 @@ Before marking this task complete, answer EVERY question:
 
 ## 2. What's the Verification Method?
 Pick one or more:
+- **features.json (preferred)**: If `.claude/features.json` exists (long-session plugin), execute each `verify_cmd` for features matching the current work. Record results to `.claude/gate/features.json`. `done` status only counts if the verify_cmd actually passed.
 - **Tests**: Run the test suite. Show output. All pass? Which tests cover this change?
 - **Build**: Does it compile/build without errors? Run the build command.
 - **Manual check**: Describe what to look at and what the expected behavior is.
 - **Type check**: Run static analysis if available.
+
+### features.json execution (long-session integration)
+
+If `.claude/features.json` is present:
+1. Read it; for each entry with `status ∈ {pending, in_progress}`, run its `verify_cmd` (skip `# manual` entries; report them as needing human check).
+2. Capture stdout/stderr + exit code.
+3. Write `.claude/gate/features.json` with `[{id, verify_cmd, exit_code, passed, tail}]`.
+4. Flip `status: done` only for entries where `passed: true`. Never auto-flip on `# manual`.
+5. Report pass/fail counts in the verdict.
+
+This is the evidence the reviewer and /gate-report read.
 
 ## 3. Run the Verification
 Actually run it. Show the output. Don't say "it should work" — show that it DOES work.

@@ -151,6 +151,14 @@ done
 
 Authors mark external-policy rules as `external:<reason>` (e.g., `external: tone preference`). The goal is traceability, not gatekeeping.
 
+### Check 9a: R.E.S.T. Audit (sub-check)
+
+Invoke `/rest-audit` (this same plugin). Propagate its axis statuses verbatim. This is the outcome-oriented counterpart to the structural checks above — structural drift AND outcome degradation surface in one report.
+
+### Check 9b: CLAUDE.md Structure (sub-check)
+
+Invoke `/claude-md-structure` on `./CLAUDE.md`. Propagate its PRESENT/WEAK/MISSING statuses. Report any section missing or weak.
+
 ### Check 9: Tool-Menu Inflation
 
 For each agent definition (`plugins/*/agents/*.md`) and each SKILL.md, count entries in `tools:` / `allowed-tools:` frontmatter. Warn if the count exceeds `FORGE_TOOL_MENU_MAX` (default 10).
@@ -237,6 +245,18 @@ Actual: {N} plugins, {N} skills, {N} hooks, {N} agents
 ### Check 9: Tool-Menu Inflation
 **Status:** {PASS / {N} over threshold}
 {List of agent/skill files declaring more than FORGE_TOOL_MENU_MAX tools}
+
+### Check 9a: R.E.S.T. Audit
+**Status:** {PASS / WARN / FAIL}
+Reliability: {status}
+Efficiency:  {status}
+Security:    {status}
+Traceability:{status}
+{Details from /rest-audit}
+
+### Check 9b: CLAUDE.md Structure
+**Status:** {PASS / {N} sections missing or weak}
+{List of section status from /claude-md-structure}
 
 ### Proposed Fixes
 {For each issue, one-line fix command or description}

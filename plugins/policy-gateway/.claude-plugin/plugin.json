@@ -1,0 +1,6 @@
+{
+  "name": "policy-gateway",
+  "description": "Policy Gateway between planner and execution (TRAE §5.2.4): PII/secrets scan, prompt-injection detection, sensitive-ops audit. Same permissionDecision:deny contract as behavioral-core block-destructive. Rules live in rules.d/ so SEPL can evolve them.",
+  "version": "1.0.0",
+  "keywords": ["policy", "security", "secrets", "injection", "audit", "harness:behavioral-steering", "overhead:minimal", "role:guide-computational"]
+}

@@ -41,6 +41,6 @@ When `remaining` reaches **3**, add urgency:
 
 When `remaining` reaches **0**:
 
-> **Timebox reached. Wrap up now: commit what works, /handoff what doesn't.**
+> **Timebox reached. Wrap up now: commit what works, /progress-log what doesn't.**
 
 Stop working on the task. Do not send further implementation messages.

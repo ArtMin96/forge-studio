@@ -425,7 +425,7 @@ Useful variables to set in `settings.json` under `"env"`:
 | `WORKFLOW_ROUTER_LLM_MODEL` | model ID | Model used by the LLM fallback (default `claude-haiku-4-5-20251001`) |
 | `WORKFLOW_ROUTER_CONFIDENCE_THRESHOLD` | `"0.75"` | In `hybrid` mode, shell results below this escalate to the LLM |
 | `WORKFLOW_TURN_GATE_INTERVAL` | `"3"` | Stop-hook nudges fire every N turns (plan items + context pressure) |
-| `WORKFLOW_HANDOFF_PCT` | `"75"` | Context pressure threshold that triggers a `/handoff` nudge |
+| `WORKFLOW_HANDOFF_PCT` | `"75"` | Context pressure threshold that triggers a `/progress-log` nudge (env name retained for back-compat) |
 
 ---
 

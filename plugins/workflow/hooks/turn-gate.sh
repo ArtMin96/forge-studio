@@ -35,12 +35,23 @@ if [ -d "$PLANS_DIR" ]; then
   fi
 fi
 
-# Context pressure → handoff nudge. Thresholds align with context-engine defaults.
 if [ -n "${CLAUDE_CONTEXT_WINDOW_USED_PCT:-}" ]; then
   PCT="$CLAUDE_CONTEXT_WINDOW_USED_PCT"
   THRESH="${WORKFLOW_HANDOFF_PCT:-75}"
   if [ "$PCT" -ge "$THRESH" ] 2>/dev/null; then
-    MSG="${MSG}[workflow] Context at ${PCT}%. Run /handoff (context-engine) before compaction risks information loss."$'\n'
+    MSG="${MSG}[workflow] Context at ${PCT}%. Run /progress-log (long-session) before compaction risks information loss."$'\n'
+  fi
+fi
+
+# Net-new commits this session → suggest /progress-log at session end.
+# Only fires once per WORKFLOW_TURN_GATE_INTERVAL window; combines with the cadence above.
+if [ -d .git ]; then
+  RECENT_COMMITS=$(git log --oneline --since="2 hours ago" 2>/dev/null | wc -l | tr -d ' ')
+  if [ "${RECENT_COMMITS:-0}" -gt 0 ] 2>/dev/null; then
+    # Only nudge if no fresh progress entry exists (<10 min).
+    if [ ! -f claude-progress.txt ] || ! find claude-progress.txt -mmin -10 2>/dev/null | grep -q .; then
+      MSG="${MSG}[workflow] ${RECENT_COMMITS} new commits this session. Run /progress-log before ending to persist state."$'\n'
+    fi
   fi
 fi
 

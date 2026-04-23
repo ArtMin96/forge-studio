@@ -5,10 +5,6 @@
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 
-if [ -z "$COMMAND" ]; then
-  exit 0
-fi
-
 deny_command() {
   jq -n --arg reason "$1" '{
     hookSpecificOutput: {
@@ -19,6 +15,19 @@ deny_command() {
   }'
   exit 0
 }
+
+# Layer 5 (runs first): safe-mode flag denies all mutations until cleared.
+# Set by context-engine/consecutive-failure-guard.sh at FORGE_SAFE_MODE_THRESHOLD.
+# Cleared by /safe-mode off.
+if [ -f .claude/safe-mode ]; then
+  REASON=$(jq -r '.reason // "unspecified"' .claude/safe-mode 2>/dev/null)
+  COUNTER=$(jq -r '.counter // "?"' .claude/safe-mode 2>/dev/null)
+  deny_command "safe-mode active (reason: ${REASON}, failures: ${COUNTER}). Diagnose root cause, then run /safe-mode off. Until then all mutations are blocked."
+fi
+
+if [ -z "$COMMAND" ]; then
+  exit 0
+fi
 
 # Layer 1: Direct destructive patterns
 if echo "$COMMAND" | grep -qEi '(rm\s+-rf\s+[/~]|git\s+push\s+--force|git\s+push\s+-f\b|git\s+reset\s+--hard|DROP\s+TABLE|DROP\s+DATABASE|TRUNCATE\s+|git\s+checkout\s+\.\s*$|git\s+clean\s+-f|git\s+branch\s+-D)'; then

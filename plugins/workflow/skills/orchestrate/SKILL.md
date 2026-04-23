@@ -69,4 +69,4 @@ End with one line: `Dispatched: <pattern>. Next gate: <which hook / skill will f
 - Do not rewrite the plan unless the user asked
 - Do not skip the contract re-read (step 3.2) — it is the reliability mechanism that survives compaction
 - Do not invoke multiple patterns in parallel — pick one and report
-- Do not duplicate logic from `agents:/dispatch`, `evaluator:/verify`, or `context-engine:/handoff` — compose them
+- Do not duplicate logic from `agents:/dispatch`, `evaluator:/verify`, or `long-session:/progress-log` — compose them

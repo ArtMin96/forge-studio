@@ -1,0 +1,9 @@
+# Prompt-injection patterns (case-insensitive). One pattern per line.
+# Lines starting with '#' and empty lines are ignored.
+# Evolvable via SEPL.
+#
+ignore (all |any )?(previous|above|prior) instructions
+ignore the (system|above) prompt
+disregard (all |any )?(previous|above) (instructions|rules)
+you are now (a|an|no longer)
+system:[[:space:]]*you
