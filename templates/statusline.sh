@@ -20,6 +20,63 @@ magenta='\033[38;2;180;140;255m'
 dim='\033[2m'
 reset='\033[0m'
 
+# Reads the active theme from ~/.claude/settings.json (.theme field, format
+# "custom:[<plugin>:]<slug>") and remaps theme tokens onto the statusline ANSI
+# slots so the bar follows /theme selection. Built-in presets (no JSON file)
+# leave defaults in place. The .theme key is undocumented but stable since
+# v2.1.118 — if upstream removes it, this silently no-ops.
+hex_to_rgb() {
+    local hex="${1#\#}"
+    [ ${#hex} -ne 6 ] && return 1
+    printf "%d;%d;%d" "0x${hex:0:2}" "0x${hex:2:2}" "0x${hex:4:2}"
+}
+
+load_theme_colors() {
+    local settings="$HOME/.claude/settings.json"
+    [ ! -f "$settings" ] && return
+    command -v jq >/dev/null 2>&1 || return
+
+    local pref
+    pref=$(jq -r '.theme // empty' "$settings" 2>/dev/null)
+    [[ "$pref" != custom:* ]] && return
+
+    local rest="${pref#custom:}"
+    local plugin="" slug="$rest"
+    if [[ "$rest" == *:* ]]; then
+        plugin="${rest%%:*}"
+        slug="${rest#*:}"
+    fi
+
+    local file=""
+    if [ -f "$HOME/.claude/themes/${slug}.json" ]; then
+        file="$HOME/.claude/themes/${slug}.json"
+    elif [ -n "$plugin" ]; then
+        set +f
+        file=$(ls -1 "$HOME/.claude/plugins/marketplaces"/*/plugins/"$plugin"/themes/"${slug}.json" 2>/dev/null | head -1)
+        set -f
+    fi
+    [ -z "$file" ] || [ ! -f "$file" ] && return
+
+    apply() {
+        local var="$1" token="$2"
+        local hex rgb
+        hex=$(jq -r --arg t "$token" '.overrides[$t] // empty' "$file" 2>/dev/null)
+        [[ "$hex" != \#?????? ]] && return
+        rgb=$(hex_to_rgb "$hex") || return
+        printf -v "$var" '\033[38;2;%sm' "$rgb"
+    }
+
+    apply blue    claude
+    apply green   success
+    apply red     error
+    apply yellow  warning
+    apply magenta planMode
+    apply cyan    ide
+    apply orange  bashBorder
+    apply white   text
+}
+load_theme_colors
+
 sep=" ${dim}│${reset} "
 
 # ── Helpers ─────────────────────────────────────────────
