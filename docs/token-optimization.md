@@ -31,7 +31,7 @@ Most token waste isn't a settings problem. It's a workflow problem.
 Context from task A is noise during task B. File reads, error messages, design decisions — all of it accumulates and the model references it. A fresh session costs nothing extra. An accumulated session costs proportionally more with every exchange.
 
 **2. `/compact` at 60-70% capacity, not 90%.**
-Auto-compaction at ~95% produces low-quality summaries — there's too much to compress and Claude doesn't know what matters. At 70%, the summary is readable and your architectural decisions survive. At 90%, you get a lossy summary and you'll spend tokens re-establishing context. Use `/cost` or a status line to watch the gauge.
+Auto-compaction at ~95% produces low-quality summaries — there's too much to compress and Claude doesn't know what matters. At 70%, the summary is readable and your architectural decisions survive. At 90%, you get a lossy summary and you'll spend tokens re-establishing context. Use `/usage` or a status line to watch the gauge.
 
 **3. Subagents for exploration — verbose reads stay in their context.**
 When you need to understand an unfamiliar codebase, the worst approach is reading 20 files in the main conversation. Every file read stays in context for the rest of the session. Spawn a subagent with a specific question; it reads whatever it needs, summarizes the answer, and its context disappears. The parent session sees one clean response.

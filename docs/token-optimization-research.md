@@ -139,7 +139,7 @@ Use `Esc + Esc` or `/rewind`, select a message checkpoint, and choose "Summarize
 
 - `/clear` between unrelated tasks (most impactful habit)
 - `/compact` at ~70% capacity, not when auto-compact triggers at ~95%
-- `/cost` or status line to monitor usage continuously
+- `/usage` or status line to monitor usage continuously
 - `/btw` for quick questions that should not enter conversation history
 - Target: sessions under 30K tokens, compact at 70%, reset every 20 iterations
 
@@ -367,8 +367,7 @@ Specialized instructions (PR review checklists, migration guides, etc.) should b
 
 | Command | Purpose |
 |---|---|
-| `/cost` | Show token usage for current session |
-| `/stats` | Usage patterns (Pro/Max subscribers) |
+| `/usage` | Token usage for current session and Pro/Max usage patterns |
 | `/clear` | Reset context between tasks |
 | `/compact [instructions]` | Manual compaction with optional focus |
 | `/context` | See what is consuming context space |
@@ -410,7 +409,7 @@ For CI/CD and unattended runs:
 
 ### Ongoing Habits
 
-- [ ] Monitor `/cost` regularly — know your per-session spend
+- [ ] Monitor `/usage` regularly — know your per-session spend
 - [ ] `/compact` at 70% capacity, not when auto-compact triggers at 95%
 - [ ] Use subagents for codebase exploration, test running, log analysis
 - [ ] Use plan mode for complex tasks (prevents expensive re-work)

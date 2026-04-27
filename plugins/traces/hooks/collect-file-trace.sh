@@ -16,6 +16,8 @@ INPUT=$(cat)
 
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
 TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
+DURATION_MS=$(echo "$INPUT" | jq -r '.duration_ms // "null"' 2>/dev/null)
+[[ -z "$DURATION_MS" ]] && DURATION_MS="null"
 
 if [[ -z "$FILE_PATH" ]]; then
   exit 0
@@ -28,7 +30,8 @@ jq -n -c \
   --arg tool "$TOOL_NAME" \
   --arg path "$FILE_PATH" \
   --arg cwd "$(pwd)" \
-  '{timestamp: $ts, type: $type, tool: $tool, file_path: $path, cwd: $cwd}' \
+  --argjson dur "$DURATION_MS" \
+  '{timestamp: $ts, type: $type, tool: $tool, file_path: $path, cwd: $cwd, duration_ms: $dur}' \
   >> "$TRACE_FILE" 2>/dev/null
 
 exit 0

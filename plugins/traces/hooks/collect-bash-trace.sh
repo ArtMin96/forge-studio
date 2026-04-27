@@ -21,6 +21,8 @@ INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
 EXIT_CODE=$(echo "$INPUT" | jq -r '.tool_response.exitCode // .tool_response.exit_code // "0"' 2>/dev/null)
 OUTPUT=$(echo "$INPUT" | jq -r '.tool_response.stdout // .tool_response // empty' 2>/dev/null | head -c 500)
+DURATION_MS=$(echo "$INPUT" | jq -r '.duration_ms // "null"' 2>/dev/null)
+[[ -z "$DURATION_MS" ]] && DURATION_MS="null"
 
 if [[ -z "$COMMAND" ]]; then
   exit 0
@@ -35,7 +37,8 @@ jq -n -c \
   --arg exit "$EXIT_CODE" \
   --arg out "$OUTPUT" \
   --arg cwd "$(pwd)" \
-  '{timestamp: $ts, type: $type, command: $cmd, exit_code: $exit, output_preview: $out, cwd: $cwd}' \
+  --argjson dur "$DURATION_MS" \
+  '{timestamp: $ts, type: $type, command: $cmd, exit_code: $exit, output_preview: $out, cwd: $cwd, duration_ms: $dur}' \
   >> "$TRACE_FILE" 2>/dev/null
 
 exit 0

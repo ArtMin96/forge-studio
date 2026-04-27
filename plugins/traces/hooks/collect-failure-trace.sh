@@ -16,6 +16,8 @@ INPUT=$(cat)
 TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
 ERROR=$(echo "$INPUT" | jq -r '.error // empty' 2>/dev/null | head -c 500)
 IS_INTERRUPT=$(echo "$INPUT" | jq -r '.is_interrupt // false' 2>/dev/null)
+DURATION_MS=$(echo "$INPUT" | jq -r '.duration_ms // "null"' 2>/dev/null)
+[[ -z "$DURATION_MS" ]] && DURATION_MS="null"
 
 if [[ -z "$TOOL_NAME" ]]; then
   exit 0
@@ -29,7 +31,8 @@ jq -n -c \
   --arg error "$ERROR" \
   --arg interrupt "$IS_INTERRUPT" \
   --arg cwd "$(pwd)" \
-  '{timestamp: $ts, type: $type, tool: $tool, error: $error, is_interrupt: $interrupt, cwd: $cwd}' \
+  --argjson dur "$DURATION_MS" \
+  '{timestamp: $ts, type: $type, tool: $tool, error: $error, is_interrupt: $interrupt, cwd: $cwd, duration_ms: $dur}' \
   >> "$TRACE_FILE" 2>/dev/null
 
 exit 0
