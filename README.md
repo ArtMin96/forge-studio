@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-16 plugins. 56 skills. 51 hooks. 4 agents. 9 behavioral rules.
+17 plugins. 56 skills. 51 hooks. 4 agents. 9 behavioral rules.
 
 ---
 
@@ -29,6 +29,7 @@
 /plugin install policy-gateway@forge-studio      # Secrets + prompt-injection scan, sensitive-ops audit
 /plugin install rtk-optimizer@forge-studio       # Auto-installs rtk binary + registers global hook
 /plugin install code-graph@forge-studio          # Auto-installs code-review-graph + registers MCP for Tree-sitter code graph
+/plugin install themes@forge-studio              # Curated color themes (Catppuccin Mocha); pick via /theme
 ```
 
 Start a new session after installing for plugins to load.
@@ -64,6 +65,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | **policy-gateway** | PreToolUse secrets scan + prompt-injection scan + sensitive-ops audit. Same `permissionDecision:deny` contract as block-destructive. Rules live in `rules.d/` so SEPL can evolve them. | 3 | 1 |
 | **rtk-optimizer** | Auto-installs [rtk-ai/rtk](https://github.com/rtk-ai/rtk) on first session and runs `rtk init -g`. 60-90% token reduction on shell commands. Opt-out: `FORGE_RTK_DISABLED=1`. | 1 | 0 |
 | **code-graph** | Auto-installs [tirth8205/code-review-graph](https://github.com/tirth8205/code-review-graph). Registers a Tree-sitter MCP graph per repo so Claude Code queries structural context instead of re-reading files. Claude Code only. Opt-out: `FORGE_CODE_GRAPH_DISABLED=1`. | 2 | 0 |
+| **themes** | Curated color themes for `/theme`: **Catppuccin Mocha**, **Tokyo Night**, **Nord**. Switch via `/theme`; `Ctrl+E` forks any theme into `~/.claude/themes/` for editing. Pure cosmetic — zero hooks. | 0 | 0 |
 
 ### Key Skills
 

@@ -135,6 +135,14 @@
       "source": "./plugins/code-graph",
       "category": "context-management",
       "keywords": ["code-graph", "mcp", "tree-sitter", "blast-radius", "external-tool", "harness:context-management", "overhead:moderate"]
+    },
+    {
+      "name": "themes",
+      "description": "Curated color themes for Claude Code: Catppuccin Mocha, Tokyo Night, Nord. Pick via /theme; Ctrl+E to fork into ~/.claude/themes/ for editing.",
+      "version": "1.1.0",
+      "source": "./plugins/themes",
+      "category": "appearance",
+      "keywords": ["theme", "color", "catppuccin", "tokyo-night", "nord", "dark", "appearance", "harness:cosmetic", "overhead:zero"]
     }
   ]
 }

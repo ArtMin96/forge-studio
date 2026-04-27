@@ -1,0 +1,48 @@
+{
+  "name": "Nord",
+  "base": "dark",
+  "overrides": {
+    "claude": "#88c0d0",
+    "claudeShimmer": "#8fbcbb",
+    "text": "#eceff4",
+    "inverseText": "#2e3440",
+    "inactive": "#4c566a",
+    "subtle": "#3b4252",
+    "permission": "#88c0d0",
+    "remember": "#ebcb8b",
+
+    "success": "#a3be8c",
+    "successShimmer": "#8fbcbb",
+    "error": "#bf616a",
+    "errorShimmer": "#d08770",
+    "warning": "#ebcb8b",
+    "warningShimmer": "#d08770",
+    "merged": "#b48ead",
+
+    "promptBorder": "#434c5e",
+    "planMode": "#81a1c1",
+    "autoAccept": "#a3be8c",
+    "bashBorder": "#d08770",
+    "ide": "#8fbcbb",
+    "fastMode": "#ebcb8b",
+
+    "diffAdded": "#2e3d2e",
+    "diffRemoved": "#4a2e30",
+    "diffAddedDimmed": "#28342a",
+    "diffRemovedDimmed": "#3d2828",
+    "diffAddedWord": "#4a5e3f",
+    "diffRemovedWord": "#6b3f44",
+
+    "userMessageBackground": "#2e3440",
+    "selectionBg": "#434c5e",
+
+    "red_FOR_SUBAGENTS_ONLY": "#bf616a",
+    "blue_FOR_SUBAGENTS_ONLY": "#5e81ac",
+    "green_FOR_SUBAGENTS_ONLY": "#a3be8c",
+    "yellow_FOR_SUBAGENTS_ONLY": "#ebcb8b",
+    "purple_FOR_SUBAGENTS_ONLY": "#b48ead",
+    "orange_FOR_SUBAGENTS_ONLY": "#d08770",
+    "pink_FOR_SUBAGENTS_ONLY": "#c8a2c8",
+    "cyan_FOR_SUBAGENTS_ONLY": "#88c0d0"
+  }
+}

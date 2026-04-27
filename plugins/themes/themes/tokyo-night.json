@@ -1,0 +1,48 @@
+{
+  "name": "Tokyo Night",
+  "base": "dark",
+  "overrides": {
+    "claude": "#7aa2f7",
+    "claudeShimmer": "#bb9af7",
+    "text": "#c0caf5",
+    "inverseText": "#1a1b26",
+    "inactive": "#565f89",
+    "subtle": "#3b4261",
+    "permission": "#7aa2f7",
+    "remember": "#e0af68",
+
+    "success": "#9ece6a",
+    "successShimmer": "#73daca",
+    "error": "#f7768e",
+    "errorShimmer": "#ff9e64",
+    "warning": "#e0af68",
+    "warningShimmer": "#ff9e64",
+    "merged": "#bb9af7",
+
+    "promptBorder": "#414868",
+    "planMode": "#bb9af7",
+    "autoAccept": "#9ece6a",
+    "bashBorder": "#ff9e64",
+    "ide": "#7dcfff",
+    "fastMode": "#e0af68",
+
+    "diffAdded": "#1f3a2a",
+    "diffRemoved": "#3a1f24",
+    "diffAddedDimmed": "#18281f",
+    "diffRemovedDimmed": "#28181d",
+    "diffAddedWord": "#2d5a3d",
+    "diffRemovedWord": "#5a2d35",
+
+    "userMessageBackground": "#1a1b26",
+    "selectionBg": "#364a82",
+
+    "red_FOR_SUBAGENTS_ONLY": "#f7768e",
+    "blue_FOR_SUBAGENTS_ONLY": "#7aa2f7",
+    "green_FOR_SUBAGENTS_ONLY": "#9ece6a",
+    "yellow_FOR_SUBAGENTS_ONLY": "#e0af68",
+    "purple_FOR_SUBAGENTS_ONLY": "#bb9af7",
+    "orange_FOR_SUBAGENTS_ONLY": "#ff9e64",
+    "pink_FOR_SUBAGENTS_ONLY": "#ff7eb6",
+    "cyan_FOR_SUBAGENTS_ONLY": "#7dcfff"
+  }
+}
