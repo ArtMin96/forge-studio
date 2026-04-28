@@ -1,7 +1,7 @@
 ---
 name: gate-report
-description: Aggregate all quality warnings from the current session into a summary of hook-generated warnings.
-when_to_use: Before committing, to see a consolidated view of all session quality warnings.
+description: Use when the user wants a single consolidated view of every quality warning the hooks raised this session — duplicate reads, oversized outputs, scope-guard denials, secret-scan flags, drift checkpoints — grouped by severity with the offending file/line.
+when_to_use: Reach for this right before a commit or PR, after a long session that produced many small warnings, or when investigating "did anything fail silently?". Do NOT use to run new audits — gate-report only re-aggregates warnings the hooks already emitted; for fresh checks use `/rules-audit` or `/rest-audit`.
 disable-model-invocation: true
 model: haiku
 allowed-tools:
@@ -48,3 +48,63 @@ READY TO COMMIT:  [Yes / No — fix these first]
 ```
 
 Only report actual findings. No generic advice.
+
+## Examples
+
+### Example 1: clean session
+
+Input:
+```
+PHPStan run:        no errors
+Pint --test:        clean
+git diff:           app/Services/Order.php, tests/OrderTest.php
+Policy ledger since last commit: 0 entries
+features.json:      3 done / 0 in_progress / 0 pending
+.claude/gate/features.json: PASS 3/3
+```
+
+Output:
+```
+GATE REPORT
+===========
+Static Analysis:  0 warnings
+Migration Safety: n/a (no migrations changed)
+Debug Artifacts:  0
+TODOs Added:      0
+Security:         0
+Formatting:       0
+Policy blocks:    0
+Features:         0 pending / 0 in_progress / 3 done
+/verify gate:     PASS 3/3
+---
+READY TO COMMIT:  Yes
+```
+
+### Example 2: dirty session
+
+Input:
+```
+PHPStan run:        2 errors in app/Http/Controllers/AuthController.php
+Pint --test:        1 file needs formatting
+git diff: app/Http/Controllers/AuthController.php has dd($user)
+Policy ledger since last commit: 1 secret-detected entry (file: .env.local)
+features.json:      1 done / 1 in_progress / 1 pending; pending item touches AuthController
+.claude/gate/features.json: NOT RUN
+```
+
+Output:
+```
+GATE REPORT
+===========
+Static Analysis:  2 warnings (app/Http/Controllers/AuthController.php)
+Migration Safety: n/a
+Debug Artifacts:  1 (dd() at AuthController.php:54)
+TODOs Added:      0
+Security:         1 secret-detected (.env.local)
+Formatting:       1 file
+Policy blocks:    1 secret-detected
+Features:         1 pending / 1 in_progress / 1 done — pending item overlaps current diff
+/verify gate:     NOT RUN
+---
+READY TO COMMIT:  No — strip dd(), run /verify, redact .env.local before staging
+```

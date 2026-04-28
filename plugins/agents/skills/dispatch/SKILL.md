@@ -1,7 +1,7 @@
 ---
 name: dispatch
-description: Analyze a task and recommend how to decompose it across agents (single-agent, fan-out, or planner→generator→reviewer pipeline).
-when_to_use: Before starting work on a feature that may touch 5+ files or has independent sub-tasks worth parallelizing.
+description: Use when the user describes a multi-step feature or refactor and you need to decide whether to handle it solo, dispatch a parallel `/fan-out`, or run a `/worktree-team` planner→generator→reviewer pipeline. Outputs a routing recommendation with the reasoning behind it.
+when_to_use: Reach for this before starting any task that may touch 5+ files, has independent sub-tasks worth parallelizing, or carries enough risk to warrant separated planning and review. Do NOT use it as the executor itself — once a route is picked, hand off to `/fan-out` for parallel batches or `/worktree-team` for full pipelines.
 disable-model-invocation: true
 ---
 
@@ -51,3 +51,10 @@ Agent(s): <which agents to use>
 Estimated scope: <files/operations count>
 Risk level: <low/medium/high>
 ```
+
+## Known Failure Modes
+
+- **Route picked from file count alone.** Five similar files reading "fan-out" can still be sequential if each step depends on the previous result. Before locking the route, check interdependence, not just count.
+- **Pipeline chosen for a one-shot bug fix.** The planner→generator→reviewer round-trip costs ~3× tokens; a 1–3 file fix doesn't earn the overhead. Prefer Single Agent unless the change spans concerns or carries deploy risk.
+- **Fan-out with shared mutable state.** Two parallel subagents editing the same file race; both succeed, second overwrites first. The dispatch decision should refuse fan-out when the file list overlaps.
+- **LLM fallback non-termination.** When `route-prompt-llm.sh` is in play and disagrees with the shell verdict, the router can flap. Cap with `WORKFLOW_ROUTER_MODE=shell` for deterministic dispatch when investigating.

@@ -1,7 +1,7 @@
 ---
 name: devils-advocate
-description: Argue against a design decision or implementation approach.
-when_to_use: When evaluating architecture or design choices, before committing to an approach.
+description: Use when the user asks to "play devil's advocate", "argue the other side", "what could go wrong here", or wants the strongest possible counter-case against a design decision before committing — produces a structured tradeoff analysis with the opposing view's evidence.
+when_to_use: Reach for this during architecture choices, before locking in a refactor approach, or when consensus feels too easy. Do NOT use to review code that already exists (`/challenge` for self-review, `/verify` for diff verification, `/assess-proposal` for SEPL gate); this skill argues *forward-looking* design decisions.
 disable-model-invocation: true
 argument-hint: <decision-or-approach>
 allowed-tools:

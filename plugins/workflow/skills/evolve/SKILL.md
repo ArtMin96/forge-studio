@@ -1,7 +1,7 @@
 ---
 name: evolve
 description: Run a self-evolution cycle. Consumes a proposal source (trace-evolve output, router-tune output, manual proposal), routes through /assess-proposal, asks for user approval, hands off to /commit-proposal. Never mutates harness files without consent.
-when_to_use: When router-tune or trace-evolve has produced a proposal artifact ready for the assess-commit pipeline.
+when_to_use: Reach for this when `/router-tune` or `/trace-evolve` has produced a proposal artifact ready for the assess-commit pipeline, or when the user wants to run a manual SEPL cycle. Do NOT use to write the proposal itself — those upstream skills (`/router-tune`, `/trace-evolve`, manual draft) generate proposals; `/evolve` orchestrates the propose → assess → commit handoff.
 disable-model-invocation: true
 effort: high
 argument-hint: [signal-source]
@@ -93,3 +93,14 @@ Snapshots:      .claude/lineage/versions/
 - Do not batch multiple commits in one approval prompt. Each proposal gets its own prompt so the user can reject selectively.
 - Do not auto-commit file resources. Auto-commit is reserved for `env/<VAR>` numeric tweaks under `WORKFLOW_EVOLVE_AUTOCOMMIT=1` (see `/commit-proposal`).
 - Do not delete rejected proposals. They stay on disk as negative evidence — informs future rounds of `/trace-evolve`.
+
+## Execution Checklist
+
+- [ ] Located the source proposal artifact (path or signal source)
+- [ ] Confirmed it has a `resource:` slug, target `version:`, rationale, and proposed content
+- [ ] Forked `/assess-proposal` with the proposal path; captured the verdict
+- [ ] Verdict is `pass` (else stop, write rejection to ledger, exit)
+- [ ] Showed the user the proposal + verdict; received explicit approval
+- [ ] Invoked `/commit-proposal` with the approved proposal path
+- [ ] Verified ledger has new `commit` entry and snapshot exists under `.claude/lineage/versions/<slug>/`
+- [ ] Ran any needed verify step (`/verify` or `/healthcheck`) to confirm the change behaves

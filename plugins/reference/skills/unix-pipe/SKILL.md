@@ -1,7 +1,7 @@
 ---
 name: unix-pipe
-description: Use Claude Code as a Unix utility. Headless mode, piping, CI/CD integration, output formats.
-when_to_use: When automating Claude into scripts, pipelines, or CI/CD workflows.
+description: Use when the user wants to automate Claude into scripts, pipelines, or CI/CD workflows — covers headless mode, stdin/stdout piping, JSON output formats, and Claude-as-a-CLI-tool patterns. Reference-style passive skill, applied inline whenever automation comes up.
+when_to_use: Reach for this when teaching headless usage, building a CI gate, or composing Claude with other shell tools. Do NOT use for in-session orchestration — that's `/orchestrate` and `/dispatch`; unix-pipe is for *outside* the interactive session.
 disable-model-invocation: true
 ---
 

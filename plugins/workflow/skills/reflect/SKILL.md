@@ -1,6 +1,7 @@
 ---
 name: reflect
-description: Reflect-Memorize step. Read a completed sprint (plan contract + test output + git diff), emit a three-line insight (worked / surprised / watch), route to /remember. Optional post-tdd-loop phase.
+description: Use after a completed sprint or `/tdd-loop` finishes — reads the plan's contract, test output, and git diff, emits a three-line insight (what worked / what surprised / what to watch), and routes the lesson to `/remember` if it deserves persistence. Optional but recommended phase to convert successful work into durable knowledge.
+when_to_use: Reach for this immediately after `/tdd-loop` reports green, after a non-trivial feature lands, or when wanting to capture a working pattern for future sessions. Do NOT use for failures — those go to `/postmortem`; reflect is the *successful*-outcome reflection.
 disable-model-invocation: true
 argument-hint: [plan-path]
 allowed-tools:

@@ -1,7 +1,7 @@
 ---
 name: context-tricks
-description: Advanced context window management techniques. Guided compaction, partial compaction, side questions, checkpoints, session discipline.
-when_to_use: When you want to master context management, reduce waste, or learn techniques for long or complex sessions.
+description: Use when the user wants to learn techniques for long or complex sessions — covers guided compaction, partial compaction, side-question dispatch, checkpointing, and session discipline. Reference-style passive skill, applied inline whenever the conversation hits context-management questions.
+when_to_use: Reach for this when the user asks "how do I keep context clean", "what's the best way to run a long session", or "should I /compact now"; also applicable when teaching or onboarding. Do NOT use to actually run an audit (`/audit-context`) or to make a real-time drift check (`/checkpoint`) — this skill is the playbook, not the operation.
 disable-model-invocation: true
 ---
 

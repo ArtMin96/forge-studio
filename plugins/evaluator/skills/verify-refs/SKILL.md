@@ -1,7 +1,7 @@
 ---
 name: verify-refs
 description: Cross-check file paths, function names, and external references claimed in your prior turn against the actual repo. Catches fabricated references (hallucinated file paths, misspelled symbols, dead URLs) before they reach a commit message, PR body, or user-facing summary.
-when_to_use: After drafting a summary, PR description, commit message, or review response that names specific files/symbols/URLs. Before claiming a change touches X when you haven't verified X exists.
+when_to_use: Reach for this after drafting any summary, PR description, commit message, or review response that names specific files/symbols/URLs, and before claiming a change touches X when you haven't verified X exists. Do NOT use for runtime verification (tests, lint) — that's `/verify`; verify-refs is purely a reference-existence sanity check.
 disable-model-invocation: true
 allowed-tools:
   - Bash

@@ -1,7 +1,7 @@
 ---
 name: docs-maintenance
 description: Comprehensive documentation maintenance — audit freshness, validate links and images, enforce style consistency, optimize structure, and emit a quality report across all `*.md` / `*.mdx` files.
-when_to_use: Before a release, after major content changes, or on a recurring schedule (weekly/monthly) to keep project documentation healthy. Also use when investigating doc drift, broken links, or stale content.
+when_to_use: Reach for this before a release, after major content changes, on a weekly/monthly schedule, or when investigating doc drift, broken links, or stale content. Do NOT use for marketplace/harness drift between docs and code — that's `/entropy-scan` (drift) and `/validate-marketplace` (correctness); this skill covers project-level Markdown only.
 argument-hint: "[--audit | --update | --validate | --optimize | --comprehensive]"
 effort: xhigh
 allowed-tools:

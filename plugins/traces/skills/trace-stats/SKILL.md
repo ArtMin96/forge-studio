@@ -1,7 +1,7 @@
 ---
 name: trace-stats
-description: Quick statistics on recent session traces — command counts, error rates, files modified.
-when_to_use: When you want a fast numeric summary of recent sessions without deep analysis.
+description: Use when the user wants a fast numeric summary of recent sessions — command counts, error rates, files modified, average tokens per turn — without the cost of full pattern analysis. Runs against `.claude/traces/*.jsonl` and returns a one-screen table.
+when_to_use: Reach for this for a 30-second sanity check, before deciding whether a deeper `/trace-review` is warranted, or when reporting overall harness usage. Do NOT use for failure clustering or proposal generation — that's `/trace-review` and `/trace-evolve`.
 disable-model-invocation: true
 model: haiku
 paths:

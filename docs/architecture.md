@@ -80,7 +80,7 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 
 ## Hook Event Reference
 
-46 hooks across 9 plugins. Hooks fire automatically on events — no commands needed.
+55 hooks across 13 plugins. Hooks fire automatically on events — no commands needed.
 
 ### Session Lifecycle
 
@@ -235,13 +235,14 @@ Forge Studio uses hooks for enforcement, skills for guidance. Anything that must
 
 ## Behavioral Rules (`rules.d/`)
 
-8 rules in `plugins/behavioral-core/hooks/rules.d/`. Each `.txt` file = one behavioral rule. Re-injected every message via `behavioral-anchor.sh`.
+9 rules in `plugins/behavioral-core/hooks/rules.d/`. Each `.txt` file = one behavioral rule. Re-injected every message via `behavioral-anchor.sh`.
 
 | # | Rule | Purpose |
 |---|------|---------|
 | 10 | tone | No sycophancy, no filler, lead with substance |
 | 25 | brevity | 25 words between tools, 100 word responses |
 | 30 | intellectual-honesty | Challenge own work, admit uncertainty |
+| 35 | no-code-narration | No what-comments, no changelog notes in source |
 | 50 | faithful-reporting | Report outcomes accurately, no false claims |
 | 60 | minimal-changes | Fix the bug only, no scope creep |
 | 70 | follow-plans | Execute approved plans exactly |

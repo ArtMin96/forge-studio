@@ -1,7 +1,7 @@
 ---
 name: scope
-description: Create a task scope with boundaries, acceptance criteria, and file limits to prevent scope creep.
-when_to_use: Before any non-trivial task (3+ steps, multiple files, or unclear requirements).
+description: Use whenever the user describes a non-trivial task with vague edges — "add support for X", "refactor Y", "make Z faster" — and writes a scope document with explicit acceptance criteria, file allowlist, out-of-scope list, and a token/edit budget. The resulting `.claude/scopes/<task>.md` is then read by `scope-guard.sh` to block edits outside the allowlist.
+when_to_use: Reach for this before a task that touches 3+ files, has acceptance criteria you'd want to grade against later, or where scope creep has bitten before. Do NOT use for one-line edits, typo fixes, or running existing tooling — direct execution is fine; reach for `/contract` instead when an approved plan already exists.
 disable-model-invocation: true
 argument-hint: <task-description>
 allowed-tools:

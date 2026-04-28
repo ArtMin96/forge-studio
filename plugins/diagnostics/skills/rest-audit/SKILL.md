@@ -1,7 +1,7 @@
 ---
 name: rest-audit
 description: Audit the project against the R.E.S.T. framework (TRAE) — Reliability, Efficiency, Security, Traceability. Reads ledger entries, hook state, and artifact presence across long-session + policy-gateway + context-engine + traces. Single PASS/WARN/FAIL table. Cross-cut meta-surface.
-when_to_use: Periodic checkup (like /entropy-scan). Before releases. When investigating a session regression.
+when_to_use: Periodic checkup, before releases, or when investigating a session regression that may span multiple plugins (a missed gate, a leaked secret, a token blowout). Do NOT use for structural drift — that's `/entropy-scan`; this skill reports outcomes (R/E/S/T axes), not file-level mismatches.
 disable-model-invocation: true
 allowed-tools:
   - Read

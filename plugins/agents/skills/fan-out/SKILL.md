@@ -1,7 +1,7 @@
 ---
 name: fan-out
-description: Apply the same operation to multiple files or components simultaneously using parallel subagents.
-when_to_use: When the same operation must be applied to multiple independent files (e.g., bulk migration, batch refactor across controllers).
+description: Use whenever the user asks to apply the same operation to many independent files or components — bulk migration, batch refactor across controllers, parallel exploration of unrelated subsystems. Dispatches one subagent per file with a shared prompt template, then collects the results.
+when_to_use: Reach for this when an operation is mechanical, idempotent, and the file list has no shared mutable state between items. Do NOT use for sequential pipelines (use `/dispatch` to pick `/worktree-team` instead) or when items depend on each other's output (the parallel runs will race).
 disable-model-invocation: true
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: checkpoint
-description: Mid-session drift check. Compare current work against original task. Detect scope creep and context bloat.
-when_to_use: Periodically during long sessions, or any time the work feels like it may have drifted from the original plan.
+description: Use during long sessions when the conversation feels like it may have drifted, when an unrelated subgoal has appeared, or when tracking-error matters before the next major edit — runs a fast comparison of recent work against the original task statement, listing scope creep, context bloat, and unfulfilled acceptance criteria.
+when_to_use: Reach for this every ~50 turns in a long session, after a long debugging detour, or when the user says "are we still on track?". Do NOT use for full session-quality audits with rule violations — that is `/rules-audit`; checkpoint stays small and fast.
 disable-model-invocation: true
 allowed-tools:
   - Read

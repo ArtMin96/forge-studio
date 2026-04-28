@@ -1,7 +1,7 @@
 ---
 name: timebox
-description: Set a message budget for the current task and track progress against it to enforce efficiency.
-when_to_use: When you want focused, fast work with a hard message limit.
+description: Use when the user says "timebox this", "spend at most N messages on it", or wants a hard ceiling on conversation length for the current task — writes a budget file at `.claude/scopes/.timebox` that the brevity rule and scope-guard read on every turn to count remaining messages.
+when_to_use: Reach for this before a focused, exploratory, or boxed-in task where overrun risk is high (debugging spirals, perfectionist refactors). Do NOT use for open-ended planning where the budget can't be estimated up front — `/scope` (which carries its own budget) is the better starting point there.
 disable-model-invocation: true
 argument-hint: [message-count]
 allowed-tools:

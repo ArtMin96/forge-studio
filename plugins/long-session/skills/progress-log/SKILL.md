@@ -1,7 +1,7 @@
 ---
 name: progress-log
 description: Append the current session's net outcomes to claude-progress.txt (durable, session-to-session log). Records completions, in-progress work, blockers, and next-step recommendations. Emits a ledger entry for unified audit.
-when_to_use: At session end, before auto-compaction, or whenever net-new commits land.
+when_to_use: Reach for this at session end, right before auto-compaction is about to fire, or whenever net-new commits land that the next session needs to pick up. Do NOT use for in-conversation tracking — that's `TaskCreate` / `TaskUpdate`; progress-log is the cross-session durable record.
 disable-model-invocation: true
 argument-hint: [topic]
 allowed-tools:
@@ -72,3 +72,51 @@ Append this session's outcomes to `claude-progress.txt` at the repo root. Durabl
 - `claude-progress.txt` is a directory → fail loudly; tell the user.
 - Ledger append fails → entry still written to log (log is the source of truth; ledger is secondary metadata). Report the ledger failure.
 - No git history available → still produces an entry using `status --short` only.
+
+## Examples
+
+### Example 1: feature landed mid-session
+
+Input:
+```
+$ARGUMENTS: auth-rewrite
+git log --since="6 hours ago": a1b2c3d feat(auth): swap session middleware
+git diff --name-only HEAD~1 HEAD: app/Http/Middleware/Session.php, tests/Feature/AuthTest.php
+```
+
+Output (appended to `claude-progress.txt`):
+
+
+```
+=== 2026-04-28T14:32:00Z — auth-rewrite ===
+Done:
+  - Replaced legacy session middleware with token-based variant (a1b2c3d)
+  - Added regression test for cookie-less request path (tests/Feature/AuthTest.php:42)
+In progress:
+  - Token rotation hook (app/Http/Middleware/Session.php:78 — TODO marker)
+Blockers:
+  - None
+Next:
+  - Wire rotation hook to scheduled task; backfill rate-limit on /login
+```
+
+### Example 2: session ended on a blocker
+
+Input:
+```
+$ARGUMENTS: (empty → defaults to "session")
+git status --short: M docs/architecture.md (no commits this session)
+```
+
+Output:
+```
+=== 2026-04-28T18:01:11Z — session ===
+Done:
+  - None (investigation only)
+In progress:
+  - Editing docs/architecture.md to reconcile hook-count drift
+Blockers:
+  - Need confirmation on whether `35-no-code-narration.txt` counts as a behavioral rule for the README header
+Next:
+  - Confirm with user, then commit the architecture update + version-bump
+```

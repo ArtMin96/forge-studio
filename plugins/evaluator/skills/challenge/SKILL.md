@@ -1,7 +1,7 @@
 ---
 name: challenge
-description: "Draft Verification critique: self-review + git history comparison."
-when_to_use: After completing complex features or security-sensitive code, before marking complete.
+description: Use whenever the user wants a deep critique of a recently completed feature — runs Stage 1 self-review against the diff, then Stage 2 git-history verification (does the change actually pass historical evidence, not just current tests?). Forks to a general-purpose agent so the critique is independent of the original implementation context.
+when_to_use: Reach for this after finishing complex features, security-sensitive code, or anything where "tests pass" isn't enough proof. Do NOT use for SEPL proposal verdicts (use `/assess-proposal`) or fast diff review (`/verify` is cheaper); challenge is the heavyweight option.
 disable-model-invocation: true
 effort: xhigh
 context: fork

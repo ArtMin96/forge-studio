@@ -1,7 +1,7 @@
 ---
 name: feature-list
 description: Expand the ## Contract section of the latest plan into .claude/features.json — a machine-readable list of testable requirements with verify_cmd per item. Consumed by /tdd-loop, /verify, and after-subagent updates.
-when_to_use: After a plan is approved (ExitPlanMode) and before the generator dispatches. Feeds TDD and verification.
+when_to_use: Reach for this immediately after a plan is approved (ExitPlanMode) and before the generator dispatches — `/tdd-loop` and `/verify` both read the resulting features.json. Do NOT use for free-form work without a plan; feature-list expects a structured `## Contract` section as its source of truth.
 disable-model-invocation: true
 allowed-tools:
   - Read

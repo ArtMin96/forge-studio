@@ -1,7 +1,7 @@
 ---
 name: living-spec
 description: Initialize .claude/spec.md from the latest plan's ## Contract. after-subagent.sh then appends delta blocks as each agent completes. Pairs with /contract (static criteria) + /feature-list (testable JSON) to form the plan→execute→verify loop.
-when_to_use: After a plan is approved and before dispatching the generator. Re-run only if the plan changes.
+when_to_use: Reach for this immediately after a plan is approved (ExitPlanMode), before the generator dispatches, and re-run only if the plan itself changes. Do NOT use to log session progress — that's `/progress-log`; living-spec is the in-task delta tracker, progress-log is the cross-session summary.
 disable-model-invocation: true
 allowed-tools:
   - Read
@@ -76,3 +76,48 @@ Write `.claude/spec.md` from the latest plan's `## Contract`. Unlike `/contract`
 - Do not overwrite an existing spec.md without explicit user confirmation.
 - Do not rewrite deltas — they are append-only history.
 - Do not mix spec content with `claude-progress.txt` — those are different artifacts (spec = current plan state, progress = session-to-session history).
+
+## Examples
+
+### Example 1: fresh init from a plan with three contract items
+
+Input:
+```
+plan file: .claude/plans/2026-04-28-cache-rewrite.md
+## Contract excerpt:
+- Cache layer behind a single `CacheService` interface
+- All call sites use the interface; no direct Redis client imports outside `app/Cache/`
+- Failure path: Redis unavailable → in-memory fallback for ≤60s, then bubble error
+spec.md status: does not exist
+```
+
+Output:
+```markdown
+# Living Spec
+
+Plan: .claude/plans/2026-04-28-cache-rewrite.md
+Initialized: 2026-04-28T15:00:00Z
+
+## Contract (from plan)
+
+- Cache layer behind a single `CacheService` interface
+- All call sites use the interface; no direct Redis client imports outside `app/Cache/`
+- Failure path: Redis unavailable → in-memory fallback for ≤60s, then bubble error
+
+## Deltas
+```
+Reported: `spec.md initialized with 3 contract items.`
+
+### Example 2: spec already exists for the same plan
+
+Input:
+```
+spec.md status: exists
+Plan: header matches the current latest plan
+```
+
+Output:
+```
+spec.md already initialized for this plan. Use after-subagent updates instead.
+```
+(no file write)

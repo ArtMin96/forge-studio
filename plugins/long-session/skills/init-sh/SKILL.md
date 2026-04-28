@@ -1,7 +1,7 @@
 ---
 name: init-sh
 description: Generate an executable init.sh that bootstraps the dev environment (install, build, test, run commands) so fresh sessions can recreate state in one command.
-when_to_use: Start of a project or after major tooling changes. Once committed, surface-progress (SessionStart hook) will surface its presence to future sessions.
+when_to_use: Reach for this at the start of a project, after major tooling changes (new package manager, new build step), or when a fresh session needs to recreate state in one command. Do NOT use to *resume* an existing session — that's `/session-resume`; init-sh produces the script, session-resume reads it.
 disable-model-invocation: true
 allowed-tools:
   - Read

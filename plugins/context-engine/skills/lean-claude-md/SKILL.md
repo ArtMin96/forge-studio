@@ -1,7 +1,7 @@
 ---
 name: lean-claude-md
-description: Trim a CLAUDE.md file to only the lines that change behavior. Applies the 30-line principle from Claude Code's creator.
-when_to_use: When CLAUDE.md feels bloated, compliance has dropped, or the file has grown beyond 100 lines.
+description: Use when a CLAUDE.md file has grown past 100 lines, when compliance has dropped (the model is ignoring rules), or when the user asks to "trim" / "shorten" / "audit" their CLAUDE.md — applies the every-line-must-earn-its-place principle and rewrites the file with only the directives that change observable behavior.
+when_to_use: Reach for this on a working CLAUDE.md that has accumulated cruft over many sessions, or before sharing a project's CLAUDE.md as a template. Do NOT use to *structurally* reorganize CLAUDE.md (move sections, add headings) — that's `/claude-md-structure`; this skill cuts content, not architecture.
 disable-model-invocation: true
 argument-hint: [path-to-claude-md]
 allowed-tools:

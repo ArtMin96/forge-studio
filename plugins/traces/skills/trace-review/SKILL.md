@@ -1,7 +1,7 @@
 ---
 name: trace-review
 description: Analyze recent execution traces to find recurring patterns, failures, and optimization opportunities.
-when_to_use: After compiling traces with `/trace-compile`, or when investigating why a session had a high error rate.
+when_to_use: Reach for this after `/trace-compile`, when investigating a session with a high error rate, or when looking for recurring patterns that haven't yet been turned into SEPL proposals. Do NOT use to compile raw traces — that's `/trace-compile`; do NOT use to *propose* fixes — that's `/trace-evolve`.
 disable-model-invocation: true
 paths:
   - ".claude/traces/*.jsonl"

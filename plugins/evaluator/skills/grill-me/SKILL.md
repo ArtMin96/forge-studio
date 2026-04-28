@@ -1,7 +1,7 @@
 ---
 name: grill-me
-description: Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree.
-when_to_use: When in plan mode, stress-testing a plan, or the user says "grill me".
+description: Use when the user says "grill me", "interview me", "stress-test this plan", or you're in plan mode and the design has branches with unresolved decisions — runs a structured interview, walking each branch of the decision tree, recommending an answer for every question, and refusing to move on until shared understanding is reached.
+when_to_use: Reach for this before locking a non-trivial design, when requirements feel under-specified, or before handing a plan to `/dispatch`. Do NOT use to argue against a chosen direction — that's `/devils-advocate`; grill-me is about clarification, not opposition.
 disable-model-invocation: true
 model: haiku
 allowed-tools:

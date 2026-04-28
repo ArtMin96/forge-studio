@@ -1,7 +1,7 @@
 ---
 name: worktree-team
-description: Bootstrap N parallel agents each in an isolated git worktree with a role-scoped CLAUDE.md, so multiple agents can edit the same repo without stepping on each other.
-when_to_use: When two or more streams of work must not interleave edits, or when long-running parallel research and implementation splits need full isolation. Max 5 roles.
+description: Use when two or more streams of work must not interleave edits — concurrent feature branches, long-running research alongside implementation, or any time `/fan-out` would race because items share mutable state. Bootstraps N (max 5) parallel agents each in an isolated git worktree with a role-scoped CLAUDE.md and optional path ownership, so each role can only write to its declared subtree.
+when_to_use: Reach for this when the request mentions running tasks "in parallel" with separate scopes, when planner/generator/reviewer must each have their own scratch space, or when previous attempts to coordinate via a single session produced merge conflicts. Do NOT use for one-shot batches that share no state — `/fan-out` is cheaper there.
 disable-model-invocation: true
 argument-hint: <role1,role2,...> [--owned <role>:<path>,<role>:<path>]
 effort: high
@@ -181,3 +181,20 @@ Cleanup: `git worktree remove <path>` per role when done.
 - Never commit from within the skill. Commits are the role's job inside its worktree.
 - The `directory-ownership` hook activates only when `.claude/agents/active-roles.json` is present and `FORGE_DIRECTORY_OWNERSHIP=1`. Users who opt out keep single-agent behavior unchanged.
 - `--owned` is optional. If omitted, roles with defaults (planner/generator/reviewer) get no owned-directory restriction (enforcement requires an explicit list).
+
+## Execution Checklist
+
+- [ ] Parsed roles from `<role1,role2,...>` — abort if more than 5
+- [ ] Resolved current `HEAD` short SHA for worktree naming
+- [ ] For each role: confirmed `.claude/worktrees/<role>-<sha>/` does not already exist (else fail loud)
+- [ ] Created the worktree on a fresh branch (`<role>/<short-task>`) — never reuse a branch already checked out elsewhere
+- [ ] Wrote a role-scoped `CLAUDE.md` into each worktree
+- [ ] If `--owned` provided: wrote `.claude/agents/active-roles.json` and confirmed `FORGE_DIRECTORY_OWNERSHIP=1`
+- [ ] Emitted launch commands and explicit `git worktree remove` cleanup per role
+
+## Known Failure Modes
+
+- **Stale worktree path collision.** A previous run that crashed before cleanup leaves `.claude/worktrees/<role>-<sha>/` on disk; bootstrap then aborts with "path exists". Resolve with `git worktree remove --force <path>` before re-running, never overwrite.
+- **Roles starve when one writes outside `--owned`.** `directory-ownership.sh` denies the write but the role keeps trying — visible as a hot loop in trace logs. The fix is to widen the `--owned` glob for that role, not to disable the hook.
+- **Branch already checked out elsewhere.** `git worktree add` refuses to mount a branch that another worktree already has. Use a fresh branch name (e.g. `<role>/<short-task>`) instead of reusing one.
+- **Forgetting `git worktree remove` after merge.** Old worktrees pile up under `.claude/worktrees/` and confuse future bootstraps. Every successful run should end with explicit cleanup commands shown in the output.

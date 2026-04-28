@@ -1,7 +1,7 @@
 ---
 name: status
 description: On-demand snapshot of where the session stands — active plan, last progress-log entry, recent traces, context pressure. Composes existing plugins; no new persistence.
-when_to_use: Anytime you want a quick situational report on session state without creating new artifacts.
+when_to_use: Reach for this anytime you want a quick situational report on session state without creating new artifacts — handy after returning from a break, before deciding what to work on next, or as a sanity check mid-session. Do NOT use to *write* state — status is read-only and composes existing plugins; for cross-session persistence use `/progress-log`.
 disable-model-invocation: true
 model: haiku
 allowed-tools:

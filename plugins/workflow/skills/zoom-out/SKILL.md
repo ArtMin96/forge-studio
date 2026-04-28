@@ -1,7 +1,7 @@
 ---
 name: zoom-out
-description: Tell the agent to zoom out and give broader context or a higher-level perspective.
-when_to_use: When unfamiliar with a section of code or needing to understand how it fits into the bigger picture.
+description: Use when the user is unfamiliar with a section of code, asks "what does this fit into", "where does this get called from", or wants a higher-level map before diving into a specific function — returns a one-screen map of relevant modules, callers, and the layer above the current file.
+when_to_use: Reach for this before reading deep into unfamiliar code, when planning a refactor that may have non-obvious callers, or when onboarding to a new codebase. Do NOT use for narrow line-level questions — direct reading or grep is cheaper there.
 disable-model-invocation: true
 model: haiku
 ---

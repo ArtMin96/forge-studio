@@ -1,7 +1,7 @@
 ---
 name: entropy-scan
 description: Scan the marketplace for documentation drift, registration gaps, convention violations, stale memory, and HARNESS_SPEC invariant compliance. Reports only — no writes.
-when_to_use: Run weekly or before releases to catch drift between documentation and reality.
+when_to_use: Run weekly, before releases, after large refactors, or whenever the README header counts feel suspect — catches drift between documentation and reality. Do NOT use for pre-commit correctness checks (will the marketplace install cleanly?) — that is `/validate-marketplace`; entropy-scan is the broader drift sweep, validate-marketplace is the focused gate.
 disable-model-invocation: true
 effort: high
 allowed-tools:
@@ -21,32 +21,13 @@ Run all 9 checks. Report results in the structured format below. **Do not modify
 
 ### Check 1: Plugin Count Drift
 
-Compare README.md header line (e.g., "14 plugins. 47 skills. 51 hooks. 4 agents.") against actual counts:
+Compare the README.md header line `<N> plugins. <M> skills. <H> hooks. <A> agents. <R> behavioral rules.` against actual counts:
 
 ```bash
-# Plugins
-ls -d plugins/*/ | wc -l
-
-# Skills (SKILL.md files)
-find plugins -name "SKILL.md" | wc -l
-
-# Hooks (count entries across all hooks.json, not files)
-# Each matcher+hooks pair in a hooks.json counts as one hook
-python3 -c "
-import json, glob
-total = 0
-for f in glob.glob('plugins/*/hooks/hooks.json'):
-    data = json.load(open(f))
-    for event, matchers in data.get('hooks', {}).items():
-        total += len(matchers)
-print(total)
-"
-
-# Agents
-find plugins -name "*.md" -path "*/agents/*" | wc -l
+bash plugins/diagnostics/skills/entropy-scan/scripts/count.sh
 ```
 
-Compare against README header. Report any mismatch.
+Compare against the README header. Report any mismatch.
 
 ### Check 2: Marketplace Registration Gap
 
@@ -164,38 +145,7 @@ Invoke `/claude-md-structure` on `./CLAUDE.md`. Propagate its PRESENT/WEAK/MISSI
 For each agent definition (`plugins/*/agents/*.md`) and each SKILL.md, count entries in `tools:` / `allowed-tools:` frontmatter. Warn if the count exceeds `FORGE_TOOL_MENU_MAX` (default 10).
 
 ```bash
-python3 - <<'PY'
-import os, glob, re
-MAX = int(os.environ.get('FORGE_TOOL_MENU_MAX', '10'))
-def count_tools(path, field_names):
-    try:
-        text = open(path).read()
-    except Exception: return None
-    if not text.startswith('---'):
-        return None
-    fm = text.split('---', 2)[1] if text.count('---') >= 2 else ''
-    for field in field_names:
-        # Try block list first: `field:\n  - Tool1\n  - Tool2`
-        block = re.search(rf'^{field}[ \t]*:[ \t]*\n((?:[ \t]*-[ \t]+.+\n?)+)', fm, re.M)
-        if block:
-            return len(re.findall(r'^[ \t]*-[ \t]+\S', block.group(1), re.M))
-        # Inline: `field: Tool1, Tool2` or `field: [Tool1, Tool2]`
-        m = re.search(rf'^{field}[ \t]*:[ \t]*([^\n]+)$', fm, re.M)
-        if m:
-            inline = m.group(1).strip().strip('[]')
-            parts = [p.strip() for p in re.split(r'[,\s]+', inline) if p.strip()]
-            return len(parts) if parts else None
-    return None
-
-for path in sorted(glob.glob('plugins/*/agents/*.md')):
-    n = count_tools(path, ['tools', 'allowed-tools'])
-    if n and n > MAX:
-        print(f"TOOL-BLOAT: {path} declares {n} tools (max {MAX})")
-for path in sorted(glob.glob('plugins/*/skills/*/SKILL.md')):
-    n = count_tools(path, ['allowed-tools'])
-    if n and n > MAX:
-        print(f"TOOL-BLOAT: {path} declares {n} tools (max {MAX})")
-PY
+python3 plugins/diagnostics/skills/entropy-scan/scripts/check-tool-menu.py
 ```
 
 **Rationale** (Osmani, 2026): *"Ten sharp tools beat fifty overlapping ones."* Large tool menus compete for the model's working memory and degrade tool-selection accuracy. Advisory only — some agents legitimately need more tools.

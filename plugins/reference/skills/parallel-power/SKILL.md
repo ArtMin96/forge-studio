@@ -1,7 +1,7 @@
 ---
 name: parallel-power
-description: Multi-session and parallel execution patterns. Worktrees, fan-out, writer/reviewer splits.
-when_to_use: When you need to work on multiple independent things simultaneously, or want to parallelize a large task across subagents.
+description: Use when the user asks "how do I run things in parallel", "should I use worktrees", or wants the playbook for multi-session and parallel execution — worktrees, fan-out, writer/reviewer splits, headless mode, queue-and-collect. Reference-style passive skill that surfaces examples inline.
+when_to_use: Reach for this for explaining parallel patterns, before choosing between `/fan-out` vs `/worktree-team`, or when teaching. Do NOT use to actually dispatch the work — `/dispatch` picks the route, `/fan-out` and `/worktree-team` execute it.
 disable-model-invocation: true
 ---
 

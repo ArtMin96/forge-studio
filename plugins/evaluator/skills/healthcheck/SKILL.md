@@ -1,7 +1,7 @@
 ---
 name: healthcheck
-description: Run a full project health check. Auto-detects PHP and/or JS/TS projects and runs the appropriate quality pipeline.
-when_to_use: Before committing or when you want a quality snapshot.
+description: Use when the user wants a one-command quality snapshot — auto-detects PHP and/or JS/TS projects and runs the appropriate pipeline (composer install + pest + pint + phpstan; npm install + tests + lint + typecheck). Returns a single PASS/WARN/FAIL summary plus the offending tool's output.
+when_to_use: Reach for this before committing, before opening a PR, or whenever the user asks "is this healthy?" without specifying a tool. Do NOT use to audit Forge Studio's marketplace integrity — that's `/validate-marketplace` and `/entropy-scan`; healthcheck targets the user's actual project code.
 disable-model-invocation: true
 effort: high
 argument-hint: [--quick|--full]

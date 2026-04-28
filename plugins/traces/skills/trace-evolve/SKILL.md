@@ -1,7 +1,7 @@
 ---
 name: trace-evolve
 description: Analyze execution traces to cluster failure patterns and propose harness improvements (rules, hooks, skills).
-when_to_use: Run weekly or when you suspect recurring failure patterns across sessions. Requires compiled trace views — run `/trace-compile` first if summaries are absent.
+when_to_use: Reach for this on a weekly cadence, when failures feel "the same as last time", or when you want trace-driven proposals rather than guesses. Requires compiled views — run `/trace-compile` first if summaries are absent. Do NOT use to apply changes — trace-evolve only proposes; the actual SEPL pipeline is `/evolve` → `/assess-proposal` → `/commit-proposal`.
 disable-model-invocation: true
 effort: xhigh
 paths:

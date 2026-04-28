@@ -1,7 +1,7 @@
 ---
 name: assess-proposal
 description: Adversarial review of a self-evolution proposal artifact. Emits a pass/fail verdict against four criteria. Pure read — never mutates harness files.
-when_to_use: After /evolve generates a proposal, before user approval and /commit-proposal.
+when_to_use: Reach for this immediately after `/evolve` writes a proposal artifact, before any user approval or `/commit-proposal`. Do NOT use for general code review of un-versioned changes — that's `/challenge` or `/devils-advocate`; this skill is the SEPL `assess` operator gate against versioned harness resources.
 disable-model-invocation: true
 effort: xhigh
 argument-hint: <proposal-path>
@@ -93,3 +93,52 @@ Then append a `assess` entry to `.claude/lineage/ledger.jsonl`:
 - Do not apply the proposal, even partially. Commit is a separate operator owned by workflow.
 - Do not lower the bar because a proposal came from another skill. `/trace-evolve` output gets the same scrutiny as user-drafted proposals.
 - Do not emit a verdict without reading at least one neighboring resource — "no regression" cannot be asserted from the proposal alone.
+
+## Examples
+
+### Example 1: a clean pass
+
+Input:
+```
+proposal: .claude/lineage/proposals/2026-04-28-context-pressure-bump.md
+resource: env/FORGE_CONTEXT_PRESSURE_THRESHOLD
+current:  0.65 (v2)
+proposed: 0.70 (v3)
+trigger:  trace-evolve cluster #4 — token-pipeline firing too eagerly on short sessions
+impact:   ~+8% later trigger time; no compaction-budget change
+neighbors: track-context-pressure.sh documents 0.65 as a tunable; no other resource references the variable.
+```
+
+Output:
+```json
+{
+  "proposal": ".claude/lineage/proposals/2026-04-28-context-pressure-bump.md",
+  "verdict": "pass",
+  "criteria": {"single_variable": true, "root_cause": true, "honest_impact": true, "no_regression": true},
+  "rationale": "Single env-var tweak, addresses the root false-positive trigger pattern observed in trace cluster #4, impact estimate matches the +7.7% delta, no neighbor depends on the prior value.",
+  "blockers": []
+}
+```
+
+### Example 2: a fail on root-cause
+
+Input:
+```
+proposal: .claude/lineage/proposals/2026-04-28-no-edit-unread-reminder.md
+resource: rules.d/85-do-not-edit-unread.txt
+proposed: "Reminder: Read files before editing them. Always."
+trigger:  research-gate denied 14 edits this week
+impact:   ~30 chars × ~25 messages/session = ~750 chars/session
+neighbors: research-gate/hooks/require-read-before-edit.sh already enforces this; adding a reminder rule is symptom patching since the hook already blocks.
+```
+
+Output:
+```json
+{
+  "proposal": ".claude/lineage/proposals/2026-04-28-no-edit-unread-reminder.md",
+  "verdict": "fail",
+  "criteria": {"single_variable": true, "root_cause": false, "honest_impact": true, "no_regression": true},
+  "rationale": "research-gate already enforces the constraint at the hook layer; an additional rule adds tokens without changing observable behavior. Root cause for the 14 denials is missing exploration before edit, which is the gate's job — not a rule's.",
+  "blockers": ["root_cause: research-gate/hooks/require-read-before-edit.sh already covers this enforcement"]
+}
+```

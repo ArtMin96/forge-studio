@@ -1,7 +1,7 @@
 ---
 name: orchestrate
 description: Manually invoke the agentic workflow for the current task. Reads the active plan and dispatches the right pattern (single-agent, pipeline, fan-out, TDD loop).
-when_to_use: When you want to skip the automatic router, override its routing decision, or explicitly choose a dispatch pattern.
+when_to_use: Reach for this when you want to skip the automatic router, override its routing decision, or explicitly choose a dispatch pattern (single-agent, pipeline, fan-out, TDD loop). Do NOT use to *decide* which pattern fits — that's `/dispatch`; orchestrate is the executor once the pattern is already chosen.
 disable-model-invocation: true
 argument-hint: [pattern]
 allowed-tools:

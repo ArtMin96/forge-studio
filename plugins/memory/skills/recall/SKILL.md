@@ -1,7 +1,7 @@
 ---
 name: recall
-description: Search and retrieve stored memories. Load topic files on demand.
-when_to_use: When you need context from previous sessions, or before starting work on a topic that may have been explored before.
+description: Use when the user references prior work, asks "what did we decide about X", or starts a topic that may have been explored before — loads `.claude/memory/index.md`, picks the matching tier-2 topic file, and brings the relevant facts into the current turn. Performs a tier-aware retrieval (pointer → topic → optional transcript) instead of dumping everything.
+when_to_use: Reach for this at the start of a session that continues prior work, when a user phrase matches a known memory topic, or when grounding a decision against past context. Do NOT use to write or update memories — that's `/remember`; do NOT use to audit memory hygiene — that's `/memory-index`.
 disable-model-invocation: true
 ---
 

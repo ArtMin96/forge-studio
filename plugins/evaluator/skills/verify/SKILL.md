@@ -1,7 +1,7 @@
 ---
 name: verify
-description: Evidence-based completion check. Prevents the trust-then-verify gap.
-when_to_use: Before committing, merging, or claiming any task is done.
+description: Use whenever a task is about to be marked done — runs the listed verification commands (tests, lint, type-check, behavioral spot-check), captures the actual output, and compares against `.claude/features.json` or the `/contract` criteria. Refuses to mark done unless every gate produced evidence; closes the trust-then-verify gap that produces "I think it works" claims.
+when_to_use: Reach for this before committing, merging, or telling the user "fixed". Do NOT use for deep adversarial review — that's `/challenge` (fork-based critique); verify is the cheap, in-line evidence gate that runs first.
 disable-model-invocation: true
 effort: xhigh
 allowed-tools:

@@ -1,7 +1,7 @@
 ---
 name: session-resume
 description: Resume work from the long-session artifacts (claude-progress.txt + spec.md + features.json). Reads the append-only log, the living spec, and the testable-requirements list, then briefs the current session.
-when_to_use: Start of a new session to pick up where the previous one left off.
+when_to_use: Reach for this at the start of a new session to pick up where the previous one left off, or after a `/compact` when context state has been lost. Do NOT use to *write* the resume artifacts — that's `/progress-log` (writes), `/feature-list` (writes); session-resume is the read-side briefer.
 disable-model-invocation: true
 allowed-tools:
   - Read

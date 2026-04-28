@@ -1,7 +1,7 @@
 ---
 name: tdd-loop
-description: Red-Green-Refactor loop with real-command completion gates. Each phase runs in an isolated subagent context to prevent pollution.
-when_to_use: When building a new feature or reproducing a bug test-first.
+description: Use when building a new feature or reproducing a bug test-first — drives a Red-Green-Refactor loop with three real-command completion gates (failing test exists → test passes → no regressions). Each phase runs in an isolated subagent so context from one phase can't leak into the next and produce premature green.
+when_to_use: Reach for this when the contract or features.json defines clear acceptance criteria and tests are the right verification. Do NOT use for exploratory spikes (no tests yet), pure-refactor work (`/orchestrate refactor`), or one-line fixes — TDD overhead isn't justified there.
 disable-model-invocation: true
 argument-hint: <feature-or-bug-description>
 allowed-tools:
@@ -98,3 +98,23 @@ Why this phase exists: without it, every RED→GREEN→REFACTOR cycle is thrown 
 ## Why Context Isolation
 
 Each phase in its own forked context prevents the implementer from "remembering" the planner's assumptions and prevents the refactorer from protecting the implementer's choices. Honest evaluation requires fresh eyes.
+
+## Execution Checklist
+
+Paste this into the response on first turn and tick boxes as each step completes. Unchecked boxes block "done".
+
+- [ ] Phase 1 (RED): wrote failing test on a clean working tree
+- [ ] Phase 1 gate: ran the suite, observed the new test fail with the expected assertion message
+- [ ] Phase 2 (GREEN): implemented just enough code; did not touch the test file
+- [ ] Phase 2 gate: ran the suite, the new test now passes, no other tests regressed
+- [ ] Phase 3 (REFACTOR): cleaned up shape without changing behavior
+- [ ] Phase 3 gate: full suite green, assertion count not lower than before
+- [ ] Plan item marked `[x]` (so `turn-gate.sh` stops nudging)
+- [ ] Optional `/reflect` invoked if `WORKFLOW_TDD_REFLECT=1`
+
+## Known Failure Modes
+
+- **Premature green.** Phase 2 reports the test passes but the test is asserting the wrong thing or was edited mid-loop. Mitigation: Phase 1 must produce the failing test on a clean tree; Phase 2 may not edit the test file.
+- **Test deleted, not fixed.** Pressure to reach green tempts a "fix" that deletes the assertion. Phase 3 must run the *full* suite, not just the new test, and must compare assertion counts before/after.
+- **Refactor reintroduces failure.** Phase 3 changes shape and re-breaks the test added in Phase 1. The completion gate requires the original test plus the full suite to be green at the end of Phase 3.
+- **Skill skipped on "trivial" change.** A one-liner gets shipped without TDD because it "felt obvious", and an edge case slips through. Mitigation lives in the `when_to_use` exclusion: TDD overhead is not justified for typo-class fixes, but acceptance-criteria changes must run the loop even if small.

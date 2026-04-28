@@ -1,7 +1,7 @@
 ---
 name: safe-mode
-description: Toggle the safe-mode flag (.claude/safe-mode). Written automatically by consecutive-failure-guard at FORGE_SAFE_MODE_THRESHOLD (default 5); read by block-destructive.sh to deny all mutations until cleared. /safe-mode off clears the flag and logs exit + prompts /postmortem.
-when_to_use: `/safe-mode off` after diagnosing the failure chain. `/safe-mode on` to enter manually (rare — most triggers are automatic).
+description: Use to toggle the safe-mode flag at .claude/safe-mode. The flag is written automatically by consecutive-failure-guard once tool failures hit FORGE_SAFE_MODE_THRESHOLD (default 5), and block-destructive.sh denies every Bash/Write/Edit while it exists. /safe-mode off clears the flag, logs the exit, and prompts /postmortem; /safe-mode on enters manually; /safe-mode status reports current state.
+when_to_use: Reach for "/safe-mode off" after diagnosing the failure chain that auto-triggered the lock, or "/safe-mode on" when about to perform a risky operation that you want the harness to block until you explicitly clear it. Do NOT use to skip a postmortem — clearing the flag without root-cause analysis defeats the graceful-degradation contract.
 disable-model-invocation: true
 argument-hint: <on|off|status>
 allowed-tools:

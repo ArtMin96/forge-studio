@@ -1,7 +1,7 @@
 ---
 name: lean-agents
-description: Reduce subagent token overhead from ~50K to ~5K per turn using 4-layer isolation, CLAUDE_CODE_SIMPLE mode, and dispatch guidelines.
-when_to_use: Before spawning subagents when token budget is a concern, or when diagnosing high per-turn cost in multi-agent workflows.
+description: Use when subagent dispatches feel expensive — token budget tight, per-turn cost ballooning in multi-agent workflows, or when planning a `/fan-out` over many files. Recommends a 4-layer isolation profile (CLAUDE_CODE_SIMPLE, narrowed `allowed-tools`, capped `maxTurns`, picked `model`) that drops subagent overhead from ~50K to ~5K tokens per turn.
+when_to_use: Reach for this before launching any heavy `/fan-out`, `/worktree-team`, or multi-stage pipeline, or when diagnosing why a recent multi-agent run cost more than expected. Do NOT use for single-agent flows — the overhead it targets only exists when subagents are spawned.
 disable-model-invocation: true
 model: haiku
 ---

@@ -1,7 +1,7 @@
 ---
 name: token-pipeline
 description: Run the 5-stage Token Transformation Pipeline (TRAE §5.2.2) over the current session state — Collection, Ranking, Compression, Budgeting, Assembly. Emits a concrete next-action recommendation (/compact, /lean-claude-md, or /progress-log + fresh session) instead of a generic warning.
-when_to_use: Triggered automatically by track-context-pressure at ~65% pressure. Can be invoked manually any time context feels heavy.
+when_to_use: Fires automatically via track-context-pressure at ~65% pressure; invoke manually any time context feels heavy or auto-compact looks imminent. Do NOT use to run a holistic context audit before work starts — that's `/audit-context`; this skill is the in-flight pressure-relief decision.
 disable-model-invocation: true
 allowed-tools:
   - Read

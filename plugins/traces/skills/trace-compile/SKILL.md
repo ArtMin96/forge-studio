@@ -1,7 +1,7 @@
 ---
 name: trace-compile
 description: Compile raw JSONL traces from `.claude/traces/` into structured summary and error views.
-when_to_use: When analyzing a session's execution log, triaging trace failures, or before running `/trace-review`.
+when_to_use: Reach for this when analyzing a session's execution log, triaging recent failures, or as the prep step before `/trace-review` or `/trace-evolve`. Do NOT use for quick numeric summaries (`/trace-stats`) or for pattern review across sessions (`/trace-review`); compile is the structured-view-builder that the other trace-* skills consume.
 disable-model-invocation: true
 paths:
   - ".claude/traces/*.jsonl"

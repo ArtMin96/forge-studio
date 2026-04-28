@@ -1,6 +1,7 @@
 ---
 name: rollback
-description: Reverse a prior self-evolution commit. Restores a snapshot from .claude/lineage/versions/ and appends a rollback entry to the ledger. Itself logged — history is append-only.
+description: Use to reverse a prior self-evolution commit — restores a snapshot from `.claude/lineage/versions/<slug>/<version>` and appends a rollback entry to the ledger. The rollback itself is logged so history stays append-only and auditable.
+when_to_use: Reach for this when a recent `/commit-proposal` produced a regression, when `/lineage-audit` flags a bad commit, or when reverting to a known-good resource version. Do NOT use to undo an arbitrary working-tree change — that's `git`; rollback only reverses versioned harness resources tracked in the lineage ledger.
 disable-model-invocation: true
 argument-hint: <resource-slug> [target-version]
 allowed-tools:
@@ -70,3 +71,12 @@ The report hints at the re-roll-forward path: the user can `/rollback` back to t
 - Do not delete snapshot files. They are the append-only history. Cleanup is a separate concern (not implemented in v1).
 - Do not roll back to a version that has no snapshot file — the `v0` state (original shipped file) is not automatically snapshotted. Use git for pre-evolution history.
 - Do not rollback batch. One resource per call.
+
+## Execution Checklist
+
+- [ ] Read the resource slug and target version from arguments
+- [ ] Confirmed `.claude/lineage/versions/<slug>/<target>` exists (otherwise abort with the entropy-scan hint)
+- [ ] Compared current file content to the snapshot — if identical, report no-op and exit
+- [ ] Restored the snapshot to the resource's actual path
+- [ ] Appended a `rollback` entry to the ledger with the prior version recorded
+- [ ] Reported the rollback + the re-roll-forward path the user can take next
