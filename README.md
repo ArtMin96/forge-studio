@@ -9,10 +9,22 @@
 ## Install
 
 ```bash
-# Add the marketplace
+git clone https://github.com/ArtMin96/forge-studio.git
+cd forge-studio
+./install.sh
+```
+
+`install.sh` registers the marketplace, installs all 17 plugins to user scope, and copies `templates/CLAUDE.md` to `~/.claude/CLAUDE.md` (backing up any existing file). Idempotent — safe to re-run.
+
+Start a new Claude Code session (or run `/reload-plugins` in an existing one) for plugins to load.
+
+### Manual install (per-plugin)
+
+To pick a subset, run these inside Claude Code instead:
+
+```bash
 /plugin marketplace add ArtMin96/forge-studio
 
-# Install by layer — pick what you need
 /plugin install behavioral-core@forge-studio    # Behavioral steering (start here)
 /plugin install context-engine@forge-studio      # Context window management
 /plugin install long-session@forge-studio        # Long-running sessions: init.sh + claude-progress.txt + features.json
@@ -32,13 +44,12 @@
 /plugin install themes@forge-studio              # Curated color themes (Catppuccin Mocha); pick via /theme
 ```
 
-Start a new session after installing for plugins to load.
-
 ### Templates
 
+`install.sh` copies `templates/CLAUDE.md` automatically. For the optional power-user settings file:
+
 ```bash
-cp templates/CLAUDE.md ./CLAUDE.md       # Lean project instructions
-cp templates/settings.json ~/.claude/settings.json  # Power-user settings
+cp templates/settings.json ~/.claude/settings.json
 ```
 
 See [docs/settings.md](docs/settings.md) for settings documentation.
