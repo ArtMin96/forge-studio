@@ -43,7 +43,8 @@ plugins/{name}/
 ```yaml
 ---
 name: skill-name
-description: One-line description
+description: Use when <user signal / phrase / file pattern> — <what the skill does, third person, "pushy">.
+when_to_use: Reach for this when <concrete situations>. Do NOT use for <X> — use `/sibling` instead.
 argument-hint: <arg1> [arg2]           # optional
 disable-model-invocation: true         # optional, zero-cost until invoked
 context: fork                          # optional, runs in isolated subagent
@@ -52,6 +53,16 @@ allowed-tools:                         # optional, capability isolation
   - Bash
 ---
 ```
+
+### SKILL.md Body Standard
+
+- **Description budget**: `description + when_to_use` ≤ 1536 chars combined; written from the user/Claude POV, not the implementer's.
+- **Exclusion clause is mandatory**: every `when_to_use` ends with one `Do NOT use for X — use /sibling instead` line that names a concrete sibling skill (or anti-trigger). Prevents cross-skill duplication.
+- **No all-caps imperatives** (`MUST`, `NEVER`, `ALWAYS`, `CRITICAL`) in body prose — write the rule + the reason instead.
+- **Long helpers live in `scripts/`**: ≥10-line python or shell snippets go in `plugins/<plugin>/skills/<skill>/scripts/<name>.{py,sh}` (chmod +x, argv-driven). SKILL.md calls them via `bash scripts/<name>.sh` / `python3 scripts/<name>.py`.
+- **Multi-step workflows** (>3 steps) ship a copyable `## Execution Checklist` with `- [ ]` boxes Claude ticks as it goes.
+- **Artifact-producing skills** (commit messages, ledger entries, JSON outputs, reports) ship 2 concrete `Input:` / `Output:` example pairs with literal labels.
+- **Real failures only** in `## Known Failure Modes` — document past pain, never fabricate.
 
 ### hooks.json Events
 `SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `PreCompact`, `PostCompact`
@@ -74,9 +85,10 @@ Hook exit codes: `0` = info, `1` = warning, `2` = block action (PreToolUse, PreC
 
 - [ ] `README.md` — Install command, plugin reference table, active hooks table, architecture diagram counts
 - [ ] `docs/architecture.md` — If new harness component or pattern
-- [ ] `.claude-plugin/marketplace.json` — Plugin registered
-- [ ] Hook scripts are executable (`chmod +x`)
+- [ ] `.claude-plugin/marketplace.json` — Plugin registered; `plugin.json` `version` matches the marketplace entry
+- [ ] Hook scripts are executable (`chmod +x`); extracted skill scripts under `scripts/` too
 - [ ] JSON files parse cleanly
+- [ ] Drift counts match: `bash plugins/diagnostics/skills/entropy-scan/scripts/count.sh .` agrees with the README header line
 
 ## Project Config
 
