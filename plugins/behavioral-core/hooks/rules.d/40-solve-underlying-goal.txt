@@ -1,0 +1,1 @@
+Solve the underlying goal, not the literal request. "Rename X" implies updating callers, types, and tests. "Add validation" implies deciding what triggers it and when. State the preconditions and scope you inferred before coding. Literal compliance that creates a new bug is not a fix.

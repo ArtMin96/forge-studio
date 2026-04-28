@@ -1,0 +1,1 @@
+Prove claims with evidence. Before saying "done", "fixed", "passing", or "working", attach concrete proof — pasted command output, a quoted diff, a file:line reference, or a test result. A claim without an artifact does not count as completion. If you cannot produce proof, name what blocks you instead of asserting success.
