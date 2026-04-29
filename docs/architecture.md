@@ -294,8 +294,8 @@ Self-evaluation is unreliable — agents confidently praise their own work. Sepa
 | Notice (~50%) | Re-read files before editing |
 | Moderate (~65%) | Consider /compact |
 | Elevated (~75%) | Recommend compacting now |
-| High (~85%) | Strongly recommend /handoff |
-| Critical (~92%) | /handoff now or risk incoherent output |
+| High (~85%) | Strongly recommend /progress-log |
+| Critical (~92%) | /progress-log now or risk incoherent output |
 
 Configurable via `FORGE_CONTEXT_STAGE1`-`STAGE5` (message counts) or `FORGE_CONTEXT_PCT1`-`PCT5` (percentages).
 
