@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "agents",
   "description": "Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries",
   "version": "1.2.0",

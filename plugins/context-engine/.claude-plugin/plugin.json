@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "context-engine",
   "description": "Context management: progressive pressure tracking, drift detection, edit safety, large-file warnings, plan mode hooks, MCP monitoring, prompt budget awareness, failure-escalation with safe-mode flag.",
   "version": "1.4.0",

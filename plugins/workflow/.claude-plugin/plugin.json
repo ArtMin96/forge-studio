@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "workflow",
   "description": "Hook-driven agentic workflow orchestrator. Automatic routing (shell or LLM-hybrid), sprint-contract enforcement, TDD loop, session bootstrap, handoff nudges. Self-evolution SEPL loop (propose/assess/commit/rollback) over versioned resources. Composes agents/evaluator/context-engine/memory rather than duplicating them.",
   "version": "2.1.0",

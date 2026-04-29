@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "memory",
   "description": "Three-tier memory architecture: pointer index, on-demand topics, searchable transcripts. Version-aware updates snapshot prior topic contents to the lineage ledger.",
   "version": "1.2.0",
