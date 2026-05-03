@@ -8,7 +8,7 @@
      contracts between planner/generator/reviewer), diagnostics (entropy
      scanning for documentation drift), and self-evolution (auditable
      propose → assess → commit → rollback over versioned resources; see
-     docs/self-evolution.md and docs/lineage.md). This file covers what
+     docs/self-evolution.md). This file covers what
      hooks CAN'T: personality, judgment, and project config. -->
 
 ## Personality

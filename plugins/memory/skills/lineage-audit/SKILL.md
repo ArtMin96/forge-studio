@@ -14,7 +14,7 @@ allowed-tools:
 
 # Lineage Audit — Ledger Invariant Check
 
-Read-only inspection of the self-evolution ledger. Verifies the invariants in `HARNESS_SPEC.md` §Self-Evolution Protocol and `docs/lineage.md`. Does not modify the ledger.
+Read-only inspection of the self-evolution ledger. Verifies the invariants in `HARNESS_SPEC.md` §Self-Evolution Protocol and `docs/self-evolution.md`. Does not modify the ledger.
 
 ## When to Use
 

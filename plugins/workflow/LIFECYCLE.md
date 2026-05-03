@@ -56,7 +56,7 @@ PreCompact ─► pre-compact-handoff.sh
 
 ## Self-Evolution Loop (SEPL)
 
-Closed-loop propose → assess → commit operator over versioned resources. See `docs/lineage.md` for the full protocol.
+Closed-loop propose → assess → commit operator over versioned resources. See `docs/self-evolution.md` for the full protocol.
 
 ```
 signal source ──► /trace-evolve (traces)         propose draft

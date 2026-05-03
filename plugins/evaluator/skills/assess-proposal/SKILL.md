@@ -16,7 +16,7 @@ allowed-tools:
 
 # /assess-proposal — SEPL `assess` Operator
 
-Second of the three SEPL operators (propose → **assess** → commit). See `docs/lineage.md` for the full protocol.
+Second of the three SEPL operators (propose → **assess** → commit). See `docs/self-evolution.md` for the full protocol.
 
 Runs in a forked `reviewer` subagent so the assessor cannot "fix" the proposal by editing it — forcing an honest pass/fail call.
 

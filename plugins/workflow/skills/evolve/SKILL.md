@@ -15,7 +15,7 @@ allowed-tools:
 
 # /evolve — SEPL Orchestrator
 
-Top-level skill for the propose → assess → commit loop. Composes `/trace-evolve` (traces), `/assess-proposal` (evaluator), `/commit-proposal` (this plugin). See `docs/lineage.md` for the protocol.
+Top-level skill for the propose → assess → commit loop. Composes `/trace-evolve` (traces), `/assess-proposal` (evaluator), `/commit-proposal` (this plugin). See `docs/self-evolution.md` for the protocol.
 
 **Never** writes to harness files directly. This skill orchestrates; mutation happens in `/commit-proposal` after user approval.
 

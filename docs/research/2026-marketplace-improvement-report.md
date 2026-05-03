@@ -324,7 +324,7 @@ Directly complements 5.1. A PreToolUse hook that, when an active role is set, bl
 `CLAUDE.md` currently lists a manual checklist (check JSON, check executability, check frontmatter, check size). `/entropy-scan` covers most of this but is geared toward drift detection, not pre-release validation. A focused `/validate-marketplace` skill — JSON parse, SKILL.md schema, hook exec, skill size budget, marketplace.json/plugin-dir set equality — replaces the checklist with a runnable check and can be invoked before commits.
 
 ### 5.5 Ledger Audit (Hardening Gap)
-The lineage protocol documented in `HARNESS_SPEC.md` §Self-Evolution and `docs/lineage.md` has strict invariants: every commit has an earlier propose + pass-assess on the same resource/version; every commit/rollback has a snapshot file; the ledger is append-only; the `resource` field must be a registry slug. Nothing in the marketplace currently inspects these. `/lineage-audit` closes the inspection loop.
+The lineage protocol documented in `HARNESS_SPEC.md` §Self-Evolution and `docs/self-evolution.md` has strict invariants: every commit has an earlier propose + pass-assess on the same resource/version; every commit/rollback has a snapshot file; the ledger is append-only; the `resource` field must be a registry slug. Nothing in the marketplace currently inspects these. `/lineage-audit` closes the inspection loop.
 
 ### Explicitly Rejected
 - **shared-task-queue plugin** — overlaps `context-engine/task-guardian` and `TaskCreate`/`TaskCompleted` hooks.
@@ -511,6 +511,6 @@ These items emerge from the research but are not Tier 1:
 | `directory-ownership` hook | 2.2 (directory ownership) | 2.5 (claim-lock analog), 3.5 (anti-pattern: two agents editing same file) |
 | `output-schema-check` hook | 2.1 (schema discipline), 2.4 (schema validation at merge), 2.8 (binary criteria) | 3.3 (safety schema validation), 3.5 (ambiguous tool design) |
 | `validate-marketplace` skill | 3.1 (marketplace schema), 3.4C (plugin integration evals), CLAUDE.md existing checklist | 3.5 (plugin anti-patterns) |
-| `lineage-audit` skill | `HARNESS_SPEC.md` §Self-Evolution, `docs/lineage.md` | Autogenesis (arXiv:2604.15034) |
+| `lineage-audit` skill | `HARNESS_SPEC.md` §Self-Evolution, `docs/self-evolution.md` | Autogenesis (arXiv:2604.15034) |
 
 Every Tier-1 addition has ≥1 primary citation. Every rejection has a reason logged in §5.

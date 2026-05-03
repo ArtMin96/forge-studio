@@ -387,7 +387,7 @@ Periodic scanning to detect drift between documentation and reality.
 
 ## Self-Evolution Protocol
 
-Source: *Autogenesis: A Self-Evolving Agent Protocol* (Wentao Zhang, arXiv:2604.15034, Apr 2026). Protocol detail: `docs/lineage.md`.
+Source: *Autogenesis: A Self-Evolving Agent Protocol* (Wentao Zhang, arXiv:2604.15034, Apr 2026). Protocol detail: `docs/self-evolution.md`.
 
 Two layers:
 - **RSPL** (Resource Substrate Protocol Layer) — resources the loop may touch: rules, skills, hooks, memory topics, env vars. Each resolves to a stable slug.
@@ -403,7 +403,7 @@ Two layers:
 | Memory topic | `memory/topics/<slug>` | `.claude/memory/topics/<slug>.md` |
 | Env var | `env/<VAR>` | `.claude/settings.json` key `env.<VAR>` |
 
-Adding a new kind requires amending this table and `docs/lineage.md`.
+Adding a new kind requires amending this table and `docs/self-evolution.md`.
 
 ### Ledger Invariants
 

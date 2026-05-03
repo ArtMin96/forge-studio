@@ -15,7 +15,7 @@ allowed-tools:
 
 # /rollback — Reverse a Commit
 
-Fourth operator (alongside propose/assess/commit). See `docs/lineage.md` §Operator Semantics.
+Fourth operator (alongside propose/assess/commit). See `docs/self-evolution.md` §The Four Operators.
 
 ## Input
 

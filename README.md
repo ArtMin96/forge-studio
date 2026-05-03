@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-17 plugins. 56 skills. 55 hooks. 4 agents. 11 behavioral rules.
+17 plugins. 56 skills. 56 hooks. 4 agents. 11 behavioral rules.
 
 ---
 
@@ -128,87 +128,14 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 
 ## Active Hooks
 
-Hooks fire automatically. No commands needed.
+Hooks fire automatically. No commands needed. 56 hook command registrations across 13 plugins, spanning all major events:
 
-### Session Lifecycle
-| Event | Plugin | What it does |
-|-------|--------|-------------|
-| SessionStart | context-engine | Environment snapshot: OS, memory, languages, tools, git state |
-| SessionStart | context-engine | MCP server instruction token monitoring |
-| SessionStart | caveman | Load compressed communication rules |
-| SessionStart | behavioral-core | One-time check for unsafe output styles |
-| SessionStart | workflow | Surface active plan + unchecked items + recent progress (agentic workflow bootstrap) |
-| SessionStart | long-session | Surface tail of `claude-progress.txt` + features.json status + spec.md delta + init.sh presence hint |
-| SessionStart | rtk-optimizer | First session: install `rtk` binary + run `rtk init -g`. Subsequent sessions: no-op. |
-| SessionStart | code-graph | Install `code-review-graph` and register its MCP server for the current repo on first run. Subsequent sessions: no-op. |
-| PreCompact | context-engine | Guard: block compaction when uncommitted work has no progress entry or tasks are in-progress |
-| PreCompact | context-engine | Save scope, plan, progress, git state to recovery file |
-| PreCompact | workflow | Advisory nudge to run `/progress-log` before auto-compaction (replaces old /handoff nudge) |
-| PostCompact | context-engine | Re-inject scope, plan, tasks, modified files from recovery |
-| PostCompact | caveman | Re-inject compressed communication rules |
-| SessionEnd | traces | Write session summary to trace file |
+- **Session lifecycle** — `SessionStart` (9 hooks), `SessionEnd`, `PreCompact` (3), `PostCompact` (2)
+- **Per-turn** — `UserPromptSubmit` (5 hooks), `Stop`, `StopFailure`
+- **Tool execution** — `PreToolUse` (9 deny-chain hooks), `PostToolUse` (18), `PostToolUseFailure` (2)
+- **Agent / Task** — `SubagentStop` (3), `TaskCreated`, `TaskCompleted`
 
-### Every Message
-| Event | Plugin | What it does |
-|-------|--------|-------------|
-| UserPromptSubmit | behavioral-core | Re-anchor all behavioral rules from `rules.d/` |
-| UserPromptSubmit | context-engine | 5-stage progressive context pressure warnings |
-| UserPromptSubmit | context-engine | Track system-reminder injection patterns |
-| UserPromptSubmit | context-engine | Remind about incomplete tasks |
-| UserPromptSubmit | workflow | Agentic router: classify prompt (shell/hybrid/LLM), nudge pattern |
-
-### Before Tool Use
-| Event | Plugin | What it does |
-|-------|--------|-------------|
-| PreToolUse:Bash | behavioral-core | **Block** safe-mode-flagged sessions (Layer 5) + destructive commands (`rm -rf`, `git push --force`, etc.) |
-| PreToolUse:Edit\|Write | behavioral-core | Warn when editing files outside active scope |
-| PreToolUse:Edit\|Write | research-gate | **Block** edit/write if file not Read in session (exit 2) |
-| PreToolUse:Edit\|Write | research-gate | Warn if insufficient exploration before first edit |
-| PreToolUse:Edit\|Write | policy-gateway | **Block** on secret pattern match (rules in `rules.d/secrets.txt`); emits `policy-block` ledger entry |
-| PreToolUse:Bash\|Edit\|Write | policy-gateway | **Block** on prompt-injection pattern match (rules in `rules.d/injection.txt`) |
-| PreToolUse:Bash | evaluator | Evaluation gate: warn if plan exists but `/verify` not run |
-
-### After Tool Use
-| Event | Plugin | What it does |
-|-------|--------|-------------|
-| PostToolUse:Write\|Edit | behavioral-core | "Does this change do ONLY what was asked?" |
-| PostToolUse:Read | context-engine | Warn on files >500 lines |
-| PostToolUse:Bash\|Grep | context-engine | Warn on large output or near-truncation |
-| PostToolUse:Edit\|Read | context-engine | Track edits per file; warn after 3 without re-reading |
-| PostToolUse:Edit | context-engine | Detect thrashing (5+ edits to same file, oscillating regions) |
-| PostToolUse:EnterPlanMode | context-engine | Inject plugin-aware plan mode guidance |
-| PostToolUse:Write\|Edit (.php) | evaluator | Run PHPStan on changed file |
-| PostToolUse:Write\|Edit (.js/.ts) | evaluator | Run tsc + ESLint on changed file |
-| PostToolUse:Edit\|Write | evaluator | Nudge to run tests after every 3rd edit |
-| PostToolUse:Bash | evaluator | Reset test-nudge counter when tests detected |
-| PostToolUse:Write\|Edit | traces | Log file change to session trace |
-| PostToolUse:Bash | traces | Log command, exit code, output to session trace |
-| PostToolUse:Read | research-gate | Record file read for edit gate |
-| PostToolUse:Read\|Grep\|Glob | research-gate | Track exploration depth |
-| PostToolUse:Read | token-efficiency | Warn on duplicate reads |
-| PostToolUse:Bash | code-graph | Refresh the graph after `git commit`/`merge`/`rebase`/`pull`/`checkout`/`reset`/`cherry-pick`. |
-| PostToolUse:Bash (.test) | evaluator | Backpressure: replace verbose passing test output with summary |
-| PostToolUse:* | context-engine | Reset consecutive failure counter on success |
-| PostToolUseFailure:* | traces | Log tool failures to session trace |
-| PostToolUseFailure:* | context-engine | Warn at `FORGE_FAILURE_THRESHOLD` (default 3); write `.claude/safe-mode` + ledger `safe-mode-enter` at `FORGE_SAFE_MODE_THRESHOLD` (default 5) |
-| PostToolUse:Edit\|Write | policy-gateway | Audit writes to `.env` / `secrets/` / `credentials/` / key files; ledger `sensitive-op-audit` |
-| TaskCreated | context-engine | Log task for progress guardian |
-| StopFailure | traces | Log API errors and rate limits to session trace |
-
-### Agent Lifecycle
-| Event | Plugin | What it does |
-|-------|--------|-------------|
-| SubagentStop | agents | Warn if sprint contract criteria not verified by reviewer |
-| SubagentStop | agents | Warn if generator finished without producing artifacts declared in plan Contract/Output Schema |
-| PreToolUse:Edit\|Write | agents | Directory-ownership guard for worktree-team (opt-in: `FORGE_DIRECTORY_OWNERSHIP=1`) |
-| SubagentStop | workflow | Nudge next phase in planner→generator→reviewer→/verify chain; if `.claude/spec.md` present, append delta block; if `.claude/features.json` present, flip matching items to `done` based on recent commit subjects |
-
-### Turn Completion
-
-| Event | Plugin | Hook | What It Does |
-|-------|--------|------|-------------|
-| Stop | workflow | turn-gate.sh | Every N turns: remind about unchecked plan items and context pressure |
-| TaskCompleted | evaluator | task-completion-gate.sh | Warn if task marked done without verification evidence |
+For the full event-by-event table — every hook, matcher, plugin, and behavior — see [`HARNESS_SPEC.md` §Hook Events Reference](HARNESS_SPEC.md#hook-events-reference). Architectural framing in [`docs/architecture.md`](docs/architecture.md).
 
 ---
 

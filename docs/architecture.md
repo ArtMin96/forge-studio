@@ -21,7 +21,7 @@ Design rationale, component model, hook mechanics. For research citations, see [
 
 Cross-cutting plugins: `evaluator`, `workflow`, `reference`, `traces`, `diagnostics`, `caveman`, `token-efficiency`, `research-gate`, `long-session`, `policy-gateway`.
 
-Component 8 is drawn from *Autogenesis: A Self-Evolving Agent Protocol* (arXiv:2604.15034, Apr 2026). See `docs/lineage.md` for the protocol and `HARNESS_SPEC.md` §Self-Evolution Protocol for invariants.
+Component 8 is drawn from *Autogenesis: A Self-Evolving Agent Protocol* (arXiv:2604.15034, Apr 2026). See `docs/self-evolution.md` for the protocol and `HARNESS_SPEC.md` §Self-Evolution Protocol for invariants.
 
 ### TRAE Harness-Engineering Framings (overlays, not replacements)
 
@@ -78,9 +78,9 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 
 ---
 
-## Hook Event Reference
+## Forge Hook Deployment
 
-55 hooks across 13 plugins. Hooks fire automatically on events — no commands needed.
+56 hook command registrations across 13 plugins. Hooks fire automatically on events — no commands needed. For the underlying Claude Code event API catalog see [`HARNESS_SPEC.md` §Hook Events Reference](../HARNESS_SPEC.md#hook-events-reference); the tables below describe **what forge actually deploys** at each event.
 
 ### Session Lifecycle
 
@@ -90,11 +90,14 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | SessionStart | context-engine | mcp-instruction-monitor.sh | MCP server token overhead + config injection-pattern scan |
 | SessionStart | caveman | caveman-init.sh | Load compressed communication rules |
 | SessionStart | behavioral-core | output-style-check.sh | One-time check for unsafe output styles |
-| SessionStart | workflow | session-bootstrap.sh | Surface active plan + unchecked items + recent progress (agentic workflow bootstrap) |
+| SessionStart | workflow | session-bootstrap.sh | Surface active plan + unchecked items + recent progress |
+| SessionStart | long-session | bootstrap-substrate.sh | Idempotently create `.claude/{plans,gate}/`, `.claude/spec.md`, `.claude/features.json` so handoff chain works on first run (opt-out: `FORGE_LONG_SESSION_BOOTSTRAP=0`) |
 | SessionStart | long-session | surface-progress.sh | Tail `claude-progress.txt`, `features.json` status, `spec.md` delta, `init.sh` presence |
-| PreCompact | context-engine | pre-compact-guard.sh | Block compaction when uncommitted work has no handoff or tasks in-progress |
-| PreCompact | context-engine | pre-compact.sh | Save scope, plan, handoff, git state, tasks to recovery file |
-| PreCompact | workflow | pre-compact-handoff.sh | Advisory nudge to run `/progress-log` before auto-compaction (freshness check on `claude-progress.txt`) |
+| SessionStart | rtk-optimizer | rtk-bootstrap.sh | First session: install `rtk` binary + run `rtk init -g`. Subsequent sessions: no-op |
+| SessionStart | code-graph | code-graph-bootstrap.sh | Install `code-review-graph` and register MCP server for current repo on first run |
+| PreCompact | context-engine | pre-compact-guard.sh | Block compaction when uncommitted work has no progress entry or tasks in-progress |
+| PreCompact | context-engine | pre-compact.sh | Save scope, plan, progress, git state to recovery file |
+| PreCompact | workflow | pre-compact-handoff.sh | Advisory nudge to run `/progress-log` before auto-compaction |
 | PostCompact | context-engine | post-compact.sh | Re-inject scope, plan, tasks, modified files from recovery |
 | PostCompact | caveman | caveman-restore.sh | Re-inject compressed communication rules |
 | SessionEnd | traces | session-summary.sh | Write session summary to trace file |
@@ -109,20 +112,21 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | context-engine | task-guardian.sh | Remind about incomplete tasks |
 | workflow | route-prompt.sh | Agentic router: classify prompt (shell/hybrid/LLM), nudge pattern |
 
-### Before Tool Use (PreToolUse)
+### Before Tool Use (PreToolUse — 9 hooks, deny-chain)
 
 | Matcher | Plugin | Hook | What It Does |
 |---------|--------|------|-------------|
-| Bash | behavioral-core | block-destructive.sh | **Block** safe-mode-flagged sessions (Layer 5) + `rm -rf`, `git push --force`, etc. |
+| Bash | behavioral-core | block-destructive.sh | **Block** safe-mode + `rm -rf`, `git push --force`, etc. |
 | Edit\|Write | behavioral-core | scope-guard.sh | Warn when editing files outside active scope |
 | Edit\|Write | research-gate | require-read-before-edit.sh | **Block** edit/write if file not Read in session (exit 2) |
 | Edit\|Write | research-gate | exploration-depth-gate.sh | Warn if insufficient exploration before first edit |
-| Edit\|Write | policy-gateway | scan-secrets.sh | **Block** on secret pattern match (`rules.d/secrets.txt`); ledger `policy-block` |
-| Bash\|Edit\|Write | policy-gateway | scan-injection.sh | **Block** on prompt-injection pattern (`rules.d/injection.txt`); ledger `policy-block` |
+| Edit\|Write | policy-gateway | scan-secrets.sh | **Block** on secret pattern match; ledger `policy-block` |
+| Bash\|Edit\|Write | policy-gateway | scan-injection.sh | **Block** on prompt-injection pattern; ledger `policy-block` |
 | Bash | evaluator | pre-commit-gate.sh | Warn if plan exists but `/verify` not run |
+| Edit\|Write | agents | directory-ownership.sh | Worktree-team scope guard (opt-in: `FORGE_DIRECTORY_OWNERSHIP=1`) |
 | Read | token-efficiency | track-duplicate-reads.sh | Warn on duplicate reads |
 
-### After Tool Use (PostToolUse)
+### After Tool Use (PostToolUse — 18 hooks)
 
 | Matcher | Plugin | Hook | What It Does |
 |---------|--------|------|-------------|
@@ -132,34 +136,42 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | Edit\|Read | context-engine | track-edits.sh | Track edits per file; warn after 3 without re-reading |
 | Edit | context-engine | detect-thrashing.sh | Detect thrashing (5+ edits same file, oscillating regions) |
 | EnterPlanMode | context-engine | plan-mode-enter.sh | Inject plugin-aware plan mode guidance |
+| (any) | context-engine | consecutive-failure-reset.sh | Reset consecutive failure counter on success |
 | Write\|Edit (.php) | evaluator | php-static-analysis.sh | Run PHPStan on changed file |
 | Write\|Edit (.js/.ts) | evaluator | js-static-analysis.sh | Run tsc + ESLint on changed file |
 | Edit\|Write | evaluator | test-nudge.sh | Nudge to run tests after every 3rd edit |
 | Bash | evaluator | test-nudge-reset.sh | Reset test-nudge counter when tests detected |
-| Write\|Edit | traces | collect-file-trace.sh | Log file change to session trace |
-| Bash | traces | collect-bash-trace.sh | Log command, exit code, output to session trace |
+| Bash | evaluator | filter-test-output.sh | Replace verbose passing test output with summary |
+| Edit\|Write | policy-gateway | audit-sensitive-ops.sh | Audit writes to `.env` / `secrets/` / key files; ledger `sensitive-op-audit` |
 | Read | research-gate | track-file-reads.sh | Record file read for edit gate |
 | Read\|Grep\|Glob | research-gate | track-exploration.sh | Track exploration depth |
+| Write\|Edit | traces | collect-file-trace.sh | Log file change to session trace |
+| Bash | traces | collect-bash-trace.sh | Log command, exit code, output to session trace |
+| Bash | code-graph | code-graph-update.sh | Refresh graph after `git commit/merge/rebase/pull/checkout/reset/cherry-pick` |
 
-### Task Lifecycle
+### Failure & Task Events
 
 | Event | Plugin | Hook | What It Does |
 |-------|--------|------|-------------|
+| PostToolUseFailure | context-engine | consecutive-failure-guard.sh | Warn at `FORGE_FAILURE_THRESHOLD`; write `.claude/safe-mode` + ledger at `FORGE_SAFE_MODE_THRESHOLD` |
+| PostToolUseFailure | traces | collect-failure-trace.sh | Log tool failures to session trace |
 | TaskCreated | context-engine | task-guardian-log.sh | Log task for progress guardian |
+| TaskCompleted | evaluator | task-completion-gate.sh | Warn if task marked done without verification evidence |
+| StopFailure | traces | log-stop-failure.sh | Log API errors and rate limits to session trace |
 
 ### Agent Lifecycle
 
 | Event | Plugin | Hook | What It Does |
 |-------|--------|------|-------------|
 | SubagentStop | agents | contract-check.sh | Warn if sprint contract criteria not verified by reviewer |
-| SubagentStop | workflow | after-subagent.sh | Nudge next phase in planner→generator→reviewer→/verify chain |
+| SubagentStop | agents | output-schema-check.sh | Warn if generator finished without producing declared artifacts |
+| SubagentStop | workflow | after-subagent.sh | Nudge next phase (planner→generator→reviewer→/verify); append spec.md delta; flip features.json `F<n>` to done |
 
-### Turn Completion & Task Events
+### Turn Completion
 
 | Event | Plugin | Hook | What It Does |
 |-------|--------|------|-------------|
 | Stop | workflow | turn-gate.sh | Every N turns: remind about unchecked plan items and context pressure |
-| TaskCompleted | evaluator | task-completion-gate.sh | Warn if task marked done without verification evidence |
 
 ---
 
@@ -209,16 +221,9 @@ Forge Studio currently uses hooks for all event-driven behavior. Monitors are do
 
 ## Hook Handler Types
 
-Claude Code supports four hook handler types. Forge Studio uses `command` type for all hooks.
+Forge Studio uses `command`-type hooks exclusively — deterministic, fast, cheap. The full handler-type table (`command` / `prompt` / `agent` / `http`, with execution semantics and use cases) lives in [`HARNESS_SPEC.md` §Hook Handler Types](../HARNESS_SPEC.md#hook-handler-types).
 
-| Type | Execution | Blocking | Use Case |
-|------|-----------|----------|----------|
-| `command` | Shell script | Yes (exit 2) | Deterministic checks, file tracking, linting |
-| `prompt` | LLM evaluation | No | Semantic analysis at decision points |
-| `agent` | Agent delegation | No | Complex evaluation requiring multi-step reasoning |
-| `http` | Webhook POST | No | External integrations, audit logging |
-
-Forge Studio uses `command` hooks exclusively — deterministic, fast, cheap. The `prompt` and `agent` types enable inferential hooks but cost tokens on every firing. Reserve these for periodic deep analysis, not per-tool checks.
+The `prompt` and `agent` types enable inferential hooks but cost tokens on every firing. Reserve these for periodic deep analysis, not per-tool checks.
 
 ---
 
@@ -394,14 +399,4 @@ Invoked skills survive context compaction with the first 5,000 tokens per skill.
 
 ## Glossary
 
-| Term | Definition |
-|------|-----------|
-| Harness | Everything in an AI agent except the model — prompts, hooks, memory, tools, context management |
-| System-reminder | `<system-reminder>` tag injected by hooks. Model treats these as authoritative context |
-| Hook | Shell script firing on events. Outputs injected as system-reminders |
-| Exit codes | 0 = info, 1 = warning, 2 = block (PreToolUse, PreCompact) |
-| Context compaction | Claude Code compresses older messages when context fills. Information may be lost |
-| JSONL | JSON Lines — one JSON object per line. Used for execution traces |
-| Policy kernel | External enforcement of action classification (allow/deny/defer) |
-| Context firewall | Sub-agent isolation preventing intermediate results from polluting parent |
-| Sprint contract | Negotiated done-criteria between planner and evaluator before execution |
+See [`HARNESS_SPEC.md` §Glossary](../HARNESS_SPEC.md#glossary) for the canonical term definitions.

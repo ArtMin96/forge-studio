@@ -15,7 +15,7 @@ allowed-tools:
 
 # /commit-proposal — SEPL `commit` Operator
 
-Third of the three SEPL operators (propose → assess → **commit**). See `docs/lineage.md`.
+Third of the three SEPL operators (propose → assess → **commit**). See `docs/self-evolution.md`.
 
 ## Preconditions
 

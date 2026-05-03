@@ -1,6 +1,6 @@
 # Self-Evolution
 
-User-facing guide to Forge Studio's self-improvement loop. For the wire-level protocol (ledger schema, snapshot paths, operator semantics) see [`lineage.md`](lineage.md). For the architectural invariant see [`HARNESS_SPEC.md`](../HARNESS_SPEC.md) §Self-Evolution Protocol.
+User-facing guide to Forge Studio's self-improvement loop **and** the wire-level protocol that powers it (ledger schema, snapshot paths, operator semantics). For the architectural invariants see [`HARNESS_SPEC.md`](../HARNESS_SPEC.md) §Self-Evolution Protocol.
 
 ## What It Is
 
@@ -35,7 +35,7 @@ The loop only touches resources in the registry. Anything else is out of reach.
 | Memory topic | `memory/topics/router-thresholds` |
 | Config var | `env/WORKFLOW_ROUTER_CONFIDENCE_THRESHOLD` |
 
-Full slug table: `lineage.md` §Resource Registry. Adding a kind requires editing the registry deliberately — the loop cannot grant itself new powers.
+Full slug table below in §Resource Registry. Adding a kind requires editing the registry deliberately — the loop cannot grant itself new powers.
 
 ## The Four Operators
 
@@ -141,9 +141,57 @@ Why both loops? Harness evolution needs the full assess + commit ceremony becaus
 | `memory` | Version-aware topic updates (`/remember`) feed the same ledger |
 | `diagnostics` | Future: `/entropy-scan` will validate ledger invariants (snapshot existence, propose→assess→commit ordering) |
 
+## Resource Registry
+
+Everything the self-evolution loop can touch must resolve to a stable slug.
+
+| Resource kind | Slug format | Example |
+|---|---|---|
+| Behavioral rule | `rules.d/<filename>` | `rules.d/25-brevity.txt` |
+| Skill | `skills/<plugin>/<skill-name>` | `skills/workflow/tdd-loop` |
+| Hook script | `hooks/<plugin>/<script>` | `hooks/workflow/route-prompt.sh` |
+| Memory topic | `memory/topics/<slug>` | `memory/topics/router-thresholds` |
+| Config var | `env/<VAR>` | `env/WORKFLOW_ROUTER_CONFIDENCE_THRESHOLD` |
+
+Resources not in this list are outside the loop's reach. Adding a new kind requires a ledger entry of its own (`operator: register-kind`).
+
+## Ledger Format
+
+Path: `.claude/lineage/ledger.jsonl` (append-only, one JSON object per line).
+
+```json
+{"ts":"2026-04-20T10:15:00Z","operator":"propose","resource":"rules.d/25-brevity.txt","version":"v3","prev":"v2","trigger":"trace-evolve:cluster-thrashing-0420","evidence":".claude/lineage/proposals/0420-brevity-v3.md","actor":"workflow:/evolve"}
+```
+
+| Field | Type | Required | Meaning |
+|---|---|---|---|
+| `ts` | ISO 8601 UTC | yes | Event timestamp |
+| `operator` | `propose \| assess \| commit \| reject \| rollback` | yes | Which SEPL step |
+| `resource` | string (slug from table above) | yes | What this entry is about |
+| `version` | string (`v<N>` or `vN-assess` etc.) | yes | The version this entry produced |
+| `prev` | string | on `commit` and `rollback` | The version being replaced |
+| `trigger` | string | recommended | What surfaced the proposal (trace cluster id, user request, etc.) |
+| `evidence` | relative path | yes | Artifact supporting the entry (proposal, verdict, diff) |
+| `actor` | string | yes | Which skill/hook wrote the entry (`workflow:/evolve`, `evaluator:/assess-proposal`, etc.) |
+
+## Version Snapshots
+
+On `commit`, the **previous** file contents are snapshotted to:
+
+```
+.claude/lineage/versions/<resource-slug>/<prev-version>
+```
+
+Example: committing `rules.d/25-brevity.txt` from v2 → v3 writes the old contents to `.claude/lineage/versions/rules.d/25-brevity.txt/v2`.
+
+For `env/<VAR>` resources, the snapshot file contains the prior value plus the path to the settings.json key it was read from (so rollback can restore it without guessing).
+
+## Wire-Level Invariants
+
+The formal invariants — append-only ledger, matching propose/assess/commit lineage, snapshot existence, slug-registry enforcement, no-go list — live in [`HARNESS_SPEC.md` §Ledger Invariants and §No-Go List](../HARNESS_SPEC.md#ledger-invariants). Authoritative source; check there before changing protocol expectations.
+
 ## Pointers
 
-- [Protocol spec](lineage.md) — wire format, ledger schema, snapshot paths
 - [Architectural invariant](../HARNESS_SPEC.md) — §Self-Evolution Protocol
 - [Lifecycle diagram](../plugins/workflow/LIFECYCLE.md) — §Self-Evolution Loop (SEPL)
 - [Autogenesis paper](https://arxiv.org/abs/2604.15034) — source material
