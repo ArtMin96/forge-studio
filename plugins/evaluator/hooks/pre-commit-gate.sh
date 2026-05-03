@@ -16,8 +16,15 @@ if ! echo "$COMMAND" | grep -qE '^git\s+commit'; then
 fi
 
 # Check evaluation gate (if not disabled)
+# Plans may live project-local (.claude/plans/, used by /contract /dispatch /feature-list
+# /after-subagent.sh) or user-scope (~/.claude/plans/, Claude Code plan-mode default).
+# Prefer project-local when present so per-repo plans take precedence.
 if [ "${FORGE_EVALUATION_GATE:-1}" != "0" ]; then
-  PLAN_DIR="${HOME}/.claude/plans"
+  if [ -d ".claude/plans" ] && ls .claude/plans/*.md >/dev/null 2>&1; then
+    PLAN_DIR=".claude/plans"
+  else
+    PLAN_DIR="${HOME}/.claude/plans"
+  fi
   if [ -d "$PLAN_DIR" ]; then
     LATEST_PLAN=$(ls -t "$PLAN_DIR"/*.md 2>/dev/null | head -1)
     if [ -n "$LATEST_PLAN" ]; then
