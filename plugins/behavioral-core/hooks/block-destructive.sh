@@ -29,9 +29,24 @@ if [ -z "$COMMAND" ]; then
   exit 0
 fi
 
-# Layer 1: Direct destructive patterns
-if echo "$COMMAND" | grep -qEi '(rm\s+-rf\s+[/~]|git\s+push\s+--force|git\s+push\s+-f\b|git\s+reset\s+--hard|DROP\s+TABLE|DROP\s+DATABASE|TRUNCATE\s+|git\s+checkout\s+\.\s*$|git\s+clean\s+-f|git\s+branch\s+-D)'; then
-  MATCHED=$(echo "$COMMAND" | grep -oEi '(rm\s+-rf\s+[/~]|git\s+push\s+--force|git\s+push\s+-f\b|git\s+reset\s+--hard|DROP\s+TABLE|DROP\s+DATABASE|TRUNCATE\s+|git\s+checkout\s+\.\s*$|git\s+clean\s+-f|git\s+branch\s+-D)' | head -1)
+# Layer 1a: rm -rf — deny system paths, allow temp dirs (common test cleanup pattern).
+# Strip quotes for path detection so 'rm -rf "/etc/x"' is caught. Scan ALL occurrences
+# (compound `rm -rf /tmp/a; rm -rf /etc/b` must catch the second). Handle `--` separator.
+RM_SCAN=$(echo "$COMMAND" | tr -d "\"'" | grep -oE 'rm[[:space:]]+-rf([[:space:]]+--)?[[:space:]]+[~/][^[:space:];|&]*' || true)
+if [ -n "$RM_SCAN" ]; then
+  while IFS= read -r MATCH; do
+    [ -z "$MATCH" ] && continue
+    RM_TARGET=$(echo "$MATCH" | grep -oE '[~/][^[:space:];|&]*$')
+    case "$RM_TARGET" in
+      /tmp/*|/tmp|/var/tmp/*|/var/tmp|/private/tmp/*|/private/var/tmp/*) ;;
+      *) deny_command "Destructive command detected: '${MATCH}'. Ask the user to run it manually if genuinely needed." ;;
+    esac
+  done <<< "$RM_SCAN"
+fi
+
+# Layer 1b: Other direct destructive patterns
+if echo "$COMMAND" | grep -qEi '(git\s+push\s+--force|git\s+push\s+-f\b|git\s+reset\s+--hard|DROP\s+TABLE|DROP\s+DATABASE|TRUNCATE\s+|git\s+checkout\s+\.\s*$|git\s+clean\s+-f|git\s+branch\s+-D)'; then
+  MATCHED=$(echo "$COMMAND" | grep -oEi '(git\s+push\s+--force|git\s+push\s+-f\b|git\s+reset\s+--hard|DROP\s+TABLE|DROP\s+DATABASE|TRUNCATE\s+|git\s+checkout\s+\.\s*$|git\s+clean\s+-f|git\s+branch\s+-D)' | head -1)
   deny_command "Destructive command detected: '${MATCHED}'. Ask the user to run it manually if genuinely needed."
 fi
 
@@ -45,9 +60,15 @@ if echo "$COMMAND" | grep -qE '(bash|sh|zsh)\s+-c\s'; then
   fi
 fi
 
-# Layer 3: Pipe-to-shell patterns
-if echo "$COMMAND" | grep -qE '\|\s*(bash|sh|zsh)\b'; then
-  deny_command "Pipe-to-shell detected. This pattern can execute arbitrary code. Ask the user to run it manually if genuinely needed."
+# Layer 3a: Network-to-shell — curl/wget piped into shell is the classic remote-code-execution pattern.
+if echo "$COMMAND" | grep -qE '(curl|wget|fetch)([[:space:]][^|]*)?\|[[:space:]]*(bash|sh|zsh)\b'; then
+  deny_command "Network-to-shell pipe detected (curl|wget|fetch → shell). Executes remote untrusted code. Ask the user to run it manually if genuinely needed."
+fi
+
+# Layer 3b: Pipe to bare shell with no script argument — equivalent to executing stdin as code.
+# Allows: `cat input | bash known-script.sh`. Denies: `cat input | bash`, `... | bash;`, `... | bash &`.
+if echo "$COMMAND" | grep -qE '\|[[:space:]]*(bash|sh|zsh)([[:space:]]*$|[[:space:]]*[;&|]|[[:space:]]+-c[[:space:]])'; then
+  deny_command "Pipe to bare shell detected (no script argument). Executes piped data as code. Ask the user to run it manually if genuinely needed."
 fi
 
 # Layer 4: Flag reordering (rm -r -f /, rm -f -r /)
