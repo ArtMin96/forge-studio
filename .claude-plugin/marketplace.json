@@ -27,7 +27,7 @@
     {
       "name": "long-session",
       "description": "Long-running session continuity: init.sh bootstrap, append-only claude-progress.txt log, features.json testable-requirements list, /session-resume briefing.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "source": "./plugins/long-session",
       "category": "context-management",
       "keywords": ["long-session", "session-continuity", "init.sh", "progress-log", "features", "harness:context-management", "overhead:minimal", "role:sensor-computational"]
