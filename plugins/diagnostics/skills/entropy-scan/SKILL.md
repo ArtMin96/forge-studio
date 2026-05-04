@@ -9,6 +9,7 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+logical: report shows PASS / DRIFT for each of the 9 checks with concrete fix lines for any drift
 ---
 
 # Entropy Scan — Codebase Health Validation
@@ -111,7 +112,7 @@ Skills survive compaction with first 5,000 tokens per skill, shared 25,000-token
 
 Every rule in `plugins/behavioral-core/hooks/rules.d/*.txt` (excluding `archive/`) should declare its origin on its first non-blank line:
 
-```
+```text
 # origin: <source>
 ```
 
@@ -152,64 +153,25 @@ python3 plugins/diagnostics/skills/entropy-scan/scripts/check-tool-menu.py
 
 ## Output Format
 
-```
+```markdown
 ## Entropy Scan Report
 
 **Date:** {YYYY-MM-DD}
 **Overall:** {CLEAN / {N} issues found}
 
-### Check 1: Plugin Count Drift
-**Status:** {PASS / DRIFT}
-README claims: {N} plugins, {N} skills, {N} hooks, {N} agents
-Actual: {N} plugins, {N} skills, {N} hooks, {N} agents
-{Mismatch details if DRIFT}
-
-### Check 2: Marketplace Registration
-**Status:** {PASS / GAP}
-{Details if GAP}
-
-### Check 3: SKILL.md Frontmatter
-**Status:** {PASS / {N} incomplete}
-{List of files and missing fields if incomplete}
-
-### Check 4: Hook Executability
-**Status:** {PASS / {N} non-executable}
-{List of files if non-executable}
-
-### Check 5: Memory Staleness
-**Status:** {PASS / {N} stale / N/A}
-{List of stale files if any}
-
-### Check 6: Invariant Compliance
-**Status:** {PASS / {N} violations}
-{Details if violations}
-
-### Check 7: Skill Token Weight
-**Status:** {PASS / {N} oversized}
-{List of SKILL.md files exceeding 2,000 tokens with approximate size}
-
-### Check 8: Rule Provenance
-**Status:** {PASS / {N} unprovenanced}
-{List of rules.d/*.txt files missing an `# origin:` header}
-
-### Check 9: Tool-Menu Inflation
-**Status:** {PASS / {N} over threshold}
-{List of agent/skill files declaring more than FORGE_TOOL_MENU_MAX tools}
+### Check {1..9}: <name>
+**Status:** {PASS / DRIFT / GAP / {N} <issue>}
+{Per-check details — counts, file lists, mismatch deltas — only when status is non-clean}
 
 ### Check 9a: R.E.S.T. Audit
 **Status:** {PASS / WARN / FAIL}
-Reliability: {status}
-Efficiency:  {status}
-Security:    {status}
-Traceability:{status}
-{Details from /rest-audit}
+Reliability / Efficiency / Security / Traceability: {status each}
 
 ### Check 9b: CLAUDE.md Structure
 **Status:** {PASS / {N} sections missing or weak}
-{List of section status from /claude-md-structure}
 
 ### Proposed Fixes
-{For each issue, one-line fix command or description}
+{For each issue: one-line fix command or description}
 ```
 
-Keep the report factual. No opinions, no suggestions beyond fixing the detected issues.
+One section per check. Keep the report factual: no opinions, no suggestions beyond fixing detected issues.

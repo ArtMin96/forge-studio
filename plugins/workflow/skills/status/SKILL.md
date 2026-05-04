@@ -9,6 +9,7 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+logical: six-line situational report emitted (plan / progress / traces / pressure / router)
 ---
 
 # /status — Where Are We?
@@ -61,7 +62,7 @@ If found: count of classifications by route (single-agent, pipeline, fan-out, td
 
 Six lines max. Example:
 
-```
+```text
 Plan:     refactor-billing.md (2d old, 3/7 done)
 Progress: claude-progress.txt (2d ago) — /session-resume to load
 Traces:   42 events, last: Bash grep "Subscription"

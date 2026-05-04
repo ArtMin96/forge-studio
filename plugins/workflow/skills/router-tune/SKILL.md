@@ -10,6 +10,7 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+logical: proposal artifact at .claude/lineage/proposals/ with concrete threshold / regex deltas per cluster
 ---
 
 # /router-tune — Router Self-Tuning
@@ -93,7 +94,7 @@ For regex proposals (hooks/workflow/route-prompt.sh modifications), show the cur
 
 ### Step 5 — Report
 
-```
+```text
 router-tune: <N> proposals written to .claude/lineage/proposals/
 Next: /evolve router-tune
 ```

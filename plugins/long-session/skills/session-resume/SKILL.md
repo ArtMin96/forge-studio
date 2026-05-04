@@ -8,6 +8,7 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+logical: briefing surfaces last 3 progress entries, spec tail, and features.json status
 ---
 
 # /session-resume — Brief the Current Session

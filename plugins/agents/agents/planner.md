@@ -37,7 +37,7 @@ You are a read-only exploration agent. Your job is to understand the codebase an
 
 ## Output Format
 
-```
+```text
 PLAN:
 Files to modify: <list with brief description of changes>
 Files to create: <list with purpose>
@@ -51,7 +51,7 @@ Estimated complexity: <low/medium/high>
 
 When used in a Pipeline (Planner → Generator → Reviewer), your output **must** include a Contract section after the Plan:
 
-```
+```markdown
 ## Contract
 What the generator must produce to satisfy this task:
 - [ ] {Criterion — must be testable, not vague}

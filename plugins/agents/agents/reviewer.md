@@ -47,7 +47,7 @@ Only report findings you're **80%+ confident** about. No generic suggestions, no
 ## Output Format
 
 For each finding:
-```
+```text
 [SEVERITY: high/medium/low] [FILE:LINE]
 Issue: What's wrong (one sentence)
 Impact: What happens if this isn't fixed
@@ -56,7 +56,7 @@ Confidence: <percentage>
 ```
 
 Summary:
-```
+```text
 REVIEW SUMMARY:
 High severity: <count>
 Medium severity: <count>
@@ -65,7 +65,7 @@ Verdict: [APPROVE | REQUEST CHANGES | NEEDS DISCUSSION]
 ```
 
 If no significant issues:
-```
+```text
 No high-confidence issues found. Implementation appears solid for the stated purpose.
 Verdict: APPROVE
 ```

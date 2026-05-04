@@ -7,6 +7,7 @@ allowed-tools:
   - Read
   - Grep
   - Glob
+logical: report includes counts for sycophancy, apologies, scope-creep, focus, and filler with an overall discipline rating
 ---
 
 # Rules Audit
@@ -33,7 +34,7 @@ Flag instances of reading files unrelated to the current task, exploring without
 Flag: "Let me...", "I'll go ahead and...", "Sure, I can help with that!", trailing summaries of completed work.
 
 ## Output Format
-```
+```text
 BEHAVIORAL AUDIT
 ================
 Sycophancy:     [count] violations

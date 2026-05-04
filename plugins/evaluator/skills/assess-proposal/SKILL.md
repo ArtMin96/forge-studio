@@ -12,6 +12,7 @@ allowed-tools:
   - Grep
   - Glob
   - Bash
+logical: verdict JSON (pass/fail) written to .claude/lineage/verdicts/<basename>.json plus assess ledger entry
 ---
 
 # /assess-proposal — SEPL `assess` Operator
@@ -96,7 +97,7 @@ Write a verdict JSON to `.claude/lineage/verdicts/<proposal-basename>.json`:
 Then append a `assess` entry to `.claude/lineage/ledger.jsonl`:
 
 ```json
-{"ts":"<UTC>","operator":"assess","resource":"<slug>","version":"<target>-assess","prev":"<current>","trigger":"proposal:<basename>","evidence":".claude/lineage/verdicts/<basename>.json","actor":"evaluator:/assess-proposal"}
+{"ts":"<UTC>","operator":"assess","resource":"<slug>","version":"<target>","prev":"<current>","trigger":"proposal:<basename>","evidence":".claude/lineage/verdicts/<basename>.json","actor":"evaluator:/assess-proposal","verdict":"<pass|fail>"}
 ```
 
 ## Do NOT
@@ -111,7 +112,7 @@ Then append a `assess` entry to `.claude/lineage/ledger.jsonl`:
 ### Example 1: a clean pass
 
 Input:
-```
+```yaml
 proposal: .claude/lineage/proposals/2026-04-28-context-pressure-bump.md
 resource: env/FORGE_CONTEXT_PRESSURE_THRESHOLD
 current:  0.65 (v2)
@@ -135,7 +136,7 @@ Output:
 ### Example 2: a fail on root-cause
 
 Input:
-```
+```yaml
 proposal: .claude/lineage/proposals/2026-04-28-no-edit-unread-reminder.md
 resource: rules.d/85-do-not-edit-unread.txt
 proposed: "Reminder: Read files before editing them. Always."

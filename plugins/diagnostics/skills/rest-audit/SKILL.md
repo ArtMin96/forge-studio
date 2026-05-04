@@ -8,6 +8,7 @@ allowed-tools:
   - Grep
   - Glob
   - Bash
+logical: report shows PASS / WARN / FAIL for each of the 4 R.E.S.T. axes with worst-axis as overall verdict
 ---
 
 # /rest-audit — R.E.S.T. Framework Audit
@@ -69,7 +70,7 @@ Sources: `plugins/traces/hooks/hooks.json`, `.claude/lineage/ledger.jsonl`, `.cl
 
 ## Output
 
-```
+```text
 R.E.S.T. AUDIT — <UTC>
 =============================================
 

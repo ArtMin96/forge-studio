@@ -8,6 +8,7 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+logical: report enumerates CLAUDE.md size, plugin / MCP / skill counts, and a per-session token estimate
 ---
 
 # Audit Context: Find and Fix Token Waste
@@ -43,7 +44,7 @@ List all skills that auto-load (those without `disable-model-invocation: true`).
 
 ## Output
 
-```
+```text
 CONTEXT AUDIT
 =============
 CLAUDE.md:    [X lines / ~Y tokens] — [OK / OVER BUDGET]

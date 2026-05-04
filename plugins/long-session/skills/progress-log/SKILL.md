@@ -11,6 +11,7 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+logical: new entry appended to claude-progress.txt with done / in-progress / blockers / next sections plus ledger entry
 ---
 
 # /progress-log — Append-Only Session Log
@@ -78,7 +79,7 @@ Append this session's outcomes to `claude-progress.txt` at the repo root. Durabl
 ### Example 1: feature landed mid-session
 
 Input:
-```
+```text
 $ARGUMENTS: auth-rewrite
 git log --since="6 hours ago": a1b2c3d feat(auth): swap session middleware
 git diff --name-only HEAD~1 HEAD: app/Http/Middleware/Session.php, tests/Feature/AuthTest.php
@@ -87,7 +88,7 @@ git diff --name-only HEAD~1 HEAD: app/Http/Middleware/Session.php, tests/Feature
 Output (appended to `claude-progress.txt`):
 
 
-```
+```text
 === 2026-04-28T14:32:00Z — auth-rewrite ===
 Done:
   - Replaced legacy session middleware with token-based variant (a1b2c3d)
@@ -103,13 +104,13 @@ Next:
 ### Example 2: session ended on a blocker
 
 Input:
-```
+```text
 $ARGUMENTS: (empty → defaults to "session")
 git status --short: M docs/architecture.md (no commits this session)
 ```
 
 Output:
-```
+```text
 === 2026-04-28T18:01:11Z — session ===
 Done:
   - None (investigation only)

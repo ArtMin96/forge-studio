@@ -11,6 +11,7 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+logical: RED -> GREEN -> REFACTOR sequence completed; each phase gated by a real test command exit
 ---
 
 # /tdd-loop — Red → Green → Refactor

@@ -10,6 +10,7 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+logical: three-line insight (Worked / Surprised / Watch) handed to /remember, or skipped if duplicate
 ---
 
 # /reflect — Reflect-Memorize Step
@@ -32,7 +33,7 @@ Optional `[plan-path]`. Default: most recent `.claude/plans/*.md`.
 
 ### Step 2 — Draft the insight (three lines, total)
 
-```
+```text
 Worked:     <what contract said vs what shipped — specific>
 Surprised:  <one thing you discovered mid-implementation that wasn't in the plan>
 Watch:      <one leading indicator that this will break later>
@@ -61,7 +62,7 @@ If the insight is new, invoke `/remember` with:
 
 One line:
 
-```
+```text
 Reflect: <topic-slug> (<new|updated|skipped-duplicate>)
 ```
 

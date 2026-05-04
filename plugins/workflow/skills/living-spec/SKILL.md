@@ -9,6 +9,7 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
+logical: .claude/spec.md initialized (or delta-appended) with contract items from the latest plan
 ---
 
 # /living-spec — Initialize the Living Spec
@@ -82,7 +83,7 @@ Write `.claude/spec.md` from the latest plan's `## Contract`. Unlike `/contract`
 ### Example 1: fresh init from a plan with three contract items
 
 Input:
-```
+```text
 plan file: .claude/plans/2026-04-28-cache-rewrite.md
 ## Contract excerpt:
 - Cache layer behind a single `CacheService` interface
@@ -111,13 +112,13 @@ Reported: `spec.md initialized with 3 contract items.`
 ### Example 2: spec already exists for the same plan
 
 Input:
-```
+```text
 spec.md status: exists
 Plan: header matches the current latest plan
 ```
 
 Output:
-```
+```text
 spec.md already initialized for this plan. Use after-subagent updates instead.
 ```
 (no file write)

@@ -27,11 +27,11 @@ Component 8 is drawn from *Autogenesis: A Self-Evolving Agent Protocol* (arXiv:2
 
 *Agentic World Modeling* (Chu et al., Apr 2026) defines a three-tier capability ladder for agents that model environmental dynamics:
 
-- **L1 Predictor** — single-step transition prediction; the agent infers the next state from the current state.
-- **L2 Simulator** — multi-step, action-conditioned sequences; the agent rolls forward through several steps to evaluate options.
-- **L3 Evolver** — self-correcting; the agent observes its own prediction errors and updates its model.
+- **L1 Predictor** — learns one-step local transition operators.
+- **L2 Simulator** — composes those operators into multi-step, action-conditioned rollouts that respect domain laws.
+- **L3 Evolver** — autonomously revises its own model when predictions fail against new evidence.
 
-Mapping forge-studio's 8 components to this ladder (interpretive — paper read as abstract only, not full PDF):
+Mapping forge-studio's 8 components to this ladder (interpretive — the paper's framework targets world-modeling agents broadly, applied here to harness components):
 
 | Component | Level | Reason |
 |---|---|---|

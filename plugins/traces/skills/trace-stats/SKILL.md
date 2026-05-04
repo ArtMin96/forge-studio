@@ -6,6 +6,7 @@ disable-model-invocation: true
 model: haiku
 paths:
   - ".claude/traces/*.jsonl"
+logical: numeric summary table emitted for last N sessions (commands / errors / files / error rate)
 ---
 
 # Trace Stats
@@ -21,7 +22,7 @@ Quick overview of recent session activity from `~/.claude/traces/`.
 
 ## Output Format
 
-```
+```markdown
 ## Session Traces (last N sessions)
 
 | Date | Commands | Errors | Files Modified | Error Rate |

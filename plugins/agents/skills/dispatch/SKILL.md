@@ -3,6 +3,7 @@ name: dispatch
 description: Use when the user describes a multi-step feature or refactor and you need to decide whether to handle it solo, dispatch a parallel `/fan-out`, or run a `/worktree-team` planner→generator→reviewer pipeline. Outputs a routing recommendation with the reasoning behind it.
 when_to_use: Reach for this before starting any task that may touch 5+ files, has independent sub-tasks worth parallelizing, or carries enough risk to warrant separated planning and review. Do NOT use it as the executor itself — once a route is picked, hand off to `/fan-out` for parallel batches or `/worktree-team` for full pipelines.
 disable-model-invocation: true
+logical: route classification (single-agent / fan-out / pipeline / tdd-loop) emitted with reason and risk level
 ---
 
 # /dispatch — Task Decomposition Router
@@ -43,7 +44,7 @@ Analyze the task against these criteria:
 
 ## Output Format
 
-```
+```text
 DISPATCH RECOMMENDATION:
 Route: [Single Agent | Fan-Out | Pipeline]
 Reason: <one sentence>

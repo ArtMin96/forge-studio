@@ -34,7 +34,7 @@ Output is a markdown report on stdout. Pipe to a file if you want to keep it.
 
 ## Output Format
 
-```
+```markdown
 ## SSL Audit
 Skills scanned: N
 With scheduling field: A
@@ -62,7 +62,7 @@ A non-zero "Missing logical" count is not a failure — most skills have not yet
 Input: a forge-studio checkout where no SKILL.md uses the SSL overlay.
 
 Output:
-```
+```markdown
 ## SSL Audit
 Skills scanned: N
 With scheduling field: 0
@@ -80,7 +80,7 @@ Missing logical (no measurable success criterion): N
 Input: K high-traffic skills retrofitted with SSL fields.
 
 Output:
-```
+```markdown
 ## SSL Audit
 Skills scanned: N
 With scheduling field: K

@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "code-review-graph": {
-      "command": "/home/dell/.local/bin/code-review-graph",
+      "command": "/home/arthur/.local/bin/code-review-graph",
       "args": [
         "serve"
       ],

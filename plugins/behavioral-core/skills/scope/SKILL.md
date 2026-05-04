@@ -9,6 +9,7 @@ allowed-tools:
   - Write
   - Glob
   - Grep
+logical: scope document at .claude/scopes/<task-name>.md exists with task / files / boundaries / done-when sections
 ---
 
 # Create Task Scope
@@ -26,7 +27,7 @@ Define a focused scope for: **$ARGUMENTS**
 
 The document must be under 15 lines. Use this exact structure:
 
-```
+```markdown
 # {Task Name}
 
 ## Task

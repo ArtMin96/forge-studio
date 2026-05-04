@@ -5,6 +5,7 @@ when_to_use: Reach for this after `/trace-compile`, when investigating a session
 disable-model-invocation: true
 paths:
   - ".claude/traces/*.jsonl"
+logical: report enumerates recurring failures, file hotspots, and session-health trend with recommendations
 ---
 
 # Trace Review
@@ -30,7 +31,7 @@ Analyze execution traces stored in `~/.claude/traces/` to identify patterns acro
 
 ## Output Format
 
-```
+```markdown
 ## Trace Review (last N sessions)
 
 ### Recurring Failures

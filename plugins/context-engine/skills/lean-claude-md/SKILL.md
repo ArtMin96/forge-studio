@@ -8,6 +8,7 @@ allowed-tools:
   - Read
   - Write
   - Glob
+logical: trimmed CLAUDE.md emitted with before/after line counts and removed sections listed
 ---
 
 # Lean CLAUDE.md: Every Line Must Earn Its Place

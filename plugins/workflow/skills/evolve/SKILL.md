@@ -11,6 +11,7 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+logical: propose -> assess -> commit cycle ran; summary report shows counts (received / passed / committed / rejected)
 ---
 
 # /evolve — SEPL Orchestrator
@@ -55,7 +56,7 @@ For each proposal, invoke `/assess-proposal <artifact-path>`. It runs in a forke
 
 For each proposal where verdict = `pass`, show the user:
 
-```
+```text
 Proposal <N>/<total>: <slug> <current> → <target>
   Trigger: <trigger>
   Impact:  <estimate from artifact>
@@ -73,7 +74,7 @@ For proposals where verdict = `fail` or `conditional`, do NOT present commit app
 
 ### Step 5 — Summary report
 
-```
+```text
 Evolve cycle complete.
   Proposals received:  N
   Assessed pass:       N

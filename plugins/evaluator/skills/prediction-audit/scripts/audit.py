@@ -76,6 +76,52 @@ def observed_delta_chars(traces_dir, since_ts):
     return msg_count, char_count
 
 
+def _haystack(entry):
+    t = entry.get('type')
+    if t == 'file':
+        return entry.get('file_path') or ''
+    if t == 'bash':
+        return (entry.get('command') or '') + ' ' + (entry.get('output_preview') or '')
+    return ''
+
+
+def observed_delta_for_resource(traces_dir, commit_ts, slug):
+    """Per-resource pre/post bytes-per-session delta.
+
+    Counts trace entries whose haystack (file_path for file events, command +
+    output_preview for bash) contains the slug or its basename. Splits on
+    commit_ts and normalizes by distinct trace files (≈ sessions). Returns
+    (delta_bytes_per_session, sessions_pre, sessions_post)."""
+    if not os.path.isdir(traces_dir) or not slug:
+        return 0, 0, 0
+    files = sorted(glob(os.path.join(traces_dir, '*.jsonl')))
+    slug_basename = os.path.basename(slug)
+    pre_bytes = post_bytes = 0
+    pre_sessions = set()
+    post_sessions = set()
+    for f in files:
+        for line in open(f, errors='ignore'):
+            try:
+                e = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            haystack = _haystack(e)
+            if not haystack:
+                continue
+            if slug not in haystack and (not slug_basename or slug_basename not in haystack):
+                continue
+            ts = e.get('timestamp', '')
+            if commit_ts and ts < commit_ts:
+                pre_bytes += len(line)
+                pre_sessions.add(f)
+            else:
+                post_bytes += len(line)
+                post_sessions.add(f)
+    pre_per = pre_bytes / max(len(pre_sessions), 1)
+    post_per = post_bytes / max(len(post_sessions), 1)
+    return int(post_per - pre_per), len(pre_sessions), len(post_sessions)
+
+
 def render_report(rows, skipped, calibration):
     out = ['## Prediction Audit', '']
     out.append(f'Committed proposals scanned: {len(rows) + skipped}')
@@ -84,10 +130,13 @@ def render_report(rows, skipped, calibration):
     out.append('### Per-resource prediction error')
     out.append('')
     if rows:
-        out.append('| Resource | Predicted Δtokens | Observed Δtokens (chars) | Verdict |')
-        out.append('|---|---|---|---|')
+        out.append('| Resource | Predicted Δtokens/session | Observed Δbytes/session (post − pre) | Pre/Post sessions | Verdict |')
+        out.append('|---|---|---|---|---|')
         for r in rows:
-            out.append(f"| {r['slug']} | {r['predicted_token_delta_per_session']:+d} | {r['observed_chars']:+d} | {r['verdict']} |")
+            out.append(
+                f"| {r['slug']} | {r['predicted_token_delta_per_session']:+d} | "
+                f"{r['observed_chars']:+d} | {r['pre_sessions']}/{r['post_sessions']} | {r['verdict']} |"
+            )
     else:
         out.append('_No structured-prediction rows yet — populate `## Predicted Impact (structured)` in proposals._')
     out.append('')
@@ -132,20 +181,13 @@ def main():
         sys.exit(self_test())
     proposals_dir = '.claude/lineage/proposals'
     ledger_path = '.claude/lineage/ledger.jsonl'
-    traces_dir = os.path.expanduser('~/.claude/traces')
+    traces_dir = os.environ.get('FORGE_TRACES_DIR') or os.path.expanduser('~/.claude/traces')
     if not os.path.isdir(proposals_dir):
         print(f'No proposals dir at {proposals_dir} — nothing to audit.')
         return 0
     committed = committed_slugs(ledger_path)
     rows = []
     skipped = 0
-    earliest_commit_ts = None
-    for entries in committed.values():
-        for e in entries:
-            ts = e.get('ts', '')
-            if not earliest_commit_ts or ts < earliest_commit_ts:
-                earliest_commit_ts = ts
-    msg_count, char_count = observed_delta_chars(traces_dir, earliest_commit_ts)
     for path in sorted(glob(os.path.join(proposals_dir, '*.md'))):
         parsed = parse_proposal(path)
         if not parsed or parsed['predicted_token_delta_per_session'] is None:
@@ -155,20 +197,25 @@ def main():
         if slug not in committed:
             skipped += 1
             continue
+        commit_entries = committed[slug]
+        commit_ts = min(e.get('ts', '') for e in commit_entries)
         predicted = parsed['predicted_token_delta_per_session']
-        observed_share = char_count // max(len(committed), 1) if msg_count else 0
-        if msg_count == 0:
+        observed_delta, pre_sessions, post_sessions = observed_delta_for_resource(
+            traces_dir, commit_ts, slug)
+        if post_sessions == 0:
             verdict = 'insufficient-data'
-        elif abs(predicted - observed_share) <= max(50, abs(predicted) // 4):
+        elif abs(predicted - observed_delta) <= max(50, abs(predicted) // 4):
             verdict = 'accurate'
-        elif abs(predicted) > abs(observed_share):
+        elif abs(predicted) > abs(observed_delta):
             verdict = 'over-estimate'
         else:
             verdict = 'under-estimate'
         rows.append({
             'slug': slug,
             'predicted_token_delta_per_session': predicted,
-            'observed_chars': observed_share,
+            'observed_chars': observed_delta,
+            'pre_sessions': pre_sessions,
+            'post_sessions': post_sessions,
             'verdict': verdict,
         })
     if rows:

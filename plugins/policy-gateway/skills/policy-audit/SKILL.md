@@ -8,6 +8,7 @@ allowed-tools:
   - Grep
   - Glob
   - Bash
+logical: report counts policy-block ledger entries by label and lists secret-pattern findings as <file>:<line>
 ---
 
 # /policy-audit — Security Checkup
@@ -33,7 +34,7 @@ Two passes: ledger replay (what the plugin has blocked/audited) + live repo scan
 
 ## Output
 
-```
+```text
 POLICY AUDIT — <UTC>
 =============================================
 

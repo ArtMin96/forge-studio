@@ -4,6 +4,7 @@ description: Use whenever the user wants to change token-compression aggressiven
 when_to_use: Reach for this when output feels too verbose ("/caveman ultra"), too clipped ("/caveman lite"), or when context is tight and you want maximum compression. Do NOT use to compress code-block contents — caveman governs prose only; code, errors, and tool output stay verbatim.
 argument-hint: <lite|full|ultra>
 disable-model-invocation: true
+logical: caveman intensity flag updated; subsequent prose follows the new compression level
 ---
 
 Switch caveman intensity. Current session default: **full** (loaded at session start).

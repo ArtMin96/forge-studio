@@ -8,6 +8,7 @@ ALLOWED = {
     'name', 'description', 'when_to_use', 'argument-hint', 'arguments',
     'disable-model-invocation', 'user-invocable', 'allowed-tools', 'model',
     'effort', 'context', 'agent', 'hooks', 'paths', 'shell',
+    'scheduling', 'structural', 'logical',
 }
 failures = []
 

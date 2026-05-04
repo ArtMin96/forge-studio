@@ -9,6 +9,7 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
+logical: .claude/features.json contains a testable requirements array derived from the plan's contract
 ---
 
 # /feature-list — Contract → Testable Requirements JSON

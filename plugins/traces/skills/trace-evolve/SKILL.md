@@ -6,6 +6,7 @@ disable-model-invocation: true
 effort: xhigh
 paths:
   - ".claude/traces/*.jsonl"
+logical: proposal artifact written to .claude/lineage/proposals/ with cluster-derived rule / hook / skill suggestions
 ---
 
 # Trace Evolve

@@ -5,6 +5,7 @@ when_to_use: Invoke at the start of every non-trivial implementation turn, when 
 allowed-tools:
   - Read
   - Glob
+logical: sprint contract criteria re-printed verbatim and acknowledged before any Edit/Write
 ---
 
 # Contract Confirmation

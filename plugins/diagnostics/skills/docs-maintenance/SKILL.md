@@ -10,6 +10,7 @@ allowed-tools:
   - Edit
   - Bash
   - Grep
+logical: report enumerates Critical / Warning / Info findings per file with line numbers
 ---
 
 # /docs-maintenance — Documentation Maintenance & Quality Assurance
@@ -89,7 +90,7 @@ Always stop at the first section that produces critical findings unless the mode
 
 Emit a final report in this shape:
 
-```
+```markdown
 ## Docs Maintenance Report — <timestamp>
 
 Mode: <mode>

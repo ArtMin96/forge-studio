@@ -8,6 +8,7 @@ allowed-tools:
   - Read
   - Write
   - Glob
+logical: report shows PRESENT / WEAK / MISSING for each of the 4 Karpathy sections with line numbers
 ---
 
 # /claude-md-structure — 4-Section Karpathy Audit

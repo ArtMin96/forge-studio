@@ -4,6 +4,7 @@ description: Use when subagent dispatches feel expensive — token budget tight,
 when_to_use: Reach for this before launching any heavy `/fan-out`, `/worktree-team`, or multi-stage pipeline, or when diagnosing why a recent multi-agent run cost more than expected. Do NOT use for single-agent flows — the overhead it targets only exists when subagents are spawned.
 disable-model-invocation: true
 model: haiku
+logical: recommended isolation profile (4-layer) printed with concrete tool/context constraints per role
 ---
 
 # /lean-agents — Subagent Token Optimization

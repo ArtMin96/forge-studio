@@ -9,6 +9,7 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+logical: VERIFIED yes/no with method (tests / build / manual) and one-line evidence summary
 ---
 
 # Verify: Evidence Before Assertions
@@ -55,7 +56,7 @@ Good: "Output: `Tests: 42 passed, 0 failed (0.83s)`"
 - What happens if this runs twice?
 
 ## 5. Verdict
-```
+```text
 VERIFIED: [Yes/No]
 METHOD: [tests/build/manual/type-check]
 EVIDENCE: [One line summary of proof]
@@ -63,7 +64,7 @@ REMAINING RISK: [What could still go wrong, or "None identified"]
 ```
 
 If you CANNOT verify the change:
-```
+```text
 UNVERIFIED: Cannot verify this change.
 NEEDED: [What would be needed to verify — test command, expected output, etc.]
 ```

@@ -5,6 +5,7 @@ when_to_use: Reach for this when analyzing a session's execution log, triaging r
 disable-model-invocation: true
 paths:
   - ".claude/traces/*.jsonl"
+logical: per-source summary.md and errors.md written under ~/.claude/traces/ with one-line entry per trace event
 ---
 
 # Trace Compile
@@ -29,12 +30,12 @@ Pick the target session file (or use the most recent).
 
 Read the JSONL file. For each entry, emit one line:
 
-```
+```text
 [HH:MM:SS] {type} {target} → {outcome}
 ```
 
 Examples:
-```
+```text
 [14:02:15] bash  git status → exit:0
 [14:02:18] file  Edit src/auth.php → ok
 [14:02:20] bash  ./vendor/bin/pest → exit:1 (3 failures)

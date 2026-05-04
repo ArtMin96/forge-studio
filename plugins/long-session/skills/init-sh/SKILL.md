@@ -9,6 +9,7 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
+logical: repo-root init.sh exists, is executable, idempotent, and ends with one-line written-bytes report
 ---
 
 # /init-sh — Bootstrap Script for Long-Running Sessions

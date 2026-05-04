@@ -9,6 +9,7 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+logical: report enumerates duplicate reads, oversized outputs, tool-call density, and total session token estimate
 ---
 
 Audit the current session for token waste. Run each check, then present findings in a compact table, followed by top 3 recommendations.

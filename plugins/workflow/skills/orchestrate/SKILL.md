@@ -9,6 +9,7 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
+logical: dispatch pattern picked and the corresponding skill (/dispatch, /fan-out, /tdd-loop) handed off to
 ---
 
 # /orchestrate — Manual Entry Into the Agentic Workflow

@@ -8,6 +8,7 @@ allowed-tools:
   - Read
   - Grep
   - Glob
+logical: counter-case stated with strongest objection, concrete risk, alternative, and verdict
 ---
 
 # Devil's Advocate: Argue Against This Decision
@@ -44,7 +45,7 @@ Given the decision or approach in $ARGUMENTS, construct the strongest possible a
 - If no: state what should change
 
 ## Output
-```
+```text
 DEVIL'S ADVOCATE
 ================
 Against: [The decision being challenged]

@@ -10,6 +10,7 @@ allowed-tools:
   - Read
   - Write
   - Glob
+logical: N worktrees created under .claude/worktrees/ with role-scoped CLAUDE.md and active-roles.json registry
 ---
 
 # /worktree-team — Parallel Agents With Physical Isolation
@@ -114,7 +115,7 @@ Default tool sets by role:
 
 The skill does **not** spawn the child Claude Code sessions. It emits the commands the user (or an outer orchestration script) runs:
 
-```
+```text
 Worktrees ready. Launch commands:
 
 cd .claude/worktrees/planner-<sha>   && claude --agent planner
@@ -156,7 +157,7 @@ Remove `.claude/agents/active-roles.json` when the team is disbanded, or the `di
 
 ## Output Format
 
-```
+```markdown
 ## Worktree Team Ready
 
 Base commit: <short sha>

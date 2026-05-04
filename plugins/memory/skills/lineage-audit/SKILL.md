@@ -10,6 +10,7 @@ allowed-tools:
   - Read
   - Bash
   - Glob
+logical: report shows CLEAN or {N} violations per check (parse / operators / slugs / snapshots / post-reject)
 ---
 
 # Lineage Audit — Ledger Invariant Check
@@ -85,7 +86,7 @@ python3 plugins/memory/skills/lineage-audit/scripts/check-post-reject.py "$LEDGE
 
 ## Output Format
 
-```
+```markdown
 ## Lineage Audit
 
 Ledger: .claude/lineage/ledger.jsonl

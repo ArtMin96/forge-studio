@@ -8,6 +8,7 @@ allowed-tools:
   - Read
   - Write
   - Bash
+logical: .claude/safe-mode flag toggled to the requested state; ledger entry appended
 ---
 
 # /safe-mode — Graceful-Degradation Toggle
@@ -18,7 +19,7 @@ Controls `.claude/safe-mode`. When present, `block-destructive.sh` denies Bash/W
 
 ### `/safe-mode status`
 Read the flag. Print:
-```
+```text
 SAFE MODE: <active|inactive>
 Entered: <ISO8601> (if active)
 Reason: <reason> (if active)

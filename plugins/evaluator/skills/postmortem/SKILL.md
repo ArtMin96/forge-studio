@@ -10,6 +10,7 @@ allowed-tools:
   - Grep
   - Glob
   - Bash
+logical: postmortem entry includes bug, root cause, category, missed-by, and a specific prevention action
 ---
 
 # Postmortem: Bug Autopsy
@@ -51,7 +52,7 @@ One concrete recommendation. Not vague ("be more careful") — specific:
 
 ## Output Format
 
-```
+```text
 POSTMORTEM
 ==========
 Bug:         [One-sentence description]

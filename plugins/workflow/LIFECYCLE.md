@@ -4,7 +4,7 @@ The development cycle as an **event-driven pipeline**. Hooks fire automatically;
 
 ## How It Runs
 
-```
+```text
 SessionStart ─► session-bootstrap.sh
                  ├─ surface latest handoff (context-engine)
                  └─ list unchecked items in active plan
@@ -58,7 +58,7 @@ PreCompact ─► pre-compact-handoff.sh
 
 Closed-loop propose → assess → commit operator over versioned resources. See `docs/self-evolution.md` for the full protocol.
 
-```
+```text
 signal source ──► /trace-evolve (traces)         propose draft
                   or /router-tune (workflow)     ─────────┐
                                                           ▼

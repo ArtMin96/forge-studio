@@ -11,6 +11,7 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+logical: snapshot exists at .claude/lineage/versions/<slug>/<prev>; resource updated; commit ledger entry appended
 ---
 
 # /commit-proposal — SEPL `commit` Operator
@@ -57,13 +58,13 @@ Scan the ledger for the last `commit` entry on this resource. If none, `prev = v
 
 Copy the current resource contents to:
 
-```
+```text
 .claude/lineage/versions/<slug>/<prev-version>
 ```
 
 For `env/<VAR>` slugs, write a snapshot file containing:
 
-```
+```yaml
 value: <current value>
 source: .claude/settings.json
 key: env.<VAR>
@@ -85,7 +86,7 @@ Read the proposal's `Proposed value` (or `Diff`) section. For file resources, us
 
 One line:
 
-```
+```text
 Committed <slug> <prev> → <target>. Rollback: /rollback <slug> <prev>
 ```
 
@@ -122,7 +123,7 @@ If `WORKFLOW_EVOLVE_AUTOCOMMIT=1` AND `resource` starts with `env/` AND the prop
 ### Example 1: Rule addition
 
 Input:
-```
+```yaml
 proposal: .claude/lineage/proposals/2026-04-28-no-hardcoded-paths.md
 resource: rules.d/95-no-hardcoded-paths.txt
 version:  v1
@@ -139,7 +140,7 @@ Side effect: `.claude/lineage/versions/rules.d/95-no-hardcoded-paths.txt/v0` sna
 ### Example 2: Auto-commit env tweak
 
 Input:
-```
+```yaml
 proposal: .claude/lineage/proposals/2026-04-28-bump-pressure-threshold.md
 resource: env/FORGE_CONTEXT_PRESSURE_THRESHOLD
 version:  v3   (numeric: 0.65 → 0.70, +7.7%)

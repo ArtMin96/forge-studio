@@ -8,6 +8,7 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
+logical: next-action recommendation emitted (/compact, /context-tricks, or continue) with quantified pressure value
 ---
 
 # /token-pipeline — Explicit Context Engineering Stages

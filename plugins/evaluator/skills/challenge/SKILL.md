@@ -11,6 +11,7 @@ allowed-tools:
   - Grep
   - Glob
   - Bash
+logical: report includes Stage 1 self-critique plus Stage 2 git-history evidence per change
 ---
 
 # Challenge: Draft Verification Critique
@@ -89,7 +90,7 @@ If git history is available, also check:
 If no git history is available (new repo, new files), skip Stage 2 and note it in the report.
 
 ## Output
-```
+```text
 CHALLENGE REPORT (Draft Verification)
 ======================================
 

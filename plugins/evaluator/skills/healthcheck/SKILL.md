@@ -9,6 +9,7 @@ allowed-tools:
   - Bash
   - Read
   - Glob
+logical: each pipeline step (formatting / static analysis / tests) reports PASS / FAIL / SKIP with concrete details
 ---
 
 # Healthcheck: One-Command Project Quality
@@ -74,7 +75,7 @@ Report: tests passed/failed
 - `--full` (default): All steps including tests.
 
 ## Output
-```
+```text
 HEALTHCHECK
 ===========
 [PHP]

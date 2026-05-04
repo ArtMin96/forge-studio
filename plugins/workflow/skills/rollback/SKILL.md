@@ -11,6 +11,7 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+logical: resource restored from snapshot; rollback ledger entry appended; forward snapshot saved for re-roll
 ---
 
 # /rollback — Reverse a Commit
@@ -54,7 +55,7 @@ For file resources, `Write` the snapshot contents over the live file. For `env/<
 
 ### Step 5 — Report
 
-```
+```text
 Rolled back <slug> <current> → <target>. Forward version snapshot saved: /rollback <slug> <current>
 ```
 

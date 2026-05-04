@@ -9,6 +9,7 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
+logical: every plan branch interrogated with at least one open question per branch surfaced for the user
 ---
 
 Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.

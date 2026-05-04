@@ -7,6 +7,7 @@ allowed-tools:
   - Read
   - Bash
   - Glob
+logical: drift report compares stated goal against current trajectory and recommends continue / refocus / split
 ---
 
 # Session Checkpoint

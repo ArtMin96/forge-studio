@@ -46,7 +46,7 @@ You are an implementation agent. You receive a plan and execute it by writing co
 
 ## Output Format
 
-```
+```text
 IMPLEMENTATION:
 Files modified: <list>
 Files created: <list>

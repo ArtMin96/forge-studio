@@ -7,6 +7,7 @@ argument-hint: [message-count]
 allowed-tools:
   - Read
   - Write
+logical: .claude/scopes/.timebox file exists with budget, remaining, and started fields
 ---
 
 # Set Timebox
@@ -19,7 +20,7 @@ Set a message budget to force focused, efficient work.
 2. Create the directory `.claude/scopes/` if it does not exist.
 3. Write the file `.claude/scopes/.timebox` with this exact content:
 
-```
+```yaml
 budget: {N}
 remaining: {N}
 started: {ISO 8601 timestamp}

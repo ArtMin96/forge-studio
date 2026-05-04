@@ -7,6 +7,7 @@ allowed-tools:
   - Read
   - Bash
   - Glob
+logical: per-resource verdict table emitted (accurate / over-estimate / under-estimate / insufficient-data)
 ---
 
 # /prediction-audit — SEPL Prediction-Outcome Joiner
@@ -30,9 +31,15 @@ Reads `## Predicted Impact (structured)` sections from `.claude/lineage/proposal
 The skill walks two directories (no arguments):
 
 - `.claude/lineage/proposals/*.md` — proposals authored by `/evolve`, `/router-tune`, `/remember`
-- `~/.claude/traces/*.jsonl` — bash, file-edit, failure, session-summary entries collected by the `traces` plugin
+- `~/.claude/traces/*.jsonl` (or `$FORGE_TRACES_DIR/*.jsonl` if set) — bash, file-edit, failure, session-summary entries collected by the `traces` plugin
 
-For each proposal that has been committed (per the ledger), the helper script extracts the structured prediction fields, computes an observed delta over the post-commit trace window, and joins them.
+For each proposal that has been committed (per the ledger), the helper script extracts the structured prediction fields, attributes trace entries to the resource by matching the slug or its basename in `file_path` (file events) and `command` / `output_preview` (bash events), splits matching entries on the commit timestamp into pre and post buckets, normalizes by distinct trace files (≈ sessions), and reports the resulting Δbytes/session as the observed value.
+
+Override the traces directory for project-local or test runs:
+
+```bash
+FORGE_TRACES_DIR=/path/to/traces python3 plugins/evaluator/skills/prediction-audit/scripts/audit.py
+```
 
 ## Process
 
@@ -48,32 +55,35 @@ It returns a markdown report (stdout). Pipe to a file if you want to keep it. Th
 
 ```markdown
 ## Prediction Audit
-Window: <date-range>
+
 Committed proposals scanned: N
 Proposals with structured prediction: M
 
 ### Per-resource prediction error
 
-| Resource | Predicted Δtokens | Observed Δtokens | Error % | Clusters predicted | Clusters observed | Verdict |
-|---|---|---|---|---|---|---|
-| rules.d/<rule>.txt | +132 | +118 | -10.6% | none | none | accurate |
+| Resource | Predicted Δtokens/session | Observed Δbytes/session (post − pre) | Pre/Post sessions | Verdict |
+|---|---|---|---|---|
+| rules.d/<rule>.txt | +132 | +118 | 3/4 | accurate |
 
 ### Calibration summary
-Mean signed error: <pct>
-Mean absolute error: <pct>
+Mean signed error: <int>
+Mean absolute error: <int>
 Proposals with no structured prediction (skipped): K
 ```
 
+Predicted is in *predicted* tokens; observed is in *bytes* of trace entries that reference the resource — the units differ but the sign and magnitude are the audit signal. A proposal that predicted `+100` and got `+107` is accurate; one that predicted `-200` and got `-428` under-estimated the magnitude. The `Pre/Post sessions` column is the count of distinct trace files (≈ sessions) before/after the commit timestamp; a `0/N` post-only count drops the row to `insufficient-data`.
+
 ## Limitations
 
-- Observed Δtokens is heuristic — the helper estimates per-session token deltas from trace volume, not from actual model API counters (which the plugins don't have access to). The metric is comparative across proposals, not absolute.
-- Cluster-resolved verification compares the predicted cluster ids against post-commit trace failure clusters. If the same cluster signature reappears, it counts as "not resolved" even when frequency dropped meaningfully.
-- The audit is read-only. Never appends ledger entries. Misses in calibration become inputs to the next `/evolve` cycle.
+- Observed Δbytes is a proxy for impact, not a token counter — the plugin has no access to model API counters, so it measures how often the resource appears in tool traces. Comparable across proposals on the same resource; not directly comparable to `predicted_token_delta_per_session` in absolute terms.
+- Cluster-resolved verification is not implemented. The structured field is parsed and reported but not joined against trace failure clusters; that join lives in `/trace-evolve`.
+- Sessions ≈ distinct trace files. A trace file rolls per day per cwd, so a long single session that crosses midnight will inflate the session count. Acceptable noise at the audit's monthly cadence.
+- Read-only. Never appends ledger entries. Misses in calibration become inputs to the next `/evolve` cycle.
 
 ## Execution Checklist
 
 - [ ] Confirmed `.claude/lineage/proposals/` exists and has at least one committed proposal
-- [ ] Confirmed `~/.claude/traces/` has JSONL files spanning the post-commit window
+- [ ] Confirmed `~/.claude/traces/` (or `$FORGE_TRACES_DIR`) has JSONL files spanning the pre- and post-commit windows
 - [ ] Ran `python3 plugins/evaluator/skills/prediction-audit/scripts/audit.py`
 - [ ] Reviewed the per-resource table for outliers (>50% error)
 - [ ] Captured the calibration summary; flagged any commit where prediction was off by >2× as a candidate for `/trace-evolve` follow-up
@@ -83,7 +93,7 @@ Proposals with no structured prediction (skipped): K
 ### Example 1: a proposal with accurate prediction
 
 Input: a committed proposal under `.claude/lineage/proposals/` containing
-```
+```markdown
 ## Predicted Impact (structured)
 predicted_token_delta_per_session: 132
 predicted_failure_clusters_resolved: none
@@ -91,8 +101,8 @@ predicted_negative_effects: none
 ```
 
 Output row:
-```
-| rules.d/<rule>.txt | +132 | +118 | -10.6% | none | none | accurate |
+```text
+| rules.d/<rule>.txt | +132 | +118 | 3/4 | accurate |
 ```
 
 ### Example 2: a proposal with no structured section
@@ -103,5 +113,6 @@ Output: appears under `Proposals with no structured prediction (skipped)` count,
 
 ## Known Failure Modes
 
-- **No traces in window** — when `~/.claude/traces/` is empty for the post-commit window, observed delta is 0 and every prediction looks like a 100% over-estimate. The script labels this as `insufficient-data` rather than `inaccurate`.
-- **Self-test fixture drift** — `--self-test` runs against an inline fixture; if the helper's parsing changes, the test should be updated alongside.
+- **No post-commit sessions** — when no trace file exists with a timestamp ≥ the resource's commit ts, the script labels the row `insufficient-data` rather than fabricating a verdict.
+- **Slug-substring matching** — attribution uses `slug in haystack or basename in haystack`. Two resources with identical basenames in different directories will collide; rename one to disambiguate.
+- **Self-test fixture drift** — `--self-test` runs an inline fixture for the parser; trace-attribution is exercised by integration tests, not by `--self-test`. If parsing changes, update the fixture.

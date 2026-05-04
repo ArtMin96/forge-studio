@@ -8,6 +8,7 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+logical: report shows OK / FAIL per check; returns CLEAN when every check passes
 ---
 
 # Validate Marketplace — Pre-Commit Correctness Check
@@ -100,7 +101,7 @@ python3 plugins/diagnostics/skills/validate-marketplace/scripts/check-skill-size
 
 ## Output Format
 
-```
+```markdown
 ## Validate Marketplace Report
 
 ### Check 1 — marketplace.json parses

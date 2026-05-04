@@ -7,6 +7,7 @@ allowed-tools:
   - Bash
   - Grep
   - Read
+logical: every claimed file/symbol/URL classified YES / NO / SKIP with evidence; verdict line emitted
 ---
 
 # Verify References
@@ -55,7 +56,7 @@ Plus check `.claude/settings.json`, `composer.json`, `package.json` as appropria
 
 ## 3. Report
 
-```
+```markdown
 | Claim                | Class  | Found? | Evidence                       |
 |----------------------|--------|--------|--------------------------------|
 | plugins/agents/...   | path   | YES    | test -e → exists               |
@@ -65,7 +66,7 @@ Plus check `.claude/settings.json`, `composer.json`, `package.json` as appropria
 
 Then emit a verdict line:
 
-```
+```text
 VERIFIED-REFS: <N_found>/<N_total> ok. <N_missing> missing. <N_skipped> skipped.
 ```
 
