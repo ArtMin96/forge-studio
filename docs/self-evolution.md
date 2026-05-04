@@ -6,7 +6,7 @@ User-facing guide to Forge Studio's self-improvement loop **and** the wire-level
 
 A closed loop that lets the harness improve itself over time — and lets you reverse any improvement that turns out to be wrong. Four operators over versioned resources:
 
-```
+```text
 propose ─► assess ─► commit ─► (rollback, any time)
 ```
 
@@ -75,7 +75,7 @@ Failure modes are safe by construction:
 
 ### Typical session
 
-```
+```console
 $ /trace-evolve           # mine last 2 weeks, produce cluster report
 $ /evolve trace-evolve    # convert clusters → proposals, assess each, ask to commit
   Proposal 1/3: rules.d/40-defensive-reads.txt v1 → v2
@@ -94,7 +94,7 @@ $ /evolve trace-evolve    # convert clusters → proposals, assess each, ask to 
 
 ### If it goes wrong
 
-```
+```console
 $ /rollback rules.d/40-defensive-reads.txt
   Rolled back rules.d/40-defensive-reads.txt v2 → v1.
   Forward version snapshot saved: /rollback rules.d/40-defensive-reads.txt v2
@@ -102,7 +102,7 @@ $ /rollback rules.d/40-defensive-reads.txt
 
 ### Inspecting history
 
-```
+```console
 $ cat .claude/lineage/ledger.jsonl | jq -c 'select(.resource | startswith("rules.d/"))'
 $ ls .claude/lineage/versions/rules.d/40-defensive-reads.txt/
   v1  v2
@@ -136,10 +136,24 @@ Why both loops? Harness evolution needs the full assess + commit ceremony becaus
 | Plugin | Role |
 |---|---|
 | `traces` | Proposal source — `/trace-evolve` mines failure clusters |
-| `evaluator` | Runs the `assess` operator via `/assess-proposal` |
+| `evaluator` | Runs the `assess` operator via `/assess-proposal`; `/prediction-audit` joins predictions to traces |
 | `workflow` | Owns the `propose` orchestrator, `commit`, `rollback`, reflect skill, router-tune |
 | `memory` | Version-aware topic updates (`/remember`) feed the same ledger |
 | `diagnostics` | Future: `/entropy-scan` will validate ledger invariants (snapshot existence, propose→assess→commit ordering) |
+
+## Predicted Impact (structured)
+
+Proposals may include an optional `## Predicted Impact (structured)` section with three fields. When present, `/assess-proposal` criterion #3 verifies each field independently; absent fields fall back to the free-form impact check.
+
+| Field | Type | Purpose |
+|---|---|---|
+| `predicted_token_delta_per_session` | integer (chars) | Net delta per typical session, accounting for re-injection frequency |
+| `predicted_failure_clusters_resolved` | list of cluster ids or `none` | Which `/trace-evolve` clusters this proposal addresses |
+| `predicted_negative_effects` | list of one-liners or `none` | Honest catalog of small downsides; `none` is acceptable when there really are none |
+
+After commits land, `/prediction-audit` joins the structured predictions against post-commit traces to compute per-resource prediction error. The mechanism mirrors the *paired predictions verified against outcomes* observability principle from *Agentic Harness Engineering* (arXiv:2604.25850). Predictions that are systematically off feed back into `/trace-evolve` for harness-level recalibration.
+
+The structured schema is **opt-in and additive** — pre-existing proposals continue to validate. New proposals are encouraged to include it; runtime tooling (`/evolve`, `/router-tune`, `/remember`) can populate it automatically as it evolves.
 
 ## Resource Registry
 
@@ -178,7 +192,7 @@ Path: `.claude/lineage/ledger.jsonl` (append-only, one JSON object per line).
 
 On `commit`, the **previous** file contents are snapshotted to:
 
-```
+```text
 .claude/lineage/versions/<resource-slug>/<prev-version>
 ```
 

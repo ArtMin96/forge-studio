@@ -14,7 +14,7 @@ Plan mode has **two entry paths** that work differently:
 
 When the model decides to enter plan mode, it calls the `EnterPlanMode` tool — a real SDK tool registered in the tool system (`src/tools/EnterPlanModeTool/EnterPlanModeTool.ts`).
 
-```
+```text
 Model calls EnterPlanMode → PreToolUse hooks fire → tool executes → PostToolUse hooks fire
 ```
 
@@ -30,7 +30,7 @@ The tool:
 
 When the user types `/plan`, it's handled as a `local-jsx` command (`src/commands/plan/plan.tsx`). This is client-side UI code that directly mutates `appState.toolPermissionContext.mode` without going through the tool system.
 
-```
+```text
 User types /plan → client-side mode switch → plan mode instructions injected
 ```
 

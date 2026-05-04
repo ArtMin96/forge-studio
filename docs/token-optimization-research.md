@@ -110,7 +110,7 @@ Auto-compaction triggers when the context window approaches its limit (~200K tok
 ### Custom Compaction
 
 You can guide what gets preserved:
-```
+```text
 /compact Focus on code samples and API usage
 /compact Keep the auth flow decisions, the current test plan, and the open TODOs
 ```

@@ -116,13 +116,13 @@ Four user-invocable skills. All start with `/`.
 
 ### 1. Narrow fix — the router stays out of the way
 
-```
+```text
 > fix the typo "recieve" in UserProfile.vue
 ```
 
 The shell classifier sees a narrow verb + short prompt → routes `single-agent`. The hook emits one line:
 
-```
+```text
 [workflow router] route=single-agent confidence=0.85 reason=narrow change, single-file verb
 Narrow change detected. Execute directly; skip the planner→generator→reviewer pipeline.
 ```
@@ -131,7 +131,7 @@ Claude edits the file, runs the project's test command, done. No planner, no rev
 
 ### 2. Feature build — full pipeline with a sprint contract
 
-```
+```text
 > implement a subscription upgrade flow across the billing and notifications modules
 ```
 
@@ -162,13 +162,13 @@ Router classifies `pipeline`. Behavior you'll see:
 
 ### 3. Fan-out — parallel batch
 
-```
+```text
 > rename the Logger import across all components in every module of src
 ```
 
 Router classifies `fan-out` (batch verb + "across all" + target nouns). Suggested:
 
-```
+```text
 Parallel-safe batch detected. Consider /fan-out (agents plugin) with 3–5 workers per batch.
 ```
 
@@ -176,13 +176,13 @@ Run `/fan-out` from the agents plugin. It dispatches 3–5 subagents (the Anthro
 
 ### 4. TDD loop — three phases, three real-command gates
 
-```
+```text
 > /tdd-loop reproduce the bug where UserProfile.logout() leaves stale tokens
 ```
 
 Phase output you will see:
 
-```
+```text
 RED phase
   Writes tests/Feature/LogoutLeaksTokenTest.php asserting empty token cache after logout()
   Runs: ./vendor/bin/pest tests/Feature/LogoutLeaksTokenTest.php
@@ -206,14 +206,14 @@ If any gate fails, the phase stops and reports the real output. No "I think it p
 
 Near the end of a long session, `Stop` fires after a turn and the hook emits:
 
-```
+```text
 [workflow] Plan subscription-upgrade.md has 2 unchecked items. Update the plan or reconcile before claiming done.
 [workflow] Context at 78%. Run /progress-log (context-engine) before compaction risks information loss.
 ```
 
 You run `/progress-log billing-upgrade`. A `.claude/progress-logs/2026-04-20-billing-upgrade.md` is written with done / in-progress / blockers / decisions / next-steps. Next session, `SessionStart` surfaces it:
 
-```
+```text
 [workflow] Last handoff: 2026-04-20-billing-upgrade.md (0d ago). Run /session-resume to load it.
 [workflow] Active plan: subscription-upgrade.md (2 unchecked items).
 ```
@@ -224,7 +224,7 @@ You run `/progress-log billing-upgrade`. A `.claude/progress-logs/2026-04-20-bil
 
 Sometimes the router picks wrong. Force the pattern explicitly:
 
-```
+```text
 > /orchestrate tdd
 ```
 
@@ -234,13 +234,13 @@ The skill reads the active plan, ignores the router's classification, and hands 
 
 ## Checking live state
 
-```
+```text
 > /status
 ```
 
 Typical output:
 
-```
+```text
 Plan:     subscription-upgrade.md (0d old, 5/7 done)
 Handoff:  2026-04-20-billing-upgrade.md (0d ago) — /session-resume to load
 Traces:   31 events, last: Bash pest --filter=SubscriptionUpgrade

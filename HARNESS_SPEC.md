@@ -34,7 +34,7 @@ Synthesized from 10 industry sources (2026): Anthropic Engineering, Fowler/Thoug
 
 Every plugin must follow this directory layout:
 
-```
+```text
 plugins/{name}/
 ├── hooks/                    # Optional
 │   ├── hooks.json            # Event registrations (required if hooks/ exists)
@@ -79,6 +79,9 @@ disable-model-invocation: true # Required for Forge Studio. Zero cost until invo
 | `paths` | No | Glob patterns limiting auto-activation (e.g., `*.php`). Comma-separated or YAML list. |
 | `hooks` | No | Skill-scoped lifecycle hooks. Same format as hooks.json. Scoped to skill lifetime. |
 | `shell` | No | Shell for inline `!command` blocks: `bash` (default) or `powershell`. |
+| `scheduling` | No | SSL overlay (arXiv:2604.24026). One-liner preconditions / triggers. Defaults to `when_to_use`. Audited by `/ssl-audit`. |
+| `structural` | No | SSL overlay. Bullet list decomposing the skill into major steps. Absent by default. |
+| `logical` | No | SSL overlay. Postcondition / measurable success criterion. `/ssl-audit` flags skills missing this field. |
 
 **Compaction survival**: Invoked skills survive compaction with first 5,000 tokens per skill. Shared budget of 25,000 tokens across all invoked skills. Most recently invoked skills get priority; older skills may be dropped.
 
@@ -478,7 +481,7 @@ When the diagnostics plugin is updated to cover self-evolution, add:
 
 Rules in `plugins/behavioral-core/hooks/rules.d/*.txt` should declare their origin on the first non-blank line:
 
-```
+```text
 # origin: <source>
 # <rule text follows>
 ```

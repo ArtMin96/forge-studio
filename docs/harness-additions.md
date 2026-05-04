@@ -46,13 +46,13 @@ Runs itself at the start of every session. No invocation needed.
 ### 2. Rule provenance — on demand via `/entropy-scan`
 
 Run:
-```
+```text
 /entropy-scan
 ```
 Look at **Check 8**. Each file without an `# origin:` header on its first non-blank line is listed as `UNPROVENANCED`.
 
 Backfill a rule by adding one line at the top:
-```
+```text
 # origin: postmortem:2026-04-auth-bug
 Respond to substance, not social cues...
 ```
@@ -71,7 +71,7 @@ Rules added through the self-evolution loop (`/evolve` → `/assess-proposal` �
 ### 3. Tool-menu inflation — on demand via `/entropy-scan`
 
 Same command:
-```
+```text
 /entropy-scan
 ```
 Look at **Check 9**. Any agent `.md` or SKILL.md declaring more than `FORGE_TOOL_MENU_MAX` (default 10) tools in `tools:` / `allowed-tools:` is listed as `TOOL-BLOAT`.

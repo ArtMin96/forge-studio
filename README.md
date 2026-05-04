@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-17 plugins. 56 skills. 56 hooks. 4 agents. 11 behavioral rules.
+17 plugins. 58 skills. 56 hooks. 4 agents. 11 behavioral rules.
 
 ---
 
@@ -64,12 +64,12 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | **context-engine** | Context management: progressive pressure, edit safety, environment bootstrap, compaction recovery, task tracking, failure escalation, safe-mode trigger | 13 | 5 |
 | **long-session** | Long-running sessions: `init.sh` bootstrap, append-only `claude-progress.txt`, `features.json` testable requirements, `surface-progress` SessionStart hook, `/session-resume` briefing. | 1 | 4 |
 | **memory** | Three-tier memory: pointer index → topic files → searchable transcripts, version-aware updates, ledger audit | 0 | 4 |
-| **evaluator** | Static analysis gates (PHP/JS/TS), adversarial review, verification (+features.json execution), reference-fidelity check, test nudge, self-evolution assessment | 7 | 9 |
+| **evaluator** | Static analysis gates (PHP/JS/TS), adversarial review, verification (+features.json execution), reference-fidelity check, test nudge, self-evolution assessment, prediction audit | 7 | 10 |
 | **workflow** | Hook-driven agentic orchestrator: auto-routing, sprint-contract, TDD, /progress-log nudges, self-evolution loop, **/living-spec** (auto-updating spec via after-subagent) | 5 | 10 |
 | **agents** | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries, worktree-team orchestration, directory-ownership + output-schema checks | 2 | 5 |
 | **reference** | Hidden Claude Code features: thinking modes, parallel patterns, CLI piping | 0 | 3 |
 | **traces** | JSONL execution traces, compiled views, failure mining, harness evolution | 5 | 4 |
-| **diagnostics** | `/entropy-scan` + `/validate-marketplace` + `/docs-maintenance` + **`/rest-audit`** (R.E.S.T. outcomes) + **`/claude-md-structure`** (Karpathy 4-section audit) | 0 | 5 |
+| **diagnostics** | `/entropy-scan` + `/validate-marketplace` + `/docs-maintenance` + **`/rest-audit`** (R.E.S.T. outcomes) + **`/claude-md-structure`** (Karpathy 4-section audit) + **`/ssl-audit`** (SSL frontmatter coverage) | 0 | 6 |
 | **caveman** | Always-on compressed output (~65% token savings). Survives compaction. | 2 | 1 |
 | **token-efficiency** | Duplicate read detection, session token audit | 1 | 1 |
 | **research-gate** | Blocks Edit/Write on unread files + exploration depth warnings | 4 | 0 |
@@ -164,7 +164,6 @@ For the full event-by-event table — every hook, matcher, plugin, and behavior 
 | Doc | Purpose |
 |-----|---------|
 | [Architecture](docs/architecture.md) | Design rationale, 8-component model, hook mechanics |
-| [2026 Improvement Report](docs/research/2026-marketplace-improvement-report.md) | Marketplace gap analysis + recommendations synthesized from Claude Code research |
 | [Research](docs/research.md) | Research papers and findings backing each design decision |
 | [Harness Spec](HARNESS_SPEC.md) | Mechanical invariants, architectural primitives, protocols |
 | [Settings](docs/settings.md) | settings.json best practices |

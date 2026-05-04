@@ -12,7 +12,7 @@ A scheduled remote trigger sends a single cheap Haiku message before your workda
 
 ## Example: Armenia (UTC+4), 09:00–18:00, lunch 13:00–14:00
 
-```
+```text
 08  09  10  11  12  13  14  15  16  17  18
  |======= WINDOW 1 (08-13) =======|
      |====== WORK ======|  LUNCH  |==== WORK ====|
@@ -42,7 +42,7 @@ Account-level — works on any machine where you're logged into the same Anthrop
 
 In any Claude Code session:
 
-```
+```text
 "Set up a budget warmup trigger. I work [YOUR HOURS] in [YOUR TIMEZONE] with lunch at [LUNCH TIME]."
 ```
 
@@ -115,7 +115,7 @@ The template is at [`templates/warmup/warmup.yml`](../templates/warmup/warmup.ym
 
 The cron expression is in UTC. Convert your desired warmup time:
 
-```
+```text
 (Lunch start hour - 5) + :15 local time → convert to UTC
 
 Examples:

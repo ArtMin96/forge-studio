@@ -53,6 +53,18 @@ The proposal lists an impact estimate. Check it.
 
 If the estimate is missing, off by an order of magnitude, or suspiciously round ("~0 tokens"), fail the criterion.
 
+#### Structured prediction (optional, recommended)
+
+Proposals may include a `## Predicted Impact (structured)` section with three fields. When present, criterion #3 verifies each field independently; absent fields fall back to the free-form check above.
+
+| Field | Type | Purpose |
+|---|---|---|
+| `predicted_token_delta_per_session` | integer (chars) | Net delta per typical session, after accounting for re-injection frequency |
+| `predicted_failure_clusters_resolved` | list of cluster ids or `none` | Which `/trace-evolve` clusters this proposal addresses |
+| `predicted_negative_effects` | list of one-liners or `none` | Honest catalog of small downsides; `none` is acceptable when there really are none |
+
+A populated structured section pairs with a post-commit `/prediction-audit` run that joins predictions against observed traces — the longer-term goal is closing the prediction loop without manual bookkeeping. Proposals without the structured section keep working unchanged.
+
 ### 4. No Regression of Existing Rules
 
 Read the nearby resources:

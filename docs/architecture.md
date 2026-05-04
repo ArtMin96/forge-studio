@@ -23,6 +23,29 @@ Cross-cutting plugins: `evaluator`, `workflow`, `reference`, `traces`, `diagnost
 
 Component 8 is drawn from *Autogenesis: A Self-Evolving Agent Protocol* (arXiv:2604.15034, Apr 2026). See `docs/self-evolution.md` for the protocol and `HARNESS_SPEC.md` §Self-Evolution Protocol for invariants.
 
+### Capability Levels (per arXiv:2604.22748)
+
+*Agentic World Modeling* (Chu et al., Apr 2026) defines a three-tier capability ladder for agents that model environmental dynamics:
+
+- **L1 Predictor** — single-step transition prediction; the agent infers the next state from the current state.
+- **L2 Simulator** — multi-step, action-conditioned sequences; the agent rolls forward through several steps to evaluate options.
+- **L3 Evolver** — self-correcting; the agent observes its own prediction errors and updates its model.
+
+Mapping forge-studio's 8 components to this ladder (interpretive — paper read as abstract only, not full PDF):
+
+| Component | Level | Reason |
+|---|---|---|
+| System Prompts | L1 | Single-turn behavioral steering; no rollout |
+| Tool System | L1 | Each tool call is a single step |
+| Permission System | L1 | Per-call allow/deny decisions |
+| Context Management | L1 → L2 | Per-turn tracking is L1; compaction recovery + plan-mode replay reach L2 |
+| Memory Architecture | L1 → L2 | Recall is L1; SEPL-versioned snapshots enable L2 replay |
+| Multi-Agent Decomposition | L2 | Planner/generator/reviewer is multi-step, action-conditioned |
+| Behavioral Steering | L1 | Per-message rule re-anchor; no self-correction |
+| Self-Evolution (SEPL) | L3 | Propose → assess → commit → rollback is the canonical self-correcting loop; `/prediction-audit` closes the L3 prediction-vs-outcome cycle |
+
+The annotation is descriptive, not aspirational — the goal is precise vocabulary, not climbing the ladder for its own sake. Component upgrades go through SEPL like any other harness change.
+
 ### TRAE Harness-Engineering Framings (overlays, not replacements)
 
 The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive Guide to Harness Engineering" (2026) provides orthogonal *outcomes* and *mechanics* framings useful for audit and design:
@@ -51,7 +74,7 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 
 ## Three-Layer Model
 
-```
+```text
 ┌─────────────────────────────────────┐
 │            User / IDE               │
 ├─────────────────────────────────────┤

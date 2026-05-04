@@ -67,7 +67,7 @@ When prototyping: move fast, iterate. Perfect is the enemy of done.
 
 <!-- Replace these with your project's actual commands -->
 
-```
+```text
 Build:    composer install
 Test:     ./vendor/bin/pest
 Lint:     ./vendor/bin/pint

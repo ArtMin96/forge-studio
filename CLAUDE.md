@@ -29,7 +29,7 @@ Every change must be complete. Before calling work done:
 ## File Conventions
 
 ### Plugin Structure
-```
+```text
 plugins/{name}/
 ├── hooks/
 │   ├── hooks.json       # Event registrations
@@ -51,6 +51,12 @@ context: fork                          # optional, runs in isolated subagent
 allowed-tools:                         # optional, capability isolation
   - Read
   - Bash
+# SSL overlay (optional, additive — see arXiv:2604.24026):
+scheduling: <one-liner preconditions / triggers>          # defaults to when_to_use
+structural:                                                # decomposition into major steps
+  - <step 1>
+  - <step 2>
+logical: <postcondition / measurable success criterion>   # what makes this skill "done"
 ---
 ```
 
@@ -63,6 +69,7 @@ allowed-tools:                         # optional, capability isolation
 - **Multi-step workflows** (>3 steps) ship a copyable `## Execution Checklist` with `- [ ]` boxes Claude ticks as it goes.
 - **Artifact-producing skills** (commit messages, ledger entries, JSON outputs, reports) ship 2 concrete `Input:` / `Output:` example pairs with literal labels.
 - **Real failures only** in `## Known Failure Modes` — document past pain, never fabricate.
+- **SSL overlay is opt-in**: `scheduling`, `structural`, `logical` fields tighten skill matching by separating preconditions, decomposition, and success criteria. Audit with `/ssl-audit`. Skills that already encode this in `when_to_use` need no rewrite.
 
 ### hooks.json Events
 `SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `PreCompact`, `PostCompact`
@@ -92,7 +99,7 @@ Hook exit codes: `0` = info, `1` = warning, `2` = block action (PreToolUse, PreC
 
 ## Project Config
 
-```
+```text
 No build step — this is a collection of markdown, JSON, and shell scripts.
 Validate JSON: python3 -c "import json; json.load(open('file.json'))"
 Test hooks: bash plugins/{name}/hooks/{script}.sh
