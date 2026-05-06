@@ -9,7 +9,7 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
-logical: report shows PASS / DRIFT for each of the 9 checks with concrete fix lines for any drift
+logical: report shows PASS / DRIFT for each of the 13 checks with concrete fix lines for any drift
 ---
 
 # Entropy Scan — Codebase Health Validation
@@ -18,7 +18,7 @@ Detect drift between documentation and reality. Run periodically (weekly recomme
 
 ## Instructions
 
-Run all 9 checks. Report results in the structured format below. **Do not modify any files** — report issues and propose fixes only.
+Run all 13 checks (1–8, 9a, 9b, 10–13). Report results in the structured format below. **Do not modify any files** — report issues and propose fixes only.
 
 ### Check 1: Plugin Count Drift
 
@@ -141,7 +141,7 @@ Invoke `/rest-audit` (this same plugin). Propagate its axis statuses verbatim. T
 
 Invoke `/claude-md-structure` on `./CLAUDE.md`. Propagate its PRESENT/WEAK/MISSING statuses. Report any section missing or weak.
 
-### Check 9: Tool-Menu Inflation
+### Check 10: Tool-Menu Inflation
 
 For each agent definition (`plugins/*/agents/*.md`) and each SKILL.md, count entries in `tools:` / `allowed-tools:` frontmatter. Warn if the count exceeds `FORGE_TOOL_MENU_MAX` (default 10).
 
@@ -151,6 +151,30 @@ python3 plugins/diagnostics/skills/entropy-scan/scripts/check-tool-menu.py
 
 **Rationale** (Osmani, 2026): *"Ten sharp tools beat fifty overlapping ones."* Large tool menus compete for the model's working memory and degrade tool-selection accuracy. Advisory only — some agents legitimately need more tools.
 
+### Check 11: Sibling Reference Resolution
+
+Every `Do NOT use for X — use \`/sibling\` instead` line in a SKILL.md `when_to_use` field must point to a skill that exists somewhere in `plugins/*/skills/`. Broken references produce dead routing advice that drifts as skills are renamed or removed.
+
+```bash
+python3 plugins/diagnostics/skills/entropy-scan/scripts/check-sibling-refs.py
+```
+
+### Check 12: SKILL.md Description Budget
+
+Per `CLAUDE.md`, `description` + `when_to_use` combined must stay under 1536 characters. Past that, the skill description gets truncated when surfaced in the skill picker, which degrades model-side skill matching.
+
+```bash
+python3 plugins/diagnostics/skills/entropy-scan/scripts/check-desc-length.py
+```
+
+### Check 13: Policy Registry Drift
+
+The cross-plugin policy index at `plugins/diagnostics/registry/policies.json` must stay in sync with the enforcement scripts on disk: every registered FS-id's `implementation` path must exist, and every enforcement script under `behavioral-core/hooks/`, `policy-gateway/hooks/`, `research-gate/hooks/` (excluding bootstrap and healthcheck files) must appear in the registry. Drift either way produces silent inconsistency between `/policies-list` and reality.
+
+```bash
+python3 plugins/diagnostics/skills/entropy-scan/scripts/check-policy-registry.py
+```
+
 ## Output Format
 
 ```markdown
@@ -159,7 +183,7 @@ python3 plugins/diagnostics/skills/entropy-scan/scripts/check-tool-menu.py
 **Date:** {YYYY-MM-DD}
 **Overall:** {CLEAN / {N} issues found}
 
-### Check {1..9}: <name>
+### Check {1..8, 10..13}: <name>
 **Status:** {PASS / DRIFT / GAP / {N} <issue>}
 {Per-check details — counts, file lists, mismatch deltas — only when status is non-clean}
 

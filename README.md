@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-17 plugins. 58 skills. 56 hooks. 4 agents. 11 behavioral rules.
+17 plugins. 60 skills. 58 hooks. 4 agents. 11 behavioral rules.
 
 ---
 
@@ -128,9 +128,9 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 
 ## Active Hooks
 
-Hooks fire automatically. No commands needed. 56 hook command registrations across 13 plugins, spanning all major events:
+Hooks fire automatically. No commands needed. 58 hook command registrations across 13 plugins, spanning all major events:
 
-- **Session lifecycle** — `SessionStart` (9 hooks), `SessionEnd`, `PreCompact` (3), `PostCompact` (2)
+- **Session lifecycle** — `SessionStart` (11 hooks), `SessionEnd`, `PreCompact` (3), `PostCompact` (2)
 - **Per-turn** — `UserPromptSubmit` (5 hooks), `Stop`, `StopFailure`
 - **Tool execution** — `PreToolUse` (9 deny-chain hooks), `PostToolUse` (18), `PostToolUseFailure` (2)
 - **Agent / Task** — `SubagentStop` (3), `TaskCreated`, `TaskCompleted`

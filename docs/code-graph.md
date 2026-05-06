@@ -18,6 +18,8 @@ On subsequent sessions in the same repo: nothing — everything is already set u
 
 The graph refreshes after `git commit`, `git merge`, `git rebase`, `git pull`, `git checkout`, `git reset`, or `git cherry-pick`. Uncommitted edits are not reflected until you commit.
 
+A second SessionStart hook (`code-graph-healthcheck.sh`) runs immediately after the bootstrap and verifies three things: `code-review-graph` is on `PATH`, `code-review-graph --version` returns 0, and `.mcp.json` in the project root references the binary. On any miss it writes a multi-line stderr block with the exact remediation commands. Exit code stays 0 — a missing integration cannot kill session startup, but it can no longer fail silently. Set `FORGE_CODE_GRAPH_DISABLED=1` to suppress both bootstrap and healthcheck.
+
 ---
 
 ## Files created in your repo

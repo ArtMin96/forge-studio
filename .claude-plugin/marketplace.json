@@ -98,8 +98,8 @@
     },
     {
       "name": "diagnostics",
-      "description": "Codebase health scanning: documentation drift, registration gaps, convention violations, stale memory, HARNESS_SPEC invariant compliance. /validate-marketplace performs pre-commit mechanical correctness checks (distinct from /entropy-scan).",
-      "version": "1.1.0",
+      "description": "Codebase health scanning: documentation drift, registration gaps, convention violations, stale memory, HARNESS_SPEC invariant compliance. /validate-marketplace performs pre-commit mechanical correctness checks (distinct from /entropy-scan). /startup-profile reports SessionStart hook latency. /policies-list prints the cross-plugin enforcement registry (FS01–FS42).",
+      "version": "1.4.0",
       "source": "./plugins/diagnostics",
       "category": "diagnostics",
       "keywords": ["health", "entropy", "invariants", "validation", "harness:entropy-management", "overhead:zero", "role:sensor-computational"]
@@ -122,16 +122,16 @@
     },
     {
       "name": "rtk-optimizer",
-      "description": "Auto-install rtk-ai/rtk (Rust token killer) on first session and register its global Bash rewrite hook. Opt-out: FORGE_RTK_DISABLED=1.",
-      "version": "1.0.0",
+      "description": "Auto-install rtk-ai/rtk (Rust token killer) on first session and register its global Bash rewrite hook. Second SessionStart hook surfaces a remediation warning when the binary is missing or unhealthy. Opt-out: FORGE_RTK_DISABLED=1.",
+      "version": "1.1.0",
       "source": "./plugins/rtk-optimizer",
       "category": "context-management",
       "keywords": ["rtk", "token-optimization", "external-tool", "harness:context-management", "overhead:moderate"]
     },
     {
       "name": "code-graph",
-      "description": "Auto-install tirth8205/code-review-graph. Claude Code queries a Tree-sitter structural graph of the current repo through MCP instead of re-reading files on every task. Claude Code only. Opt-out: FORGE_CODE_GRAPH_DISABLED=1.",
-      "version": "1.0.0",
+      "description": "Auto-install tirth8205/code-review-graph. Claude Code queries a Tree-sitter structural graph of the current repo through MCP instead of re-reading files on every task. Second SessionStart hook surfaces a remediation warning when the MCP server is missing or unhealthy. Claude Code only. Opt-out: FORGE_CODE_GRAPH_DISABLED=1.",
+      "version": "1.1.0",
       "source": "./plugins/code-graph",
       "category": "context-management",
       "keywords": ["code-graph", "mcp", "tree-sitter", "blast-radius", "external-tool", "harness:context-management", "overhead:moderate"]

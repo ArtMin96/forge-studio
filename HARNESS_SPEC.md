@@ -19,7 +19,7 @@ Synthesized from 10 industry sources (2026): Anthropic Engineering, Fowler/Thoug
 | 3 | Evaluator/Verifier | Independently assesses output against criteria (never self-evaluation) | `evaluator/adversarial-reviewer` + `/verify` + `/challenge` + `/assess-proposal` |
 | 4 | Context Firewall | Isolates sub-task context from parent orchestration context | Sub-agents with `context: fork` |
 | 5 | Handoff Artifact | Structured file-based state transfer between agents/phases | `.claude/plans/`, `.claude/spec.md` (living spec), `claude-progress.txt` (append-only session log), `.claude/features.json` |
-| 6 | Guide (Feedforward) | Pre-execution instructions, conventions, architectural rules | `behavioral-core/rules.d/*.txt` (8 rules), CLAUDE.md |
+| 6 | Guide (Feedforward) | Pre-execution instructions, conventions, architectural rules | `behavioral-core/hooks/rules.d/*.txt`, CLAUDE.md |
 | 7 | Sensor (Feedback) | Post-execution observation (computational or inferential) | Static analysis hooks, `/gate-report` |
 | 8 | Policy Kernel | External enforcement of action classification (allow/deny/defer/ask) | `behavioral-core/block-destructive.sh` (incl. Layer 5 safe-mode gate), `research-gate/require-read-before-edit.sh`, `research-gate/exploration-depth-gate.sh`, `policy-gateway/scan-secrets.sh`, `policy-gateway/scan-injection.sh`, settings.json deny list |
 | 9 | Entropy Collector | Periodic scanning agent restoring codebase invariants | `diagnostics/entropy-scan` |
@@ -236,6 +236,23 @@ Skills should stay under 5,000 tokens (~20,000 chars) to survive compaction inta
 **Rationale**: Official docs confirm skills survive compaction with first 5,000 tokens per skill, shared 25,000-token budget. Oversized skills accelerate context rot.
 
 **Validation**: `/entropy-scan` should flag SKILL.md files exceeding ~8,000 characters.
+
+## Invariant: SessionStart Latency Budget
+
+Every plugin's SessionStart hooks must collectively respect:
+
+| Phase | Per-plugin total | Marketplace total |
+|---|---|---|
+| Warm session (binaries cached, marker files present) | < 300 ms expected | < 2,000 ms target / < 5,000 ms ceiling |
+| Cold session (first-run install, no markers) | unbounded by design | report cost for visibility, do not block |
+
+**Rationale**: SessionStart hooks are the user's first interaction. Latency here is fixed cost on every conversation. Cold cost is acceptable when amortized across all subsequent sessions, but warm cost must stay imperceptible.
+
+**Mechanism**: `plugins/diagnostics/lib/time-hook.sh` wraps each SessionStart hook command in `hooks.json`, preserves the hook's stdin/stdout/exit-code contract, and appends one JSONL row per invocation to `${FORGE_STUDIO_TIMING_LOG:-~/.local/share/forge-studio/startup.jsonl}`. The wrapper falls through to direct exec on its own internal failure so a measurement bug cannot break session startup.
+
+**Validation**: `/startup-profile` reads the JSONL and reports per-plugin median + p95 ms, plus warm/cold session totals. Run after adding a SessionStart hook or before a release.
+
+**No-go**: never wrap a hook for an event other than SessionStart through this wrapper without first re-evaluating the contract — `PreToolUse` hooks have decision semantics (`exit 2`, `{"decision":"block"}`) that the wrapper does not need to handle today and would have to be extended for.
 
 ## Invariant: Agent Tool Boundaries
 

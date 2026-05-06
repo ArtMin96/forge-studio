@@ -49,11 +49,11 @@ Convert the latest plan's `## Contract` into `.claude/features.json`. This file 
 ## Integration
 
 - `.claude/features.json` is read by:
-  - `/tdd-loop` — drives RED/GREEN cycles.
   - `/verify` (evaluator plugin) — runs each verify_cmd and writes results.
   - `after-subagent.sh` (workflow plugin) — flips `status` when matching work completes.
   - `surface-progress.sh` (this plugin, SessionStart) — summarizes pending/in_progress/done counts.
   - `/rest-audit` — Efficiency axis (pending/done ratio).
+- `/tdd-loop` does not read this file; it accepts a feature description as `$ARGUMENTS` and runs Red/Green/Refactor against the test suite. Use `/feature-list` first to make the contract machine-readable for `/verify`, then drive `/tdd-loop` per item.
 
 ## Failure Modes
 

@@ -24,7 +24,7 @@ Mechanical validation of marketplace integrity. Fast, deterministic, scriptable.
 
 ## Instructions
 
-Run the six checks below. Stop at the first check that returns `FAIL` if time-constrained; otherwise run all six and produce a structured report.
+Run the eight checks below. Stop at the first check that returns `FAIL` if time-constrained; otherwise run all eight and produce a structured report.
 
 ### Check 1 — `marketplace.json` Parses
 
@@ -99,6 +99,22 @@ Skills should stay under the compaction survival budget.
 python3 plugins/diagnostics/skills/validate-marketplace/scripts/check-skill-size.py
 ```
 
+### Check 8 — Plugin Version Sync
+
+Each `plugins/<name>/.claude-plugin/plugin.json` `version` must equal the corresponding `.claude-plugin/marketplace.json` entry. A mismatch ships a wrong version label to users.
+
+```bash
+python3 plugins/diagnostics/skills/validate-marketplace/scripts/check-version-sync.py
+```
+
+### Check 9 — Bash Syntax
+
+Every shell script under `plugins/*/hooks/`, `plugins/*/skills/*/scripts/`, and `plugins/*/lib/` must pass `bash -n`. Catches syntax breakage before a hook fires at runtime.
+
+```bash
+python3 plugins/diagnostics/skills/validate-marketplace/scripts/check-bash-syntax.py
+```
+
 ## Output Format
 
 ```markdown
@@ -135,6 +151,14 @@ Status: {CLEAN / {N} warn / {N} fail}
 Oversized-fail (>5,000 tokens, will be dropped): {list}
 Oversized-warn (>2,000 tokens, truncation risk): {list}
 
+### Check 8 — Plugin Version Sync
+Status: {CLEAN / {N} mismatches}
+{list of (plugin, marketplace_version, plugin_json_version)}
+
+### Check 9 — Bash Syntax
+Status: {CLEAN / {N} failures}
+{list of (path, stderr)}
+
 ### Verdict
 Overall: {VALID / INVALID}
 {One-line remediation per issue kind}
@@ -156,6 +180,8 @@ Overall: {VALID / INVALID}
 - [ ] Ran `check-hooks-json.py` — every `hooks.json` parses
 - [ ] Ran `check-agents.py` — no banned fields, no disabled-skill preloads
 - [ ] Ran `check-skill-size.py` — no file over the compaction-fail threshold
+- [ ] Ran `check-version-sync.py` — every plugin.json version matches marketplace.json
+- [ ] Ran `check-bash-syntax.py` — every shell script parses
 - [ ] Compiled the verdict (VALID / INVALID) and one-line remediation per failing check
 
 ## Known Failure Modes

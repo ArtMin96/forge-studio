@@ -5,8 +5,13 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/code-graph-bootstrap.sh",
+            "command": "W=${CLAUDE_PLUGIN_ROOT}/../diagnostics/lib/time-hook.sh; H=${CLAUDE_PLUGIN_ROOT}/hooks/code-graph-bootstrap.sh; if [ -x \"$W\" ]; then bash \"$W\" code-graph SessionStart bash \"$H\"; else bash \"$H\"; fi",
             "timeout": 90
+          },
+          {
+            "type": "command",
+            "command": "W=${CLAUDE_PLUGIN_ROOT}/../diagnostics/lib/time-hook.sh; H=${CLAUDE_PLUGIN_ROOT}/hooks/code-graph-healthcheck.sh; if [ -x \"$W\" ]; then bash \"$W\" code-graph SessionStart bash \"$H\"; else bash \"$H\"; fi",
+            "timeout": 5
           }
         ]
       }

@@ -4,6 +4,8 @@ Wraps [rtk-ai/rtk](https://github.com/rtk-ai/rtk) as a forge-studio plugin. Inst
 
 Upstream claims 60–90% token reduction on shell-heavy commands. Verified locally: `rtk 0.37.2`, binary ~9.8 MB, one-time install completes in well under 45 s.
 
+A second SessionStart hook (`rtk-healthcheck.sh`) runs immediately after the bootstrap and verifies `rtk` is on `PATH` and `rtk --version` returns 0. On any miss it writes a multi-line stderr block with the exact remediation commands. Exit code stays 0 — a missing integration cannot kill session startup, but it can no longer fail silently. Set `FORGE_RTK_DISABLED=1` to suppress both bootstrap and healthcheck.
+
 ---
 
 ## Why this plugin exists

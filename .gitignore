@@ -1,2 +1,5 @@
 # Added by code-review-graph
 .code-review-graph/
+
+# Per-session artifacts written by long-session/workflow plugins
+.claude/
