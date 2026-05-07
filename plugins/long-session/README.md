@@ -19,6 +19,7 @@ Skip if every task fits in one session.
 ```text
  SessionStart ──► bootstrap-substrate.sh  ensure .claude/ scaffolding exists
                   surface-progress.sh     read claude-progress.txt + spec.md + features.json
+                                          + .precompact-feedback.txt (memory plugin)
                                           and brief the new session
 ```
 
@@ -46,7 +47,7 @@ Three artifacts:
 | Event | Hook | Effect |
 |---|---|---|
 | `SessionStart` | bootstrap-substrate | Ensure `.claude/` scaffolding exists |
-| `SessionStart` | surface-progress | Read artifacts and brief the session |
+| `SessionStart` | surface-progress | Read `claude-progress.txt`, `features.json`, `spec.md`, plus the `memory` plugin's `.precompact-feedback.txt` snapshot so corrections from before the last compaction carry into the new session |
 
 ## Disable
 

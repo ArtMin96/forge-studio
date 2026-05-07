@@ -41,6 +41,16 @@ Each skill is a self-contained audit. They run on demand, read everything, write
 | "What does the harness actually block at runtime?" | `/policies-list` |
 | "Are my project's docs current?" | `/docs-maintenance` |
 
+## Hooks
+
+Project-agnostic enforcement that fires on every project, not just this marketplace.
+
+| Event | Hook | Effect |
+|---|---|---|
+| `PostToolUse` (`Edit\|Write`) | changelog-leak | Warn when written content has Sprint/Phase/changelog markers — disable: `FORGE_CHANGELOG_LEAK=0` |
+| `Stop` | stop-clean-tree | Block end-of-turn if staged or unstaged changes still contain Sprint/Phase markers — disable: `FORGE_CLEAN_TREE_GATE=0` |
+| `Stop` | stop-docs-touched | Nudge when N+ code files changed but no canonical doc surface (README / CHANGELOG / docs/ / ADR / CLAUDE.md) was touched — threshold env: `FORGE_DOCS_TOUCHED_THRESHOLD` (default 3); disable: `FORGE_DOCS_TOUCHED_GATE=0` |
+
 ## Disable
 
 `/plugin disable diagnostics@forge-studio`. Audits become unavailable; nothing else breaks.

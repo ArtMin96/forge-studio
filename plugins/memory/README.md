@@ -35,6 +35,14 @@ Tier 1 (`index.md`) is the only file loaded automatically. Tier 2 files load whe
 | `/memory-index` | Review, prune, sanity-check stored memories. Flag entries older than 90 days; verify a memory's claim against the current repo |
 | `/lineage-audit` | Audit the ledger for invariant violations (operator order, registry slugs, snapshot presence, append-only) |
 
+## Hooks
+
+| Event | Hook | Effect |
+|---|---|---|
+| `PreCompact` (`manual\|auto`) | precompact-snapshot | Snapshot the last 10 user corrections (no/stop/don't/actually/wait/...) to `~/.claude/projects/<slug>/memory/.precompact-feedback.txt` so behavioral feedback survives compaction. `long-session/surface-progress.sh` tails the file on next `SessionStart`. Disable: `FORGE_PRECOMPACT_SNAPSHOT=0` |
+
+Project root for the `<slug>` resolves via `CLAUDE_PROJECT_DIR` → `git rev-parse --git-common-dir` parent → `pwd`, so worktrees write to the same memory dir as the main checkout.
+
 ## Disable
 
 `/plugin disable memory@forge-studio`. The memory files stay on disk under `.claude/memory/` — re-enabling restores access.
