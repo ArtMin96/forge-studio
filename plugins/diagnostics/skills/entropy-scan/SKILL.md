@@ -2,7 +2,6 @@
 name: entropy-scan
 description: Scan the marketplace for documentation drift, registration gaps, convention violations, stale memory, and HARNESS_SPEC invariant compliance. Reports only — no writes.
 when_to_use: Run weekly, before releases, after large refactors, or whenever the README header counts feel suspect — catches drift between documentation and reality. Do NOT use for pre-commit correctness checks (will the marketplace install cleanly?) — that is `/validate-marketplace`; entropy-scan is the broader drift sweep, validate-marketplace is the focused gate.
-disable-model-invocation: true
 effort: high
 allowed-tools:
   - Read

@@ -2,7 +2,6 @@
 name: validate-marketplace
 description: Pre-commit mechanical validator — checks plugin registration, SKILL.md frontmatter, hook executability, and token budget. Focuses on correctness; complements `/entropy-scan` which focuses on drift.
 when_to_use: Reach for this before committing any change to `plugins/`, after editing `marketplace.json` or a SKILL.md frontmatter, before bumping a plugin version, or when `/entropy-scan` reports a registration gap and you want a focused pass. Do NOT use for documentation-vs-reality drift (counts, stale README) — that's `/entropy-scan`; validate-marketplace answers "will the install succeed?".
-disable-model-invocation: true
 allowed-tools:
   - Read
   - Bash

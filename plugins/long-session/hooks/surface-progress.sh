@@ -53,6 +53,25 @@ if [ -f "$INIT_SCRIPT" ] && [ -x "$INIT_SCRIPT" ]; then
   ANY=1
 fi
 
+# 5. Behavioral-feedback snapshot from the last PreCompact (memory plugin).
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-}"
+if [ -z "$PROJECT_DIR" ]; then
+  COMMON=$(git rev-parse --git-common-dir 2>/dev/null || true)
+  if [ -n "$COMMON" ]; then
+    PROJECT_DIR=$(dirname "$(cd "$COMMON" 2>/dev/null && pwd)")
+  fi
+fi
+[ -z "$PROJECT_DIR" ] && PROJECT_DIR=$(pwd)
+SLUG=$(echo "$PROJECT_DIR" | sed 's|/|-|g; s|^-||')
+FEEDBACK_FILE="${HOME}/.claude/projects/-${SLUG}/memory/.precompact-feedback.txt"
+if [ -f "$FEEDBACK_FILE" ]; then
+  FB=$(head -n 20 "$FEEDBACK_FILE" 2>/dev/null)
+  if [ -n "$FB" ]; then
+    OUT="${OUT}[long-session] Pre-compact feedback snapshot:\n${FB}\n"
+    ANY=1
+  fi
+fi
+
 if [ "$ANY" = "1" ]; then
   printf "%b" "$OUT"
 fi

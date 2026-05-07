@@ -2,7 +2,6 @@
 name: assess-proposal
 description: Adversarial review of a self-evolution proposal artifact. Emits a pass/fail verdict against four criteria. Pure read — never mutates harness files.
 when_to_use: Reach for this immediately after `/evolve` writes a proposal artifact, before any user approval or `/commit-proposal`. Do NOT use for general code review of un-versioned changes — that's `/challenge` or `/devils-advocate`; this skill is the SEPL `assess` operator gate against versioned harness resources.
-disable-model-invocation: true
 effort: xhigh
 argument-hint: <proposal-path>
 context: fork

@@ -142,5 +142,77 @@
     "implementation": "plugins/research-gate/hooks/track-file-reads.sh",
     "patterns_source": null,
     "description": "Records each file path Read into the per-session read-set consumed by FS04 (require-read-before-edit)."
+  },
+  {
+    "id": "FS50",
+    "name": "proof-of-done-gate",
+    "plugin": "evaluator",
+    "hook_event": "Stop",
+    "verdict": "gate",
+    "severity": "high",
+    "bypass": "FORGE_PROOF_OF_DONE=0 / stop_hook_active",
+    "implementation": "plugins/evaluator/hooks/stop-proof-of-done.sh",
+    "patterns_source": null,
+    "description": "Blocks Stop when the last assistant message claims completion (done/fixed/passing/working/...) without supporting evidence (tool_use, file:line, fenced shell block, or /verify invocation) in the recent assistant turns."
+  },
+  {
+    "id": "FS51",
+    "name": "preflight-impact",
+    "plugin": "code-graph",
+    "hook_event": "PreToolUse:Edit|Write|Bash",
+    "verdict": "anchor",
+    "severity": "advisory",
+    "bypass": "FORGE_PREFLIGHT_IMPACT=0",
+    "implementation": "plugins/code-graph/hooks/preflight-impact.sh",
+    "patterns_source": null,
+    "description": "Project-agnostic. When Claude is about to touch a broad-blast file (CI config, container/orchestration manifest, build file, dependency manifest, lockfile, top-level tooling config, schema/migration, repo-wide doc, .env), injects an additionalContext reminder describing the role and pointing at code-review-graph MCP get_impact_radius_tool for callers/dependents."
+  },
+  {
+    "id": "FS52",
+    "name": "changelog-leak",
+    "plugin": "diagnostics",
+    "hook_event": "PostToolUse:Edit|Write",
+    "verdict": "nudge",
+    "severity": "medium",
+    "bypass": "FORGE_CHANGELOG_LEAK=0",
+    "implementation": "plugins/diagnostics/hooks/changelog-leak.sh",
+    "patterns_source": null,
+    "description": "Warns when written content includes Sprint/Phase/changelog markers that CLAUDE.md forbids in source. Skips .claude/plans/, .claude/lineage/, CHANGELOG files."
+  },
+  {
+    "id": "FS53",
+    "name": "clean-tree-gate",
+    "plugin": "diagnostics",
+    "hook_event": "Stop",
+    "verdict": "gate",
+    "severity": "medium",
+    "bypass": "FORGE_CLEAN_TREE_GATE=0 / stop_hook_active / non-git tree",
+    "implementation": "plugins/diagnostics/hooks/stop-clean-tree.sh",
+    "patterns_source": null,
+    "description": "Blocks Stop when staged or unstaged changes contain Sprint/Phase markers. Backstop for FS52 since PostToolUse cannot undo writes."
+  },
+  {
+    "id": "FS54",
+    "name": "docs-touched-gate",
+    "plugin": "diagnostics",
+    "hook_event": "Stop",
+    "verdict": "nudge",
+    "severity": "advisory",
+    "bypass": "FORGE_DOCS_TOUCHED_GATE=0 / stop_hook_active / non-git tree / no doc surfaces",
+    "implementation": "plugins/diagnostics/hooks/stop-docs-touched.sh",
+    "patterns_source": null,
+    "description": "Project-agnostic. Warns when at least FORGE_DOCS_TOUCHED_THRESHOLD (default 3) substantive code files changed without any canonical doc surface (README / CHANGELOG / docs/ / ADR / CLAUDE.md) being touched in the same session."
+  },
+  {
+    "id": "FS55",
+    "name": "precompact-snapshot",
+    "plugin": "memory",
+    "hook_event": "PreCompact",
+    "verdict": "log",
+    "severity": "advisory",
+    "bypass": "FORGE_PRECOMPACT_SNAPSHOT=0",
+    "implementation": "plugins/memory/hooks/precompact-snapshot.sh",
+    "patterns_source": null,
+    "description": "Snapshots last 10 user corrections (no/stop/don't/actually/wait/...) to ~/.claude/projects/<slug>/memory/.precompact-feedback.txt so behavioral feedback survives compaction; long-session surface-progress.sh tails it on next SessionStart."
   }
 ]

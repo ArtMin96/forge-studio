@@ -4,6 +4,51 @@
 
 A marketplace of composable Claude Code plugins implementing harness principles: behavioral steering, context management, memory, evaluation, orchestration, multi-agent decomposition, and execution traces.
 
+## Scope: This Marketplace Is For Daily Work Across Projects
+
+The marketplace is **not** built to work on itself. It is installed once and used across many unrelated projects (PHP/Laravel, JS/TS, Python, Go, Ruby, Rust, monorepos, microservices, docs sites, etc.). Every plugin, hook, and skill must be designed for that wider daily use.
+
+Concrete consequences when authoring or modifying anything in `plugins/`:
+
+- **Hooks must be project-agnostic.** A hook that hardcodes `plugins/<X>/`, `marketplace.json`, `docs/architecture.md`, `HARNESS_SPEC.md`, or any other forge-internal path is a no-op (or worse, a false positive) on every other project. Match by canonical filenames common across ecosystems (`package.json`, `Dockerfile`, `.github/workflows/*.yml`, `pyproject.toml`, `Cargo.toml`, `README*`, `CHANGELOG*`, `docs/`, `.env*`, schemas/migrations) — not by this repo's structure.
+- **Marketplace-self-audit skills are the exception**, not the rule. `/entropy-scan`, `/validate-marketplace`, `/policies-list`, `/ssl-audit` *are* allowed to know about `plugins/` and `marketplace.json` because their explicit job is to audit this marketplace. They are slash-only tools, not always-on hooks. Don't extend that pattern to anything that fires on every project.
+- **Tool matchers must reflect actual Claude Code tools.** Real tool names: `Bash`, `Edit`, `Write`, `Read`, `Grep`, `Glob`, plus event-specific matchers (`auto`/`manual` for PreCompact, error categories for StopFailure). `MultiEdit` is not a stable matcher — do not use it. Verify against `https://code.claude.com/docs/en/tools-reference` before adding any matcher.
+- **Repo detection before forge assumptions.** If a hook needs to behave differently inside this marketplace versus a user project, gate it behind detection (`[ -f .claude-plugin/marketplace.json ] && ...`) or an explicit env var (`FORGE_MARKETPLACE_DEV=1`). Default behavior must be useful in any repo.
+- **Path resolution must respect worktrees.** Use `CLAUDE_PROJECT_DIR` (set by Claude Code) → `git rev-parse --git-common-dir` parent → `pwd` as a fallback chain. Never slug `pwd` directly when interfacing with `~/.claude/projects/<slug>/` — Claude Code keys that off the main repo, so a worktree-derived slug writes to the wrong directory.
+- **Portability matters.** Avoid GNU-only tools in shell hooks: no `tac` (use `awk '{a[NR]=$0} END{for(i=NR;i>=1;i--) print a[i]}'`), no `grep -P` (use `grep -E` with POSIX ERE: `\<word\>` for word boundaries, `[[:space:]]` for `\s`, `[[:alnum:]_]` for `\w`). Hooks silently no-op on macOS/BSD when GNU extensions are missing.
+
+## Always Check Authoritative Claude Code Documentation
+
+Before editing anything in this marketplace — adding a hook event, changing a matcher, using an env var, writing skill frontmatter, calling MCP, building a plugin manifest — open the official sources first. Train-time knowledge drifts; treat these URLs as ground truth and verify before claiming a feature works.
+
+| Source | Use it for |
+|---|---|
+| [Claude Code CHANGELOG](https://raw.githubusercontent.com/anthropics/claude-code/refs/heads/main/CHANGELOG.md) | Recent breaking changes, new hook events, new tool matchers, deprecations. Check the latest 30 days before any non-trivial change. |
+| [Best practices](https://code.claude.com/docs/en/best-practices) | Recommended patterns and anti-patterns. |
+| [Hooks reference](https://code.claude.com/docs/en/hooks) | Authoritative event list, exit-code semantics, JSON output schema (`{"decision":"block","reason":...}` vs `hookSpecificOutput.permissionDecision`), `stop_hook_active` contract. |
+| [Plugins reference](https://code.claude.com/docs/en/plugins-reference) | `plugin.json`, `marketplace.json`, `hooks.json` schema. |
+| [Tools reference](https://code.claude.com/docs/en/tools-reference) | Canonical tool names for matchers. |
+| [Env vars](https://code.claude.com/docs/en/env-vars) | `CLAUDE_PLUGIN_ROOT`, `CLAUDE_PROJECT_DIR`, `CLAUDE_SESSION_ID`, etc. — never invent env vars when an official one exists. |
+| [Plugins guide](https://code.claude.com/docs/en/plugins) | Plugin authoring conventions. |
+| [Headless](https://code.claude.com/docs/en/headless) | CLI invocation patterns and stdin contracts. |
+| [Skills](https://code.claude.com/docs/en/skills) | YAML frontmatter schema, `disable-model-invocation` semantics, listing budget (1,536 chars per entry; ~2K total), compaction carry-over. |
+| [MCP](https://code.claude.com/docs/en/mcp) | MCP tool naming, when hooks can call MCP, server install patterns. |
+
+If an answer needs to be precise (matcher names, exit-code semantics, frontmatter fields, env var names), fetch the doc — do not guess from memory. WebFetch the source directly when in doubt.
+
+## Reference Following: One Change Touches Many Files
+
+When you modify anything, follow every reference. A change is incomplete until every file that knows about the changed thing has been reconciled with it.
+
+- **New / removed plugin** → `README.md` (install command, plugin reference table, Active Hooks table, header counts), `docs/architecture.md` (component table, hook tables), `.claude-plugin/marketplace.json`, any cross-plugin policy registry entry.
+- **New / removed hook** → register in `plugins/<plugin>/hooks/hooks.json`, add an FS-id to `plugins/diagnostics/registry/policies.json` (deny/gate/anchor/nudge/log verdict), update README Active Hooks paragraph counts and the per-event table in `docs/architecture.md`.
+- **New / renamed skill** → re-grep for old name across all SKILL.md `Do NOT use for X — use /sibling instead` clauses; broken sibling references degrade routing advice.
+- **Renamed identifier** → search direct calls, type references, string literals, dynamic imports, re-exports, test files, comment references. Assume grep missed something; run it twice with different queries.
+- **Plugin version bump** → `plugins/<plugin>/.claude-plugin/plugin.json` AND the entry in `.claude-plugin/marketplace.json` (validate-marketplace check 8 fails on mismatch).
+- **Behavioral rule change** → `plugins/behavioral-core/hooks/rules.d/*.txt` is one source; the related skill (`/verify`, `/challenge`, etc.), CLAUDE.md, and any hook that enforces the same intent need to stay coherent.
+
+If you cannot say "I checked every file that names this thing", the change is not done.
+
 ## The Codebase Is Not A Changelog
 
 Shipped files (`.sh`, `.md`, `.json`) must not carry process metadata. Never write:

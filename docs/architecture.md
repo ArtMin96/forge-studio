@@ -103,7 +103,7 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 
 ## Forge Hook Deployment
 
-56 hook command registrations across 13 plugins. Hooks fire automatically on events — no commands needed. For the underlying Claude Code event API catalog see [`HARNESS_SPEC.md` §Hook Events Reference](../HARNESS_SPEC.md#hook-events-reference); the tables below describe **what forge actually deploys** at each event.
+65 hook command registrations across 15 plugins. Hooks fire automatically on events — no commands needed. For the underlying Claude Code event API catalog see [`HARNESS_SPEC.md` §Hook Events Reference](../HARNESS_SPEC.md#hook-events-reference); the tables below describe **what forge actually deploys** at each event.
 
 ### Session Lifecycle
 
@@ -121,6 +121,7 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | PreCompact | context-engine | pre-compact-guard.sh | Block compaction when uncommitted work has no progress entry or tasks in-progress |
 | PreCompact | context-engine | pre-compact.sh | Save scope, plan, progress, git state to recovery file |
 | PreCompact | workflow | pre-compact-handoff.sh | Advisory nudge to run `/progress-log` before auto-compaction |
+| PreCompact (manual\|auto) | memory | precompact-snapshot.sh | Snapshot last 10 user corrections to `~/.claude/projects/<slug>/memory/.precompact-feedback.txt` so behavioral feedback survives compaction (FS55) |
 | PostCompact | context-engine | post-compact.sh | Re-inject scope, plan, tasks, modified files from recovery |
 | PostCompact | caveman | caveman-restore.sh | Re-inject compressed communication rules |
 | SessionEnd | traces | session-summary.sh | Write session summary to trace file |
@@ -135,7 +136,7 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | context-engine | task-guardian.sh | Remind about incomplete tasks |
 | workflow | route-prompt.sh | Agentic router: classify prompt (shell/hybrid/LLM), nudge pattern |
 
-### Before Tool Use (PreToolUse — 9 hooks, deny-chain)
+### Before Tool Use (PreToolUse — 10 hooks, deny-chain)
 
 | Matcher | Plugin | Hook | What It Does |
 |---------|--------|------|-------------|
@@ -148,8 +149,9 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | Bash | evaluator | pre-commit-gate.sh | Warn if plan exists but `/verify` not run |
 | Edit\|Write | agents | directory-ownership.sh | Worktree-team scope guard (opt-in: `FORGE_DIRECTORY_OWNERSHIP=1`) |
 | Read | token-efficiency | track-duplicate-reads.sh | Warn on duplicate reads |
+| Edit\|Write\|Bash | code-graph | preflight-impact.sh | Surface broad-blast advisory when about to touch plugin source, marketplace registry, README, or architecture doc (FS51) |
 
-### After Tool Use (PostToolUse — 18 hooks)
+### After Tool Use (PostToolUse — 19 hooks)
 
 | Matcher | Plugin | Hook | What It Does |
 |---------|--------|------|-------------|
@@ -171,6 +173,7 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | Write\|Edit | traces | collect-file-trace.sh | Log file change to session trace |
 | Bash | traces | collect-bash-trace.sh | Log command, exit code, output to session trace |
 | Bash | code-graph | code-graph-update.sh | Refresh graph after `git commit/merge/rebase/pull/checkout/reset/cherry-pick` |
+| Edit\|Write | diagnostics | changelog-leak.sh | Warn on Sprint/Phase/changelog markers in written content (FS52) |
 
 ### Failure & Task Events
 
@@ -195,6 +198,9 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | Event | Plugin | Hook | What It Does |
 |-------|--------|------|-------------|
 | Stop | workflow | turn-gate.sh | Every N turns: remind about unchecked plan items and context pressure |
+| Stop | evaluator | stop-proof-of-done.sh | **Block** when last assistant message claims completion without supporting evidence (FS50) |
+| Stop | diagnostics | stop-clean-tree.sh | **Block** when staged/unstaged changes contain Sprint/Phase markers (FS53) |
+| Stop | diagnostics | stop-docs-touched.sh | Warn when plugin source changed without README / architecture doc / marketplace.json being touched (FS54) |
 
 ---
 

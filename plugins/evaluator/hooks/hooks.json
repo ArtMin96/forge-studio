@@ -78,6 +78,17 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/stop-proof-of-done.sh",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   }
 }
