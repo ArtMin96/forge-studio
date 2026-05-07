@@ -2,14 +2,8 @@
 # PreCompact: snapshot the most recent user corrections to disk so behavioral
 # feedback survives compaction. SessionStart picks the file up via the
 # long-session surface-progress.sh tail.
-#
-# Disable: FORGE_PRECOMPACT_SNAPSHOT=0
 
 set -u
-
-if [ "${FORGE_PRECOMPACT_SNAPSHOT:-1}" = "0" ]; then
-  exit 0
-fi
 
 if ! command -v jq >/dev/null 2>&1; then
   exit 0

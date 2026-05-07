@@ -7,14 +7,8 @@
 #
 # Project-agnostic: matches by canonical filename patterns common across
 # JS/TS/PHP/Python/Go/Ruby/Rust ecosystems. Advisory only; never blocks.
-#
-# Disable: FORGE_PREFLIGHT_IMPACT=0
 
 set -u
-
-if [ "${FORGE_PREFLIGHT_IMPACT:-1}" = "0" ]; then
-  exit 0
-fi
 
 if ! command -v jq >/dev/null 2>&1; then
   exit 0

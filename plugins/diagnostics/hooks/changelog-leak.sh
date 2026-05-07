@@ -5,14 +5,8 @@
 # PostToolUse cannot undo the write (issue #19009 — exit 2 only warns), so this
 # hook only emits additionalContext nudging Claude to rewrite the comment.
 # stop-clean-tree.sh is the blocking backstop at end-of-turn.
-#
-# Disable: FORGE_CHANGELOG_LEAK=0
 
 set -u
-
-if [ "${FORGE_CHANGELOG_LEAK:-1}" = "0" ]; then
-  exit 0
-fi
 
 if ! command -v jq >/dev/null 2>&1; then
   exit 0

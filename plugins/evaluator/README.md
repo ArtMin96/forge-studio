@@ -45,7 +45,7 @@ The forked `adversarial-reviewer` agent runs `/assess-proposal` and `/challenge`
 | Event | Hook | Effect |
 |---|---|---|
 | `TaskCompleted` | task-completion-gate | Demand proof before allowing "done" |
-| `Stop` | stop-proof-of-done | Block end-of-turn when last assistant message claims done/fixed/passing without evidence (tool_use, file:line, fenced shell block, or `/verify` invocation) — disable: `FORGE_PROOF_OF_DONE=0` |
+| `Stop` | stop-proof-of-done | Block end-of-turn when last assistant message claims done/fixed/passing without evidence (tool_use, file:line, fenced shell block, or `/verify` invocation) |
 | `PostToolUse` (`Edit\|Write`) | test-nudge | Nudge testing after edits |
 | `PostToolUse` (`Edit\|Write`) | php-static-analysis, js-static-analysis | Run static analysis on relevant edits |
 | `PostToolUse` (`Bash`) | test-nudge-reset | Clear the nudge once a test command runs |

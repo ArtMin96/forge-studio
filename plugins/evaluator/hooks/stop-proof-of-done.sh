@@ -5,14 +5,8 @@
 # Evidence accepted: any tool_use in the last 3 assistant messages (Bash,
 # Edit, Write, Read, Grep), any /verify or /challenge invocation, any fenced
 # code block whose first line begins with $ or #, or any file:line citation.
-#
-# Disable: FORGE_PROOF_OF_DONE=0
 
 set -u
-
-if [ "${FORGE_PROOF_OF_DONE:-1}" = "0" ]; then
-  exit 0
-fi
 
 INPUT=$(cat 2>/dev/null || true)
 if ! command -v jq >/dev/null 2>&1; then

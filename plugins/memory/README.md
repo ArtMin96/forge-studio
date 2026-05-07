@@ -39,7 +39,7 @@ Tier 1 (`index.md`) is the only file loaded automatically. Tier 2 files load whe
 
 | Event | Hook | Effect |
 |---|---|---|
-| `PreCompact` (`manual\|auto`) | precompact-snapshot | Snapshot the last 10 user corrections (no/stop/don't/actually/wait/...) to `~/.claude/projects/<slug>/memory/.precompact-feedback.txt` so behavioral feedback survives compaction. `long-session/surface-progress.sh` tails the file on next `SessionStart`. Disable: `FORGE_PRECOMPACT_SNAPSHOT=0` |
+| `PreCompact` (`manual\|auto`) | precompact-snapshot | Snapshot the last 10 user corrections (no/stop/don't/actually/wait/...) to `~/.claude/projects/<slug>/memory/.precompact-feedback.txt` so behavioral feedback survives compaction. `long-session/surface-progress.sh` tails the file on next `SessionStart` |
 
 Project root for the `<slug>` resolves via `CLAUDE_PROJECT_DIR` → `git rev-parse --git-common-dir` parent → `pwd`, so worktrees write to the same memory dir as the main checkout.
 

@@ -3,15 +3,10 @@
 # none of the repo-wide docs (README, CHANGELOG, docs/, ADR/, CLAUDE.md) were
 # touched. Generic across project types — uses canonical doc surfaces only.
 #
-# Tunables:
-#   FORGE_DOCS_TOUCHED_GATE=0     → disable
-#   FORGE_DOCS_TOUCHED_THRESHOLD  → minimum changed code files to warn (default 3)
+# Tunable: FORGE_DOCS_TOUCHED_THRESHOLD = minimum changed code files to warn
+# (default 3).
 
 set -u
-
-if [ "${FORGE_DOCS_TOUCHED_GATE:-1}" = "0" ]; then
-  exit 0
-fi
 
 if ! command -v jq >/dev/null 2>&1; then
   exit 0

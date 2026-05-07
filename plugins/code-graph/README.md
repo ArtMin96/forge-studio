@@ -35,7 +35,7 @@ Once installed, use the MCP tools: `query_graph_tool`, `detect_changes_tool`, `g
 |---|---|---|
 | `SessionStart` | code-graph-bootstrap | First-time install + graph build (idempotent) |
 | `SessionStart` | code-graph-healthcheck | Warn if binary or MCP server is missing |
-| `PreToolUse` (`Edit\|Write\|Bash`) | preflight-impact | Project-agnostic advisory when about to touch broad-blast files (CI configs, container/orchestration manifests, build files, dependency manifests, lockfiles, top-level tooling configs, schemas/migrations, env files, repo-wide docs); points at `mcp__code-review-graph__get_impact_radius_tool` for callers/dependents — disable: `FORGE_PREFLIGHT_IMPACT=0` |
+| `PreToolUse` (`Edit\|Write\|Bash`) | preflight-impact | Project-agnostic advisory when about to touch broad-blast files (CI configs, container/orchestration manifests, build files, dependency manifests, lockfiles, top-level tooling configs, schemas/migrations, env files, repo-wide docs); points at `mcp__code-review-graph__get_impact_radius_tool` for callers/dependents |
 | `PostToolUse` (`Bash`) | code-graph-update | Refresh graph after code-changing Bash commands |
 
 ## Configuration
@@ -43,7 +43,6 @@ Once installed, use the MCP tools: `query_graph_tool`, `detect_changes_tool`, `g
 | Variable | Effect |
 |---|---|
 | `FORGE_CODE_GRAPH_DISABLED=1` | Skip install and bootstrap entirely |
-| `FORGE_PREFLIGHT_IMPACT=0` | Disable the PreToolUse broad-blast advisory |
 
 Claude Code only — Codex CLI and other harnesses do not consume MCP servers in the same way.
 

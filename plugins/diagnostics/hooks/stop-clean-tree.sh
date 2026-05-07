@@ -2,14 +2,8 @@
 # Stop: scan staged + unstaged tree for phase/sprint markers and block end-of-turn
 # until the working tree is clean. Backstop for the changelog-leak PostToolUse
 # warning (which can only nudge, not undo).
-#
-# Disable: FORGE_CLEAN_TREE_GATE=0
 
 set -u
-
-if [ "${FORGE_CLEAN_TREE_GATE:-1}" = "0" ]; then
-  exit 0
-fi
 
 if ! command -v jq >/dev/null 2>&1; then
   exit 0
