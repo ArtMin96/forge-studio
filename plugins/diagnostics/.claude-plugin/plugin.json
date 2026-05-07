@@ -1,7 +1,12 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "diagnostics",
-  "description": "Codebase health scanning: documentation drift, registration gaps, convention violations, stale memory, HARNESS_SPEC invariant compliance",
+  "description": "Codebase health scanning: documentation drift, registration gaps, convention violations, stale memory, HARNESS_SPEC invariant compliance. /validate-marketplace performs pre-commit mechanical correctness checks (distinct from /entropy-scan). /startup-profile reports SessionStart hook latency. /policies-list prints the cross-plugin enforcement registry (FS01\u2013FS42).",
   "version": "1.4.0",
-  "keywords": ["health", "entropy", "invariants", "validation"]
+  "keywords": [
+    "health",
+    "entropy",
+    "invariants",
+    "validation"
+  ]
 }

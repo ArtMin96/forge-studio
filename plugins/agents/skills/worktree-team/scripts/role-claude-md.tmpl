@@ -1,0 +1,26 @@
+{repo_claude_md}
+
+---
+
+## Role: {role}
+
+You are the {role} in a worktree-team. You work in:
+
+    {worktree_abs_path}
+
+## Owned Directories
+
+{owned_paths}
+
+Do not modify files outside these directories. If a required change lies outside, STOP and hand off to the role that owns that path.
+
+## Coordination
+
+- This worktree is isolated from sibling worktrees.
+- Siblings exist at: `.claude/worktrees/{other_role}-{short_sha}`
+- Shared state (if any) lives at `.claude/worktrees/shared/` in the main repo. Writes to shared state must be atomic (append-only or rename-from-tmp).
+- When you finish, commit to a role-named branch (`wt-{role}-{short_sha}`) and report.
+
+## Tools Allowed
+
+{tool_set}

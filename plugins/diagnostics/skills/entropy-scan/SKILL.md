@@ -50,14 +50,11 @@ Report: directories without marketplace entries, and marketplace entries without
 ### Check 3: SKILL.md Frontmatter Completeness
 
 For each SKILL.md found via `find plugins -name "SKILL.md"`:
-- Verify `description:` field exists (official 2026 schema — only `description` is strongly recommended; `name` defaults to directory name if omitted)
-- If any of these fields are present, verify they use valid values:
-  - `effort`: must be one of `low|medium|high|xhigh|max`
-  - `context`: if `fork`, an `agent:` field is strongly recommended (defaults to `general-purpose` otherwise)
-- Flag any unknown frontmatter keys (authoritative list: `name, description, when_to_use, argument-hint, arguments, disable-model-invocation, user-invocable, allowed-tools, model, effort, context, agent, hooks, paths, shell`)
-- Flag any agent whose `skills:` preload list references a skill with `disable-model-invocation: true` (silently skipped per official docs)
-
-Report any SKILL.md failing these checks. `disable-model-invocation` is optional, not required — use it only when the skill should be user-invoke-only.
+- Verify `description:` field exists.
+- If `effort:` is set, value must be `low|medium|high|xhigh|max`.
+- If `context: fork`, an `agent:` field is strongly recommended.
+- Flag unknown frontmatter keys. Authoritative list: `name, description, when_to_use, argument-hint, arguments, disable-model-invocation, user-invocable, allowed-tools, model, effort, context, agent, hooks, paths, shell`.
+- Flag any agent whose `skills:` preload list references a skill with `disable-model-invocation: true` (silently skipped per official docs).
 
 ### Check 4: Hook Script Executability
 
@@ -89,19 +86,11 @@ Read `HARNESS_SPEC.md` and validate these invariants:
 
 ### Check 7: Skill Token Weight
 
-For each SKILL.md, count characters (approximate tokens = chars / 4):
-
 ```bash
-find plugins -name "SKILL.md" -exec sh -c '
-  chars=$(wc -c < "$1")
-  tokens=$((chars / 4))
-  if [ "$tokens" -gt 2000 ]; then
-    echo "OVERSIZED: $1 (~${tokens} tokens)"
-  fi
-' _ {} \;
+bash plugins/diagnostics/skills/entropy-scan/scripts/check-skill-size-quick.sh
 ```
 
-Thresholds:
+Approximates tokens as `chars / 4` and flags any SKILL.md over 2000 tokens. Thresholds:
 - Under 2,000 tokens (~8,000 chars): ideal
 - 2,000-5,000 tokens: warn (may lose content after compaction)
 - Over 5,000 tokens (~20,000 chars): flag as oversized (truncated after compaction)
@@ -119,27 +108,15 @@ Every rule in `plugins/behavioral-core/hooks/rules.d/*.txt` (excluding `archive/
 Accepted sources: `postmortem:<id>`, `trace:<session-id-or-slug>`, `ledger:<entry-id>`, `external:<short-reason>`.
 
 ```bash
-for f in plugins/behavioral-core/hooks/rules.d/*.txt; do
-  [ -f "$f" ] || continue
-  first=$(grep -m1 -v '^\s*$' "$f" 2>/dev/null)
-  case "$first" in
-    \#\ origin:*) ;;
-    *) echo "UNPROVENANCED: $f" ;;
-  esac
-done
+bash plugins/diagnostics/skills/entropy-scan/scripts/check-rule-provenance.sh
 ```
 
-**Rationale** (Osmani, 2026 — Agent Harness Engineering): *"Every rule must trace to a specific past failure or external constraint."* Rule bloat accumulates when constraints are brainstormed without being earned by a real failure. Advisory only — do not block.
+Advisory only — do not block. Rationale: Osmani, 2026 (Agent Harness Engineering) — every rule must trace to a specific past failure or external constraint, else rule bloat accumulates. Mark external-policy rules as `external:<reason>` (e.g. `external: tone preference`). Traceability, not gatekeeping.
 
-Authors mark external-policy rules as `external:<reason>` (e.g., `external: tone preference`). The goal is traceability, not gatekeeping.
+### Check 9: Sub-audits
 
-### Check 9a: R.E.S.T. Audit (sub-check)
-
-Invoke `/rest-audit` (this same plugin). Propagate its axis statuses verbatim. This is the outcome-oriented counterpart to the structural checks above — structural drift AND outcome degradation surface in one report.
-
-### Check 9b: CLAUDE.md Structure (sub-check)
-
-Invoke `/claude-md-structure` on `./CLAUDE.md`. Propagate its PRESENT/WEAK/MISSING statuses. Report any section missing or weak.
+- **9a — R.E.S.T.**: invoke `/rest-audit`; propagate its Reliability/Efficiency/Security/Traceability statuses verbatim. Outcome-oriented counterpart to the structural checks above.
+- **9b — CLAUDE.md structure**: invoke `/claude-md-structure` on `./CLAUDE.md`; propagate PRESENT/WEAK/MISSING statuses.
 
 ### Check 10: Tool-Menu Inflation
 
@@ -149,7 +126,7 @@ For each agent definition (`plugins/*/agents/*.md`) and each SKILL.md, count ent
 python3 plugins/diagnostics/skills/entropy-scan/scripts/check-tool-menu.py
 ```
 
-**Rationale** (Osmani, 2026): *"Ten sharp tools beat fifty overlapping ones."* Large tool menus compete for the model's working memory and degrade tool-selection accuracy. Advisory only — some agents legitimately need more tools.
+Advisory only. Rationale: Osmani, 2026 — large tool menus compete for working memory and degrade selection accuracy.
 
 ### Check 11: Sibling Reference Resolution
 
@@ -187,12 +164,9 @@ python3 plugins/diagnostics/skills/entropy-scan/scripts/check-policy-registry.py
 **Status:** {PASS / DRIFT / GAP / {N} <issue>}
 {Per-check details — counts, file lists, mismatch deltas — only when status is non-clean}
 
-### Check 9a: R.E.S.T. Audit
-**Status:** {PASS / WARN / FAIL}
-Reliability / Efficiency / Security / Traceability: {status each}
-
-### Check 9b: CLAUDE.md Structure
-**Status:** {PASS / {N} sections missing or weak}
+### Check 9: Sub-audits
+- 9a R.E.S.T. — Reliability/Efficiency/Security/Traceability statuses
+- 9b CLAUDE.md structure — PRESENT/WEAK/MISSING per section
 
 ### Proposed Fixes
 {For each issue: one-line fix command or description}

@@ -60,23 +60,23 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 
 | Plugin | Purpose | Hooks | Skills |
 |--------|---------|-------|--------|
-| **behavioral-core** | Modular `rules.d/` steering, destructive command blocking, safe-mode layer (gated by `.claude/safe-mode`), scope discipline | 5 | 4 |
-| **context-engine** | Context management: progressive pressure, edit safety, environment bootstrap, compaction recovery, task tracking, failure escalation, safe-mode trigger | 13 | 5 |
-| **long-session** | Long-running sessions: `init.sh` bootstrap, append-only `claude-progress.txt`, `features.json` testable requirements, `surface-progress` SessionStart hook, `/session-resume` briefing. | 1 | 4 |
-| **memory** | Three-tier memory: pointer index → topic files → searchable transcripts, version-aware updates, ledger audit | 0 | 4 |
-| **evaluator** | Static analysis gates (PHP/JS/TS), adversarial review, verification (+features.json execution), reference-fidelity check, test nudge, self-evolution assessment, prediction audit | 7 | 10 |
-| **workflow** | Hook-driven agentic orchestrator: auto-routing, sprint-contract, TDD, /progress-log nudges, self-evolution loop, **/living-spec** (auto-updating spec via after-subagent) | 5 | 10 |
-| **agents** | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries, worktree-team orchestration, directory-ownership + output-schema checks | 2 | 5 |
-| **reference** | Hidden Claude Code features: thinking modes, parallel patterns, CLI piping | 0 | 3 |
-| **traces** | JSONL execution traces, compiled views, failure mining, harness evolution | 5 | 4 |
-| **diagnostics** | `/entropy-scan` + `/validate-marketplace` + `/docs-maintenance` + **`/rest-audit`** (R.E.S.T. outcomes) + **`/claude-md-structure`** (Karpathy 4-section audit) + **`/ssl-audit`** (SSL frontmatter coverage) | 0 | 6 |
-| **caveman** | Always-on compressed output (~65% token savings). Survives compaction. | 2 | 1 |
-| **token-efficiency** | Duplicate read detection, session token audit | 1 | 1 |
-| **research-gate** | Blocks Edit/Write on unread files + exploration depth warnings | 4 | 0 |
-| **policy-gateway** | PreToolUse secrets scan + prompt-injection scan + sensitive-ops audit. Same `permissionDecision:deny` contract as block-destructive. Rules live in `rules.d/` so SEPL can evolve them. | 3 | 1 |
-| **rtk-optimizer** | Auto-installs [rtk-ai/rtk](https://github.com/rtk-ai/rtk) on first session and runs `rtk init -g`. 60-90% token reduction on shell commands. Opt-out: `FORGE_RTK_DISABLED=1`. | 1 | 0 |
-| **code-graph** | Auto-installs [tirth8205/code-review-graph](https://github.com/tirth8205/code-review-graph). Registers a Tree-sitter MCP graph per repo so Claude Code queries structural context instead of re-reading files. Claude Code only. Opt-out: `FORGE_CODE_GRAPH_DISABLED=1`. | 2 | 0 |
-| **themes** | Curated color themes for `/theme`: **Catppuccin Mocha**, **Tokyo Night**, **Nord**. Switch via `/theme`; `Ctrl+E` forks any theme into `~/.claude/themes/` for editing. Pure cosmetic — zero hooks. | 0 | 0 |
+| [**behavioral-core**](plugins/behavioral-core/README.md) | Modular `rules.d/` steering, destructive command blocking, safe-mode layer (gated by `.claude/safe-mode`), scope discipline | 5 | 4 |
+| [**context-engine**](plugins/context-engine/README.md) | Context management: progressive pressure, edit safety, environment bootstrap, compaction recovery, task tracking, failure escalation, safe-mode trigger | 16 | 5 |
+| [**long-session**](plugins/long-session/README.md) | Long-running sessions: `init.sh` bootstrap, append-only `claude-progress.txt`, `features.json` testable requirements, `surface-progress` SessionStart hook, `/session-resume` briefing. | 2 | 4 |
+| [**memory**](plugins/memory/README.md) | Three-tier memory: pointer index → topic files → searchable transcripts, version-aware updates, ledger audit | 0 | 4 |
+| [**evaluator**](plugins/evaluator/README.md) | Static analysis gates (PHP/JS/TS), adversarial review, verification (+features.json execution), reference-fidelity check, test nudge, self-evolution assessment, prediction audit | 7 | 10 |
+| [**workflow**](plugins/workflow/README.md) | Hook-driven agentic orchestrator: auto-routing, sprint-contract, TDD, /progress-log nudges, self-evolution loop, **/living-spec** (auto-updating spec via after-subagent) | 5 | 10 |
+| [**agents**](plugins/agents/README.md) | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries, worktree-team orchestration, directory-ownership + output-schema checks | 3 | 5 |
+| [**reference**](plugins/reference/README.md) | Hidden Claude Code features: thinking modes, parallel patterns, CLI piping | 0 | 3 |
+| [**traces**](plugins/traces/README.md) | JSONL execution traces, compiled views, failure mining, harness evolution | 5 | 4 |
+| [**diagnostics**](plugins/diagnostics/README.md) | `/entropy-scan` + `/validate-marketplace` + `/docs-maintenance` + **`/rest-audit`** (R.E.S.T. outcomes) + **`/claude-md-structure`** (Karpathy 4-section audit) + **`/ssl-audit`** (SSL frontmatter coverage) + `/policies-list` + `/startup-profile` | 0 | 8 |
+| [**caveman**](plugins/caveman/README.md) | Always-on compressed output (~65% token savings). Survives compaction. | 2 | 1 |
+| [**token-efficiency**](plugins/token-efficiency/README.md) | Duplicate read detection, session token audit | 1 | 1 |
+| [**research-gate**](plugins/research-gate/README.md) | Blocks Edit/Write on unread files + exploration depth warnings | 4 | 0 |
+| [**policy-gateway**](plugins/policy-gateway/README.md) | PreToolUse secrets scan + prompt-injection scan + sensitive-ops audit. Same `permissionDecision:deny` contract as block-destructive. Rules live in `rules.d/` so SEPL can evolve them. | 3 | 1 |
+| [**rtk-optimizer**](plugins/rtk-optimizer/README.md) | Auto-installs [rtk-ai/rtk](https://github.com/rtk-ai/rtk) on first session and runs `rtk init -g`. 60-90% token reduction on shell commands. Opt-out: `FORGE_RTK_DISABLED=1`. | 2 | 0 |
+| [**code-graph**](plugins/code-graph/README.md) | Auto-installs [tirth8205/code-review-graph](https://github.com/tirth8205/code-review-graph). Registers a Tree-sitter MCP graph per repo so Claude Code queries structural context instead of re-reading files. Claude Code only. Opt-out: `FORGE_CODE_GRAPH_DISABLED=1`. | 3 | 0 |
+| [**themes**](plugins/themes/README.md) | Curated color themes for `/theme`: **Catppuccin Mocha**, **Tokyo Night**, **Nord**. Switch via `/theme`; `Ctrl+E` forks any theme into `~/.claude/themes/` for editing. Pure cosmetic — zero hooks. | 0 | 0 |
 
 ### Key Skills
 

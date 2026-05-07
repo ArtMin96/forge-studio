@@ -1,7 +1,13 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "memory",
-  "description": "Three-tier memory architecture: pointer index, on-demand topics, searchable transcripts. Version-aware updates snapshot prior topic contents to the lineage ledger.",
+  "description": "Three-tier memory architecture: pointer index, on-demand topics, searchable transcripts. Version-aware updates snapshot prior topic contents to the lineage ledger. Includes /lineage-audit for ledger invariant inspection.",
   "version": "1.2.0",
-  "keywords": ["memory", "persistence", "recall", "versioned", "self-evolution"]
+  "keywords": [
+    "memory",
+    "persistence",
+    "recall",
+    "versioned",
+    "self-evolution"
+  ]
 }

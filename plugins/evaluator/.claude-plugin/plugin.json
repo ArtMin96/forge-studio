@@ -1,7 +1,13 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "evaluator",
-  "description": "Evaluator-optimizer pattern: adversarial review, verification gates (Stop + TaskCompleted), static analysis, postmortems, self-evolution proposal assessment.",
+  "description": "Evaluator-optimizer pattern: adversarial review, verification gates (TaskCompleted), static analysis, postmortems, reference-fidelity check, self-evolution proposal assessment.",
   "version": "1.5.0",
-  "keywords": ["code-review", "quality", "static-analysis", "verification", "self-evolution"]
+  "keywords": [
+    "code-review",
+    "quality",
+    "static-analysis",
+    "verification",
+    "self-evolution"
+  ]
 }

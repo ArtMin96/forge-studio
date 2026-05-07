@@ -117,52 +117,33 @@ python3 plugins/diagnostics/skills/validate-marketplace/scripts/check-bash-synta
 
 ## Output Format
 
+One section per check, then a verdict.
+
 ```markdown
 ## Validate Marketplace Report
 
-### Check 1 — marketplace.json parses
-Status: {OK / FAIL}
-Plugins registered: {N}
-
-### Check 2 — Directory/Registration Equality
-Status: {CLEAN / FAIL}
-Missing marketplace entry: {list}
-Missing plugin directory: {list}
-Source path mismatches: {list}
-
-### Check 3 — SKILL.md Frontmatter
-Status: {CLEAN / {N} failures}
-{list}
-
-### Check 4 — Hook Executability
-Status: {CLEAN / {N} non-executable}
-{list}
-
-### Check 5 — hooks.json Parses
-Status: {CLEAN / {N} failures}
-{list}
-
-### Check 6 — Agent Schema + Skill Preload Coherence
-Status: {CLEAN / {N} failures}
-{list — flags unknown fields, banned fields (hooks/mcpServers/permissionMode), and disabled-skill preloads}
-
-### Check 7 — Skill Size Budget
-Status: {CLEAN / {N} warn / {N} fail}
-Oversized-fail (>5,000 tokens, will be dropped): {list}
-Oversized-warn (>2,000 tokens, truncation risk): {list}
-
-### Check 8 — Plugin Version Sync
-Status: {CLEAN / {N} mismatches}
-{list of (plugin, marketplace_version, plugin_json_version)}
-
-### Check 9 — Bash Syntax
-Status: {CLEAN / {N} failures}
-{list of (path, stderr)}
+### Check N — <title>
+Status: {OK / CLEAN / {N} failures / FAIL}
+{check-specific lines: counts, file lists, deltas — only when non-clean}
 
 ### Verdict
 Overall: {VALID / INVALID}
 {One-line remediation per issue kind}
 ```
+
+Per-check non-clean payloads:
+
+| Check | Payload on failure |
+|---|---|
+| 1 marketplace parse | parser error |
+| 2 registration | `Missing marketplace entry`, `Missing plugin directory`, `Source path mismatches` |
+| 3 frontmatter | failing SKILL.md paths + reason |
+| 4 hook exec | non-executable script paths |
+| 5 hooks.json | parse-error path + line |
+| 6 agents | unknown/banned fields, disabled-skill preloads |
+| 7 size | `Oversized-fail (>5,000 tokens, dropped)`, `Oversized-warn (>2,000 tokens, truncation risk)` |
+| 8 version sync | `(plugin, marketplace_version, plugin_json_version)` |
+| 9 bash syntax | `(path, stderr)` |
 
 ## Rules
 

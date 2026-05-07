@@ -19,15 +19,13 @@ Fan-out and pipeline both run inside one session. Sometimes what you want is N *
 
 ## When to Use
 
-- Two or more streams of work that must not interleave edits (e.g., one agent refactoring `src/api/`, another refactoring `src/ui/`).
-- Long-running parallel research + implementation splits where you don't want either stream blocked on the other's context.
+Concrete cases beyond the frontmatter triggers:
+
+- Two streams that must not interleave edits (e.g. one agent on `src/api/`, another on `src/ui/`).
+- Long-running research + implementation splits where neither should block on the other's context.
 - Code review experiments where multiple agents attack the same problem in isolation for later comparison.
 
-## When Not to Use
-
-- In-session batch work → use `/fan-out`.
-- Linear planner→generator→reviewer flow → use `/dispatch` with the existing pipeline pattern.
-- Tasks that require shared intermediate state → worktrees make coordination harder, not easier.
+Skip for: in-session batch work (use `/fan-out`), linear planner→generator→reviewer (use `/dispatch`), tasks needing shared intermediate state (worktrees hurt coordination there).
 
 ## Protocol
 
@@ -71,36 +69,7 @@ For each role, write `<worktree>/CLAUDE.md` composed of:
 3. A `## Owned Directories` section listing directories the role may modify. Any Edit/Write outside these is out-of-scope.
 4. A `## Coordination` section with the worktree root path so the agent knows where it is.
 
-Template (populated per role):
-
-```markdown
-<repo CLAUDE.md contents>
-
----
-
-## Role: <role>
-
-You are the <role> in a worktree-team. You work in:
-
-    <worktree absolute path>
-
-## Owned Directories
-
-<list from --owned flag or from a role-default table>
-
-Do not modify files outside these directories. If a required change lies outside, STOP and hand off to the role that owns that path.
-
-## Coordination
-
-- This worktree is isolated from sibling worktrees.
-- Siblings exist at: `.claude/worktrees/<other>-<short-sha>`
-- Shared state (if any) lives at `.claude/worktrees/shared/` in the main repo. Writes to shared state must be atomic (append-only or rename-from-tmp).
-- When you finish, commit to a role-named branch (`wt-<role>-<short-sha>`) and report.
-
-## Tools Allowed
-
-<default tool set per role — see table below>
-```
+Template lives at `scripts/role-claude-md.tmpl` — populate `{repo_claude_md}`, `{role}`, `{worktree_abs_path}`, `{owned_paths}`, `{other_role}`, `{short_sha}`, `{tool_set}` per role and write the result to `<worktree>/CLAUDE.md`. Section order is fixed: repo CLAUDE.md → Role → Owned Directories → Coordination → Tools Allowed.
 
 Default tool sets by role:
 
@@ -165,9 +134,7 @@ Roles: <n>
 
 | Role | Worktree | Owned |
 |------|----------|-------|
-| planner   | .claude/worktrees/planner-<sha>   | <paths> |
-| generator | .claude/worktrees/generator-<sha> | <paths> |
-| reviewer  | .claude/worktrees/reviewer-<sha>  | <paths> |
+| <role> | .claude/worktrees/<role>-<sha> | <paths> |
 
 Launch commands:
 <...>
