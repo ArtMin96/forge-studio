@@ -100,6 +100,8 @@ Then append a `assess` entry to `.claude/lineage/ledger.jsonl`:
 {"ts":"<UTC>","operator":"assess","resource":"<slug>","version":"<target>","prev":"<current>","trigger":"proposal:<basename>","evidence":".claude/lineage/verdicts/<basename>.json","actor":"evaluator:/assess-proposal","verdict":"<pass|fail>"}
 ```
 
+For generic criterion-weighted scoring outside the SEPL context, use `/score-rubric`.
+
 ## Do NOT
 
 - Do not modify the proposal artifact. Return a verdict; the author edits.

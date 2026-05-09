@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-17 plugins. 60 skills. 58 hooks. 4 agents. 11 behavioral rules.
+17 plugins. 61 skills. 58 hooks. 4 agents. 11 behavioral rules.
 
 ---
 
@@ -64,7 +64,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | [**context-engine**](plugins/context-engine/README.md) | Context management: progressive pressure, edit safety, environment bootstrap, compaction recovery, task tracking, failure escalation, safe-mode trigger | 16 | 5 |
 | [**long-session**](plugins/long-session/README.md) | Long-running sessions: `init.sh` bootstrap, append-only `claude-progress.txt`, `features.json` testable requirements, `surface-progress` SessionStart hook, `/session-resume` briefing. | 2 | 4 |
 | [**memory**](plugins/memory/README.md) | Three-tier memory: pointer index → topic files → searchable transcripts, version-aware updates, ledger audit | 0 | 4 |
-| [**evaluator**](plugins/evaluator/README.md) | Static analysis gates (PHP/JS/TS), adversarial review, verification (+features.json execution), reference-fidelity check, test nudge, self-evolution assessment, prediction audit | 7 | 10 |
+| [**evaluator**](plugins/evaluator/README.md) | Static analysis gates (PHP/JS/TS), adversarial review, verification (+features.json execution), reference-fidelity check, test nudge, self-evolution assessment, prediction audit, rubric scoring | 7 | 11 |
 | [**workflow**](plugins/workflow/README.md) | Hook-driven agentic orchestrator: auto-routing, sprint-contract, TDD, /progress-log nudges, self-evolution loop, **/living-spec** (auto-updating spec via after-subagent) | 5 | 10 |
 | [**agents**](plugins/agents/README.md) | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries, worktree-team orchestration, directory-ownership + output-schema checks | 3 | 5 |
 | [**reference**](plugins/reference/README.md) | Hidden Claude Code features: thinking modes, parallel patterns, CLI piping | 0 | 3 |
@@ -114,6 +114,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | `/rollback` | workflow | Reverse a commit; restore prior snapshot; logged append-only |
 | `/reflect` | workflow | Three-line Reflect-Memorize insight after TDD loop → memory |
 | `/router-tune` | workflow | Analyze router miss-fires, emit threshold/regex proposals |
+| `/score-rubric` | evaluator | Aggregate weighted criterion scores into a single rubric result; outputs match `result.schema.json` |
 
 ### Agents
 

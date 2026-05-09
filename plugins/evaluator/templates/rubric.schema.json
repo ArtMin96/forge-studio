@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "rubric.schema.json",
+  "title": "Rubric",
+  "description": "A scoring rubric definition. Sum of `criteria[].weight` must equal 1.0 ± 1e-6. Enforced by score.py at runtime, not by JSON Schema (which has no native sum constraint).",
+  "type": "object",
+  "required": ["name", "version", "criteria"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "weight"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable per-criterion identifier."
+          },
+          "type": {
+            "type": "string",
+            "enum": ["scored", "binary", "reference-based"]
+          },
+          "scale": {
+            "type": "object",
+            "required": ["min", "max"],
+            "additionalProperties": false,
+            "properties": {
+              "min": { "type": "number" },
+              "max": { "type": "number" }
+            },
+            "description": "Required when type is 'scored'. Defines the raw score range."
+          },
+          "weight": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

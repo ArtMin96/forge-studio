@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "variant.schema.json",
+  "title": "Variant",
+  "description": "An A/B variant declaration linking a skill version to the rubric it is scored against.",
+  "type": "object",
+  "required": ["skillId", "label", "rubricId"],
+  "additionalProperties": false,
+  "properties": {
+    "skillId": {
+      "type": "string",
+      "description": "The skill being tested (e.g. 'evaluate-summary')."
+    },
+    "label": {
+      "type": "string",
+      "enum": ["control", "treatment"]
+    },
+    "rubricId": {
+      "type": "string",
+      "description": "Which rubric this variant is scored against."
+    }
+  }
+}

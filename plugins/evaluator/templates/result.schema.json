@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "result.schema.json",
+  "title": "ScoringResult",
+  "description": "A rubric scoring result. When variantLabel is null, this is a single-run result and the four A/B fields (winner, delta, confidence, pValue) are also null. When comparing two variants, a comparator populates all four A/B fields.",
+  "type": "object",
+  "required": ["rubricId", "rubricVersion", "score", "perCriterion", "variantLabel", "winner", "delta", "confidence", "pValue"],
+  "additionalProperties": false,
+  "properties": {
+    "rubricId": {
+      "type": "string"
+    },
+    "rubricVersion": {
+      "type": "string"
+    },
+    "score": {
+      "type": "number",
+      "description": "Weighted aggregate score in [0, 1]."
+    },
+    "perCriterion": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "raw", "weighted"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "raw": { "type": "number" },
+          "weighted": { "type": "number" },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "variantLabel": {
+      "type": ["string", "null"],
+      "enum": ["control", "treatment", null],
+      "description": "Null for single-run results. Set to 'control' or 'treatment' in A/B comparisons."
+    },
+    "winner": {
+      "type": ["string", "null"],
+      "description": "Null for single-run results. Set by a comparator when comparing two variants."
+    },
+    "delta": {
+      "type": ["number", "null"],
+      "description": "Score difference (treatment − control). Null for single-run results."
+    },
+    "confidence": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Statistical confidence in [0, 1]. Null for single-run results."
+    },
+    "pValue": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1,
+      "description": "p-value in [0, 1]. Null for single-run results."
+    }
+  }
+}
