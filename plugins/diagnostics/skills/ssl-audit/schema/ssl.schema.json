@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://forge-studio/schemas/ssl/0.1-draft",
+  "version": "0.1-draft",
+  "title": "SSL Overlay",
+  "description": "Reference schema for the Scheduling-Structural-Logical overlay (arXiv:2604.24026). Three optional fields annotate a SKILL.md frontmatter with preconditions, decomposition, and success criteria. This schema is NOT used to fail validation today — it is a reference document for validate.py and future tooling. Source-grounding rule: a field that is present must carry a real value. A value equal to 'null' means explicitly unknown (documented absence). A field that is absent means not yet annotated. A value matching TODO, FIXME, or angle-bracket placeholder (e.g. '<...>') is ungrounded and flagged as WARN by validate.py.",
+  "type": "object",
+  "properties": {
+    "scheduling": {
+      "description": "Invocation-level attributes: preconditions and triggers that must hold before the skill is selected.",
+      "type": "string"
+    },
+    "structural": {
+      "description": "Execution phases. Accepts a list of plain strings (simple form) or a list of typed-step objects (advanced form). Both shapes are valid during the 0.1-draft transition.",
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "$ref": "#/$defs/typed-step"
+          }
+        ]
+      }
+    },
+    "logical": {
+      "description": "Atomic success criterion: a measurable postcondition that defines 'done' for this skill.",
+      "type": "string"
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "typed-step": {
+      "description": "A single typed execution step within structural. The step label is required; actions, resources, and effects draw from closed draft enums (mismatch is INFO, not WARN, during 0.1-draft).",
+      "type": "object",
+      "required": ["step"],
+      "properties": {
+        "step": {
+          "type": "string",
+          "description": "Human-readable label for this phase."
+        },
+        "actions": {
+          "type": "array",
+          "description": "Operations performed during this step.",
+          "items": {
+            "$ref": "#/$defs/action-enum"
+          }
+        },
+        "resources": {
+          "type": "array",
+          "description": "Artifact types touched during this step.",
+          "items": {
+            "$ref": "#/$defs/resource-enum"
+          }
+        },
+        "effects": {
+          "type": "array",
+          "description": "Observable outcomes produced by this step.",
+          "items": {
+            "$ref": "#/$defs/effect-enum"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "action-enum": {
+      "description": "Draft closed vocabulary for step actions. Mismatch against current free-text values is informational only during 0.1-draft.",
+      "type": "string",
+      "enum": [
+        "read",
+        "write",
+        "edit",
+        "scan",
+        "validate",
+        "report",
+        "audit",
+        "score",
+        "parse",
+        "render",
+        "compare"
+      ]
+    },
+    "resource-enum": {
+      "description": "Draft closed vocabulary for touched artifact types.",
+      "type": "string",
+      "enum": [
+        "file",
+        "frontmatter",
+        "skill",
+        "plugin",
+        "hook",
+        "ledger",
+        "plan",
+        "memory",
+        "marketplace"
+      ]
+    },
+    "effect-enum": {
+      "description": "Draft closed vocabulary for observable outcomes.",
+      "type": "string",
+      "enum": [
+        "informational",
+        "advisory",
+        "blocking",
+        "mutation",
+        "audit-trail",
+        "side-effect-free"
+      ]
+    }
+  }
+}

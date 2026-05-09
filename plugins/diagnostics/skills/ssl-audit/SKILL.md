@@ -26,11 +26,19 @@ No arguments. The helper script walks `plugins/*/skills/*/SKILL.md` from the rep
 
 ## Process
 
+Two tools are available. Use `audit.sh` for a quick presence count; use `validate.py` for typed shape and source-grounding checks.
+
+**Presence count (lightweight):**
 ```bash
 bash plugins/diagnostics/skills/ssl-audit/scripts/audit.sh
 ```
 
-Output is a markdown report on stdout. Pipe to a file if you want to keep it.
+**Typed validator (deeper):**
+```bash
+python3 plugins/diagnostics/skills/ssl-audit/scripts/validate.py [root]
+```
+
+`root` defaults to `.`. Both tools write a markdown report to stdout.
 
 ## Output Format
 
@@ -47,7 +55,13 @@ Missing logical (no measurable success criterion): D
 - ...
 ```
 
-A non-zero "Missing logical" count is not a failure — most skills have not yet been retrofitted. The report is informational.
+A non-zero "Missing logical" count is not a failure — most skills have not yet been retrofitted. Both `audit.sh` and `validate.py` are informational; neither causes a non-zero exit on findings.
+
+## Schema
+
+The typed vocabulary is defined in `plugins/diagnostics/skills/ssl-audit/schema/ssl.schema.json` (JSON Schema draft 2020-12, version `0.1-draft`).
+
+The `0.1-draft` version tag signals that closed-vocabulary enums (`actions`, `resources`, `effects`) are seeds, not enforced contracts. Mismatches against them are emitted as `INFO`, not `WARN`. Future versions may tighten this. Consumers should check `version` before hardening against the enums.
 
 ## Execution Checklist
 
