@@ -1,0 +1,17 @@
+{
+  "skills": ["ssl-audit"],
+  "query": "Audit SSL frontmatter coverage on a tree where one skill has no SSL fields and emit informational findings.",
+  "files": [
+    {
+      "path": "plugins/x/skills/y/SKILL.md",
+      "content": "---\nname: y\ndescription: example skill with no SSL fields\n---\nbody\n"
+    }
+  ],
+  "expected_behavior": [
+    "validate.py exits 0 (informational, never failing)",
+    "the report counts 1 skill scanned",
+    "the report shows 0 skills with logical field",
+    "the report shows 1 skill missing logical field",
+    "the report emits no WARN/INFO findings (the skill omits SSL entirely; placeholders are absent)"
+  ]
+}
