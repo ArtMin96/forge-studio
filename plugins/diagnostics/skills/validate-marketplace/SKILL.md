@@ -24,7 +24,7 @@ Mechanical validation of marketplace integrity. Fast, deterministic, scriptable.
 
 ## Instructions
 
-Run the eight checks below. Stop at the first check that returns `FAIL` if time-constrained; otherwise run all eight and produce a structured report.
+Run the checks below. Stop at the first check that returns `FAIL` if time-constrained; otherwise run all and produce a structured report.
 
 ### Check 1 — `marketplace.json` Parses
 
@@ -113,6 +113,30 @@ Every shell script under `plugins/*/hooks/`, `plugins/*/skills/*/scripts/`, and 
 
 ```bash
 python3 plugins/diagnostics/skills/validate-marketplace/scripts/check-bash-syntax.py
+```
+
+### Check 10 — Registry Budget
+
+The `<available_skills>` block injected into the LLM context at runtime has a 15 000-byte ceiling. Only auto-loadable skills (those without `disable-model-invocation: true`) occupy this block; skills with that flag appear only in the user-facing `/` menu and are excluded from the count. This check sums `description+when_to_use` UTF-8 bytes across auto-loadable skills only.
+
+```bash
+python3 plugins/diagnostics/skills/validate-marketplace/scripts/check-registry-budget.py
+```
+
+### Check 11 — Body Line Cap
+
+Every SKILL.md body (content after the closing `---` of frontmatter) must be under 500 lines. Longer bodies saturate the context window before the skill has finished reasoning (Source 5: Anthropic best-practices, 2026).
+
+```bash
+python3 plugins/diagnostics/skills/validate-marketplace/scripts/check-body-lines.py
+```
+
+### Check 12 — Name Shape
+
+The `name:` field in every SKILL.md frontmatter must match `^[a-z0-9]+(-[a-z0-9]+)*$`: lowercase alphanumeric segments joined by single hyphens, no underscores, no consecutive hyphens, no leading/trailing hyphen.
+
+```bash
+python3 plugins/diagnostics/skills/validate-marketplace/scripts/check-frontmatter.py
 ```
 
 ## Output Format

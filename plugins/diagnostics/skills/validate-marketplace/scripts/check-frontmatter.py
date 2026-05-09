@@ -2,7 +2,16 @@
 """Validates SKILL.md frontmatter against the 2026 official schema."""
 import re
 import glob
+import sys
 import yaml
+
+# Enforced name shape: lowercase, alphanumeric segments joined by single hyphens.
+# Rationale (Source 3 — agentskills.io spec): names are used as CLI slugs and
+# XML tag attributes; uppercase, underscores, and consecutive hyphens break
+# both usages. Gerund preference (e.g. "checking" over "check") is a soft style
+# hint only — not enforced here because existing forge-studio names like
+# "verify" and "dispatch" wouldn't conform.
+NAME_RE = re.compile(r'^[a-z0-9]+(-[a-z0-9]+)*$')
 
 ALLOWED = {
     'name', 'description', 'when_to_use', 'argument-hint', 'arguments',
@@ -31,6 +40,9 @@ for path in sorted(glob.glob('plugins/*/skills/*/SKILL.md')):
     if unknown:
         failures.append((path, f'unknown keys: {", ".join(unknown)}'))
         continue
+    name_val = fm.get('name') or ''
+    if name_val and not NAME_RE.match(name_val):
+        failures.append((path, f"name '{name_val}' violates regex (lowercase, hyphenated, no consecutive '--', no leading/trailing hyphen, no underscores, no uppercase)"))
     combined = (fm.get('description') or '') + ' ' + (fm.get('when_to_use') or '')
     if len(combined) > 1536:
         failures.append((path, f'description+when_to_use={len(combined)} chars (>1536 cap)'))
@@ -38,3 +50,5 @@ for path in sorted(glob.glob('plugins/*/skills/*/SKILL.md')):
         failures.append((path, 'context: fork without agent (defaults to general-purpose)'))
 
 print('FRONTMATTER_FAILURES:', failures if failures else 'none')
+if failures:
+    sys.exit(1)
