@@ -104,7 +104,7 @@ An agent asked to "investigate the auth system" may read 20 files when 3 would a
 | Duplicate reads | `token-efficiency` | PreToolUse warning on repeated file reads |
 | Large tool output | `token-efficiency` | PostToolUse warning when output exceeds threshold |
 | Context pressure | `context-engine` | 5-stage progressive warnings (50% → 92%) |
-| CLAUDE.md bloat | `context-engine` | `/lean-claude-md`, `/audit-context` skills |
+| CLAUDE.md bloat | `context-engine` | `/lean-md`, `/audit-context` skills |
 | Subagent overhead | `agents` | `/lean-agents` skill with model and scope guidance |
 | Behavioral drift in long sessions | `behavioral-core` | Hook re-injection every message prevents compounding waste from off-track behavior |
 | Compaction loss | `context-engine` | Pre/PostCompact hooks preserve and restore critical state |

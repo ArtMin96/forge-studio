@@ -116,7 +116,7 @@ Advisory only — do not block. Rationale: Osmani, 2026 (Agent Harness Engineeri
 ### Check 9: Sub-audits
 
 - **9a — R.E.S.T.**: invoke `/rest-audit`; propagate its Reliability/Efficiency/Security/Traceability statuses verbatim. Outcome-oriented counterpart to the structural checks above.
-- **9b — CLAUDE.md structure**: invoke `/claude-md-structure` on `./CLAUDE.md`; propagate PRESENT/WEAK/MISSING statuses.
+- **9b — CLAUDE.md structure**: invoke `/md-structure` on `./CLAUDE.md`; propagate PRESENT/WEAK/MISSING statuses.
 
 ### Check 10: Tool-Menu Inflation
 

@@ -1,6 +1,6 @@
 ---
 name: token-pipeline
-description: Run the 5-stage Token Transformation Pipeline (TRAE §5.2.2) over the current session state — Collection, Ranking, Compression, Budgeting, Assembly. Emits a concrete next-action recommendation (/compact, /lean-claude-md, or /progress-log + fresh session) instead of a generic warning.
+description: Run the 5-stage Token Transformation Pipeline (TRAE §5.2.2) over the current session state — Collection, Ranking, Compression, Budgeting, Assembly. Emits a concrete next-action recommendation (/compact, /lean-md, or /progress-log + fresh session) instead of a generic warning.
 when_to_use: Fires automatically via track-context-pressure at ~65% pressure; invoke manually any time context feels heavy or auto-compact looks imminent. Do NOT use to run a holistic context audit before work starts — that's `/audit-context`; this skill is the in-flight pressure-relief decision.
 disable-model-invocation: true
 allowed-tools:
@@ -51,7 +51,7 @@ Flag low-score + high-size entries as "Lost in the Middle" candidates.
 
 For each source with score < 6 (low recency + low relevance):
 
-- CLAUDE.md too long? → recommend `/lean-claude-md`
+- CLAUDE.md too long? → recommend `/lean-md`
 - Handoff/progress too old? → recommend appending a fresh `/progress-log` + `/compact`
 - Plan has stale sections? → recommend trimming the plan
 - Memory bloat? → recommend `/memory-index` (memory plugin)
@@ -73,7 +73,7 @@ Suggest a per-category cap (tokens):
 
 Emit ONE concrete recommendation, chosen by highest expected payoff:
 
-- If CLAUDE.md > cap → `/lean-claude-md`
+- If CLAUDE.md > cap → `/lean-md`
 - If no fresh progress entry AND commits made → `/progress-log` + `/compact`
 - If memory has >30 topics and many old → `/memory-index` audit
 - If plan + spec + features all fresh → `/compact` with preservation instructions
@@ -85,15 +85,15 @@ Print the recommendation in a boxed line so it's hard to miss.
 
 - **Triggered by:** `plugins/context-engine/hooks/track-context-pressure.sh` at P2 / S2 thresholds (≈65% pressure / ~15 exchanges).
 - **Reads:** CLAUDE.md, MCP log, memory index, `.claude/plans/`, `.claude/spec.md`, `.claude/features.json`, `claude-progress.txt`.
-- **Delegates to (recommended next actions):** `/compact`, `/lean-claude-md`, `/progress-log`, `/memory-index`.
+- **Delegates to (recommended next actions):** `/compact`, `/lean-md`, `/progress-log`, `/memory-index`.
 - **Feeds:** `/rest-audit` Efficiency axis consumes this skill's recommendations.
 
 ## Failure Modes
 
-- No .claude/ artifacts → still run; recommendation will lean toward `/lean-claude-md` if CLAUDE.md is the dominant load.
+- No .claude/ artifacts → still run; recommendation will lean toward `/lean-md` if CLAUDE.md is the dominant load.
 - `jq` unavailable → skip features.json stage; note in output.
 
 ## Do NOT
 
-- Do not auto-run `/compact` or `/lean-claude-md`. The user should choose; this skill is advisory.
+- Do not auto-run `/compact` or `/lean-md`. The user should choose; this skill is advisory.
 - Do not print CLAUDE.md contents or plan contents — just sizes and headings.

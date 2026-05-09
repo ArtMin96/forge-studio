@@ -34,8 +34,8 @@ Six `PostToolUse` hooks cover the most common token sinks (large file reads, too
 |---|---|
 | `/audit-context` | Measure CLAUDE.md size, system reminder weight, MCP cost, top per-skill description offenders |
 | `/checkpoint` | Compare recent work against the original task — list scope creep + bloat |
-| `/lean-claude-md` | Trim CLAUDE.md using the every-line-must-earn-its-place principle |
-| `/token-pipeline` | 5-stage Token Transformation pass — emits a concrete next action (`/compact`, `/lean-claude-md`, fresh session) |
+| `/lean-md` | Trim CLAUDE.md using the every-line-must-earn-its-place principle |
+| `/token-pipeline` | 5-stage Token Transformation pass — emits a concrete next action (`/compact`, `/lean-md`, fresh session) |
 | `/context-tricks` | Reference card — guided compaction, partial compaction, side-question dispatch, checkpointing |
 
 ## Hooks

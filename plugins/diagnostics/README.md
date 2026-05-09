@@ -26,7 +26,7 @@ Each skill is a self-contained audit. They run on demand, read everything, write
 | `/policies-list` | Print every enforcement point — id, verdict, plugin, hook, severity — grouped by verdict |
 | `/rest-audit` | R.E.S.T. cross-cut — Reliability, Efficiency, Security, Traceability. Single PASS/WARN/FAIL table |
 | `/ssl-audit` | SKILL.md SSL overlay (scheduling/structural/logical) — flag skills missing measurable success criteria |
-| `/claude-md-structure` | Karpathy 4-section audit on a CLAUDE.md (Think Before Coding · Simplicity First · Surgical Changes · Goal-Driven Execution) |
+| `/md-structure` | Karpathy 4-section audit on a CLAUDE.md (Think Before Coding · Simplicity First · Surgical Changes · Goal-Driven Execution) |
 | `/docs-maintenance` | Documentation freshness, link validation, image checks, style consistency across all `*.md` / `*.mdx` |
 | `/startup-profile` | Per-hook SessionStart latency + cold-vs-warm split |
 

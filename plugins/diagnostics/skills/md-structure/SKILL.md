@@ -1,7 +1,7 @@
 ---
-name: claude-md-structure
-description: Audit or scaffold a CLAUDE.md against the Karpathy 4-section structure (Think Before Coding · Simplicity First · Surgical Changes · Goal-Driven Execution). Companion to /lean-claude-md — structure audit, not size trim.
-when_to_use: Reach for this when authoring a fresh CLAUDE.md, when reviewing one against the four Karpathy sections, or when `/entropy-scan` calls in for a structure sub-check. Do NOT use to delete or compress lines — that's `/lean-claude-md`; this skill answers "is the architecture right?", not "is it too big?".
+name: md-structure
+description: Audit or scaffold a CLAUDE.md against the Karpathy 4-section structure (Think Before Coding · Simplicity First · Surgical Changes · Goal-Driven Execution). Companion to /lean-md — structure audit, not size trim.
+when_to_use: Reach for this when authoring a fresh CLAUDE.md, when reviewing one against the four Karpathy sections, or when `/entropy-scan` calls in for a structure sub-check. Do NOT use to delete or compress lines — that's `/lean-md`; this skill answers "is the architecture right?", not "is it too big?".
 disable-model-invocation: true
 argument-hint: [path-to-claude-md]
 allowed-tools:
@@ -11,9 +11,9 @@ allowed-tools:
 logical: report shows PRESENT / WEAK / MISSING for each of the 4 Karpathy sections with line numbers
 ---
 
-# /claude-md-structure — 4-Section Karpathy Audit
+# /md-structure — 4-Section Karpathy Audit
 
-Audits (or scaffolds) CLAUDE.md against the four sections Karpathy's failure-mode analysis maps to. `/lean-claude-md` handles *how much*; this skill handles *how organized*. Run both.
+Audits (or scaffolds) CLAUDE.md against the four sections Karpathy's failure-mode analysis maps to. `/lean-md` handles *how much*; this skill handles *how organized*. Run both.
 
 ## The Four Sections
 
@@ -46,7 +46,7 @@ Audits (or scaffolds) CLAUDE.md against the four sections Karpathy's failure-mod
      - <what's weak and why, file:line>
      - ...
 
-   Next: run /lean-claude-md to trim, or accept this structure as-is.
+   Next: run /lean-md to trim, or accept this structure as-is.
    ```
 
    `WEAK` = heading present but rule is vague (e.g. "be careful" without actionable guidance).
@@ -76,7 +76,7 @@ Audits (or scaffolds) CLAUDE.md against the four sections Karpathy's failure-mod
 
 ## Integration
 
-- **Partner skill:** `/lean-claude-md` (context-engine) — trims; this skill structures. Run this first to set sections, then trim.
+- **Partner skill:** `/lean-md` (context-engine) — trims; this skill structures. Run this first to set sections, then trim.
 - **Runtime counterpart:** `/rules-audit` (behavioral-core) — audits compliance while the session runs; good structure (this skill) makes `/rules-audit` more effective.
 - **Meta-check:** `/entropy-scan` (diagnostics) invokes this as a sub-check — weak CLAUDE.md surfaces as a drift signal.
 - No ledger writes (read-only audit). Ledger writes happen only when a scaffold is applied, via follow-up `/commit-proposal` if the user chooses.

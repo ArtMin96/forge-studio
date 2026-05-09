@@ -69,7 +69,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | [**agents**](plugins/agents/README.md) | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries, worktree-team orchestration, directory-ownership + output-schema checks | 3 | 5 |
 | [**reference**](plugins/reference/README.md) | Hidden Claude Code features: thinking modes, parallel patterns, CLI piping | 0 | 3 |
 | [**traces**](plugins/traces/README.md) | JSONL execution traces, compiled views, failure mining, harness evolution | 5 | 4 |
-| [**diagnostics**](plugins/diagnostics/README.md) | `/entropy-scan` + `/validate-marketplace` + `/docs-maintenance` + **`/rest-audit`** (R.E.S.T. outcomes) + **`/claude-md-structure`** (Karpathy 4-section audit) + **`/ssl-audit`** (SSL frontmatter coverage) + `/policies-list` + `/startup-profile` | 0 | 8 |
+| [**diagnostics**](plugins/diagnostics/README.md) | `/entropy-scan` + `/validate-marketplace` + `/docs-maintenance` + **`/rest-audit`** (R.E.S.T. outcomes) + **`/md-structure`** (Karpathy 4-section audit) + **`/ssl-audit`** (SSL frontmatter coverage) + `/policies-list` + `/startup-profile` | 0 | 8 |
 | [**caveman**](plugins/caveman/README.md) | Always-on compressed output (~65% token savings). Survives compaction. | 2 | 1 |
 | [**token-efficiency**](plugins/token-efficiency/README.md) | Duplicate read detection, session token audit | 1 | 1 |
 | [**research-gate**](plugins/research-gate/README.md) | Blocks Edit/Write on unread files + exploration depth warnings | 4 | 0 |
@@ -95,7 +95,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | `/living-spec` | workflow | Initialize `.claude/spec.md` from the plan; after-subagent appends deltas per phase |
 | `/token-pipeline` | context-engine | 5-stage Collection→Ranking→Compression→Budgeting→Assembly report with a concrete next-action recommendation |
 | `/rest-audit` | diagnostics | R.E.S.T. outcomes audit (Reliability · Efficiency · Security · Traceability) |
-| `/claude-md-structure` | diagnostics | Audit/scaffold CLAUDE.md against Karpathy's 4-section template |
+| `/md-structure` | diagnostics | Audit/scaffold CLAUDE.md against Karpathy's 4-section template |
 | `/safe-mode <on\|off\|status>` | behavioral-core | Toggle `.claude/safe-mode` — block mutations after the consecutive-failure threshold |
 | `/policy-audit` | policy-gateway | Report secret/injection blocks from ledger + live repo scan |
 | `/dispatch` | agents | Analyze task, recommend single-agent vs fan-out vs pipeline |
