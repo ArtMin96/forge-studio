@@ -51,6 +51,11 @@ context: fork                          # optional, runs in isolated subagent
 allowed-tools:                         # optional, capability isolation
   - Read
   - Bash
+compatibility: "requires: bash>=4"     # optional, environment requirements (≤500 chars)
+license: MIT                           # optional, license name or path to LICENSE file
+metadata:                              # optional, vendor extension map
+  author: example
+mode: interactive                      # optional, mode command marker; values per-skill
 # SSL overlay (optional, additive — see arXiv:2604.24026):
 scheduling: <one-liner preconditions / triggers>          # defaults to when_to_use
 structural:                                                # decomposition into major steps

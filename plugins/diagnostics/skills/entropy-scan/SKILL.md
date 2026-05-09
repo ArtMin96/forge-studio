@@ -53,7 +53,7 @@ For each SKILL.md found via `find plugins -name "SKILL.md"`:
 - Verify `description:` field exists.
 - If `effort:` is set, value must be `low|medium|high|xhigh|max`.
 - If `context: fork`, an `agent:` field is strongly recommended.
-- Flag unknown frontmatter keys. Authoritative list: `name, description, when_to_use, argument-hint, arguments, disable-model-invocation, user-invocable, allowed-tools, model, effort, context, agent, hooks, paths, shell`.
+- Flag unknown frontmatter keys. Authoritative list: `name, description, when_to_use, argument-hint, arguments, disable-model-invocation, user-invocable, allowed-tools, model, effort, context, agent, hooks, paths, shell, scheduling, structural, logical, compatibility, license, metadata, mode`.
 - Flag any agent whose `skills:` preload list references a skill with `disable-model-invocation: true` (silently skipped per official docs).
 
 ### Check 4: Hook Script Executability

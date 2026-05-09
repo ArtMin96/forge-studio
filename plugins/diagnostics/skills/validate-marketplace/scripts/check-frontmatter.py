@@ -9,6 +9,7 @@ ALLOWED = {
     'disable-model-invocation', 'user-invocable', 'allowed-tools', 'model',
     'effort', 'context', 'agent', 'hooks', 'paths', 'shell',
     'scheduling', 'structural', 'logical',
+    'compatibility', 'license', 'metadata', 'mode',
 }
 failures = []
 

@@ -82,6 +82,10 @@ disable-model-invocation: true # Required for Forge Studio. Zero cost until invo
 | `scheduling` | No | SSL overlay (arXiv:2604.24026). One-liner preconditions / triggers. Defaults to `when_to_use`. Audited by `/ssl-audit`. |
 | `structural` | No | SSL overlay. Bullet list decomposing the skill into major steps. Absent by default. |
 | `logical` | No | SSL overlay. Postcondition / measurable success criterion. `/ssl-audit` flags skills missing this field. |
+| `compatibility` | No | Environment requirements (system packages, network, product). ≤500 chars. Most skills don't need this. |
+| `license` | No | License name or path to a bundled LICENSE file. |
+| `metadata` | No | Free-form string→string map for vendor extensions (e.g. `version`, `author`). |
+| `mode` | No | Marks the skill as a mode command. String; values defined per-skill. |
 
 **Compaction survival**: Invoked skills survive compaction with first 5,000 tokens per skill. Shared budget of 25,000 tokens across all invoked skills. Most recently invoked skills get priority; older skills may be dropped.
 
