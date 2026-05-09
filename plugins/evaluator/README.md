@@ -38,6 +38,8 @@ The forked `adversarial-reviewer` agent runs `/assess-proposal` and `/challenge`
 | `/prediction-audit` | Join SEPL proposal predictions against post-commit traces. Reports per-resource error |
 | `/verify-refs` | Cross-check claimed file paths, function names, URLs against the actual repo. Catches hallucinated references |
 | `/gate-report` | Single consolidated view of every quality warning hooks raised this session |
+| `/score-rubric` | Generic rubric aggregator. Reads a rubric JSON + per-criterion scores, validates weight sum (1.0 ± 1e-6), emits a result conforming to `templates/result.schema.json` |
+| `/run-evals` | Structural validator for per-skill `evals/<case>.json` files (`{skills, query, files, expected_behavior}`). Reports shape conformance + a checklist of declared expectations |
 
 ## Hooks
 

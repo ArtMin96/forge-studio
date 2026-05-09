@@ -241,6 +241,18 @@ Skills should stay under 5,000 tokens (~20,000 chars) to survive compaction inta
 
 **Validation**: `/entropy-scan` should flag SKILL.md files exceeding ~8,000 characters.
 
+## Invariant: SKILL.md Registration Hygiene
+
+Three rules apply to every SKILL.md beyond the size budget above:
+
+1. **Registry budget** — The runtime `<available_skills>` block has a 15,000-byte ceiling. Sum of `description + when_to_use` UTF-8 bytes across **auto-loadable** skills (those without `disable-model-invocation: true`) must stay under that cap. Skills with `disable-model-invocation: true` are excluded — they appear only in the user-facing `/` menu, never in the LLM context.
+2. **Body line cap** — SKILL.md body (content after the closing `---` of frontmatter) must stay under 500 lines.
+3. **Name shape** — `name:` must match `^[a-z0-9]+(-[a-z0-9]+)*$`: lowercase alphanumeric segments joined by single hyphens; no underscores, no consecutive hyphens, no leading/trailing hyphen.
+
+**Rationale**: agentskills.io spec (name regex), Hanchung's *Claude Agent Skills: A First Principles Deep Dive* (15,000-byte registry), Anthropic skill-authoring best-practices (<500-line body).
+
+**Validation**: `/validate-marketplace` runs `check-registry-budget.py`, `check-body-lines.py`, and `check-frontmatter.py` (which also enforces the name regex).
+
 ## Invariant: SessionStart Latency Budget
 
 Every plugin's SessionStart hooks must collectively respect:
