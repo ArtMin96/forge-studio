@@ -56,7 +56,7 @@ banner() {
   printf "\n"
   printf "  %s%sForge Studio%s   %sharness marketplace for Claude Code%s\n" \
     "$C_BOLD" "$C_CYAN" "$C_RESET" "$C_DIM" "$C_RESET"
-  printf "  %s17 plugins, 58 skills, 56 hooks%s\n\n" "$C_DIM" "$C_RESET"
+  printf "  %s17 plugins, 62 skills, 58 hooks%s\n\n" "$C_DIM" "$C_RESET"
 }
 
 section() {
