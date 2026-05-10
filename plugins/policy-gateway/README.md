@@ -36,6 +36,7 @@ A `deny` blocks the tool call. A `warn` lets it through but logs to the ledger.
 | `PreToolUse` (`Edit\|Write`) | scan-secrets | Block on detected secret in input |
 | `PreToolUse` (`Bash\|Edit\|Write`) | scan-injection | Block on prompt-injection markers |
 | `PostToolUse` (`Edit\|Write`) | audit-sensitive-ops | Log sensitive-op outcomes to the ledger |
+| `PostToolUse` (`Edit\|Write`) | suggest-harden | Nudge `/challenge` when the edited path matches security-sensitive globs (`auth/`, `*.sql`, `crypto/`, HTTP handlers, `session`/`token`/`password` files). Prints a one-line suggestion; exit 0 always, never blocks. |
 
 ## Disable
 

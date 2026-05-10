@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-18 plugins. 67 skills. 58 hooks. 4 agents. 11 behavioral rules.
+18 plugins. 67 skills. 59 hooks. 4 agents. 11 behavioral rules.
 
 ---
 
@@ -76,7 +76,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | [**caveman**](plugins/caveman/README.md) | Always-on compressed output (~65% token savings). Survives compaction. | 2 | 1 |
 | [**token-efficiency**](plugins/token-efficiency/README.md) | Duplicate read detection, session token audit | 1 | 1 |
 | [**research-gate**](plugins/research-gate/README.md) | Blocks Edit/Write on unread files + exploration depth warnings | 4 | 0 |
-| [**policy-gateway**](plugins/policy-gateway/README.md) | PreToolUse secrets scan + prompt-injection scan + sensitive-ops audit. Same `permissionDecision:deny` contract as block-destructive. Rules live in `rules.d/` so SEPL can evolve them. | 3 | 1 |
+| [**policy-gateway**](plugins/policy-gateway/README.md) | PreToolUse secrets scan + prompt-injection scan + sensitive-ops audit. Same `permissionDecision:deny` contract as block-destructive. Rules live in `rules.d/` so SEPL can evolve them. | 4 | 1 |
 | [**rtk-optimizer**](plugins/rtk-optimizer/README.md) | Auto-installs [rtk-ai/rtk](https://github.com/rtk-ai/rtk) on first session and runs `rtk init -g`. 60-90% token reduction on shell commands. Opt-out: `FORGE_RTK_DISABLED=1`. | 2 | 0 |
 | [**code-graph**](plugins/code-graph/README.md) | Auto-installs [tirth8205/code-review-graph](https://github.com/tirth8205/code-review-graph). Registers a Tree-sitter MCP graph per repo so Claude Code queries structural context instead of re-reading files. Claude Code only. Opt-out: `FORGE_CODE_GRAPH_DISABLED=1`. | 3 | 0 |
 | [**themes**](plugins/themes/README.md) | Curated color themes for `/theme`: **Catppuccin Mocha**, **Tokyo Night**, **Nord**. Switch via `/theme`; `Ctrl+E` forks any theme into `~/.claude/themes/` for editing. Pure cosmetic — zero hooks. | 0 | 0 |
@@ -135,7 +135,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 
 ## Active Hooks
 
-Hooks fire automatically. No commands needed. 58 hook command registrations across 13 plugins, spanning all major events:
+Hooks fire automatically. No commands needed. 59 hook command registrations across 13 plugins, spanning all major events:
 
 - **Session lifecycle** — `SessionStart` (11 hooks), `SessionEnd`, `PreCompact` (3), `PostCompact` (2)
 - **Per-turn** — `UserPromptSubmit` (5 hooks), `Stop`, `StopFailure`
