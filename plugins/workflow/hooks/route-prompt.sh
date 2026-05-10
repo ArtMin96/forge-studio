@@ -129,7 +129,7 @@ case "$ROUTE" in
     SUGGESTION="Narrow change detected. Execute directly; skip the planner→generator→reviewer pipeline."
     ;;
   pipeline)
-    SUGGESTION="Non-trivial feature detected. Consider /dispatch and use the planner → generator → reviewer pipeline (agents plugin). Write a ## Contract section in the plan."
+    SUGGESTION="Non-trivial feature detected. Run /orchestrate pipeline once a plan exists; it iterates each #### T<n> task with its own generator → reviewer → /verify cycle (small, predictable agent-loop surface)."
     ;;
   fan-out)
     SUGGESTION="Parallel-safe batch detected. Consider /fan-out (agents plugin) with 3–5 workers per batch."
