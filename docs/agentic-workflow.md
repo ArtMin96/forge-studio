@@ -152,13 +152,16 @@ Router classifies `pipeline`. Behavior you'll see:
    [workflow] Planner finished. Next: dispatch the generator. Ensure the plan has a ## Contract section before generating.
    ```
 
-3. The **generator** (read-write subagent) invokes `/contract` first to re-read the criteria from disk (survives any context compaction between planner and generator), then implements.
+3. `/orchestrate pipeline` reads the plan and iterates over its tasks (`#### T<n>` headings under `### Tasks`) in order. For each task:
+   a. `/contract` re-reads the plan from disk (survives any context compaction).
+   b. The **generator** (read-write subagent) implements **only the current task's scope** — its Files / Success criteria block. Per-task scoping keeps each subagent's tool-call surface small enough to stay under Anthropic's `maxTurns` / `task_budget` budget; multi-task sprints will not truncate mid-stream.
+   c. The **reviewer** (read-only subagent) checks contract compliance for this task. It has no Write/Edit tools, so it must flag issues instead of "fixing" them (keeps evaluation honest).
+   d. `/verify` confirms evidence-backed completion against this task's criteria.
+   e. Optional commit before advancing to the next task.
 
-4. `SubagentStop` → hook nudges the **reviewer**. The reviewer has no Write/Edit tools, so it must flag issues instead of "fixing" them (keeps evaluation honest).
+4. On any task failure (verify exit ≠ 0, reviewer rejects, or generator produces less than the declared artifacts) the loop stops. The user fixes and resumes; subsequent tasks are not auto-attempted.
 
-5. `SubagentStop` → hook nudges `/verify`. The evaluator plugin runs the contract's verification command and returns an evidence-backed verdict.
-
-6. If `$CLAUDE_CONTEXT_WINDOW_USED_PCT ≥ 75`, the `Stop` hook suggests `/progress-log` so the decisions persist into the next session.
+5. If `$CLAUDE_CONTEXT_WINDOW_USED_PCT ≥ 75`, the `Stop` hook suggests `/progress-log` so the decisions persist into the next session.
 
 ### 3. Fan-out — parallel batch
 
