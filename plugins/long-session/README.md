@@ -47,6 +47,7 @@ Three artifacts:
 |---|---|---|
 | `SessionStart` | bootstrap-substrate | Ensure `.claude/` scaffolding exists |
 | `SessionStart` | surface-progress | Read artifacts and brief the session |
+| `PreToolUse:Edit\|Write` | spec-drift-detect | Surface matching `.claude/spec.md` lines when the edited file's basename or parent dir matches a symbol in the spec; silent on `.claude/`, `node_modules/`, `vendor/`, `.git/`, `docs/research/`, `dist/`, `build/`; exits `0`, never blocks |
 
 ## Disable
 

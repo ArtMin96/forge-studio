@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-18 plugins. 67 skills. 60 hooks. 4 agents. 11 behavioral rules.
+18 plugins. 67 skills. 61 hooks. 4 agents. 11 behavioral rules.
 
 ---
 
@@ -65,7 +65,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 |--------|---------|-------|--------|
 | [**behavioral-core**](plugins/behavioral-core/README.md) | Modular `rules.d/` steering, destructive command blocking, safe-mode layer (gated by `.claude/safe-mode`), scope discipline | 5 | 4 |
 | [**context-engine**](plugins/context-engine/README.md) | Context management: progressive pressure, edit safety, environment bootstrap, compaction recovery, task tracking, failure escalation, safe-mode trigger | 16 | 5 |
-| [**long-session**](plugins/long-session/README.md) | Long-running sessions: `init.sh` bootstrap, append-only `claude-progress.txt`, `features.json` testable requirements, `surface-progress` SessionStart hook, `/session-resume` briefing. | 2 | 4 |
+| [**long-session**](plugins/long-session/README.md) | Long-running sessions: `init.sh` bootstrap, append-only `claude-progress.txt`, `features.json` testable requirements, `surface-progress` SessionStart hook, `/session-resume` briefing. | 3 | 4 |
 | [**memory**](plugins/memory/README.md) | Three-tier memory: pointer index → topic files → searchable transcripts, version-aware updates, ledger audit | 1 | 4 |
 | [**evaluator**](plugins/evaluator/README.md) | Static analysis gates (PHP/JS/TS), adversarial review, verification (+features.json execution), reference-fidelity check, test nudge, self-evolution assessment, prediction audit, rubric scoring | 7 | 12 |
 | [**workflow**](plugins/workflow/README.md) | Hook-driven agentic orchestrator: auto-routing, sprint-contract, TDD, /progress-log nudges, self-evolution loop, **/living-spec** (auto-updating spec via after-subagent) | 5 | 10 |
@@ -135,7 +135,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 
 ## Active Hooks
 
-Hooks fire automatically. No commands needed. 60 hook command registrations across 13 plugins, spanning all major events:
+Hooks fire automatically. No commands needed. 61 hook command registrations across 13 plugins, spanning all major events:
 
 - **Session lifecycle** — `SessionStart` (11 hooks), `SessionEnd`, `PreCompact` (3), `PostCompact` (2)
 - **Per-turn** — `UserPromptSubmit` (5 hooks), `Stop`, `StopFailure`
