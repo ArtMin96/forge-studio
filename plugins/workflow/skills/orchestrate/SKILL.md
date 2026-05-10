@@ -86,3 +86,15 @@ End with one line: `Dispatched: <pattern>. Next gate: <which hook / skill will f
 - Do not skip the contract re-read (step 3.2) — it is the reliability mechanism that survives compaction
 - Do not invoke multiple patterns in parallel — pick one and report
 - Do not duplicate logic from `agents:/dispatch`, `evaluator:/verify`, or `long-session:/progress-log` — compose them
+
+## Rebuttals
+
+Common rationalizations for shortcutting orchestration, with rebuttals:
+
+| Excuse | Rebuttal |
+|---|---|
+| "User said 'just do it' — skip the contract re-read." | "Just do it" sets urgency, not scope. Re-reading the Contract before each task is what *makes* dispatch reliable across compaction; skipping turns the orchestrator into a manual edit. |
+| "I already know the pattern from earlier in this session." | Earlier-session memory is the failure mode this skill exists to bypass. The plan file on disk is the canonical source — read it. |
+| "The plan only has one task — bundle dispatch." | Per-task dispatch boundaries are how regressions get attributed. Bundling means a failed task can't be isolated from a passing one. The single-task case still benefits from one verify pass. |
+| "Auto-router already classified the prompt — no need to verify." | The auto-router classifies the **prompt**; orchestrate verifies the **plan**. Different inputs, different decisions. Don't trust upstream classification as a substitute for downstream re-read. |
+| "Skip per-task verify on small tasks to save time." | The verify gate is what makes the dispatched pattern's success criterion measurable. Skipping it doesn't save time — it defers the failure to the next task. |
