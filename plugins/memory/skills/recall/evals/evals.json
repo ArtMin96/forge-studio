@@ -1,0 +1,65 @@
+{
+  "skill_name": "recall",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "/recall — What did we decide about the API rate-limiting strategy?",
+      "files": [
+        {
+          "path": ".claude/memory/index.md",
+          "content": "# Memory Index\n\n## Topics\n\n- [api-rate-limiting](.claude/memory/topics/api-rate-limiting.md) — decision on rate-limiting strategy and chosen algorithm\n"
+        },
+        {
+          "path": ".claude/memory/topics/api-rate-limiting.md",
+          "content": "# API Rate-Limiting Strategy\n\nLast verified: 2026-04-27\n\n## Decision\n\nAdopted token-bucket algorithm with a 1000 req/min ceiling per API key. Sliding window was considered but rejected due to Redis memory overhead at scale.\n\n## Rationale\n\nToken bucket allows burst tolerance without storing per-second counters. Redis TTL handles expiry automatically.\n"
+        }
+      ],
+      "assertions": [
+        "Output header contains the literal 'Previously noted (' followed by a date in parentheses — satisfying §Output Format line 49 which defines this exact header template for the 7-30 day staleness bucket",
+        "Output contains the literal '⚠ Verify before acting — memory may be stale.' — satisfying §Output Format line 53 which requires this exact warning line when memory is in the 7-30 day staleness window",
+        "Output presents the token-bucket decision content from the topic file — confirming tier-2 retrieval completed before staleness labeling was applied",
+        "Output does not present the content as current knowledge without a staleness label — §Staleness Protocol line 34 assigns 'Previously noted (may be outdated)' for 7-30 day old topics, so an unlabeled presentation would violate the staleness protocol"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "/recall — What was the agreed schema for the events table?",
+      "files": [
+        {
+          "path": ".claude/memory/index.md",
+          "content": "# Memory Index\n\n## Topics\n\n- [events-schema](.claude/memory/topics/events-schema.md) — agreed database schema for the events table\n"
+        },
+        {
+          "path": ".claude/memory/topics/events-schema.md",
+          "content": "# Events Table Schema\n\nLast verified: 2026-03-27\n\n## Agreed Schema\n\nTable `events`: id (UUID PK), user_id (FK), type (VARCHAR 64), payload (JSONB), created_at (TIMESTAMPTZ). Partitioned by month on created_at. Index on (user_id, created_at DESC).\n\n## Notes\n\nPartitioning was chosen for query performance on per-user event history. Payload as JSONB allows schema evolution without migrations.\n"
+        }
+      ],
+      "assertions": [
+        "Output contains the literal phrase 'Noted on' followed by a date — satisfying §Staleness Protocol line 35 which assigns 'Noted on <date> — verify before acting on this' for topic files older than 30 days",
+        "Output contains the literal phrase 'verify before acting on this' — satisfying §Staleness Protocol line 35's exact trailing clause for the >30 day staleness bucket",
+        "Output presents the events table schema fields (id, user_id, type, payload, created_at) from the topic file — confirming tier-2 content was retrieved before the staleness label was applied",
+        "Output does not use 'Previously noted (' as the header — that label belongs to the 7-30 day bucket (§Staleness line 34); the >30 day bucket (§Staleness line 35) uses a different template"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "/recall — What pattern did we use for the background job processor? Do we still use that file?",
+      "files": [
+        {
+          "path": ".claude/memory/index.md",
+          "content": "# Memory Index\n\n## Topics\n\n- [background-jobs](.claude/memory/topics/background-jobs.md) — pattern and implementation file for the background job processor\n"
+        },
+        {
+          "path": ".claude/memory/topics/background-jobs.md",
+          "content": "# Background Job Processor\n\nLast verified: 2026-05-10\n\n## Pattern\n\nUsed a polling loop in `src/workers/job_processor.py`. Jobs are fetched from a Postgres queue table using SELECT FOR UPDATE SKIP LOCKED. Worker sleeps 500ms between empty polls.\n\n## Implementation\n\nSee `src/workers/job_processor.py` for the canonical implementation.\n"
+        }
+      ],
+      "assertions": [
+        "Output demonstrates file existence verified before presenting — satisfying §'Before recommending from memory' line 38: 'If the memory names a file path: check the file exists'; the file `src/workers/job_processor.py` is not present in the fixture, so recall must check and surface this",
+        "Output demonstrates stale-path flagged in output, not silently included — the path `src/workers/job_processor.py` mentioned in memory does not exist in the fixture, so output must flag the missing file rather than presenting the memory as if the file is still present",
+        "Output does not present the job_processor.py reference as a confirmed live path without verification — §'Before recommending from memory' line 38 requires a file existence check before the recommendation is included in output; asserting the path exists without checking would violate the protocol",
+        "Output surface the background-job polling pattern content from the topic file — confirming tier-2 retrieval completed and content was presented, with the stale-path caveat appended rather than the content suppressed entirely"
+      ]
+    }
+  ]
+}
