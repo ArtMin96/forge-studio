@@ -1,0 +1,53 @@
+{
+  "skill_name": "dispatch",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "/dispatch — Should I use single agent, fan-out, or pipeline for fixing a bug that touches auth.py, middleware.py, and session.py? Each change depends on the others — session relies on middleware, middleware relies on auth.",
+      "files": [
+        {
+          "path": ".claude/task-brief.md",
+          "content": "# Task: Fix session token expiry bug\n\nFiles to touch:\n- `src/auth.py` — update token validation logic\n- `src/middleware.py` — thread the new token validator through request lifecycle\n- `src/session.py` — consume the corrected middleware output\n\nAll three changes must land together. Session depends on middleware, middleware depends on auth.\nRisk: low — no new public surface, no schema changes.\n"
+        }
+      ],
+      "assertions": [
+        "Output emits 'Route: Single Agent' (the exact literal from SKILL.md §Output Format line 55) — not 'Route: single', not 'Route: Single-Agent', not any other casing or hyphenation variant",
+        "The Reason: line cites interdependence (not file count alone) drove the decision — satisfying §Known Failure Modes KFM #1 ('Route picked from file count alone'), which requires checking interdependence, not just count, before locking the route",
+        "The Risk level: field emits 'low' consistent with §Decision Matrix row 'Risk | Low' for Single Agent — not medium or high",
+        "Output does not suggest fan-out or pipeline; with 3 files and high interdependence, §Routing Rules §Route 1 ('Changes are interdependent') is the decisive criterion"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "/dispatch — I need to add type annotations to 8 controller files: user_ctrl.py, order_ctrl.py, product_ctrl.py, inventory_ctrl.py, payment_ctrl.py, shipping_ctrl.py, discount_ctrl.py, and report_ctrl.py. Same mechanical change in each, no shared state.",
+      "files": [
+        {
+          "path": ".claude/task-brief.md",
+          "content": "# Task: Add type annotations to controller layer\n\nFiles:\n- `app/controllers/user_ctrl.py`\n- `app/controllers/order_ctrl.py`\n- `app/controllers/product_ctrl.py`\n- `app/controllers/inventory_ctrl.py`\n- `app/controllers/payment_ctrl.py`\n- `app/controllers/shipping_ctrl.py`\n- `app/controllers/discount_ctrl.py`\n- `app/controllers/report_ctrl.py`\n\nOperation: add Python type annotations to all public method signatures.\nEach file is self-contained. No controller imports another controller.\nNo shared mutable state across the file list.\n"
+        }
+      ],
+      "assertions": [
+        "Output emits 'Route: Fan-Out' (the exact literal from SKILL.md §Output Format line 55) — not 'Route: fan-out', not 'Route: Fan Out', not any other casing variant",
+        "The Reason: line confirms no shared mutable state across the file list — satisfying §Known Failure Modes KFM #3 ('Fan-out with shared mutable state'), which states the dispatch decision should refuse fan-out when the file list overlaps; the absence of overlap is required before fan-out is safe",
+        "The Agent(s): field names /fan-out or parallel subagents, consistent with §Route 2 §Routing Rules 'Action: Use /fan-out to dispatch parallel subagents'",
+        "The Reason: line or Estimated scope: field reflects that all 8 files perform the same mechanical operation — matching §Decision Matrix row 'Task type | Batch migration, bulk refactor' for Fan-Out"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "/dispatch — We're building a new webhook delivery system: schema design, HTTP client, retry logic, dead-letter queue, admin UI, metrics endpoint, integration tests, and a migration. Medium-high risk new feature. Which route?",
+      "files": [
+        {
+          "path": ".claude/task-brief.md",
+          "content": "# Task: Implement webhook delivery system\n\nNew feature spanning multiple concerns:\n- `db/migrations/001_webhooks.sql` — schema for webhook subscriptions and delivery log\n- `src/webhook/client.py` — HTTP delivery with timeout and retry\n- `src/webhook/retry.py` — exponential backoff with jitter\n- `src/webhook/dlq.py` — dead-letter queue for failed deliveries\n- `src/admin/webhooks_view.py` — admin UI panel\n- `src/metrics/webhook_metrics.py` — Prometheus counters\n- `tests/integration/test_webhook_delivery.py` — end-to-end integration tests\n- `tests/unit/test_retry.py` — unit tests for retry logic\n\nRisk: medium-high. Public-facing API change. DB migration required.\nPhases depend on each other: schema must exist before client, client before retry, retry before DLQ.\n"
+        }
+      ],
+      "assertions": [
+        "Output emits 'Route: Pipeline' (the exact literal from SKILL.md §Output Format line 55) — not 'Route: pipeline', not 'Route: P/G/R', not 'Route: Planner/Generator/Reviewer'",
+        "The Reason: line or Agent(s): field describes phases dispatched sequentially: planner (read-only) → generator → reviewer — matching §Route 3 §Routing Rules 'Dispatch agents sequentially: 1. Planner (read-only)... 2. Generator... 3. Reviewer'",
+        "The Risk level: field emits 'medium' or 'high' consistent with §Decision Matrix row 'Risk | Medium-High' for Pipeline — not low",
+        "Output does not emit Route: Single Agent or Route: Fan-Out; §Decision Matrix rows 'Task type | New feature, architecture change' and 'Interdependence | Medium (phases depend on prior phase)' both point unambiguously to Pipeline"
+      ]
+    }
+  ]
+}
