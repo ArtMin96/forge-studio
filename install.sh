@@ -159,6 +159,27 @@ done
 ELAPSED=$(( $(date +%s) - START_TS ))
 printf "\n"
 
+# 4b. Cross-vendor .agents/skills/ symlinks (POSIX only)
+# Symlink source is the clone itself — stable across Claude Code version bumps.
+# Cache paths (~/.claude/plugins/cache/...) are volatile and must not be used.
+case "$(uname)" in
+  Linux|Darwin)
+    section "Cross-vendor skills"
+    mkdir -p "${HOME}/.agents/skills"
+    LINKED=0
+    for skill_dir in "${SCRIPT_DIR}"/plugins/*/skills/*/; do
+      skill_name=$(basename "$skill_dir")
+      ln -sfn "$skill_dir" "${HOME}/.agents/skills/${skill_name}"
+      LINKED=$((LINKED + 1))
+    done
+    info "Cross-vendor: linked ${LINKED} skills under ~/.agents/skills/ (from clone at ${SCRIPT_DIR})"
+    printf "\n"
+    ;;
+  *)
+    warn "POSIX symlinks unavailable; skipping ~/.agents/skills/ cross-vendor surface"
+    ;;
+esac
+
 # 5. Summary
 section "Summary"
 if [ "$FAIL" -eq 0 ]; then

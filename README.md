@@ -16,6 +16,8 @@ cd forge-studio
 
 `install.sh` registers the marketplace, installs all 17 plugins to user scope, and copies `templates/CLAUDE.md` to `~/.claude/CLAUDE.md` (backing up any existing file). Idempotent — safe to re-run.
 
+If you ran `./install.sh` from a clone, Forge Studio also exposes its skills under `~/.agents/skills/` (the cross-vendor convention from agentskills.io spec) so other clients (Cursor, Cline, Aider) can discover them. The links point back into your clone — keep the clone around or they will dangle. Manual `/plugin marketplace add` users do not get this surface.
+
 Start a new Claude Code session (or run `/reload-plugins` in an existing one) for plugins to load.
 
 ### Manual install (per-plugin)

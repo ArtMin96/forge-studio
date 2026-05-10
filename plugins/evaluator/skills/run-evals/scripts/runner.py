@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """Structural validator for per-skill eval JSON fixtures.
 
-Usage: runner.py <path-or-glob>
+Usage: runner.py <path-to-evals.json-or-glob>
 
-Validates that each matched file conforms to the evals/ convention shape:
-  {skills: [str, ...], query: str, files: [...], expected_behavior: [str, ...]}
+Validates that each matched file conforms to the evals/evals.json shape:
+  {skill_name: str, evals: [{id: int, prompt: str, files: [...], assertions: [str, ...]}]}
 
-Does not execute the eval. Emits a human-readable checklist of declared
-expectations, with [ ] boxes marking each as "not yet executed."
+Only accepts files named evals.json. Emits a human-readable checklist of
+declared assertions, with [ ] boxes marking each as "not yet executed."
 
 Exit codes:
   0 — all files valid
-  1 — at least one file has a shape violation
+  1 — at least one file has a shape violation or wrong filename
   2 — JSON parse error on at least one file
 """
 import glob as glob_module
@@ -33,67 +33,93 @@ def validate_file_item(item):
     return f"files[] item must be a string or {{path, content}} object, got {type(item).__name__}"
 
 
+def validate_eval_item(idx, item):
+    """Validate one entry in the evals list. Returns list of error strings."""
+    errors = []
+    if not isinstance(item, dict):
+        return [f"evals[{idx}] must be an object"]
+
+    # id: int
+    if 'id' not in item:
+        errors.append(f"evals[{idx}]: missing required key 'id'")
+    elif not isinstance(item['id'], int):
+        errors.append(f"evals[{idx}]: 'id' must be an integer")
+
+    # prompt: non-empty string
+    if 'prompt' not in item:
+        errors.append(f"evals[{idx}]: missing required key 'prompt'")
+    elif not isinstance(item['prompt'], str) or item['prompt'].strip() == '':
+        errors.append(f"evals[{idx}]: 'prompt' must be a non-empty string")
+
+    # files: list (may be empty)
+    if 'files' not in item:
+        errors.append(f"evals[{idx}]: missing required key 'files'")
+    elif not isinstance(item['files'], list):
+        errors.append(f"evals[{idx}]: 'files' must be a list")
+    else:
+        for i, f in enumerate(item['files']):
+            ferr = validate_file_item(f)
+            if ferr:
+                errors.append(f"evals[{idx}].files[{i}]: {ferr}")
+
+    # assertions: non-empty list of strings
+    if 'assertions' not in item:
+        errors.append(f"evals[{idx}]: missing required key 'assertions'")
+    elif not isinstance(item['assertions'], list) or len(item['assertions']) == 0:
+        errors.append(f"evals[{idx}]: 'assertions' must be a non-empty list of strings")
+    elif not all(isinstance(s, str) for s in item['assertions']):
+        errors.append(f"evals[{idx}]: 'assertions' items must all be strings")
+
+    # expected_output: optional str
+    if 'expected_output' in item and not isinstance(item['expected_output'], str):
+        errors.append(f"evals[{idx}]: 'expected_output' must be a string if present")
+
+    return errors
+
+
 def validate(path, data):
-    """Validate shape of a parsed eval JSON. Return list of error strings."""
+    """Validate shape of a parsed evals.json. Return list of error strings."""
     errors = []
 
-    # Check required keys
-    for key in ('skills', 'query', 'files', 'expected_behavior'):
+    # Top-level required keys
+    for key in ('skill_name', 'evals'):
         if key not in data:
             errors.append(f"missing required key '{key}'")
 
     if errors:
-        # Missing keys — stop here, remaining checks would be noisy
         return errors
 
-    # skills: non-empty list of strings
-    skills = data['skills']
-    if not isinstance(skills, list) or len(skills) == 0:
-        errors.append("'skills' must be a non-empty list of strings")
-    elif not all(isinstance(s, str) for s in skills):
-        errors.append("'skills' must be a non-empty list of strings")
+    # skill_name: non-empty string
+    if not isinstance(data['skill_name'], str) or data['skill_name'].strip() == '':
+        errors.append("'skill_name' must be a non-empty string")
 
-    # query: non-empty string
-    query = data['query']
-    if not isinstance(query, str) or query.strip() == '':
-        errors.append("'query' must be a non-empty string")
-
-    # files: list (may be empty); each item is string or {path, content}
-    files = data['files']
-    if not isinstance(files, list):
-        errors.append("'files' must be a list")
+    # evals: non-empty list
+    evals = data['evals']
+    if not isinstance(evals, list) or len(evals) == 0:
+        errors.append("'evals' must be a non-empty list")
     else:
-        for i, item in enumerate(files):
-            item_err = validate_file_item(item)
-            if item_err:
-                errors.append(f"files[{i}]: {item_err}")
-
-    # expected_behavior: non-empty list of strings
-    eb = data['expected_behavior']
-    if not isinstance(eb, list) or len(eb) == 0:
-        errors.append("'expected_behavior' must be a non-empty list")
-    elif not all(isinstance(s, str) for s in eb):
-        errors.append("'expected_behavior' items must all be strings")
+        for idx, item in enumerate(evals):
+            errors.extend(validate_eval_item(idx, item))
 
     return errors
 
 
 def format_ok(path, data):
-    """Return the human-readable OK report for a well-formed eval file."""
-    skills_val = data['skills']
-    query_val = data['query']
-    files_val = data['files']
-    eb_val = data['expected_behavior']
+    """Return the human-readable OK report for a well-formed evals.json."""
+    skill = data['skill_name']
+    evals = data['evals']
 
     lines = [f"OK: {path}"]
-    lines.append(f"  skills: {', '.join(skills_val)}")
-
-    truncated = query_val if len(query_val) <= 80 else query_val[:77] + '...'
-    lines.append(f'  query: "{truncated}"')
-    lines.append(f"  files: {len(files_val)} declared")
-    lines.append("  expected_behavior:")
-    for item in eb_val:
-        lines.append(f"    [ ] {item}")
+    lines.append(f"  skill_name: {skill}")
+    lines.append(f"  evals: {len(evals)} case(s)")
+    for ev in evals:
+        prompt = ev['prompt']
+        truncated = prompt if len(prompt) <= 80 else prompt[:77] + '...'
+        lines.append(f"  [{ev['id']}] {truncated}")
+        lines.append(f"    files: {len(ev['files'])} declared")
+        lines.append("    assertions:")
+        for a in ev['assertions']:
+            lines.append(f"      [ ] {a}")
 
     return '\n'.join(lines)
 
@@ -102,14 +128,14 @@ def resolve_paths(arg):
     """Return sorted list of file paths matched by arg (glob or literal)."""
     matched = sorted(glob_module.glob(arg))
     if not matched and not glob_module.has_magic(arg):
-        # Literal path that doesn't exist — return it so the caller can report
+        # Literal path that doesn't exist — return it so caller can report
         return [arg]
     return matched
 
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: runner.py <path-or-glob>", file=sys.stderr)
+        print("Usage: runner.py <path-to-evals.json-or-glob>", file=sys.stderr)
         sys.exit(2)
 
     arg = sys.argv[1]
@@ -121,6 +147,13 @@ def main():
     output_lines = []
 
     for path in paths:
+        # Enforce evals.json filename convention
+        basename = os.path.basename(path)
+        if basename != 'evals.json':
+            output_lines.append(f"INVALID: {path}: expected evals.json, got {basename}")
+            invalid_count += 1
+            continue
+
         # Parse JSON
         try:
             with open(path) as f:

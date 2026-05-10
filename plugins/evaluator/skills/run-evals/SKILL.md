@@ -8,50 +8,59 @@ allowed-tools:
   - Read
   - Bash
   - Glob
-scheduling: eval JSON file(s) exist at plugins/<plugin>/skills/<skill>/evals/<case>.json
+scheduling: evals/evals.json exists at plugins/<plugin>/skills/<skill>/evals/evals.json
 structural:
   - Resolve the path-or-glob argument to a list of JSON files
+  - Reject any file not named evals.json; emit INVALID with expected/got message
   - Parse each file; emit INPUT_ERROR and exit 2 on malformed JSON
-  - Validate required fields (skills, query, files, expected_behavior) and their types
+  - Validate top-level keys (skill_name, evals) and per-eval keys (id, prompt, files, assertions)
   - Emit INVALID with a specific reason on shape violation; continue to next file
-  - On well-formed file, emit an OK checklist with declared expectations as unchecked boxes
+  - On well-formed file, emit an OK checklist with declared assertions as unchecked boxes
   - Print a summary line; exit 0 if all OK, exit 1 if any INVALID
-logical: all matched eval files are structurally valid and each emits a checklist of declared expectations; non-conformant files emit specific errors and runner exits non-zero
+logical: all matched evals.json files are structurally valid and each emits a per-case checklist of declared assertions; non-conformant files emit specific errors and runner exits non-zero
 ---
 
 # /run-evals — Eval JSON Structural Validator
 
-Validates eval fixture files against the per-skill `evals/` convention. Does not execute the eval — emits a checklist of declared expectations that a future judge runner will tick. The `[ ]` boxes explicitly mark each expectation as "not yet executed."
+Validates `evals/evals.json` fixtures against the per-skill evals convention. Does not execute the eval — emits a checklist of declared assertions that a future judge runner will tick. The `[ ]` boxes explicitly mark each assertion as "not yet executed."
 
 ## Inputs
 
-Single positional argument: a path to an eval JSON file or a glob pattern.
+Single positional argument: a path to `evals/evals.json` or a glob pattern (must match files named `evals.json`).
 
 ```
-python3 plugins/evaluator/skills/run-evals/scripts/runner.py <eval-file-or-glob>
+python3 plugins/evaluator/skills/run-evals/scripts/runner.py <evals.json-path-or-glob>
 ```
 
 ## Eval JSON Shape
 
-Each eval file must be a JSON object with these four fields:
+Each `evals.json` file must be a JSON object with these top-level fields:
 
 | Field | Type | Constraint |
 |-------|------|-----------|
-| `skills` | array of strings | ≥ 1 item |
-| `query` | string | non-empty |
+| `skill_name` | string | non-empty; name of the skill under test |
+| `evals` | array | ≥ 1 eval case |
+
+Each entry in `evals` must contain:
+
+| Field | Type | Constraint |
+|-------|------|-----------|
+| `id` | integer | unique case identifier |
+| `prompt` | string | non-empty; realistic user prompt |
 | `files` | array | may be empty; each item is a string (path) or `{path: string, content: string}` |
-| `expected_behavior` | array of strings | ≥ 1 item |
+| `assertions` | array of strings | ≥ 1 item; what the judge checks |
+| `expected_output` | string | optional; reference output for literal comparison |
 
 ## Process
 
 ```bash
-python3 plugins/evaluator/skills/run-evals/scripts/runner.py plugins/my-plugin/skills/my-skill/evals/my-case.json
+python3 plugins/evaluator/skills/run-evals/scripts/runner.py plugins/my-plugin/skills/my-skill/evals/evals.json
 ```
 
 Or over all evals in a tree:
 
 ```bash
-python3 plugins/evaluator/skills/run-evals/scripts/runner.py "plugins/*/skills/*/evals/*.json"
+python3 plugins/evaluator/skills/run-evals/scripts/runner.py "plugins/*/skills/*/evals/evals.json"
 ```
 
 ## Output
@@ -59,14 +68,15 @@ python3 plugins/evaluator/skills/run-evals/scripts/runner.py "plugins/*/skills/*
 For a well-formed file:
 
 ```
-OK: plugins/diagnostics/skills/ssl-audit/evals/no-ssl.json
-  skills: ssl-audit
-  query: "Audit SSL frontmatter coverage on a tree where one skill has no SSL fields..."
-  files: 1 declared
-  expected_behavior:
-    [ ] validate.py exits 0 (informational, never failing)
-    [ ] the report counts 1 skill scanned
-    [ ] the report shows 0 skills with logical field
+OK: plugins/diagnostics/skills/ssl-audit/evals/evals.json
+  skill_name: ssl-audit
+  evals: 1 case(s)
+  [1] Audit SSL frontmatter coverage on a tree where one skill has no SSL fields...
+    files: 1 declared
+    assertions:
+      [ ] validate.py exits 0 (informational, never failing)
+      [ ] the report counts 1 skill scanned
+      [ ] the report shows 0 skills with logical field
 
 1 eval(s): 1 OK, 0 INVALID
 ```
@@ -74,7 +84,7 @@ OK: plugins/diagnostics/skills/ssl-audit/evals/no-ssl.json
 For a non-conformant file:
 
 ```
-INVALID: plugins/x/skills/y/evals/bad.json: missing required key 'expected_behavior'
+INVALID: plugins/x/skills/y/evals/bad-name.json: expected evals.json, got bad-name.json
 
 1 eval(s): 0 OK, 1 INVALID
 ```
@@ -84,21 +94,21 @@ INVALID: plugins/x/skills/y/evals/bad.json: missing required key 'expected_behav
 Eval fixtures live at:
 
 ```
-plugins/<plugin>/skills/<skill>/evals/<case>.json
+plugins/<plugin>/skills/<skill>/evals/evals.json
 ```
 
-Each case file is self-contained: it declares the skill(s) under test, a realistic query a user would type, any synthesized files needed, and the expected behaviors to assert. A single skill may have multiple case files (e.g. `no-ssl.json`, `partial-ssl.json`).
+One `evals.json` per skill. All eval cases for a skill are collected under the `evals` array in that file.
 
 ## Execution Checklist
 
-- [ ] Run `runner.py` against target eval file(s)
+- [ ] Run `runner.py` against target `evals.json` file(s)
 - [ ] Confirm exit code: 0 = all OK, 1 = at least one INVALID, 2 = parse error
-- [ ] Review the checklist output — each `[ ]` line is a declared expectation for the judge runner
+- [ ] Review the checklist output — each `[ ]` line is a declared assertion for the judge runner
 - [ ] Fix any INVALID files before handing off to a judge runner
 
 ## Known Failure Modes
 
-- **Missing required key** — if `skills`, `query`, `files`, or `expected_behavior` is absent, the runner emits `INVALID: <path>: missing required key '<key>'` and continues. Fix by adding the missing field.
-- **Wrong type on `skills`** — `skills` must be a list of strings. A bare string like `"ssl-audit"` is rejected with `'skills' must be a non-empty list of strings`. Wrap in `[]`.
-- **Empty `expected_behavior`** — an empty array is rejected. At least one assertion string is required.
+- **Wrong filename** — if the file is not named `evals.json`, the runner emits `INVALID: <path>: expected evals.json, got <basename>`. Rename the file.
+- **Missing required key** — if `skill_name` or `evals` is absent at top level, or if a per-eval key (`id`, `prompt`, `files`, `assertions`) is absent, the runner emits `INVALID: <path>: missing required key '<key>'` and continues.
+- **Empty `assertions`** — an empty assertions array is rejected. At least one assertion string is required per eval case.
 - **Glob matches no files** — the runner prints `0 eval(s): 0 OK, 0 INVALID` and exits 0. Check the glob pattern.

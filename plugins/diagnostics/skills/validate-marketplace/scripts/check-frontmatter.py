@@ -40,6 +40,20 @@ for path in sorted(glob.glob('plugins/*/skills/*/SKILL.md')):
     if unknown:
         failures.append((path, f'unknown keys: {", ".join(unknown)}'))
         continue
+    # metadata must be a flat string→string map (spec: no nested dicts/lists/numbers)
+    if 'metadata' in fm:
+        meta = fm['metadata']
+        if not isinstance(meta, dict):
+            failures.append((path, f"metadata must be a dict, got {type(meta).__name__}"))
+        else:
+            for k, v in meta.items():
+                if not isinstance(v, str):
+                    failures.append((path, f"metadata value '{k}' must be a string, got {type(v).__name__}"))
+    # compatibility must be 1–500 chars
+    if 'compatibility' in fm:
+        compat = str(fm['compatibility'])
+        if not (1 <= len(compat) <= 500):
+            failures.append((path, f"compatibility must be 1–500 chars, got {len(compat)}"))
     name_val = fm.get('name') or ''
     if name_val and not NAME_RE.match(name_val):
         failures.append((path, f"name '{name_val}' violates regex (lowercase, hyphenated, no consecutive '--', no leading/trailing hyphen, no underscores, no uppercase)"))

@@ -87,6 +87,28 @@ disable-model-invocation: true # Required for Forge Studio. Zero cost until invo
 | `metadata` | No | Free-form string→string map for vendor extensions (e.g. `version`, `author`). |
 | `mode` | No | Marks the skill as a mode command. String; values defined per-skill. |
 
+## Frontmatter Extensions Beyond agentskills.io Spec
+
+The following fields are forge-studio additions not defined by the agentskills.io specification. They are non-portable to strict-spec clients: a client that only implements the canonical spec will silently ignore or reject them. Each extension is intentional — documenting the rationale prevents accidental removal and explains the portability trade-off.
+
+| Extension key | Rationale | Portability |
+|---|---|---|
+| `when_to_use` | Disambiguates trigger conditions from capability description. Strict clients collapse this into `description` at parse time. | Ignored by strict-spec clients; collapsed into description by lenient clients. |
+| `argument-hint` | Drives Claude Code slash-command autocomplete UI. No equivalent in the canonical spec. | Claude Code only. |
+| `disable-model-invocation` | Zero-cost progressive disclosure — skill loads only when explicitly invoked. Spec has no equivalent opt-in loading model. | Claude Code only. |
+| `context: fork` | Forces skill execution into an isolated subagent context. Spec mentions subagents informally (§F) but does not define a `context` field. | Claude Code only. |
+| `agent` | Subagent type paired with `context: fork`. Spec does not define agent delegation in skill frontmatter. | Claude Code only. |
+| `mode` | Open-string per-skill mode marker. Semantics defined by each skill's body. Not in the canonical field set. | Claude Code only. |
+| `scheduling` | SSL overlay (arXiv:2604.24026). One-liner precondition or trigger; defaults to `when_to_use` if absent. Audited by `/ssl-audit`. | Non-portable. |
+| `structural` | SSL overlay. Bullet list decomposing the skill into major steps. Absent by default. | Non-portable. |
+| `logical` | SSL overlay. Postcondition / measurable success criterion. `/ssl-audit` flags skills missing this field. | Non-portable. |
+| `user-invocable` | `false` hides the skill from the `/` menu. No canonical equivalent. | Claude Code only. |
+| `hooks` | Skill-scoped lifecycle hooks active during skill execution. Same format as plugin `hooks.json`. | Claude Code only. |
+| `paths` | Glob patterns limiting auto-activation to matching files. Not in canonical spec. | Claude Code only. |
+| `shell` | Shell for inline `!command` blocks (`bash` or `powershell`). Not in canonical spec. | Claude Code only. |
+
+**Design decision:** forge-studio does not namespace these extensions under `metadata.forge.*` (which would be spec-round-trippable). Readability and direct field access are prioritized over strict-spec round-tripping. The trade-off is documented here so future maintainers can make an informed migration decision.
+
 **Compaction survival**: Invoked skills survive compaction with first 5,000 tokens per skill. Shared budget of 25,000 tokens across all invoked skills. Most recently invoked skills get priority; older skills may be dropped.
 
 **Validation**: `name`, `description`, and `disable-model-invocation: true` must be present in every Forge Studio SKILL.md.

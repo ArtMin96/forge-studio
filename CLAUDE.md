@@ -38,7 +38,7 @@ plugins/{name}/
     └── {skill-name}/
         ├── SKILL.md     # YAML frontmatter + instructions
         ├── scripts/     # Long helpers (≥10-line python or shell), argv-driven
-        └── evals/       # Per-skill regression cases ({skills,query,files,expected_behavior}); validated by /run-evals
+        └── evals/       # Per-skill regression cases (evals.json: {skill_name, evals[]{id, prompt, files, assertions}}); validated by /run-evals
 ```
 
 ### SKILL.md Frontmatter
