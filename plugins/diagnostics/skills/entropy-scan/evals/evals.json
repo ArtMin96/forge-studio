@@ -1,0 +1,62 @@
+{
+  "skill_name": "entropy-scan",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "/entropy-scan — run all checks; the README header counts match the count.sh output exactly",
+      "files": [
+        {
+          "path": "README.md",
+          "content": "# Forge Studio\n\n12 plugins. 48 skills. 63 hooks. 5 agents. 22 behavioral rules.\n\nA marketplace of composable Claude Code plugins.\n"
+        },
+        {
+          "path": "plugins/diagnostics/skills/entropy-scan/scripts/count.sh.fixture",
+          "content": "Plugins: 12\nSkills:  48\nHooks:   63\nAgents:  5\nRules:   22\n"
+        }
+      ],
+      "assertions": [
+        "Output contains '**Status:** PASS' for Check 1 — §Check 1 (line 28) compares README header against count.sh; when counts match, §Output Format (line 181) mandates **Status:** PASS",
+        "Output contains '**Overall:** CLEAN' — §Output Format (line 178) mandates **Overall:** CLEAN when no checks report drift or gaps",
+        "Output does not contain '**Status:** DRIFT' for Check 1 — the fixture README header counts agree with count.sh output, so no mismatch delta is present"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "/entropy-scan — run all checks; the README header reports 70 hooks but count.sh finds 63",
+      "files": [
+        {
+          "path": "README.md",
+          "content": "# Forge Studio\n\n12 plugins. 48 skills. 70 hooks. 5 agents. 22 behavioral rules.\n\nA marketplace of composable Claude Code plugins.\n"
+        },
+        {
+          "path": "plugins/diagnostics/skills/entropy-scan/scripts/count.sh.fixture",
+          "content": "Plugins: 12\nSkills:  48\nHooks:   63\nAgents:  5\nRules:   22\n"
+        }
+      ],
+      "assertions": [
+        "Output contains '**Status:** DRIFT' for Check 1 — §Check 1 (line 28) detects a mismatch between README header hook count (70) and count.sh result (63), triggering §Output Format (line 181) **Status:** DRIFT",
+        "mismatch delta cited (header value vs count.sh value) — §Output Format (line 182) requires per-check details including counts and mismatch deltas when status is non-clean; the output must cite 70 (header) vs 63 (count.sh)",
+        "Output does not contain '**Overall:** CLEAN' — at least one check reports DRIFT, so the overall status cannot be CLEAN per §Output Format (line 178)"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "/entropy-scan — run all checks; a plugins/ghost-plugin/ directory exists but has no entry in .claude-plugin/marketplace.json",
+      "files": [
+        {
+          "path": "plugins/ghost-plugin/hooks/hooks.json",
+          "content": "{\"hooks\": {}}\n"
+        },
+        {
+          "path": ".claude-plugin/marketplace.json",
+          "content": "{\n  \"plugins\": [\n    {\n      \"name\": \"diagnostics\",\n      \"description\": \"Drift detection and health validation\",\n      \"version\": \"1.0.0\",\n      \"source\": \"./plugins/diagnostics\"\n    }\n  ]\n}\n"
+        }
+      ],
+      "assertions": [
+        "Output contains '**Status:** GAP' for Check 2 — §Check 2 (line 39) detects directories without marketplace entries; ghost-plugin exists on disk but is absent from .claude-plugin/marketplace.json, triggering §Output Format (line 181) **Status:** GAP",
+        "directory name listed as missing from marketplace.json — §Check 2 (line 53) mandates reporting 'directories without marketplace entries'; the output must name ghost-plugin as the missing entry",
+        "Output does not contain '**Status:** PASS' for Check 2 — the fixture deliberately omits ghost-plugin from marketplace.json, so Check 2 cannot report a clean pass"
+      ]
+    }
+  ]
+}
