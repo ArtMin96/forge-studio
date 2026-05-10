@@ -47,7 +47,7 @@ Every step writes to `.claude/lineage/ledger.jsonl` (append-only). Snapshots liv
 
 | Skill | Purpose |
 |---|---|
-| `/orchestrate` | Manual entry into the agentic workflow — overrides automatic routing |
+| `/orchestrate` | Manual entry into the agentic workflow — overrides automatic routing. On `pipeline`, iterates per-task: one generator → reviewer → /verify cycle per `#### T<n>` heading; stops on first failure |
 | `/status` | Active plan, last progress entry, recent traces, context pressure — one snapshot |
 | `/tdd-loop` | Red → Green → Refactor with three real-command completion gates |
 | `/evolve` | Run a self-evolution cycle: proposal → assess → user approval → commit |

@@ -1,6 +1,6 @@
 # agents
 
-Multi-agent decomposition. Splits work across **planner → generator → reviewer** so each role runs in its own subagent with isolated tools.
+Multi-agent decomposition. Splits work across **planner → generator → reviewer** so each role runs in its own subagent with isolated tools. Driven per-task by `/orchestrate pipeline` (workflow plugin). Each task gets its own subagent pair; this keeps each agent's tool-call surface small enough to fit Anthropic's `maxTurns` budget reliably.
 
 ## What it does
 
