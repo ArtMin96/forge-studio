@@ -2,6 +2,8 @@
 name: ssl-audit
 description: Audit forge-studio SKILL.md frontmatter for the SSL overlay (scheduling / structural / logical). Reports skills missing a measurable success criterion. Read-only.
 when_to_use: Reach for this when planning to harden skill discovery, before promoting a plugin to a "production" tier, or when `/entropy-scan` flags skill quality concerns. Do NOT use for marketplace registration or hooks-executable checks — that's `/validate-marketplace` and `/entropy-scan`; this skill scrutinises only frontmatter SSL fields.
+paths:
+  - "**/SKILL.md"
 disable-model-invocation: true
 allowed-tools:
   - Read

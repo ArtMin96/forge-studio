@@ -2,6 +2,8 @@
 name: md-structure
 description: Audit or scaffold a CLAUDE.md against the Karpathy 4-section structure (Think Before Coding · Simplicity First · Surgical Changes · Goal-Driven Execution). Companion to /lean-md — structure audit, not size trim.
 when_to_use: Reach for this when authoring a fresh CLAUDE.md, when reviewing one against the four Karpathy sections, or when `/entropy-scan` calls in for a structure sub-check. Do NOT use to delete or compress lines — that's `/lean-md`; this skill answers "is the architecture right?", not "is it too big?".
+paths:
+  - "**/CLAUDE.md"
 disable-model-invocation: true
 argument-hint: [path-to-claude-md]
 allowed-tools:

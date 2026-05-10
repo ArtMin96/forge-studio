@@ -2,6 +2,8 @@
 name: progress-log
 description: Append the current session's net outcomes to claude-progress.txt (durable, session-to-session log). Records completions, in-progress work, blockers, and next-step recommendations. Emits a ledger entry for unified audit.
 when_to_use: Reach for this at session end, right before auto-compaction is about to fire, or whenever net-new commits land that the next session needs to pick up. Do NOT use for in-conversation tracking — that's `TaskCreate` / `TaskUpdate`; progress-log is the cross-session durable record.
+paths:
+  - "**/claude-progress.txt"
 disable-model-invocation: true
 argument-hint: [topic]
 allowed-tools:

@@ -2,6 +2,8 @@
 name: contract
 description: Use whenever a generator agent or implementation step is about to begin work from a plan file — re-read the sprint contract verbatim and confirm the success criteria before writing any code. Prevents context decay by forcing a fresh Read of the criteria from disk rather than trusting earlier-in-session memory.
 when_to_use: Invoke at the start of every non-trivial implementation turn, when a planner→generator→reviewer pipeline hands off to the generator, when plan criteria may have decayed after long context, or whenever a step claims "done" without an evidence link. Do NOT use for one-line edits or trivial fixes — direct work is fine; reach for `/scope` instead when the task itself needs definition.
+paths:
+  - ".claude/plans/**/*.md"
 allowed-tools:
   - Read
   - Glob
