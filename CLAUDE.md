@@ -83,6 +83,24 @@ logical: <postcondition / measurable success criterion>   # what makes this skil
 
 Hook exit codes: `0` = info, `1` = warning, `2` = block action (PreToolUse, PreCompact)
 
+### README.md Plugin Table
+
+The root `README.md` contains a plugin reference table with column order **`| Plugin | Purpose | Hooks | Skills |`**. When updating a plugin row:
+
+- The third column is the hook count, the fourth is the skill count — not the other way around.
+- Each row's hook count must reflect every script registered in that plugin's `hooks/hooks.json`, summed across events.
+- The header line at the top of `README.md` (`<H> hooks`) and the `## Active Hooks` paragraph (`<H> hook command registrations`) must both agree with `bash plugins/diagnostics/skills/entropy-scan/scripts/count.sh .`. Three locations, one number.
+
+### Plan Files
+
+Plans under `.claude/plans/` are authoring artifacts — gitignored, per-session. When a plan instructs a future change to a count, path, or table value:
+
+- **Reference live state, not snapshot values.** A plan that hardcodes `58 hooks → 59 hooks` rots the moment another plan lands. Use `<H>` placeholders or "increment current count by 1" phrasing instead.
+- **Mandate a pre-edit verification step** (e.g., `grep -nE "\b[0-9]+ hooks?\b" README.md`) so the generator reads current values from disk before editing.
+- **Spell out column position** when changing table cells — refer to the table header explicitly so an off-by-one in column order doesn't slip through.
+
+This keeps plans dispatchable in any order and prevents bake-in errors that the per-task pipeline must otherwise fix mid-flight.
+
 ### marketplace.json Entry
 ```json
 {
@@ -97,12 +115,16 @@ Hook exit codes: `0` = info, `1` = warning, `2` = block action (PreToolUse, PreC
 
 ## Documentation Checklist (for every plugin change)
 
-- [ ] `README.md` — Install command, plugin reference table, active hooks table, architecture diagram counts
+- [ ] `README.md` — three count locations must agree:
+  - Header line `<N> plugins. <M> skills. <H> hooks. <A> agents. <R> behavioral rules.`
+  - `## Active Hooks` paragraph: `<H> hook command registrations across <P> plugins`
+  - Per-plugin table row: `| <plugin> | <purpose> | <hooks> | <skills> |` — column order is **`Hooks | Skills`**, not the reverse
+- [ ] `README.md` install command list and key-skills table reflect any new plugin or user-invocable skill
 - [ ] `docs/architecture.md` — If new harness component or pattern
 - [ ] `.claude-plugin/marketplace.json` — Plugin registered; `plugin.json` `version` matches the marketplace entry
 - [ ] Hook scripts are executable (`chmod +x`); extracted skill scripts under `scripts/` too
 - [ ] JSON files parse cleanly
-- [ ] Drift counts match: `bash plugins/diagnostics/skills/entropy-scan/scripts/count.sh .` agrees with the README header line
+- [ ] Drift counts match: `bash plugins/diagnostics/skills/entropy-scan/scripts/count.sh .` agrees with the README header line **and** the Active Hooks paragraph
 
 ## Project Config
 
