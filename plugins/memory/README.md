@@ -35,6 +35,12 @@ Tier 1 (`index.md`) is the only file loaded automatically. Tier 2 files load whe
 | `/memory-index` | Review, prune, sanity-check stored memories. Flag entries older than 90 days; verify a memory's claim against the current repo |
 | `/lineage-audit` | Audit the ledger for invariant violations (operator order, registry slugs, snapshot presence, append-only) |
 
+## Hooks
+
+| Script | Event | Purpose |
+|--------|-------|---------|
+| `post-commit-prompt.sh` | `PostToolUse:Bash` | After a successful `git commit`, nudges Claude to run `/remember` for any decision worth preserving. Skips `--amend`, `--dry-run`, non-zero exits, and non-commit subcommands. Always exits `0` — never blocks. |
+
 ## Disable
 
 `/plugin disable memory@forge-studio`. The memory files stay on disk under `.claude/memory/` — re-enabling restores access.
