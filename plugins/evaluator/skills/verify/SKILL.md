@@ -86,3 +86,15 @@ This clears the pre-commit evaluation gate for the current plan, allowing `git c
 If UNVERIFIED, do NOT clear the gate — the warning serves its purpose.
 
 Never claim work is done without evidence. Evidence, not assertions.
+
+## Rebuttals
+
+Common rationalizations for skipping verify, with rebuttals:
+
+| Excuse | Rebuttal |
+|---|---|
+| "Tests pass locally — I just ran them." | Then quote the command + exit code in the report. Memory of a green run is not evidence; the artifact is. |
+| "The diff is small." | Small diffs miss verification more often than large ones precisely because they feel safe. The Contract's success criteria don't shrink with diff size. |
+| "User is in a hurry." | A wrong "done" costs more than a 30-second verify. If the gate is genuinely too slow, raise that as a separate concern — don't skip silently. |
+| "I reviewed the change manually." | Manual review is not a recorded artifact. Without command output or a file:line reference, the claim cannot be audited later. |
+| "This is a doc-only / formatting change." | If true, the verify gate for it is `git diff --stat` + a render check — still produce the artifact. The rule is "evidence", not "tests". |
