@@ -56,9 +56,16 @@ Read the plan's `## Contract` section. If absent, tell the user — a plan witho
 
 For `pipeline`:
 
-1. Invoke `/dispatch` from the agents plugin so its routing logic stays the single source of truth. Do **not** re-implement routing here.
-2. Before the generator starts, invoke `/contract` (agents plugin) so the plan's Contract section is re-read from disk (prevents context decay through compaction — `HARNESS_SPEC.md` §Sprint Contract).
-3. After the reviewer returns, invoke `/verify` (evaluator plugin) to produce evidence-backed completion confirmation.
+1. Invoke `/dispatch` from the agents plugin once at the start, scoped to the whole plan, so its routing logic stays the single source of truth. Do **not** re-implement routing here.
+2. Parse the plan for `#### T<n>` headings under `### Tasks`. Build an ordered task list `[T1, T2, …]`; the loop iterates this list one task at a time. If the plan has no `#### T<n>` headings, fall back to a single-pass dispatch and emit one warning line. (Most plans in `.claude/plans/` follow the heading convention; the fallback exists for old or hand-written plans.)
+3. For each task in order:
+   - Invoke `/contract` (agents plugin) so the plan's full Contract is re-read from disk fresh for this task (prevents context decay through compaction — `HARNESS_SPEC.md` §Sprint Contract).
+   - Dispatch one `agents:generator` subagent scoped to **only this task's** Files / Success criteria block. Do not include sibling tasks in the subagent's prompt — keep its tool-call surface small to stay under the agent-loop budget (`maxTurns` / `task_budget`).
+   - When the generator returns, dispatch one `agents:reviewer` subagent for the same task. Pass the generator's reported diff and the task's success criteria.
+   - When the reviewer returns, invoke `/verify` (evaluator plugin) for that task only.
+   - On failure (verify exit ≠ 0, reviewer rejects, or generator truncates without producing the declared artifacts): STOP. Report which task failed and why. Do not auto-advance; the user decides whether to fix and resume.
+   - On success: optionally commit per-task (one commit per task is the recommended granularity; bundling is allowed when the user explicitly asks).
+4. After the last task verifies clean, emit one summary line.
 
 For `fan-out`:
 - Invoke `/fan-out` (agents plugin) with an explicit file list drawn from the plan.
