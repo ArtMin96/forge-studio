@@ -389,9 +389,11 @@ Verification method: {specific command or check}
 ### 2. Generator Confirms Contract
 
 Before writing any code, the generator:
-1. Invokes `/contract` to mechanically Read the plan file (prevents context decay)
+1. Invokes `/contract` at the start of every task in the plan to mechanically Read the contract from disk (prevents context decay; protects against agent-loop budget exhaustion when plans have multiple tasks)
 2. Confirms each criterion is understood and achievable
 3. If any criterion is ambiguous → STOP and report
+
+**Per-task iteration.** When the plan has multiple `#### T<n>` task headings, the orchestrator dispatches one generator–reviewer pair per task, each preceded by its own `/contract` re-read. The contract is one document; what changes per task is the generator's scope. This keeps each subagent's tool-call surface small enough to stay under Anthropic's `maxTurns` / `task_budget` budget reliably. See `agents/skills/dispatch` and `workflow/skills/orchestrate` for the dispatch loop body.
 
 ### 3. Reviewer Validates Compliance
 
