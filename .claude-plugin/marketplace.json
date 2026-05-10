@@ -143,6 +143,14 @@
       "source": "./plugins/themes",
       "category": "appearance",
       "keywords": ["theme", "color", "catppuccin", "tokyo-night", "nord", "dark", "appearance", "harness:cosmetic", "overhead:zero"]
+    },
+    {
+      "name": "cross-repo",
+      "description": "Parallel work across sibling repos with result aggregation",
+      "version": "0.1.0",
+      "source": "./plugins/cross-repo",
+      "category": "orchestration",
+      "tags": ["cross-repo", "harness:multi-agent", "overhead:moderate"]
     }
   ]
 }

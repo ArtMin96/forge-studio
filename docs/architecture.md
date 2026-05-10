@@ -15,7 +15,7 @@ Design rationale, component model, hook mechanics. For research citations, see [
 | 3 | Permission System | What the agent is allowed to do | `behavioral-core` (block-destructive) |
 | 4 | Context Management | What the model sees each turn | `context-engine` |
 | 5 | Memory Architecture | What persists across sessions | `memory` |
-| 6 | Multi-Agent Decomposition | How work is split across agents | `agents` |
+| 6 | Multi-Agent Decomposition | How work is split across agents | `agents` (in-repo) + `cross-repo` (parallel work across sibling repos with workspace ledger at `~/.forge-cross-repo/<run-id>/`) |
 | 7 | Behavioral Steering | Ongoing course correction | `behavioral-core` (hooks) |
 | 8 | Self-Evolution | Auditable propose → assess → commit → rollback over versioned resources | `workflow` + `evaluator` + `memory` (ledger at `.claude/lineage/`) |
 

@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "sync-discovery output",
+  "type": "object",
+  "required": ["only_in_a", "only_in_b", "in_both"],
+  "additionalProperties": false,
+  "properties": {
+    "only_in_a": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["file", "line", "hash"],
+        "additionalProperties": false,
+        "properties": {
+          "file":  {"type": "string"},
+          "line":  {"type": "integer"},
+          "hash":  {"type": "string"}
+        }
+      }
+    },
+    "only_in_b": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["file", "line", "hash"],
+        "additionalProperties": false,
+        "properties": {
+          "file":  {"type": "string"},
+          "line":  {"type": "integer"},
+          "hash":  {"type": "string"}
+        }
+      }
+    },
+    "in_both": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["file_a", "file_b", "hash_a", "hash_b", "divergent"],
+        "additionalProperties": false,
+        "properties": {
+          "file_a":    {"type": "string"},
+          "file_b":    {"type": "string"},
+          "hash_a":    {"type": "string"},
+          "hash_b":    {"type": "string"},
+          "divergent": {"type": "boolean"}
+        }
+      }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Forge Studio bootstrap.
 #
-# Adds the ArtMin96/forge-studio marketplace, installs all 17 plugins to
+# Adds the ArtMin96/forge-studio marketplace, installs all 18 plugins to
 # user scope, and copies templates/CLAUDE.md to ~/.claude/CLAUDE.md
 # (backing up any existing file).
 #
@@ -33,6 +33,7 @@ PLUGINS=(
   rtk-optimizer
   code-graph
   themes
+  cross-repo
 )
 
 # Colour palette — empty when stdout is not a TTY (CI, piped to file, etc.).
@@ -56,7 +57,7 @@ banner() {
   printf "\n"
   printf "  %s%sForge Studio%s   %sharness marketplace for Claude Code%s\n" \
     "$C_BOLD" "$C_CYAN" "$C_RESET" "$C_DIM" "$C_RESET"
-  printf "  %s17 plugins, 62 skills, 58 hooks%s\n\n" "$C_DIM" "$C_RESET"
+  printf "  %s18 plugins, 65 skills, 58 hooks%s\n\n" "$C_DIM" "$C_RESET"
 }
 
 section() {

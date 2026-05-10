@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-17 plugins. 62 skills. 58 hooks. 4 agents. 11 behavioral rules.
+18 plugins. 65 skills. 58 hooks. 4 agents. 11 behavioral rules.
 
 ---
 
@@ -14,7 +14,7 @@ cd forge-studio
 ./install.sh
 ```
 
-`install.sh` registers the marketplace, installs all 17 plugins to user scope, and copies `templates/CLAUDE.md` to `~/.claude/CLAUDE.md` (backing up any existing file). Idempotent — safe to re-run.
+`install.sh` registers the marketplace, installs all 18 plugins to user scope, and copies `templates/CLAUDE.md` to `~/.claude/CLAUDE.md` (backing up any existing file). Idempotent — safe to re-run.
 
 If you ran `./install.sh` from a clone, Forge Studio also exposes its skills under `~/.agents/skills/` (the cross-vendor convention from agentskills.io spec) so other clients (Cursor, Cline, Aider) can discover them. The links point back into your clone — keep the clone around or they will dangle. Manual `/plugin marketplace add` users do not get this surface.
 
@@ -44,6 +44,7 @@ To pick a subset, run these inside Claude Code instead:
 /plugin install rtk-optimizer@forge-studio       # Auto-installs rtk binary + registers global hook
 /plugin install code-graph@forge-studio          # Auto-installs code-review-graph + registers MCP for Tree-sitter code graph
 /plugin install themes@forge-studio              # Curated color themes (Catppuccin Mocha); pick via /theme
+/plugin install cross-repo@forge-studio          # Parallel work across sibling repos with result aggregation
 ```
 
 ### Templates
@@ -79,6 +80,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | [**rtk-optimizer**](plugins/rtk-optimizer/README.md) | Auto-installs [rtk-ai/rtk](https://github.com/rtk-ai/rtk) on first session and runs `rtk init -g`. 60-90% token reduction on shell commands. Opt-out: `FORGE_RTK_DISABLED=1`. | 2 | 0 |
 | [**code-graph**](plugins/code-graph/README.md) | Auto-installs [tirth8205/code-review-graph](https://github.com/tirth8205/code-review-graph). Registers a Tree-sitter MCP graph per repo so Claude Code queries structural context instead of re-reading files. Claude Code only. Opt-out: `FORGE_CODE_GRAPH_DISABLED=1`. | 3 | 0 |
 | [**themes**](plugins/themes/README.md) | Curated color themes for `/theme`: **Catppuccin Mocha**, **Tokyo Night**, **Nord**. Switch via `/theme`; `Ctrl+E` forks any theme into `~/.claude/themes/` for editing. Pure cosmetic — zero hooks. | 0 | 0 |
+| [**cross-repo**](plugins/cross-repo/README.md) | Parallel work across sibling repos: `/federated-fan-out` (per-repo subagents), `/sync-discovery` (pattern comparison across two repos), `/aggregate-results` (verdict matrix from fan-out run) | 0 | 3 |
 
 ### Key Skills
 
