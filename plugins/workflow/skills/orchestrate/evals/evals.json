@@ -1,0 +1,48 @@
+{
+  "skill_name": "orchestrate",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "/orchestrate pipeline — dispatch the active plan with per-task agents.",
+      "files": [
+        {
+          "path": ".claude/plans/active-sprint.md",
+          "content": "# Sprint Plan\n\n## Contract\n\nImplement two small features.\n\n### Scope (in)\n\n- **C1**: `src/foo.py` adds `def foo() -> str`\n- **C2**: `tests/test_foo.py` exits 0 under pytest\n\n### Verification\n\n```bash\npytest tests/test_foo.py\n```\n\n## Tasks\n\n#### T1 — Add foo function\n\nCreate `src/foo.py` with `def foo() -> str` returning `\"foo\"`.\n\n#### T2 — Add test\n\nCreate `tests/test_foo.py` that imports and asserts `foo() == \"foo\"`.\n"
+        }
+      ],
+      "assertions": [
+        "Output confirms pipeline pattern was chosen and names the 'planner -> generator -> reviewer chain' or equivalent formulation from the SKILL.md structural field",
+        "Output shows per-task dispatch: each T1 and T2 heading triggers a separate generator subagent invocation, not a single bundled dispatch",
+        "Output invokes /contract once per task before dispatching the generator, consistent with SKILL.md step 3 instruction to re-read the plan fresh for each task",
+        "Final report line matches the format 'Dispatched: pipeline. Next gate: <...>' as specified in SKILL.md Step 4"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "/orchestrate — start the agentic workflow for my current task.",
+      "files": [],
+      "assertions": [
+        "Output contains a message beginning with or equivalent to 'No active plan.' as specified in SKILL.md Step 1 for the case where no plan file exists in .claude/plans/",
+        "Output directs the user to run the planner first, referencing the agents plugin or /dispatch, and does not fabricate or invent a plan",
+        "Output does not emit 'Dispatched:' or any pattern name, because no dispatch occurs without a plan",
+        "No pattern (single, pipeline, fan-out, tdd) is selected or mentioned as having been executed"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "/orchestrate fan-out src/alpha.py src/beta.py src/gamma.py — apply edits to these three files in parallel.",
+      "files": [
+        {
+          "path": ".claude/plans/refactor-sprint.md",
+          "content": "# Refactor Sprint\n\n## Contract\n\nApply linting fixes to three source files.\n\n### Scope (in)\n\n- **C1**: `src/alpha.py`, `src/beta.py`, `src/gamma.py` pass `flake8`\n\n### Verification\n\n```bash\nflake8 src/alpha.py src/beta.py src/gamma.py\n```\n\n## Tasks\n\n#### T1 — Fix linting\n\nApply flake8 fixes to all three files.\n"
+        }
+      ],
+      "assertions": [
+        "Output confirms 'fan-out' as the chosen pattern, consistent with the SKILL.md decision table row 'fan-out | Dispatch agents plugin /fan-out'",
+        "Output shows that /fan-out was invoked with the explicit file list (alpha.py, beta.py, gamma.py) drawn from the argument or the plan, not a single-agent direct execution",
+        "Output does not invoke the planner -> generator -> reviewer chain; fan-out delegates to /fan-out and does not run pipeline steps",
+        "Final report line names 'fan-out' as the dispatched pattern, consistent with SKILL.md Step 4 'Dispatched: <pattern>. Next gate: <...>' format"
+      ]
+    }
+  ]
+}
