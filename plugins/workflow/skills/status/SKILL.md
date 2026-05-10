@@ -21,7 +21,7 @@ Produces a compact situation report in under ~200 tokens. Read-only. Pulls from 
 ### 1. Active plan
 
 ```bash
-ls -t .claude/plans/*.md 2>/dev/null | head -1
+stat -c '%Y %n' .claude/plans/*.md 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-
 ```
 
 If found: basename, age (days), count of `- [ ]` unchecked items, count of `- [x]` checked items.
@@ -30,7 +30,7 @@ If none: `No active plan.`
 ### 2. Last progress entry
 
 ```bash
-ls -t claude-progress.txt 2>/dev/null | head -1
+stat -c '%Y %n' claude-progress.txt 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-
 ```
 
 If found: file age + tail 1 entry. Suggest `/session-resume` if the user hasn't loaded it yet (check whether the session started today vs days ago).
@@ -39,7 +39,7 @@ If none: `No progress recorded.`
 ### 3. Recent execution traces
 
 ```bash
-ls -t ~/.claude/traces/*.jsonl 2>/dev/null | head -1
+stat -c '%Y %n' ~/.claude/traces/*.jsonl 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-
 ```
 
 If the traces plugin is active: last 5 events from the newest trace file, one per line, formatted as `{event} {summary}`. Use `tail -5` on the JSONL file and render each line's `event` field.
@@ -53,7 +53,7 @@ If unset, report the turn counter from `/tmp/claude-workflow-turn-<session>` if 
 ### 5. Router stats (if traces exist)
 
 ```bash
-ls -t /tmp/claude-router-*/classifications.jsonl 2>/dev/null | head -1
+stat -c '%Y %n' /tmp/claude-router-*/classifications.jsonl 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-
 ```
 
 If found: count of classifications by route (single-agent, pipeline, fan-out, tdd-loop, none). Gives a quick sense of what the session has actually been doing.

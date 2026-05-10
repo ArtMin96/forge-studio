@@ -14,7 +14,7 @@ Analyze execution traces stored in `~/.claude/traces/` to identify patterns acro
 
 ## Process
 
-1. **Read recent trace files**: `ls -t ~/.claude/traces/*.jsonl | head -5` to find the 5 most recent sessions
+1. **Read recent trace files**: `stat -c '%Y %n' ~/.claude/traces/*.jsonl 2>/dev/null | sort -rn | head -5 | cut -d' ' -f2-` to find the 5 most recent sessions
 2. **Parse JSONL entries**: Each line is a JSON object with `type`, `timestamp`, and type-specific fields
 3. **Analyze patterns**:
    - **Repeated failures**: Commands that fail (exit_code != 0) repeatedly across sessions

@@ -15,7 +15,7 @@ Quick overview of recent session activity from `~/.claude/traces/`.
 
 ## Process
 
-1. **Find trace files**: `ls -t ~/.claude/traces/*.jsonl 2>/dev/null | head -10`
+1. **Find trace files**: `stat -c '%Y %n' ~/.claude/traces/*.jsonl 2>/dev/null | sort -rn | head -10 | cut -d' ' -f2-`
 2. **For each file**, read the `session_end` entry (last line with `"type":"session_end"`)
 3. **Aggregate**: total commands, total errors, total files, sessions count
 4. **Show today's session** detail if available

@@ -35,7 +35,7 @@ The `route-prompt.sh` hook auto-classifies every prompt. This skill is the manua
 ### Step 1 — Locate the active plan
 
 ```bash
-ls -t .claude/plans/*.md 2>/dev/null | head -1
+stat -c '%Y %n' .claude/plans/*.md 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-
 ```
 
 If no plan exists, tell the user: **"No active plan. Run the planner first (agents plugin → `/dispatch` → planner) or write a plan by hand in `.claude/plans/`."** Do not fabricate a plan.

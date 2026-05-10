@@ -21,7 +21,7 @@ Raw JSONL traces force the analyzer to parse JSON, filter noise, and navigate li
 ### Step 1: Find Traces
 
 ```bash
-ls -t ~/.claude/traces/*.jsonl | head -5
+stat -c '%Y %n' ~/.claude/traces/*.jsonl 2>/dev/null | sort -rn | head -5 | cut -d' ' -f2-
 ```
 
 Pick the target session file (or use the most recent).
