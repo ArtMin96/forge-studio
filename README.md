@@ -118,6 +118,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | `/router-tune` | workflow | Analyze router miss-fires, emit threshold/regex proposals |
 | `/score-rubric` | evaluator | Aggregate weighted criterion scores into a single rubric result; outputs match `result.schema.json` |
 | `/run-evals` | evaluator | Validate per-skill eval JSON fixtures for structural conformance; emits a checklist of declared expectations |
+| `/run-evals-bench` | evaluator | Comparative benchmark: with-skill vs without-skill, N iterations, emits `benchmark.json` and per-assertion `grading.json` |
 
 ### Agents
 

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OptimizeDescriptionCorpus",
+  "description": "Query corpus for /optimize-description. Positive queries should trigger the skill; negative queries must not.",
+  "type": "object",
+  "required": ["positive", "negative"],
+  "additionalProperties": false,
+  "properties": {
+    "positive": {
+      "type": "array",
+      "description": "Queries that should trigger the skill (true positives).",
+      "items": {"type": "string"},
+      "minItems": 8
+    },
+    "negative": {
+      "type": "array",
+      "description": "Queries that must not trigger the skill (true negatives / near-miss).",
+      "items": {"type": "string"},
+      "minItems": 8
+    }
+  }
+}

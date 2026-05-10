@@ -76,6 +76,25 @@ case "$AGENT_TYPE" in
     fi
     append_spec_delta "generator"
     mark_features_done
+
+    # Emit handoff advisory when a plan with ## Contract section exists.
+    # The helper appends a handoff_open entry that turn-gate.sh ages and finalizes.
+    if [ -d "$PLANS_DIR" ]; then
+      LATEST_PLAN_FILE=$(find "$PLANS_DIR" -maxdepth 1 -name '*.md' -printf '%T@ %p\n' 2>/dev/null \
+        | sort -rn | head -1 | cut -d' ' -f2-)
+      if [ -n "$LATEST_PLAN_FILE" ] && grep -q '^## Contract' "$LATEST_PLAN_FILE" 2>/dev/null; then
+        PLAN_BASE=$(basename "$LATEST_PLAN_FILE")
+        LIB_DIR="$(dirname "$0")/../lib"
+        HANDOFF_ID=$(bash "${LIB_DIR}/handoff-state.sh" open "$PLAN_BASE" 2>/dev/null || true)
+        {
+          printf '[handoff] generator complete. plan: %s | next gate: /verify %s\n' \
+            "$PLAN_BASE" "${PLAN_BASE%.md}"
+          if [ -n "$HANDOFF_ID" ]; then
+            printf '[handoff] handoff_id=%s tracked in .claude/handoffs.jsonl\n' "$HANDOFF_ID"
+          fi
+        } >&2
+      fi
+    fi
     ;;
   reviewer|agents:reviewer|evaluator:adversarial-reviewer)
     echo "[workflow] Reviewer finished. Before claiming done: run /verify (evaluator plugin) with evidence — commands, outputs, diffs."

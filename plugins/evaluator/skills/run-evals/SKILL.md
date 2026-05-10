@@ -1,7 +1,7 @@
 ---
 name: run-evals
 description: Validate eval JSON files for structural conformance against the per-skill evals/ convention. Parses each file, checks required fields and types, and emits a human-readable checklist of declared expectations.
-when_to_use: Reach for this when you want to confirm that eval fixtures are well-formed before handing them off to a judge runner, or when adding a new evals/ case and verifying its shape. Do NOT use for project lint or test execution — use `/healthcheck` instead; do NOT use for criterion-weighted scoring — use `/score-rubric` instead.
+when_to_use: Reach for this when you want to confirm that eval fixtures are well-formed before handing them off to a judge runner, or when adding a new evals/ case and verifying its shape. Do NOT use for project lint or test execution — use `/healthcheck` instead; do NOT use for criterion-weighted scoring — use `/score-rubric` instead; do NOT use for with-skill vs without-skill benchmarks — use `/run-evals-bench` instead.
 argument-hint: <eval-file-or-glob>
 disable-model-invocation: true
 allowed-tools:

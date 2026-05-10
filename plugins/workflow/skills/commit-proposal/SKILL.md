@@ -44,6 +44,7 @@ Given slug `rules.d/25-brevity.txt`, map to on-disk path. Resource-kind resoluti
 |---|---|
 | `rules.d/<f>` | `plugins/behavioral-core/hooks/rules.d/<f>` |
 | `skills/<plugin>/<name>` | `plugins/<plugin>/skills/<name>/SKILL.md` |
+| `description-proposal/<plugin>/<name>` | `plugins/<plugin>/skills/<name>/SKILL.md` (frontmatter `description` only — output of `/optimize-description`) |
 | `hooks/<plugin>/<script>` | `plugins/<plugin>/hooks/<script>` |
 | `memory/topics/<slug>` | `.claude/memory/topics/<slug>.md` |
 | `env/<VAR>` | `.claude/settings.json` key `env.<VAR>` |

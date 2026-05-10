@@ -14,6 +14,12 @@ COUNT=$(cat "$COUNTFILE" 2>/dev/null || echo 0)
 COUNT=$((COUNT + 1))
 echo "$COUNT" > "$COUNTFILE"
 
+# Persist turn count to the project-level file so handoff-state.sh can compute ages
+# across sessions within the same worktree.
+TURN_COUNTER_FILE=".claude/turn-counter"
+mkdir -p .claude 2>/dev/null || true
+echo "$COUNT" > "$TURN_COUNTER_FILE" 2>/dev/null || true
+
 INTERVAL="${WORKFLOW_TURN_GATE_INTERVAL:-3}"
 # Only run checks every N turns.
 if [ $((COUNT % INTERVAL)) -ne 0 ]; then
@@ -21,6 +27,53 @@ if [ $((COUNT % INTERVAL)) -ne 0 ]; then
 fi
 
 MSG=""
+
+# Scan open handoffs: age them out or match against a /verify invocation.
+# Reads .claude/handoffs.jsonl — written by after-subagent.sh via handoff-state.sh.
+HANDOFFS_FILE=".claude/handoffs.jsonl"
+LEDGER_FILE=".claude/lineage/ledger.jsonl"
+HANDOFF_SKIP_TURNS="${HANDOFF_SKIP_TURNS:-10}"
+LIB_DIR="$(dirname "$0")/../lib"
+
+if [ -f "$HANDOFFS_FILE" ]; then
+  # Collect all handoff_ids that have a handoff_open but no close event yet.
+  while IFS= read -r line; do
+    hid=$(echo "$line" | grep -o '"handoff_id":"[^"]*"' | cut -d'"' -f4)
+    plan=$(echo "$line" | grep -o '"plan":"[^"]*"' | cut -d'"' -f4)
+    [ -z "$hid" ] && continue
+
+    # Skip if a close event already exists for this id.
+    if grep -q "\"$hid\"" "$HANDOFFS_FILE" 2>/dev/null && \
+       grep "\"$hid\"" "$HANDOFFS_FILE" | grep -qE '"event":"(handoff_close|handoff_resolved|handoff_skipped)"'; then
+      continue
+    fi
+
+    # Check if the current prompt matches /verify <plan-basename-without-ext>.
+    PLAN_SLUG="${plan%.md}"
+    PROMPT_TEXT=$(echo "$INPUT" | jq -r '.prompt // empty' 2>/dev/null || true)
+    if echo "$PROMPT_TEXT" | grep -qE "^/verify[[:space:]]+${PLAN_SLUG}([[:space:]]|$)"; then
+      bash "${LIB_DIR}/handoff-state.sh" close "$hid" "handoff_resolved" 2>/dev/null || true
+      if [ -d "$(dirname "$LEDGER_FILE")" ]; then
+        ts=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+        printf '{"ts":"%s","event":"handoff_resolved","handoff_id":"%s","plan":"%s"}\n' \
+          "$ts" "$hid" "$plan" >> "$LEDGER_FILE" 2>/dev/null || true
+      fi
+      continue
+    fi
+
+    # Age check: if open handoff is older than HANDOFF_SKIP_TURNS, mark skipped.
+    age=$(bash "${LIB_DIR}/handoff-state.sh" age "$hid" 2>/dev/null || echo 0)
+    if [ "${age:-0}" -ge "$HANDOFF_SKIP_TURNS" ] 2>/dev/null; then
+      bash "${LIB_DIR}/handoff-state.sh" close "$hid" "handoff_skipped" 2>/dev/null || true
+      if [ -d "$(dirname "$LEDGER_FILE")" ]; then
+        ts=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+        printf '{"ts":"%s","event":"handoff_skipped","handoff_id":"%s","plan":"%s"}\n' \
+          "$ts" "$hid" "$plan" >> "$LEDGER_FILE" 2>/dev/null || true
+      fi
+      MSG="${MSG}[handoff] Handoff for ${plan} was not verified within ${HANDOFF_SKIP_TURNS} turns. Appended handoff_skipped to ledger."$'\n'
+    fi
+  done < <(grep '"event":"handoff_open"' "$HANDOFFS_FILE" 2>/dev/null || true)
+fi
 
 # Unchecked plan items.
 PLANS_DIR=".claude/plans"
