@@ -1,0 +1,53 @@
+{
+  "skill_name": "verify",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Run /verify on the current plan — confirm every Contract criterion has evidence before I mark this done.",
+      "files": [
+        {
+          "path": ".claude/plans/dummy.md",
+          "content": "# Dummy Plan\n\n## Contract\n\nAdd a hello function and a passing test.\n\n### Scope (in)\n\n- **C1**: `hello.py` exports `def hello() -> str` returning `\"hello\"`\n- **C2**: `pytest tests/test_hello.py` exits 0\n\n### Verification\n\n```bash\npython3 -c \"from hello import hello; assert hello() == 'hello'\"\npytest tests/test_hello.py\n```\n"
+        }
+      ],
+      "assertions": [
+        "Output contains an evidence line citing each criterion id (C1, C2) from the plan's Contract section",
+        "Each criterion is matched to the output of its verification command, not a paraphrase",
+        "Overall verdict is PASS only when all criterion evidence lines are present",
+        "No criterion is marked done without a quoted command result or file:line reference"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I finished my changes — run /verify to check everything is good.",
+      "files": [
+        {
+          "path": ".claude/plans/no-contract.md",
+          "content": "# Simple Plan\n\nDo some refactoring.\n\n## Tasks\n\n- Rename `foo` to `bar`\n"
+        }
+      ],
+      "assertions": [
+        "Output contains an explicit error or refusal message indicating no Contract section was found in the active plan",
+        "Output does not emit a PASS or VERIFIED verdict when the Contract is absent",
+        "The refusal message identifies which plan file was inspected",
+        "No evidence lines are emitted because there are no criteria to verify"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Verify the plan — one of the test commands is broken and should fail.",
+      "files": [
+        {
+          "path": ".claude/plans/failing.md",
+          "content": "# Failing Plan\n\n## Contract\n\nRun a command that exits non-zero.\n\n### Scope (in)\n\n- **C1**: `exit_code_check.sh` exits 0\n\n### Verification\n\n```bash\nbash -c 'exit 1'\n```\n"
+        }
+      ],
+      "assertions": [
+        "Final verdict is FAIL when any verification command exits non-zero",
+        "Non-zero exit propagates to verdict — the overall result is not PASS even if other criteria passed",
+        "Output quotes or includes the actual command output (or its exit code) from the failing command",
+        "The failing criterion is identified by name or id in the verdict, not silently omitted"
+      ]
+    }
+  ]
+}
