@@ -9,7 +9,7 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
-logical: report shows PASS / DRIFT for each of the 13 checks with concrete fix lines for any drift
+logical: report shows PASS / DRIFT for each of the 14 checks with concrete fix lines for any drift
 ---
 
 # Entropy Scan — Codebase Health Validation
@@ -18,7 +18,7 @@ Detect drift between documentation and reality. Run periodically (weekly recomme
 
 ## Instructions
 
-Run all 13 checks (1–8, 9a, 9b, 10–13). Report results in the structured format below. **Do not modify any files** — report issues and propose fixes only.
+Run all 14 checks (1–8, 9a, 9b, 10–14). Report results in the structured format below. **Do not modify any files** — report issues and propose fixes only.
 
 ### Check 1: Plugin Count Drift
 
@@ -151,6 +151,18 @@ The cross-plugin policy index at `plugins/diagnostics/registry/policies.json` mu
 ```bash
 python3 plugins/diagnostics/skills/entropy-scan/scripts/check-policy-registry.py
 ```
+
+### Check 14: Sprawl / Mystery-House Signals
+
+Periodic measurement catches Mystery-House drift early — when machine-speed plugin/skill growth outpaces a sole maintainer's coordination capacity (Breunig 2026-03-26, Lesson 7).
+
+```bash
+bash plugins/diagnostics/skills/entropy-scan/scripts/sprawl.sh .
+```
+
+Reports four metrics with WARN / ALARM thresholds: total plugin count, max skills-per-plugin, top hook-event collision count, cross-plugin string references. Exit 1 on any WARN or ALARM. Report results verbatim — do not interpret beyond surfacing the verdict.
+
+When two events tie for top collision count (Counter ordering), the script reports only one — note both in any output if a second event is also at the same count. Cross-plugin references that originate predominantly from `diagnostics/` are structural (diagnostics enumerates plugins as its job) and not a sign of sprawl per se; surface the WARN but contextualize.
 
 ## Output Format
 
