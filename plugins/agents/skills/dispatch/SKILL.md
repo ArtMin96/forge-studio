@@ -65,3 +65,15 @@ Risk level: <low/medium/high>
 - **Pipeline chosen for a one-shot bug fix.** The planner→generator→reviewer round-trip costs ~3× tokens; a 1–3 file fix doesn't earn the overhead. Prefer Single Agent unless the change spans concerns or carries deploy risk.
 - **Fan-out with shared mutable state.** Two parallel subagents editing the same file race; both succeed, second overwrites first. The dispatch decision should refuse fan-out when the file list overlaps.
 - **LLM fallback non-termination.** When `route-prompt-llm.sh` is in play and disagrees with the shell verdict, the router can flap. Cap with `WORKFLOW_ROUTER_MODE=shell` for deterministic dispatch when investigating.
+
+## Rebuttals
+
+Common rationalizations for shortcutting the routing decision, with rebuttals:
+
+| Excuse | Rebuttal |
+|---|---|
+| "It's obviously a single-file change — single-agent." | "Obvious" is the most common failure pre-condition. Single-file edits with cross-cutting type or test impact still benefit from pipeline review. The classification cost is one inference; the cost of a wrong route is the whole task. |
+| "Fan-out is overkill for 3 files." | Fan-out's value is **isolation**, not parallelism. Three independent files in one context window contaminate each other; three subagents do not. File count is a weak proxy for the right route. |
+| "Skip TDD just this once — the requirement is clear." | "Clear" requirements are exactly when TDD is cheapest — the test writes itself. Skipping it forfeits the artifact that proves the requirement was met. |
+| "I'll just do it without recording the route." | An undocumented routing decision is unreviewable. The one-line classification with reason is the audit trail; without it, a wrong route looks identical to a right one in retrospect. |
+| "Pipeline is too heavy for a refactor." | Pipeline overhead is fixed; refactor risk scales with surface area. Renaming three callers across two files is exactly when the planner→generator→reviewer separation pays off. |
