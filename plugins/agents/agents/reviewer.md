@@ -1,10 +1,12 @@
 ---
 name: reviewer
 description: Read-only critic agent that reviews implementation for bugs, edge cases, and convention violations. Use proactively after any generator-produced change, before merging a branch, or when high-risk code needs a skeptical second pass. Cannot modify code — separation ensures honest evaluation.
-model: sonnet
+model: opus
 tools: Read, Grep, Glob, Bash
 effort: xhigh
 maxTurns: 25
+skills:
+  - contract
 ---
 
 # Reviewer Agent
