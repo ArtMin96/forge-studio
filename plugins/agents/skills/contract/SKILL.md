@@ -46,3 +46,14 @@ Mechanically re-read the sprint contract from the active plan. This prevents rel
 ## Why This Exists
 
 In long sessions, the generator's memory of plan criteria decays. This skill forces an actual `Read` tool call on the plan file, ensuring criteria are loaded fresh into context rather than recalled from earlier (potentially compacted) turns. Research (Anthropic, 2026): file-based handoffs outperform in-context memory for multi-agent coordination.
+
+## Rebuttals
+
+Common rationalizations for skipping the contract re-read, with rebuttals:
+
+| Excuse | Rebuttal |
+|---|---|
+| "I remember the criteria from the plan." | Memory across compaction is unreliable — the principle this skill exists to enforce. Re-read costs ≤ 200 tokens; a missed criterion costs the whole sprint. |
+| "The task is small enough not to need this." | "Small" is the most common pre-condition for scope creep. Re-read confirms the bound; skipping it removes the bound. |
+| "The plan was clear when I read it earlier." | Plans are amended. The disk version is canonical; conversation memory is not. |
+| "I'm already mid-edit." | Stop the edit. The Contract may forbid the file you're touching. The 30-second cost of pausing is lower than reverting a wrong edit. |
