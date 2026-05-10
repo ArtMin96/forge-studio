@@ -2,14 +2,19 @@
 name: verify
 description: Use whenever a task is about to be marked done — runs the listed verification commands (tests, lint, type-check, behavioral spot-check), captures the actual output, and compares against `.claude/features.json` or the `/contract` criteria. Refuses to mark done unless every gate produced evidence; closes the trust-then-verify gap that produces "I think it works" claims.
 when_to_use: Reach for this before committing, merging, or telling the user "fixed". Do NOT use for deep adversarial review — that's `/challenge` (fork-based critique); verify is the cheap, in-line evidence gate that runs first.
-disable-model-invocation: true
 effort: xhigh
 allowed-tools:
   - Read
   - Bash
   - Glob
   - Grep
-logical: VERIFIED yes/no with method (tests / build / manual) and one-line evidence summary
+scheduling: an active plan exists in `.claude/plans/` with verification commands declared in its Contract section, OR a generator has just stopped and contract-check.sh nudged
+structural:
+  - Read the plan's verification commands verbatim
+  - Execute each command and capture exit code + truncated output
+  - Cross-reference declared artifacts against the working tree
+  - Emit a per-criterion pass/fail report with quoted evidence
+logical: every Contract success criterion has an evidence line (command output or file:line reference); overall verdict is PASS only if all criteria show evidence
 ---
 
 # Verify: Evidence Before Assertions

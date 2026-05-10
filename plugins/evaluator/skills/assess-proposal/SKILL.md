@@ -12,7 +12,13 @@ allowed-tools:
   - Grep
   - Glob
   - Bash
-logical: verdict JSON (pass/fail) written to .claude/lineage/verdicts/<basename>.json plus assess ledger entry
+scheduling: a self-evolution proposal file exists and the user invokes assessment before commit-proposal
+structural:
+  - Load the proposal payload and target file(s)
+  - Score against the SEPL rubric (severity, evidence, alignment, risk)
+  - Detect cargo-cult signals (disable switches on always-correct behavior, scope creep)
+  - Emit accept | reject | revise verdict with weighted score
+logical: a single verdict (accept | reject | revise) is emitted with per-rubric-criterion scores summing to the documented weights and at least one quoted-evidence line per non-zero score
 ---
 
 # /assess-proposal — SEPL `assess` Operator

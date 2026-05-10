@@ -9,7 +9,15 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
-logical: dispatch pattern picked and the corresponding skill (/dispatch, /fan-out, /tdd-loop) handed off to
+scheduling: an active plan exists in `.claude/plans/` and the user invokes manual entry into the agentic workflow (overriding route-prompt.sh classification)
+structural:
+  - Locate the active plan via mtime
+  - Resolve the requested pattern (single | pipeline | fan-out | tdd | auto)
+  - "Pipeline pattern dispatches /contract then the planner -> generator -> reviewer chain"
+  - "Fan-out pattern invokes /fan-out with an explicit file list drawn from the plan"
+  - "TDD pattern hands off to /tdd-loop with acceptance criteria"
+  - Report the dispatched pattern and next gate
+logical: exactly one pattern is dispatched; report line names the pattern and the next hook/skill that fires
 ---
 
 # /orchestrate — Manual Entry Into the Agentic Workflow

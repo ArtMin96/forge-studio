@@ -3,7 +3,13 @@ name: dispatch
 description: Use when the user describes a multi-step feature or refactor and you need to decide whether to handle it solo, dispatch a parallel `/fan-out`, or run a `/worktree-team` planner→generator→reviewer pipeline. Outputs a routing recommendation with the reasoning behind it.
 when_to_use: Reach for this before starting any task that may touch 5+ files, has independent sub-tasks worth parallelizing, or carries enough risk to warrant separated planning and review. Do NOT use it as the executor itself — once a route is picked, hand off to `/fan-out` for parallel batches or `/worktree-team` for full pipelines.
 disable-model-invocation: true
-logical: route classification (single-agent / fan-out / pipeline / tdd-loop) emitted with reason and risk level
+scheduling: user describes a task whose scope, file count, or operation type warrants a routing decision before execution
+structural:
+  - Read the task description and infer file count, operation type, interdependence
+  - Apply the dispatch decision matrix (single-agent vs fan-out vs pipeline vs tdd-loop)
+  - Emit a route classification with reason and risk level
+  - Hand off to the chosen pattern's invocation skill
+logical: a single route classification (single-agent | fan-out | pipeline | tdd-loop) is emitted with a one-line reason and a risk-level tag
 ---
 
 # /dispatch — Task Decomposition Router

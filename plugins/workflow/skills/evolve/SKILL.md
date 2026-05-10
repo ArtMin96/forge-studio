@@ -11,7 +11,13 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
-logical: propose -> assess -> commit cycle ran; summary report shows counts (received / passed / committed / rejected)
+scheduling: user requests a self-modification (edit to a hook, skill, rule, or convention) that warrants the propose -> assess -> commit loop instead of direct edit
+structural:
+  - Capture the current state of the target resource
+  - Generate a proposal (diff + rationale) into the proposals queue
+  - Hand off to /assess-proposal for independent scoring
+  - On accept verdict, hand off to /commit-proposal for landing
+logical: a proposal file is written under `.claude/lineage/proposals/` containing diff + rationale; downstream assess + commit complete or the proposal is explicitly rejected with logged reason
 ---
 
 # /evolve — SEPL Orchestrator

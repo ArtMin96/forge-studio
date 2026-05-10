@@ -11,7 +11,14 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
-logical: RED -> GREEN -> REFACTOR sequence completed; each phase gated by a real test command exit
+scheduling: a feature or bugfix has acceptance criteria that can be expressed as failing tests before implementation
+structural:
+  - Write a failing test that encodes one acceptance criterion
+  - Run the test; confirm it fails for the expected reason
+  - Implement the minimal code to make the test pass
+  - Run the test again; confirm it passes
+  - Commit; advance to next criterion
+logical: each criterion has a paired test commit (RED) + implementation commit (GREEN); test suite is fully green at sprint end; no implementation commit lacks a preceding RED commit
 ---
 
 # /tdd-loop — Red → Green → Refactor
