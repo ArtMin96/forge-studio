@@ -3,50 +3,50 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "Run /verify on the current plan — confirm every Contract criterion has evidence before I mark this done.",
+      "prompt": "/verify — confirm this task is done. All verification commands should pass.",
       "files": [
         {
-          "path": ".claude/plans/dummy.md",
-          "content": "# Dummy Plan\n\n## Contract\n\nAdd a hello function and a passing test.\n\n### Scope (in)\n\n- **C1**: `hello.py` exports `def hello() -> str` returning `\"hello\"`\n- **C2**: `pytest tests/test_hello.py` exits 0\n\n### Verification\n\n```bash\npython3 -c \"from hello import hello; assert hello() == 'hello'\"\npytest tests/test_hello.py\n```\n"
+          "path": ".claude/plans/add-hello.md",
+          "content": "# Add Hello\n\n## Contract\n\n### Verification\n\n```bash\npython3 -c \"print('hello')\"\necho 'build ok'\n```\n"
         }
       ],
       "assertions": [
-        "Output contains an evidence line citing each criterion id (C1, C2) from the plan's Contract section",
-        "Each criterion is matched to the output of its verification command, not a paraphrase",
-        "Overall verdict is PASS only when all criterion evidence lines are present",
-        "No criterion is marked done without a quoted command result or file:line reference"
+        "Output emits 'VERIFIED: Yes' (the exact literal from SKILL.md §5 verdict block template) — not 'PASS', not 'VERIFIED: TRUE', not 'VERIFIED: yes'",
+        "The EVIDENCE: line in the §5 verdict block is evidence quoted, not paraphrased — §3b mandates 'copy-paste the real test output, build output, or command result'; a summary like 'tests passed' is explicitly disallowed",
+        "Each verification command's real stdout/stderr + exit code appears verbatim in the report body — §3b rule: 'If you can't quote real output, you haven't verified'",
+        "No criterion is reported as done without a corresponding captured output artifact from running its verify_cmd"
       ]
     },
     {
       "id": 2,
-      "prompt": "I finished my changes — run /verify to check everything is good.",
+      "prompt": "/verify — one of my verification commands fails with exit code 1. Check what's broken.",
       "files": [
         {
-          "path": ".claude/plans/no-contract.md",
-          "content": "# Simple Plan\n\nDo some refactoring.\n\n## Tasks\n\n- Rename `foo` to `bar`\n"
+          "path": ".claude/plans/broken-test.md",
+          "content": "# Broken Test\n\n## Contract\n\n### Verification\n\n```bash\npython3 -c \"print('step 1 ok')\"\nbash -c 'echo \"FAILED: assertion error\"; exit 1'\n```\n"
         }
       ],
       "assertions": [
-        "Output contains an explicit error or refusal message indicating no Contract section was found in the active plan",
-        "Output does not emit a PASS or VERIFIED verdict when the Contract is absent",
-        "The refusal message identifies which plan file was inspected",
-        "No evidence lines are emitted because there are no criteria to verify"
+        "Output emits 'VERIFIED: No' (the exact literal from SKILL.md §5 verdict block template) — not 'FAIL', not 'VERIFIED: NO', not 'UNVERIFIED'",
+        "The EVIDENCE: line in the §5 verdict block cites the actual output of the failing command (per §3b), not a generic 'a command failed' paraphrase",
+        "The failing command's actual stdout/stderr ('FAILED: assertion error') and non-zero exit code are quoted in the report body, satisfying §3b's 'quote the actual output' rule",
+        "The overall verdict remains 'VERIFIED: No' even when earlier commands in the list succeeded — a single non-zero exit is sufficient per §5 logic"
       ]
     },
     {
       "id": 3,
-      "prompt": "Verify the plan — one of the test commands is broken and should fail.",
+      "prompt": "/verify — check the feature checklist. Some entries are marked manual and should not be auto-executed.",
       "files": [
         {
-          "path": ".claude/plans/failing.md",
-          "content": "# Failing Plan\n\n## Contract\n\nRun a command that exits non-zero.\n\n### Scope (in)\n\n- **C1**: `exit_code_check.sh` exits 0\n\n### Verification\n\n```bash\nbash -c 'exit 1'\n```\n"
+          "path": ".claude/features.json",
+          "content": "[\n  {\"id\": \"F1\", \"description\": \"API endpoint responds 200\", \"status\": \"in_progress\", \"verify_cmd\": \"curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/health\"},\n  {\"id\": \"F2\", \"description\": \"Manual browser check: confirm dropdown renders\", \"status\": \"in_progress\", \"verify_cmd\": \"# manual\"},\n  {\"id\": \"F3\", \"description\": \"DB migration applied\", \"status\": \"pending\", \"verify_cmd\": \"# manual\"}\n]\n"
         }
       ],
       "assertions": [
-        "Final verdict is FAIL when any verification command exits non-zero",
-        "Non-zero exit propagates to verdict — the overall result is not PASS even if other criteria passed",
-        "Output quotes or includes the actual command output (or its exit code) from the failing command",
-        "The failing criterion is identified by name or id in the verdict, not silently omitted"
+        "F2 and F3 (whose verify_cmd is '# manual') are not executed — the skill's §features.json execution step 1 mandates skipping '# manual' entries",
+        "F2 and F3 appear in the report as needing human check, not as passed or failed — manual entries reported as needing human check, never auto-flipped to done",
+        "F2 and F3 are not flipped to status 'done' — §features.json step 4 states 'Never auto-flip on # manual'",
+        "F1 (with a real verify_cmd) is executed and its actual command output is quoted in the report per §3b, demonstrating the distinction between runnable and manual entries"
       ]
     }
   ]
