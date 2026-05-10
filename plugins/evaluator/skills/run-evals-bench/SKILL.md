@@ -2,6 +2,7 @@
 name: run-evals-bench
 description: Run comparative benchmarks for a skill — with-skill vs without-skill, N iterations each. Emits per-iteration benchmark.json with pass_rate/time/token mean+stddev+delta, and per-run grading.json with per-assertion evidence.
 when_to_use: Reach for this when you want quantitative proof that a skill improves Claude's outputs — before publishing or after a description change. Do NOT use for structural eval validation — use /run-evals instead; do NOT use for rubric-weighted scoring without a benchmark context — use /score-rubric instead.
+disable-model-invocation: true
 argument-hint: --skill <name> [--iterations N] [--baseline {none,prev}] [--out <dir>] [--mock]
 scheduling: plugins/<plugin>/skills/<skill>/evals/evals.json exists and has ≥1 eval case
 structural:

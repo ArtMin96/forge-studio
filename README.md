@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-18 plugins. 65 skills. 58 hooks. 4 agents. 11 behavioral rules.
+18 plugins. 67 skills. 58 hooks. 4 agents. 11 behavioral rules.
 
 ---
 
