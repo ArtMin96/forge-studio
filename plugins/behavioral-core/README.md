@@ -1,6 +1,6 @@
 # behavioral-core
 
-Behavioral steering through hooks. Eleven principle-based rules injected into every turn, plus mechanical guards against destructive commands and out-of-scope edits.
+Behavioral steering through hooks. Twelve principle-based rules injected into every turn, plus mechanical guards against destructive commands and out-of-scope edits.
 
 ## What it does
 

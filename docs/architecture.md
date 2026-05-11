@@ -263,7 +263,7 @@ Forge Studio uses hooks for enforcement, skills for guidance. Anything that must
 
 ## Behavioral Rules (`rules.d/`)
 
-11 rules in `plugins/behavioral-core/hooks/rules.d/`. Each `.txt` file = one behavioral rule. Re-injected every message via `behavioral-anchor.sh`.
+12 rules in `plugins/behavioral-core/hooks/rules.d/`. Each `.txt` file = one behavioral rule. Re-injected every message via `behavioral-anchor.sh`.
 
 | # | Rule | Purpose |
 |---|------|---------|
