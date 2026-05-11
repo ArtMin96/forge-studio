@@ -23,10 +23,13 @@ NeoSigma extended this further with a self-improving loop, demonstrating **39.3%
 
 ### Collection (Automatic)
 
-Three hooks fire silently during every session:
+Four hooks fire silently during every session:
 
 ```text
 Session Start
+  │
+  ├── User submits prompt ──► UserPromptSubmit ──► collect-user-turn.sh
+  │                            Records: prompt length, session id (no content stored)
   │
   ├── User runs commands ──► PostToolUse:Bash ──► collect-bash-trace.sh
   │                            Records: command, exit code, output preview (500 chars)
@@ -38,7 +41,7 @@ Session Start
                                Aggregates: total commands, errors, files modified
 ```
 
-All three hooks:
+All four hooks:
 - Exit with code 0 (info only, never blocks)
 - Have a 5-10 second timeout (fail silently if slow)
 - Can be disabled via `FORGE_TRACES_ENABLED=0`
@@ -109,6 +112,19 @@ Shows a table of recent sessions with command counts, error rates, and files mod
 | 2026-04-06 | 47       | 5      | 8              | 10.6%      |
 | 2026-04-05 | 32       | 2      | 12             | 6.3%       |
 ```
+
+### `/trace-clarification` — Clarification-Timing Lens
+
+Per-session ratio of how much work ran before the first mid-session user turn arrived. Reads `user_turn` entries from the JSONL trace and counts preceding `bash` / `file` actions. High ratios indicate clarification arrived after most of the trajectory was already committed — work that may not survive the clarified intent.
+
+```text
+session                | first_clarify_at_action | actions_before | total | waste_ratio
+-----------------------|-------------------------|----------------|-------|------------
+2026-05-10-a1b2c3d4    | 18                      | 17             | 24    | 0.71
+2026-05-09-a1b2c3d4    | 4                       | 3              | 19    | 0.16
+```
+
+Use as a follow-up to `/trace-stats` when sessions look noisy but the per-command stats look clean — the cost may be timing-shaped, not error-shaped.
 
 ### `/trace-review` — Pattern Analysis
 

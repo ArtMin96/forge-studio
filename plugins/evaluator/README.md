@@ -33,7 +33,7 @@ The forked `adversarial-reviewer` agent runs `/assess-proposal` and `/challenge`
 | `/assess-proposal` | Adversarial review of a self-evolution proposal. Emits pass/fail against four criteria |
 | `/challenge` | Two-stage critique — self-review against the diff, then git-history verification |
 | `/devils-advocate` | Strongest counter-case before committing — structured tradeoff with opposing evidence |
-| `/grill-me` | Stress-test a plan. Walks decision branches, refuses to move on until shared understanding is reached |
+| `/grill-me` | Stress-test a plan. Walks decision branches, refuses to move on until shared understanding is reached. Also invoked at plan-execution start when the active plan has unresolved `(dimension: goal` or `(dimension: context` open questions |
 | `/postmortem` | Convert a fix into a durable lesson. Root cause + classification + "could a hook catch this?" |
 | `/prediction-audit` | Join SEPL proposal predictions against post-commit traces. Reports per-resource error |
 | `/verify-refs` | Cross-check claimed file paths, function names, URLs against the actual repo. Catches hallucinated references |
