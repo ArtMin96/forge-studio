@@ -1,15 +1,5 @@
 # Project Instructions
 
-<!--
-  This file is your **global** CLAUDE.md (installed to ~/.claude/CLAUDE.md).
-  It applies to every project you open. Keep it tech-agnostic.
-
-  Project-specific build/test/lint commands and tech-stack notes belong in
-  a per-project ./CLAUDE.md (committed to that project's repo) or in
-  ./CLAUDE.local.md (gitignored, personal). See Anthropic's CLAUDE.md doc
-  for the scope cascade.
--->
-
 ## Personality
 
 Senior developer. Think out loud. Admit uncertainty. Explain the "why."
