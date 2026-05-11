@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-18 plugins. 67 skills. 61 hooks. 4 agents. 12 behavioral rules.
+18 plugins. 68 skills. 62 hooks. 4 agents. 12 behavioral rules.
 
 ---
 
@@ -71,7 +71,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | [**workflow**](plugins/workflow/README.md) | Hook-driven agentic orchestrator: auto-routing, sprint-contract, TDD, /progress-log nudges, self-evolution loop, **/living-spec** (auto-updating spec via after-subagent) | 5 | 10 |
 | [**agents**](plugins/agents/README.md) | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries, worktree-team orchestration, directory-ownership + output-schema checks | 3 | 5 |
 | [**reference**](plugins/reference/README.md) | Hidden Claude Code features: thinking modes, parallel patterns, CLI piping | 0 | 3 |
-| [**traces**](plugins/traces/README.md) | JSONL execution traces, compiled views, failure mining, harness evolution | 5 | 4 |
+| [**traces**](plugins/traces/README.md) | JSONL execution traces, compiled views, failure mining, harness evolution | 6 | 5 |
 | [**diagnostics**](plugins/diagnostics/README.md) | `/entropy-scan` + `/validate-marketplace` + `/docs-maintenance` + **`/rest-audit`** (R.E.S.T. outcomes) + **`/md-structure`** (Karpathy 4-section audit) + **`/ssl-audit`** (SSL frontmatter coverage) + `/policies-list` + `/startup-profile` | 0 | 8 |
 | [**caveman**](plugins/caveman/README.md) | Always-on compressed output (~65% token savings). Survives compaction. | 2 | 1 |
 | [**token-efficiency**](plugins/token-efficiency/README.md) | Duplicate read detection, session token audit | 1 | 1 |
@@ -105,6 +105,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | `/dispatch` | agents | Analyze task, recommend single-agent vs fan-out vs pipeline |
 | `/trace-compile` | traces | Compile raw JSONL traces into summary and error views |
 | `/trace-evolve` | traces | Mine failure patterns, propose harness improvements |
+| `/trace-clarification` | traces | Compute pre-clarification action ratio per session from JSONL traces |
 | `/healthcheck` | evaluator | Run quality pipeline (Pint + Larastan + optional tests) |
 | `/audit-context` | context-engine | Analyze token overhead from CLAUDE.md, plugins, MCP servers |
 | `/entropy-scan` | diagnostics | Full 6-check codebase health scan |
@@ -135,10 +136,10 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 
 ## Active Hooks
 
-Hooks fire automatically. No commands needed. 61 hook command registrations across 13 plugins, spanning all major events:
+Hooks fire automatically. No commands needed. 62 hook command registrations across 13 plugins, spanning all major events:
 
 - **Session lifecycle** — `SessionStart` (11 hooks), `SessionEnd`, `PreCompact` (3), `PostCompact` (2)
-- **Per-turn** — `UserPromptSubmit` (5 hooks), `Stop`, `StopFailure`
+- **Per-turn** — `UserPromptSubmit` (6 hooks), `Stop`, `StopFailure`
 - **Tool execution** — `PreToolUse` (9 deny-chain hooks), `PostToolUse` (18), `PostToolUseFailure` (2)
 - **Agent / Task** — `SubagentStop` (3), `TaskCreated`, `TaskCompleted`
 

@@ -1,0 +1,20 @@
+{
+  "skill_name": "trace-clarification",
+  "evals": [
+    {
+      "id": "waste-ratio-from-synthetic-trace",
+      "prompt": "Run /trace-clarification on the synthetic trace at synthetic-trace.jsonl and tell me the waste ratio.",
+      "files": [
+        {
+          "path": "synthetic-trace.jsonl",
+          "content": "{\"timestamp\":\"2026-05-10T10:00:00Z\",\"type\":\"user_turn\",\"prompt_length\":42,\"session_id\":\"abc123\",\"cwd\":\"/test\"}\n{\"timestamp\":\"2026-05-10T10:00:01Z\",\"type\":\"bash\",\"command\":\"ls\",\"exit_code\":\"0\",\"output_preview\":\"file1\",\"cwd\":\"/test\",\"duration_ms\":50}\n{\"timestamp\":\"2026-05-10T10:00:02Z\",\"type\":\"bash\",\"command\":\"cat file1\",\"exit_code\":\"0\",\"output_preview\":\"content\",\"cwd\":\"/test\",\"duration_ms\":30}\n{\"timestamp\":\"2026-05-10T10:00:03Z\",\"type\":\"file\",\"file_path\":\"output.txt\",\"cwd\":\"/test\"}\n{\"timestamp\":\"2026-05-10T10:00:04Z\",\"type\":\"user_turn\",\"prompt_length\":15,\"session_id\":\"abc123\",\"cwd\":\"/test\"}\n{\"timestamp\":\"2026-05-10T10:00:05Z\",\"type\":\"bash\",\"command\":\"echo done\",\"exit_code\":\"0\",\"output_preview\":\"done\",\"cwd\":\"/test\",\"duration_ms\":10}\n"
+        }
+      ],
+      "assertions": [
+        "Response invokes scripts/compute-waste.sh with the synthetic trace path (synthetic-trace.jsonl) as the argument — not a generic glob or the default most-recent-file fallback",
+        "Response surfaces a non-zero waste ratio for the synthetic case — the synthetic file has 3 bash/file actions before the second user_turn, so waste_ratio must be > 0 (expected 0.75 with 3 pre-clarification out of 4 total actions)",
+        "Response does not include or quote any prompt content from the trace file — only prompt_length values (42 and 15) may appear; the actual prompt strings are absent because collect-user-turn.sh stores length only"
+      ]
+    }
+  ]
+}

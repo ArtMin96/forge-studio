@@ -13,6 +13,7 @@ You always want it on. Hooks are passive collectors; skills are on-demand. The c
 ## How it works
 
 ```text
+ UserPromptSubmit           ──► append prompt_length + session_id to the same file (no content stored)
  PostToolUse (Bash)        ──► append to ~/.claude/traces/<date>-<cwd>.jsonl
  PostToolUse (Write|Edit)  ──► append file_path + intent to the same file
  PostToolUseFailure        ──► append failure record with stderr snippet
@@ -32,11 +33,13 @@ Trace files roll daily, scoped per working directory. Old files are not auto-pru
 | `/trace-compile` | Compile raw JSONL into structured summary + error views |
 | `/trace-review` | Pattern analysis — recurring failures, optimization opportunities |
 | `/trace-evolve` | Cluster failure patterns; emit proposal artifacts for `/evolve` |
+| `/trace-clarification` | Per-session pre-clarification action ratio — how much work ran before the first mid-session user turn |
 
 ## Hooks
 
 | Event | Hook | Effect |
 |---|---|---|
+| `UserPromptSubmit` | collect-user-turn | Append prompt_length + session_id; no prompt content stored |
 | `PostToolUse` (`Bash`) | collect-bash-trace | Append Bash event to trace JSONL |
 | `PostToolUse` (`Write\|Edit`) | collect-file-trace | Append file event |
 | `PostToolUseFailure` | collect-failure-trace | Record failure context |
