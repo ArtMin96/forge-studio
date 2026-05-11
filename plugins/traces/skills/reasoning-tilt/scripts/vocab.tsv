@@ -1,0 +1,32 @@
+# Lexical vocabulary adapted from Liu et al. 2026 arXiv:2605.08060v1 §E.1; dev-reasoning terms replace cooperation-game terms.
+class	token
+forward	next
+forward	plan
+forward	try
+forward	going to
+forward	let me
+forward	should work
+forward	will
+forward	approach
+forward	attempt
+forward	I'll
+forward	expecting
+forward	once
+forward	after
+forward	enable
+forward	fix
+history	blocked
+history	failed
+history	stuck
+history	can't
+history	won't
+history	still failing
+history	doesn't work
+history	no good
+history	gave up
+history	again
+history	same error
+history	keeps
+history	never works
+history	broken
+history	impossible

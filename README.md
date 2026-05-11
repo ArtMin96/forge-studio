@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-18 plugins. 68 skills. 62 hooks. 4 agents. 12 behavioral rules.
+18 plugins. 69 skills. 62 hooks. 4 agents. 12 behavioral rules.
 
 ---
 
@@ -71,7 +71,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | [**workflow**](plugins/workflow/README.md) | Hook-driven agentic orchestrator: auto-routing, sprint-contract, TDD, /progress-log nudges, self-evolution loop, **/living-spec** (auto-updating spec via after-subagent) | 5 | 10 |
 | [**agents**](plugins/agents/README.md) | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries, worktree-team orchestration, directory-ownership + output-schema checks | 3 | 5 |
 | [**reference**](plugins/reference/README.md) | Hidden Claude Code features: thinking modes, parallel patterns, CLI piping | 0 | 3 |
-| [**traces**](plugins/traces/README.md) | JSONL execution traces, compiled views, failure mining, harness evolution | 6 | 5 |
+| [**traces**](plugins/traces/README.md) | JSONL execution traces, compiled views, failure mining, harness evolution | 6 | 6 |
 | [**diagnostics**](plugins/diagnostics/README.md) | `/entropy-scan` + `/validate-marketplace` + `/docs-maintenance` + **`/rest-audit`** (R.E.S.T. outcomes) + **`/md-structure`** (Karpathy 4-section audit) + **`/ssl-audit`** (SSL frontmatter coverage) + `/policies-list` + `/startup-profile` | 0 | 8 |
 | [**caveman**](plugins/caveman/README.md) | Always-on compressed output (~65% token savings). Survives compaction. | 2 | 1 |
 | [**token-efficiency**](plugins/token-efficiency/README.md) | Duplicate read detection, session token audit | 1 | 1 |

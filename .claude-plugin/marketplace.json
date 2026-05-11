@@ -75,7 +75,7 @@
     {
       "name": "traces",
       "description": "Execution trace collection, analysis, and harness evolution. Stores structured JSONL traces for pattern detection and failure-driven improvement. Feeds /evolve as a proposal source, plus per-session clarification-waste analysis.",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "source": "./plugins/traces",
       "category": "diagnostics",
       "keywords": ["traces", "execution-history", "diagnostics", "analytics", "harness:trace-analysis", "harness:self-evolution", "overhead:minimal", "role:sensor-computational"]
