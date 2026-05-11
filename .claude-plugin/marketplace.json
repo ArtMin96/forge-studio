@@ -59,7 +59,7 @@
     {
       "name": "agents",
       "description": "Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries. Includes /worktree-team for physical worktree isolation, directory-ownership enforcement (opt-in), and output-schema checks on generator exit.",
-      "version": "1.2.1",
+      "version": "1.2.2",
       "source": "./plugins/agents",
       "category": "multi-agent",
       "keywords": ["agents", "decomposition", "parallel", "pipeline", "harness:multi-agent-decomposition", "overhead:zero", "role:guide-inferential"]
