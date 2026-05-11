@@ -1,7 +1,7 @@
 ---
 name: grill-me
 description: Use when the user says "grill me", "interview me", "stress-test this plan", or you're in plan mode and the design has branches with unresolved decisions — runs a structured interview, walking each branch of the decision tree, recommending an answer for every question, and refusing to move on until shared understanding is reached.
-when_to_use: Reach for this before locking a non-trivial design, when requirements feel under-specified, or before handing a plan to `/dispatch`. Do NOT use to argue against a chosen direction — that's `/devils-advocate`; grill-me is about clarification, not opposition.
+when_to_use: "Reach for this before locking a non-trivial design, when requirements feel under-specified, or before handing a plan to `/dispatch`. Also invoke at the start of plan execution when the active plan has unresolved `(dimension: goal` or `(dimension: context` open questions — goal and context ambiguity is most expensive when surfaced late in a trajectory. Do NOT use to argue against a chosen direction — that's `/devils-advocate`; grill-me is about clarification, not opposition."
 disable-model-invocation: true
 model: haiku
 allowed-tools:

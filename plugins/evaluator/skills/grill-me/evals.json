@@ -1,0 +1,21 @@
+{
+  "skill_name": "grill-me",
+  "evals": [
+    {
+      "id": "trajectory-start-trigger-on-dimension-tag",
+      "prompt": "/grill-me — The active plan contains this open question: '(dimension: goal; window: before-start) Should the output be a CSV report or a JSON feed? The downstream consumer is unspecified.' We are at the start of plan execution and no tasks have run yet. Should grill-me be invoked?",
+      "files": [
+        {
+          "path": ".claude/plans/active-plan.md",
+          "content": "# Data Export Refactor\n\n## Open Questions\n\n- (dimension: goal; window: before-start) Should the output be a CSV report or a JSON feed? The downstream consumer is unspecified.\n\n## Tasks\n\n#### T1 — Implement export function\n\nWrite `src/export.py` with a function that serialises the result set.\n"
+        }
+      ],
+      "assertions": [
+        "The response confirms grill-me's when_to_use matches this situation: the active plan has an unresolved `(dimension: goal` open question and execution has not yet started — satisfying the trajectory-start trigger added to SKILL.md",
+        "The response surfaces the unresolved goal question ('CSV report or JSON feed') to the user with a recommended answer before proceeding, consistent with SKILL.md body instruction to recommend an answer for every question",
+        "The response does not proceed to T1 implementation before the goal question is resolved — goal ambiguity at trajectory start is treated as a blocker per grill-me's front-loaded clarification purpose",
+        "The response does not invoke `/devils-advocate` (argument against a chosen direction) — the exclusion clause in when_to_use distinguishes clarification from opposition"
+      ]
+    }
+  ]
+}

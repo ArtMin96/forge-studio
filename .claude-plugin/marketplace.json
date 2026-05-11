@@ -43,7 +43,7 @@
     {
       "name": "evaluator",
       "description": "Evaluator-optimizer pattern: adversarial review, verification gates (TaskCompleted), static analysis, postmortems, reference-fidelity check, self-evolution proposal assessment.",
-      "version": "1.5.0",
+      "version": "1.5.1",
       "source": "./plugins/evaluator",
       "category": "evaluation",
       "keywords": ["code-review", "quality", "static-analysis", "verification", "harness:evaluation", "harness:self-evolution", "overhead:moderate", "role:sensor-computational", "role:sensor-inferential"]
