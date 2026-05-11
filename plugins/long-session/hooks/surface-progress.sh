@@ -19,14 +19,29 @@ INIT_SCRIPT="init.sh"
 
 ANY=0
 OUT=""
+SKIP_RAW_TAIL=""
+
+FORWARD_BRIEFING=".claude/forward-briefing.md"
+if [ -f "$FORWARD_BRIEFING" ] && [ -f "$PROGRESS_FILE" ]; then
+  if [ "$FORWARD_BRIEFING" -nt "$PROGRESS_FILE" ]; then
+    BRIEF=$(cat "$FORWARD_BRIEFING" 2>/dev/null)
+    if [ -n "$BRIEF" ]; then
+      OUT="${OUT}[long-session] Forward briefing (${FORWARD_BRIEFING}):\n${BRIEF}\n"
+      ANY=1
+      SKIP_RAW_TAIL=1
+    fi
+  fi
+fi
 
 # 1. Tail of progress log (last 3 entries). Entries are separated by blank lines.
+if [ -z "${SKIP_RAW_TAIL}" ]; then
 if [ -f "$PROGRESS_FILE" ]; then
   TAIL=$(awk 'BEGIN{RS=""} {entries[NR]=$0} END{start=NR-2; if(start<1)start=1; for(i=start;i<=NR;i++) print entries[i] "\n"}' "$PROGRESS_FILE" 2>/dev/null)
   if [ -n "$TAIL" ]; then
     OUT="${OUT}[long-session] Recent progress (${PROGRESS_FILE}):\n${TAIL}\n"
     ANY=1
   fi
+fi
 fi
 
 # 2. Features.json status summary (pending / in_progress / done counts).
