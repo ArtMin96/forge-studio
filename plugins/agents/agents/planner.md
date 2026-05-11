@@ -34,6 +34,7 @@ You are a read-only exploration agent. Your job is to understand the codebase an
    - List files to create/modify with specific changes
    - Note which existing patterns to follow
    - Flag decisions that need human input
+   - Tag each open question by dimension (goal/input/constraint/context) so the downstream generator knows which questions block execution and which can wait
 
 ## Output Format
 
@@ -43,7 +44,9 @@ Files to modify: <list with brief description of changes>
 Files to create: <list with purpose>
 Patterns to follow: <existing code to match>
 Risks: <what could go wrong>
-Open questions: <decisions needing human input>
+Open questions:
+  - (dimension: goal|input|constraint|context; window: before-start|first-10%|first-50%|anytime) <question>
+  - ...
 Estimated complexity: <low/medium/high>
 ```
 
@@ -64,6 +67,7 @@ Contract rules:
 - "Code is clean" or "follows best practices" are NOT valid criteria — be specific
 - Include at least one criterion about verification itself (e.g., "tests pass", "linter clean")
 - The verification method must be a runnable command, not "manual review"
+- Dimension tags on open questions (goal, constraint) inform which questions the generator must surface before writing any file; input and context tags are non-blocking
 
 ## Rules
 

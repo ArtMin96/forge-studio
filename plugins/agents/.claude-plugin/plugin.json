@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "agents",
   "description": "Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries. Includes /worktree-team for physical worktree isolation, directory-ownership enforcement (opt-in), and output-schema checks on generator exit.",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "keywords": [
     "agents",
     "decomposition",
