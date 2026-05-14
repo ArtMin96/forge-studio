@@ -10,6 +10,8 @@
 # forces a human checkpoint before irreversible moves.
 # Reset on PostToolUse success (tracked separately).
 
+set -euo pipefail
+
 INPUT=$(cat)
 
 SESSION_ID="${CLAUDE_SESSION_ID:-$(echo "$(pwd)-$(date +%Y%m%d)" | md5sum | cut -c1-8)}"

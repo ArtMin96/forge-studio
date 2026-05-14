@@ -2,6 +2,8 @@
 # PostToolUse(Read|Grep|Glob): Track exploratory tool calls.
 # Increments counter used by exploration-depth-gate.sh.
 
+set -euo pipefail
+
 SESSION_ID="${CLAUDE_SESSION_ID:-$(echo "$(pwd)-$(date +%Y%m%d)" | md5sum | cut -c1-8)}"
 DEPTHDIR="${CLAUDE_PLUGIN_DATA:-/tmp/claude-research-gate}/${SESSION_ID}"
 mkdir -p "$DEPTHDIR"

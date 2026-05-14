@@ -5,6 +5,7 @@
 #
 # Exit 1 = warn (non-blocking). Stderr becomes Claude's feedback.
 # Spec: HARNESS_SPEC.md forbids exit 2 outside PreToolUse/PreCompact.
+set -euo pipefail
 
 SESSION_ID="${CLAUDE_SESSION_ID:-$(echo "$(pwd)-$(date +%Y%m%d)" | md5sum | cut -c1-8)}"
 TRACKDIR="${CLAUDE_PLUGIN_DATA:-/tmp/claude-test-nudge}/${SESSION_ID}"

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Traces: Log session stop failures (rate limits, API errors).
 # Helps diagnose reliability issues across sessions.
+set -euo pipefail
 
 [[ "${FORGE_TRACES_ENABLED:-1}" == "0" ]] && exit 0
 

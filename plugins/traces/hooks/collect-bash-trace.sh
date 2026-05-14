@@ -2,6 +2,7 @@
 # Traces: Collect Bash tool execution traces.
 # Logs command, exit code, and truncated output to session trace file.
 # Inspired by Meta-Harness: proposer reads 40% execution traces per iteration.
+set -euo pipefail
 
 # Skip if traces disabled
 [[ "${FORGE_TRACES_ENABLED:-1}" == "0" ]] && exit 0

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # SubagentStop: Check if sprint contract was verified when using pipeline.
 # Warns if a planner-created contract exists but the reviewer hasn't validated it.
 # Silent when no contract exists (non-pipeline usage).
@@ -6,10 +7,11 @@
 INPUT=$(cat)
 AGENT_TYPE=$(echo "$INPUT" | jq -r '.agent_type // empty' 2>/dev/null)
 
-# Only check when reviewer agent stops
-if [ "$AGENT_TYPE" != "reviewer" ]; then
-  exit 0
-fi
+# Only check when reviewer agent stops (accepts any agent_type containing "review")
+case "$AGENT_TYPE" in
+  *review*) ;;
+  *) exit 0 ;;
+esac
 
 # Check for active plan with contract section
 PLANS_DIR=".claude/plans"
@@ -17,10 +19,8 @@ if [ ! -d "$PLANS_DIR" ]; then
   exit 0
 fi
 
-LATEST_PLAN=$(find "$PLANS_DIR" -name '*.md' -mmin -120 -printf '%T@ %p\n' 2>/dev/null \
-  | sort -rn \
-  | head -1 \
-  | cut -d' ' -f2-)
+_REPO_ROOT="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || echo '.')}"
+LATEST_PLAN=$(bash "${_REPO_ROOT}/plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh" 2>/dev/null || true)
 
 if [ -z "$LATEST_PLAN" ]; then
   exit 0

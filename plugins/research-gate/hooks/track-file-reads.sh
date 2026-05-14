@@ -2,8 +2,10 @@
 # PostToolUse(Read): Record file reads for the research gate.
 # State: ${CLAUDE_PLUGIN_DATA}/${SESSION_ID}/<md5hash>
 
-INPUT=$(cat)
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+set -euo pipefail
+
+INPUT=$(cat 2>/dev/null || true)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null) || true
 
 if [ -z "$FILE_PATH" ]; then
   exit 0

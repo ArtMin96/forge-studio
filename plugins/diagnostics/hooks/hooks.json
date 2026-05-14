@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/doom-loop.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,7 +1,7 @@
 ---
 name: rules-audit
 description: Use when the user asks to "audit my session", "check for sycophancy", "review behavioral compliance", or otherwise wants a self-discipline pass — scans the current transcript for sycophancy, unnecessary apologies, scope creep, focus drift, and filler language, then reports violations against the rules in `behavioral-core/hooks/rules.d/`.
-when_to_use: Reach for this near the end of a long session, after a noticeable stretch of low-discipline turns, or when assessing whether the behavioral-anchor hooks are actually shaping output. Do NOT use to enforce rules in real time — that is the job of the `behavioral-anchor.sh` hook; this skill is the after-the-fact audit.
+when_to_use: Reach for this near the end of a long session, after a noticeable stretch of low-discipline turns, or when assessing whether the behavioral-anchor hooks are actually shaping output. Do NOT use for real-time rule enforcement — use `/safe-mode` instead; rules-audit only inspects after the fact.
 disable-model-invocation: true
 allowed-tools:
   - Read

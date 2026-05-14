@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # code-graph: auto-install tirth8205/code-review-graph (PyPI) and register its
 # MCP server for the current repo so Claude Code can query a Tree-sitter graph
 # instead of re-reading full files.
@@ -22,8 +23,6 @@
 #   Uninstalling this plugin does NOT remove those files — see docs/code-graph.md.
 # - Pinned to --platform claude-code: never configures Cursor/Windsurf/Zed/etc.
 # - Always exits 0 so session startup never fails.
-
-set -u
 
 [ "${FORGE_CODE_GRAPH_DISABLED:-0}" = "1" ] && exit 0
 

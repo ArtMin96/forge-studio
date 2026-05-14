@@ -1,7 +1,7 @@
 ---
 name: living-spec
 description: Initialize .claude/spec.md from the latest plan's ## Contract. after-subagent.sh then appends delta blocks as each agent completes. Pairs with /contract (static criteria) + /feature-list (testable JSON) to form the plan→execute→verify loop.
-when_to_use: Reach for this immediately after a plan is approved (ExitPlanMode), before the generator dispatches, and re-run only if the plan itself changes. Do NOT use to log session progress — that's `/progress-log`; living-spec is the in-task delta tracker, progress-log is the cross-session summary.
+when_to_use: Reach for this immediately after a plan is approved (ExitPlanMode), before the generator dispatches, and re-run only if the plan itself changes. Do NOT use for session progress logging — use `/progress-log` instead.
 paths:
   - ".claude/spec.md"
 disable-model-invocation: true

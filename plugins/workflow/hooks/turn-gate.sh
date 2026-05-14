@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # Stop: at the end of Claude's turn, surface open loops — unchecked plan items,
 # context pressure, long idle on in-progress work.
 #
@@ -9,16 +10,13 @@ INPUT=$(cat 2>/dev/null || true)
 SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty' 2>/dev/null)
 [ -z "$SESSION_ID" ] && SESSION_ID="${CLAUDE_SESSION_ID:-default}"
 
+# Session-local cookie under /tmp — purely rate-limits this hook's emission
+# cadence via COUNT % INTERVAL below. Unrelated to handoff-age math, which
+# uses wall-clock seconds (lib/handoff-state.sh).
 COUNTFILE="/tmp/claude-workflow-turn-${SESSION_ID}"
 COUNT=$(cat "$COUNTFILE" 2>/dev/null || echo 0)
 COUNT=$((COUNT + 1))
 echo "$COUNT" > "$COUNTFILE"
-
-# Persist turn count to the project-level file so handoff-state.sh can compute ages
-# across sessions within the same worktree.
-TURN_COUNTER_FILE=".claude/turn-counter"
-mkdir -p .claude 2>/dev/null || true
-echo "$COUNT" > "$TURN_COUNTER_FILE" 2>/dev/null || true
 
 INTERVAL="${WORKFLOW_TURN_GATE_INTERVAL:-3}"
 # Only run checks every N turns.
@@ -32,7 +30,7 @@ MSG=""
 # Reads .claude/handoffs.jsonl — written by after-subagent.sh via handoff-state.sh.
 HANDOFFS_FILE=".claude/handoffs.jsonl"
 LEDGER_FILE=".claude/lineage/ledger.jsonl"
-HANDOFF_SKIP_TURNS="${HANDOFF_SKIP_TURNS:-10}"
+FORGE_HANDOFF_SKIP_SECS="${FORGE_HANDOFF_SKIP_SECS:-5400}"
 LIB_DIR="$(dirname "$0")/../lib"
 
 if [ -f "$HANDOFFS_FILE" ]; then
@@ -61,16 +59,16 @@ if [ -f "$HANDOFFS_FILE" ]; then
       continue
     fi
 
-    # Age check: if open handoff is older than HANDOFF_SKIP_TURNS, mark skipped.
+    # Age check: if open handoff is older than FORGE_HANDOFF_SKIP_SECS, mark skipped.
     age=$(bash "${LIB_DIR}/handoff-state.sh" age "$hid" 2>/dev/null || echo 0)
-    if [ "${age:-0}" -ge "$HANDOFF_SKIP_TURNS" ] 2>/dev/null; then
+    if [ "${age:-0}" -ge "$FORGE_HANDOFF_SKIP_SECS" ] 2>/dev/null; then
       bash "${LIB_DIR}/handoff-state.sh" close "$hid" "handoff_skipped" 2>/dev/null || true
       if [ -d "$(dirname "$LEDGER_FILE")" ]; then
         ts=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
         printf '{"ts":"%s","event":"handoff_skipped","handoff_id":"%s","plan":"%s"}\n' \
           "$ts" "$hid" "$plan" >> "$LEDGER_FILE" 2>/dev/null || true
       fi
-      MSG="${MSG}[handoff] Handoff for ${plan} was not verified within ${HANDOFF_SKIP_TURNS} turns. Appended handoff_skipped to ledger."$'\n'
+      MSG="${MSG}[handoff] Handoff for ${plan} was not verified within $((FORGE_HANDOFF_SKIP_SECS/60)) minutes. Appended handoff_skipped to ledger."$'\n'
     fi
   done < <(grep '"event":"handoff_open"' "$HANDOFFS_FILE" 2>/dev/null || true)
 fi
@@ -78,10 +76,11 @@ fi
 # Unchecked plan items.
 PLANS_DIR=".claude/plans"
 if [ -d "$PLANS_DIR" ]; then
-  LATEST_PLAN=$(find "$PLANS_DIR" -maxdepth 1 -name '*.md' -mmin -360 -printf '%T@ %p\n' 2>/dev/null \
-    | sort -rn | head -1 | cut -d' ' -f2-)
+  _REPO_ROOT="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || echo '.')}"
+  LATEST_PLAN=$(bash "${_REPO_ROOT}/plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh" 2>/dev/null || true)
   if [ -n "$LATEST_PLAN" ]; then
-    UNCHECKED=$(grep -c '^\s*- \[ \]' "$LATEST_PLAN" 2>/dev/null || echo 0)
+    UNCHECKED=$(grep -c '^\s*- \[ \]' "$LATEST_PLAN" 2>/dev/null || true)
+    UNCHECKED=${UNCHECKED:-0}
     if [ "$UNCHECKED" -gt 0 ]; then
       MSG="${MSG}[workflow] Plan $(basename "$LATEST_PLAN") has ${UNCHECKED} unchecked items. Update the plan or reconcile before claiming done."$'\n'
     fi
@@ -99,7 +98,8 @@ fi
 # Net-new commits this session → suggest /progress-log at session end.
 # Only fires once per WORKFLOW_TURN_GATE_INTERVAL window; combines with the cadence above.
 if [ -d .git ]; then
-  RECENT_COMMITS=$(git log --oneline --since="2 hours ago" 2>/dev/null | wc -l | tr -d ' ')
+  # Swallow non-zero: git log may fail in shallow clones; wc/tr always succeed on empty input.
+  RECENT_COMMITS=$(git log --oneline --since="2 hours ago" 2>/dev/null | wc -l | tr -d ' ') || true
   if [ "${RECENT_COMMITS:-0}" -gt 0 ] 2>/dev/null; then
     # Only nudge if no fresh progress entry exists (<10 min).
     if [ ! -f claude-progress.txt ] || ! find claude-progress.txt -mmin -10 2>/dev/null | grep -q .; then

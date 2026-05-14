@@ -5,6 +5,8 @@
 # Disables after first edit passes (only initial exploration matters).
 # Configurable threshold via FORGE_EXPLORE_DEPTH (default 6).
 
+set -euo pipefail
+
 if [ "${FORGE_RESEARCH_GATE:-1}" = "0" ]; then
   exit 0
 fi
@@ -19,9 +21,9 @@ if [ -f "$GATEFILE" ]; then
 fi
 
 # Write to a new file — skip gate check (matches require-read-before-edit logic)
-INPUT=$(cat)
-TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+INPUT=$(cat 2>/dev/null || true)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null) || true
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null) || true
 
 if [ "$TOOL_NAME" = "Write" ] && [ -n "$FILE_PATH" ] && [ ! -f "$FILE_PATH" ]; then
   exit 0

@@ -1,8 +1,22 @@
 ---
 name: dispatch
 description: Use when the user describes a multi-step feature or refactor and you need to decide whether to handle it solo, dispatch a parallel `/fan-out`, or run a `/worktree-team` planner→generator→reviewer pipeline. Outputs a routing recommendation with the reasoning behind it.
-when_to_use: Reach for this before starting any task that may touch 5+ files, has independent sub-tasks worth parallelizing, or carries enough risk to warrant separated planning and review. Do NOT use it as the executor itself — once a route is picked, hand off to `/fan-out` for parallel batches or `/worktree-team` for full pipelines.
+when_to_use: Reach for this before starting any task that may touch 5+ files, has independent sub-tasks worth parallelizing, or carries enough risk to warrant separated planning and review. Do NOT use for executing the dispatched pattern — use `/fan-out` for parallel batches or `/worktree-team` for full pipelines instead.
 disable-model-invocation: true
+counterexamples:
+  - "Executing the dispatched pattern — use /fan-out or /worktree-team after the route is picked."
+  - "A one-line fix or small bug touching ≤2 files — execute directly without routing overhead."
+  - "Exploratory questions where no concrete task exists to route."
+contract:
+  required_outputs:
+    - "Routing recommendation block (Route / Reason / Agent(s) / Estimated scope / Risk level)."
+  budget: "1 model turn"
+  permission_scope: "Read-only on task description"
+  completion_conditions:
+    - "Exactly one route classification emitted (Single Agent | Fan-Out | Pipeline | TDD-Loop)."
+    - "One-sentence reason and risk level included."
+  output_paths:
+    - "stdout"
 scheduling: user describes a task whose scope, file count, or operation type warrants a routing decision before execution
 structural:
   - Read the task description and infer file count, operation type, interdependence
@@ -58,6 +72,20 @@ Agent(s): <which agents to use>
 Estimated scope: <files/operations count>
 Risk level: <low/medium/high>
 ```
+
+## Injecting the active contract
+
+Before constructing any generator or reviewer subagent prompt, run:
+
+```bash
+bash plugins/agents/skills/dispatch/scripts/inject-contract.sh
+```
+
+If the script prints output, prepend that output verbatim to the subagent's prompt — preserving the `[contract]` header line. This gives the subagent the freshly-written contract block that `contract-reread.sh` produced at SubagentStart time, rather than a potentially compacted in-context copy.
+
+If the script prints nothing (missing or empty `active-contract.md`), proceed without contract injection. This is normal for non-pipeline workflows where no active plan exists.
+
+Why: `contract-reread.sh` fires on every SubagentStart and writes the current plan's `## Contract` section to `.claude/state/active-contract.md` with a fresh mtime. Reading it at dispatch time — rather than recalling from context — guarantees the subagent sees a post-compaction-safe contract per Sprint Contract Protocol (HARNESS_SPEC.md). File-based handoff survives context boundaries; in-context memory does not.
 
 ## Known Failure Modes
 

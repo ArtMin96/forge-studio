@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # Behavioral Core: Block destructive commands.
 # Uses JSON permissionDecision output (exit 0) for blocking.
 
@@ -35,7 +36,7 @@ fi
 RM_SCAN=$(echo "$COMMAND" | tr -d "\"'" | grep -oE 'rm[[:space:]]+-rf([[:space:]]+--)?[[:space:]]+[~/][^[:space:];|&]*' || true)
 if [ -n "$RM_SCAN" ]; then
   while IFS= read -r MATCH; do
-    [ -z "$MATCH" ] && continue
+    if [ -z "$MATCH" ]; then continue; fi
     RM_TARGET=$(echo "$MATCH" | grep -oE '[~/][^[:space:];|&]*$')
     case "$RM_TARGET" in
       /tmp/*|/tmp|/var/tmp/*|/var/tmp|/private/tmp/*|/private/var/tmp/*) ;;
@@ -52,7 +53,8 @@ fi
 
 # Layer 2: Shell wrapper obfuscation (bash -c '...', sh -c "...")
 if echo "$COMMAND" | grep -qE '(bash|sh|zsh)\s+-c\s'; then
-  INNER=$(echo "$COMMAND" | grep -oP "(?<=-c\s')[^']*" 2>/dev/null || echo "$COMMAND" | grep -oP '(?<=-c\s")[^"]*' 2>/dev/null || echo "$COMMAND" | grep -oP '(?<=-c\s)\S+' 2>/dev/null)
+  # Each grep attempt may return non-zero (no match); || true prevents -e abort
+  INNER=$(echo "$COMMAND" | grep -oP "(?<=-c\s')[^']*" 2>/dev/null || echo "$COMMAND" | grep -oP '(?<=-c\s")[^"]*' 2>/dev/null || echo "$COMMAND" | grep -oP '(?<=-c\s)\S+' 2>/dev/null || true)
   if [ -n "$INNER" ]; then
     if echo "$INNER" | grep -qEi '(rm\s+-r|git\s+push.*(-f|--force)|git\s+reset\s+--hard|DROP\s+TABLE|DROP\s+DATABASE|TRUNCATE|git\s+clean|git\s+branch\s+-D)'; then
       deny_command "Destructive command hidden in shell wrapper. Ask the user to run it manually if genuinely needed."

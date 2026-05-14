@@ -2,11 +2,11 @@
 # PreToolUse:Bash|Edit|Write — scan tool inputs for prompt-injection patterns.
 # Same permissionDecision:deny contract as block-destructive. Patterns in rules.d/injection.txt.
 
-set -u
+set -euo pipefail
 
 INPUT=$(cat 2>/dev/null || true)
 # Combine the relevant tool-input fields into a single haystack.
-HAYSTACK=$(echo "$INPUT" | jq -r '[.tool_input.command // "", .tool_input.content // "", .tool_input.new_string // "", .tool_input.old_string // ""] | join(" \n ")' 2>/dev/null)
+HAYSTACK=$(echo "$INPUT" | jq -r '[.tool_input.command // "", .tool_input.content // "", .tool_input.new_string // "", .tool_input.old_string // ""] | join(" \n ")' 2>/dev/null) || true
 
 if [ -z "$HAYSTACK" ]; then
   exit 0

@@ -6,13 +6,12 @@
 # Usage:
 #   handoff-state.sh open  <plan_basename>          → prints handoff_id to stdout
 #   handoff-state.sh close <handoff_id> <status>    → appends close event
-#   handoff-state.sh age   <handoff_id>             → prints turn delta to stdout
+#   handoff-state.sh age   <handoff_id>             → prints seconds since open (wall-clock)
 #   handoff-state.sh --help
 
 set -euo pipefail
 
 HANDOFFS_FILE="${HANDOFFS_FILE:-.claude/handoffs.jsonl}"
-TURN_COUNTER_FILE="${TURN_COUNTER_FILE:-.claude/turn-counter}"
 
 usage() {
   cat <<EOF
@@ -21,7 +20,7 @@ Usage: handoff-state.sh <command> [args]
 Commands:
   open  <plan_basename>           Write handoff_open line; print handoff_id to stdout.
   close <handoff_id> <status>     Append handoff_close / handoff_resolved / handoff_skipped line.
-  age   <handoff_id>              Print turn delta since open (reads turn-counter).
+  age   <handoff_id>              Print seconds elapsed since open (wall-clock).
   --help                          Show this message.
 
 Exit codes:
@@ -44,13 +43,13 @@ handoff_open() {
   local handoff_id
   handoff_id="${ts//[^0-9]/}-$(openssl rand -hex 3 2>/dev/null || printf '%06x' $((RANDOM * RANDOM % 16777216)))"
 
-  # Current turn count at time of open.
-  local turn_at_open
-  turn_at_open=$(cat "$TURN_COUNTER_FILE" 2>/dev/null || echo 0)
+  # Unix epoch seconds at open — enables cross-session wall-clock age checks.
+  local opened_at
+  opened_at=$(date +%s)
 
   mkdir -p "$(dirname "$HANDOFFS_FILE")"
-  printf '{"event":"handoff_open","handoff_id":"%s","ts":"%s","plan":"%s","turn_at_open":%s}\n' \
-    "$handoff_id" "$ts" "$plan_basename" "$turn_at_open" >> "$HANDOFFS_FILE"
+  printf '{"event":"handoff_open","handoff_id":"%s","ts":"%s","plan":"%s","opened_at":%s}\n' \
+    "$handoff_id" "$ts" "$plan_basename" "$opened_at" >> "$HANDOFFS_FILE"
 
   echo "$handoff_id"
 }
@@ -72,7 +71,7 @@ handoff_close() {
     "$status" "$handoff_id" "$ts" >> "$HANDOFFS_FILE"
 }
 
-handoff_age_turns() {
+handoff_age_seconds() {
   local handoff_id="$1"
 
   if [ -z "$handoff_id" ]; then
@@ -85,23 +84,24 @@ handoff_age_turns() {
     return 0
   fi
 
-  # Find turn_at_open for this handoff_id.
-  local turn_at_open
-  turn_at_open=$(grep "\"handoff_open\"" "$HANDOFFS_FILE" 2>/dev/null \
+  # Find opened_at (Unix epoch) for this handoff_id.
+  # Pre-existing entries with "turn_at_open" won't match; they return 0 and never age out.
+  local opened_at
+  opened_at=$(grep "\"handoff_open\"" "$HANDOFFS_FILE" 2>/dev/null \
     | grep "\"$handoff_id\"" \
-    | grep -oE '"turn_at_open":[0-9]+' \
+    | grep -oE '"opened_at":[0-9]+' \
     | grep -oE '[0-9]+$' \
     | tail -1)
 
-  if [ -z "$turn_at_open" ]; then
+  if [ -z "$opened_at" ]; then
     echo "0"
     return 0
   fi
 
-  local current_turn
-  current_turn=$(cat "$TURN_COUNTER_FILE" 2>/dev/null || echo 0)
+  local current
+  current=$(date +%s)
 
-  echo $((current_turn - turn_at_open))
+  echo $((current - opened_at))
 }
 
 # --- dispatch ---
@@ -114,7 +114,7 @@ case "$CMD" in
     handoff_close "${2:-}" "${3:-}"
     ;;
   age)
-    handoff_age_turns "${2:-}"
+    handoff_age_seconds "${2:-}"
     ;;
   --help|-h|help)
     usage

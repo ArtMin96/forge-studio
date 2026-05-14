@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-18 plugins. 70 skills. 62 hooks. 4 agents. 13 behavioral rules.
+19 plugins. 74 skills. 69 hooks. 4 agents. 13 behavioral rules.
 
 ---
 
@@ -14,7 +14,7 @@ cd forge-studio
 ./install.sh
 ```
 
-`install.sh` registers the marketplace, installs all 18 plugins to user scope, and copies `templates/CLAUDE.md` to `~/.claude/CLAUDE.md` (backing up any existing file). Idempotent — safe to re-run.
+`install.sh` registers the marketplace, installs all 19 plugins to user scope, and copies `templates/CLAUDE.md` to `~/.claude/CLAUDE.md` (backing up any existing file). Idempotent — safe to re-run.
 
 If you ran `./install.sh` from a clone, Forge Studio also exposes its skills under `~/.agents/skills/` (the cross-vendor convention from agentskills.io spec) so other clients (Cursor, Cline, Aider) can discover them. The links point back into your clone — keep the clone around or they will dangle. Manual `/plugin marketplace add` users do not get this surface.
 
@@ -45,6 +45,7 @@ To pick a subset, run these inside Claude Code instead:
 /plugin install code-graph@forge-studio          # Auto-installs code-review-graph + registers MCP for Tree-sitter code graph
 /plugin install themes@forge-studio              # Curated color themes (Catppuccin Mocha); pick via /theme
 /plugin install cross-repo@forge-studio          # Parallel work across sibling repos with result aggregation
+/plugin install forge-meta@forge-studio          # Self-evolution boundary: change-manifest, evolution-history, controllability guard
 ```
 
 ### Templates
@@ -65,14 +66,14 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 |--------|---------|-------|--------|
 | [**behavioral-core**](plugins/behavioral-core/README.md) | Modular `rules.d/` steering, destructive command blocking, safe-mode layer (gated by `.claude/safe-mode`), scope discipline | 5 | 4 |
 | [**context-engine**](plugins/context-engine/README.md) | Context management: progressive pressure, edit safety, environment bootstrap, compaction recovery, task tracking, failure escalation, safe-mode trigger | 16 | 5 |
-| [**long-session**](plugins/long-session/README.md) | Long-running sessions: `init.sh` bootstrap, append-only `claude-progress.txt`, `features.json` testable requirements, `surface-progress` SessionStart hook, `/session-resume` briefing. | 3 | 5 |
+| [**long-session**](plugins/long-session/README.md) | Long-running sessions: `init.sh` bootstrap, append-only `claude-progress.txt`, `features.json` testable requirements, `surface-progress` SessionStart hook, `/session-resume` briefing. | 4 | 5 |
 | [**memory**](plugins/memory/README.md) | Three-tier memory: pointer index → topic files → searchable transcripts, version-aware updates, ledger audit | 1 | 4 |
-| [**evaluator**](plugins/evaluator/README.md) | Static analysis gates (PHP/JS/TS), adversarial review, verification (+features.json execution), reference-fidelity check, test nudge, self-evolution assessment, prediction audit, rubric scoring | 7 | 12 |
+| [**evaluator**](plugins/evaluator/README.md) | Static analysis gates (PHP/JS/TS), adversarial review, verification (+features.json execution), reference-fidelity check, test nudge, self-evolution assessment, prediction audit, rubric scoring | 8 | 14 |
 | [**workflow**](plugins/workflow/README.md) | Hook-driven agentic orchestrator: auto-routing, sprint-contract, TDD, /progress-log nudges, self-evolution loop, **/living-spec** (auto-updating spec via after-subagent) | 5 | 10 |
-| [**agents**](plugins/agents/README.md) | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries, worktree-team orchestration, directory-ownership + output-schema checks | 3 | 5 |
+| [**agents**](plugins/agents/README.md) | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries, worktree-team orchestration, directory-ownership + output-schema checks | 4 | 5 |
 | [**reference**](plugins/reference/README.md) | Hidden Claude Code features: thinking modes, parallel patterns, CLI piping | 0 | 3 |
 | [**traces**](plugins/traces/README.md) | JSONL execution traces, compiled views, failure mining, harness evolution | 6 | 6 |
-| [**diagnostics**](plugins/diagnostics/README.md) | `/entropy-scan` + `/validate-marketplace` + `/docs-maintenance` + **`/rest-audit`** (R.E.S.T. outcomes) + **`/md-structure`** (Karpathy 4-section audit) + **`/ssl-audit`** (SSL frontmatter coverage) + `/policies-list` + `/startup-profile` | 0 | 8 |
+| [**diagnostics**](plugins/diagnostics/README.md) | `/entropy-scan` + `/validate-marketplace` + `/docs-maintenance` + **`/rest-audit`** (R.E.S.T. outcomes) + **`/md-structure`** (Karpathy 4-section audit) + **`/ssl-audit`** (SSL frontmatter coverage) + `/policies-list` + `/startup-profile` | 1 | 8 |
 | [**caveman**](plugins/caveman/README.md) | Always-on compressed output (~65% token savings). Survives compaction. | 2 | 1 |
 | [**token-efficiency**](plugins/token-efficiency/README.md) | Duplicate read detection, session token audit | 1 | 1 |
 | [**research-gate**](plugins/research-gate/README.md) | Blocks Edit/Write on unread files + exploration depth warnings | 4 | 0 |
@@ -81,6 +82,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | [**code-graph**](plugins/code-graph/README.md) | Auto-installs [tirth8205/code-review-graph](https://github.com/tirth8205/code-review-graph). Registers a Tree-sitter MCP graph per repo so Claude Code queries structural context instead of re-reading files. Claude Code only. Opt-out: `FORGE_CODE_GRAPH_DISABLED=1`. | 3 | 0 |
 | [**themes**](plugins/themes/README.md) | Curated color themes for `/theme`: **Catppuccin Mocha**, **Tokyo Night**, **Nord**. Switch via `/theme`; `Ctrl+E` forks any theme into `~/.claude/themes/` for editing. Pure cosmetic — zero hooks. | 0 | 0 |
 | [**cross-repo**](plugins/cross-repo/README.md) | Parallel work across sibling repos: `/federated-fan-out` (per-repo subagents), `/sync-discovery` (pattern comparison across two repos), `/aggregate-results` (verdict matrix from fan-out run) | 0 | 3 |
+| [**forge-meta**](plugins/forge-meta/README.md) | Self-evolution boundary: change-manifest writer, evolution-history ledger, session-digest, auto-tune-skill outer loop, controllability invariant (POLICY.md) | 3 | 4 |
 
 ### Key Skills
 
@@ -122,6 +124,10 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | `/score-rubric` | evaluator | Aggregate weighted criterion scores into a single rubric result; outputs match `result.schema.json` |
 | `/run-evals` | evaluator | Validate per-skill eval JSON fixtures for structural conformance; emits a checklist of declared expectations |
 | `/run-evals-bench` | evaluator | Comparative benchmark: with-skill vs without-skill, N iterations, emits `benchmark.json` and per-assertion `grading.json` |
+| `/change-manifest` | forge-meta | Append a structured change entry to `.claude/evolution/change_manifest.jsonl`. Called automatically by `manifest-writer.sh`; invoke directly to record a change the hook couldn't auto-detect |
+| `/evolution-history` | forge-meta | Render the change manifest as a reverse-chronological Markdown timeline (newest first, up to 200 entries) grouped by date |
+| `/session-digest` | forge-meta | Produce a ≤10KB per-session rollup at `.claude/sessions/<id>-digest.md` with Component/Experience/Decision sections. Also fires automatically on SessionEnd |
+| `/auto-tune-skill <plugin>:<skill>` | forge-meta | Produce a baseline proposal for a skill at `.claude/proposals/`. The autonomous Pareto-outer-loop is future work; current mode emits the original SKILL.md as a starting candidate for human review |
 
 ### Agents
 
@@ -136,12 +142,12 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 
 ## Active Hooks
 
-Hooks fire automatically. No commands needed. 62 hook command registrations across 13 plugins, spanning all major events:
+Hooks fire automatically. No commands needed. 69 hook command registrations across 16 plugins, spanning all major events:
 
-- **Session lifecycle** — `SessionStart` (11 hooks), `SessionEnd`, `PreCompact` (3), `PostCompact` (2)
-- **Per-turn** — `UserPromptSubmit` (6 hooks), `Stop`, `StopFailure`
-- **Tool execution** — `PreToolUse` (9 deny-chain hooks), `PostToolUse` (18), `PostToolUseFailure` (2)
-- **Agent / Task** — `SubagentStop` (3), `TaskCreated`, `TaskCompleted`
+- **Session lifecycle** — `SessionStart` (11 hooks), `SessionEnd` (2), `PreCompact` (3), `PostCompact` (2)
+- **Per-turn** — `UserPromptSubmit` (7 hooks), `Stop`, `StopFailure`
+- **Tool execution** — `PreToolUse` (11 deny-chain hooks), `PostToolUse` (21), `PostToolUseFailure` (2)
+- **Agent / Task** — `SubagentStart` (1), `SubagentStop` (5), `TaskCreated`, `TaskCompleted`
 
 For the full event-by-event table — every hook, matcher, plugin, and behavior — see [`HARNESS_SPEC.md` §Hook Events Reference](HARNESS_SPEC.md#hook-events-reference). Architectural framing in [`docs/architecture.md`](docs/architecture.md).
 

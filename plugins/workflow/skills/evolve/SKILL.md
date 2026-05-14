@@ -1,7 +1,7 @@
 ---
 name: evolve
 description: Run a self-evolution cycle. Consumes a proposal source (trace-evolve output, router-tune output, manual proposal), routes through /assess-proposal, asks for user approval, hands off to /commit-proposal. Never mutates harness files without consent.
-when_to_use: Reach for this when `/router-tune` or `/trace-evolve` has produced a proposal artifact ready for the assess-commit pipeline, or when the user wants to run a manual SEPL cycle. Do NOT use to write the proposal itself — those upstream skills (`/router-tune`, `/trace-evolve`, manual draft) generate proposals; `/evolve` orchestrates the propose → assess → commit handoff.
+when_to_use: Reach for this when `/router-tune` or `/trace-evolve` has produced a proposal artifact ready for the assess-commit pipeline, or when the user wants to run a manual SEPL cycle. Do NOT use for writing proposals — use `/router-tune` or `/trace-evolve` instead.
 disable-model-invocation: true
 effort: high
 argument-hint: [signal-source]

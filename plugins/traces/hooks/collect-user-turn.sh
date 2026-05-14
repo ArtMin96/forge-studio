@@ -4,6 +4,7 @@
 # Prompt content is intentionally not stored — length only.
 # The trace file may be shared with /trace-review agents outside the machine;
 # storing content would create a privacy risk.
+set -euo pipefail
 
 # Skip if traces disabled
 [[ "${FORGE_TRACES_ENABLED:-1}" == "0" ]] && exit 0

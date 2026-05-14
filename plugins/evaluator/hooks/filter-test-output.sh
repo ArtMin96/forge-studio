@@ -3,6 +3,7 @@
 # Detects test commands, replaces verbose passing output with summary.
 # Passes through failure output (truncated to actionable content).
 # Rationale (HumanLayer, 2026): 4000+ lines of passing tests causes hallucination.
+set -euo pipefail
 
 INPUT=$(cat)
 TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)

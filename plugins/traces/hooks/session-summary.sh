@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Traces: Write session summary at session end.
 # Aggregates trace entries into a readable summary.
+set -euo pipefail
 
 # Skip if traces disabled
 [[ "${FORGE_TRACES_ENABLED:-1}" == "0" ]] && exit 0
@@ -17,12 +18,15 @@ if [[ ! -f "$TRACE_FILE" ]]; then
 fi
 
 # Count entries by type
-BASH_COUNT=$(grep -c '"type":"bash"' "$TRACE_FILE" 2>/dev/null || echo 0)
-FILE_COUNT=$(grep -c '"type":"file"' "$TRACE_FILE" 2>/dev/null || echo 0)
-ERROR_COUNT=$(grep '"type":"bash"' "$TRACE_FILE" 2>/dev/null | grep -v '"exit_code":"0"' | wc -l | tr -d ' ')
+# grep -c exits 1 when count is 0, which would trip set -e; || true + default handles that
+BASH_COUNT=$(grep -c '"type":"bash"' "$TRACE_FILE" 2>/dev/null || true); BASH_COUNT="${BASH_COUNT:-0}"
+FILE_COUNT=$(grep -c '"type":"file"' "$TRACE_FILE" 2>/dev/null || true); FILE_COUNT="${FILE_COUNT:-0}"
+# grep -v exits 1 when all lines match (zero non-matching) — || true + default guards that
+ERROR_COUNT=$(grep '"type":"bash"' "$TRACE_FILE" 2>/dev/null | grep -v '"exit_code":"0"' | wc -l | tr -d ' ' || true); ERROR_COUNT="${ERROR_COUNT:-0}"
 
 # Get unique files modified
-FILES_MODIFIED=$(grep '"type":"file"' "$TRACE_FILE" 2>/dev/null | jq -r '.file_path' 2>/dev/null | sort -u | wc -l | tr -d ' ')
+# grep exits 1 when no file entries exist — || true + default guards that
+FILES_MODIFIED=$(grep '"type":"file"' "$TRACE_FILE" 2>/dev/null | jq -r '.file_path' 2>/dev/null | sort -u | wc -l | tr -d ' ' || true); FILES_MODIFIED="${FILES_MODIFIED:-0}"
 
 # Write summary entry
 TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)

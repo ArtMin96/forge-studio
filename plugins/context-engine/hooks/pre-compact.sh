@@ -3,6 +3,8 @@
 # Saves critical state before compaction destroys working memory.
 # The model can re-read this file after compaction to restore context.
 
+set -euo pipefail
+
 STATE_DIR="${HOME}/.claude"
 STATE_FILE="${STATE_DIR}/pre-compact-state.md"
 
@@ -44,13 +46,13 @@ fi
   echo "# Pre-Compact State ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
   echo ""
   echo "Working directory: $(pwd)"
-  [[ -n "$LATEST_SCOPE" ]] && echo "Active scope: ${LATEST_SCOPE}"
-  [[ -n "$LATEST_PLAN" ]] && echo "Active plan: ${LATEST_PLAN}"
-  [[ -n "$LATEST_HANDOFF" ]] && echo "Latest handoff: ${LATEST_HANDOFF}"
+  if [[ -n "$LATEST_SCOPE" ]]; then echo "Active scope: ${LATEST_SCOPE}"; fi
+  if [[ -n "$LATEST_PLAN" ]]; then echo "Active plan: ${LATEST_PLAN}"; fi
+  if [[ -n "$LATEST_HANDOFF" ]]; then echo "Latest handoff: ${LATEST_HANDOFF}"; fi
   echo ""
   echo "## Git State"
-  BRANCH=$(git branch --show-current 2>/dev/null)
-  [[ -n "$BRANCH" ]] && echo "Branch: ${BRANCH}"
+  BRANCH=$(git branch --show-current 2>/dev/null) || BRANCH=""
+  if [[ -n "$BRANCH" ]]; then echo "Branch: ${BRANCH}"; fi
   DIRTY=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
   echo "Uncommitted changes: ${DIRTY}"
   if [[ "$DIRTY" -gt 0 ]]; then

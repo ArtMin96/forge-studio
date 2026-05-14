@@ -1,7 +1,7 @@
 ---
 name: memory-index
 description: Use when the user wants to review, prune, or sanity-check stored memories — lists every topic file in `.claude/memory/`, flags entries older than 90 days, detects duplicates, and verifies a memory's claim against the current repo state when asked.
-when_to_use: Reach for this for periodic memory hygiene, before relying on a recalled fact, or when the user says "what do you remember about X". Do NOT use to *retrieve* a specific memory for use in the current turn — that's `/recall`; do NOT use to *write* one — that's `/remember`.
+when_to_use: Reach for this for periodic memory hygiene, before relying on a recalled fact, or when the user says "what do you remember about X". Do NOT use for retrieving a specific memory for the current turn — use `/recall` instead. Do NOT use for writing a memory — use `/remember` instead.
 disable-model-invocation: true
 model: haiku
 logical: every topic file listed with last-verified date; stale (>90d) and duplicate entries flagged

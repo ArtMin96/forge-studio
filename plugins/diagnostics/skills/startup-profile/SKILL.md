@@ -1,7 +1,7 @@
 ---
 name: startup-profile
 description: Read the SessionStart timing log written by the diagnostics time-hook wrapper and report per-hook duration plus a cold-vs-warm split across recent sessions. Surfaces which plugin's bootstrap is dominating session-open latency.
-when_to_use: Reach for this when session startup feels slow, after adding a new SessionStart hook to verify it stays within budget, or before a release to confirm cold-start has not regressed. Do NOT use to measure per-tool latency mid-session — that's `/token-audit` for tool-call cost; startup-profile only covers SessionStart hooks.
+when_to_use: Reach for this when session startup feels slow, after adding a new SessionStart hook to verify it stays within budget, or before a release to confirm cold-start has not regressed. Do NOT use for measuring per-tool latency mid-session — use `/token-audit` instead; startup-profile only covers SessionStart hooks.
 disable-model-invocation: true
 allowed-tools:
   - Read

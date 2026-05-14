@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # TaskCreated: Log task creation for the task guardian.
 
 INPUT=$(cat)
-TASK_SUBJECT=$(echo "$INPUT" | jq -r '.tool_input.subject // empty' 2>/dev/null)
-TASK_ID=$(echo "$INPUT" | jq -r '.tool_result.id // .tool_result.taskId // empty' 2>/dev/null)
+TASK_SUBJECT=$(echo "$INPUT" | jq -r '.tool_input.subject // empty' 2>/dev/null || true)
+TASK_ID=$(echo "$INPUT" | jq -r '.tool_result.id // .tool_result.taskId // empty' 2>/dev/null || true)
 
 if [ -z "$TASK_SUBJECT" ]; then
   exit 0

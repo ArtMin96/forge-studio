@@ -1,7 +1,7 @@
 ---
 name: parallel-power
 description: Use when the user asks "how do I run things in parallel", "should I use worktrees", or wants the playbook for multi-session and parallel execution — worktrees, fan-out, writer/reviewer splits, headless mode, queue-and-collect. Reference-style passive skill that surfaces examples inline.
-when_to_use: Reach for this for explaining parallel patterns, before choosing between `/fan-out` vs `/worktree-team`, or when teaching. Do NOT use to actually dispatch the work — `/dispatch` picks the route, `/fan-out` and `/worktree-team` execute it.
+when_to_use: Reach for this for explaining parallel patterns, before choosing between `/fan-out` vs `/worktree-team`, or when teaching. Do NOT use for dispatching the work — use `/dispatch` to pick the route or `/fan-out` and `/worktree-team` to execute it instead.
 disable-model-invocation: true
 logical: reference content surfaced explaining the right pattern; no execution side effects
 ---

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Traces: Collect file modification traces.
 # Logs file path and change type for Write/Edit tool uses.
+set -euo pipefail
 
 # Skip if traces disabled
 [[ "${FORGE_TRACES_ENABLED:-1}" == "0" ]] && exit 0

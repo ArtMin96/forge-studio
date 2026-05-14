@@ -5,7 +5,7 @@
 #
 # Silent when nothing exists. Never blocks.
 
-set -u
+set -euo pipefail
 
 # Only act in a real repo. Bail quietly otherwise.
 if [ ! -d .git ] && [ ! -f package.json ] && [ ! -f composer.json ] && [ ! -f pyproject.toml ] && [ ! -f Cargo.toml ] && [ ! -f go.mod ]; then

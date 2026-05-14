@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # PreToolUse(Read): Warn when the same file is read more than once in a session.
 
 INPUT=$(cat)
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null || true)
 
 if [ -z "$FILE_PATH" ]; then
   exit 0

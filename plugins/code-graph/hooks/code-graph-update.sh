@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # code-graph: re-index the Tree-sitter graph after a git operation that moves
 # HEAD. Upstream `code-review-graph update` diffs the working tree against
 # HEAD~1, so uncommitted Edit/Write have nothing to pick up — only commits,
@@ -13,15 +14,13 @@
 # - Bash command is not a git HEAD-moving operation
 # - code-review-graph binary is not on PATH
 
-set -u
-
 [ "${FORGE_CODE_GRAPH_DISABLED:-0}" = "1" ] && exit 0
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 [ -d "$PROJECT_DIR/.code-review-graph" ] || exit 0
 
 INPUT=$(cat)
-CMD=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
+CMD=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null) || true
 [ -z "$CMD" ] && exit 0
 
 case "$CMD" in

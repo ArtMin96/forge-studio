@@ -1,7 +1,7 @@
 ---
 name: gate-report
 description: Use when the user wants a single consolidated view of every quality warning the hooks raised this session — duplicate reads, oversized outputs, scope-guard denials, secret-scan flags, drift checkpoints — grouped by severity with the offending file/line.
-when_to_use: Reach for this right before a commit or PR, after a long session that produced many small warnings, or when investigating "did anything fail silently?". Do NOT use to run new audits — gate-report only re-aggregates warnings the hooks already emitted; for fresh checks use `/rules-audit` or `/rest-audit`.
+when_to_use: Reach for this right before a commit or PR, after a long session that produced many small warnings, or when investigating "did anything fail silently?". Do NOT use for running new audits — use `/rules-audit` or `/rest-audit` instead; gate-report only re-aggregates warnings the hooks already emitted.
 disable-model-invocation: true
 model: haiku
 allowed-tools:

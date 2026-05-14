@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # Caveman: Re-inject rules after compaction.
 # Compaction may drop the original SessionStart reminder.
 

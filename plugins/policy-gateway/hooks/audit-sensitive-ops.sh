@@ -3,7 +3,7 @@
 # Appends a ledger entry for every write to .env, secrets/, credentials/, etc.
 # Output surfaces via /gate-report and /policy-audit.
 
-set -u
+set -euo pipefail
 
 INPUT=$(cat 2>/dev/null || true)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)

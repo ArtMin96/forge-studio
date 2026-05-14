@@ -7,7 +7,7 @@
 # the spec as a frozen artifact loses learnings during implementation. Surfacing
 # spec lines relevant to the current edit keeps the spec-code feedback loop alive.
 
-set -u
+set -euo pipefail
 
 SPEC_FILE=".claude/spec.md"
 [ ! -s "$SPEC_FILE" ] && exit 0

@@ -8,7 +8,7 @@
 # could indicate prompt-injection or untrusted code execution.
 # Opt-out injection scan: FORGE_MCP_INJECTION_SCAN=0.
 
-set -o pipefail
+set -euo pipefail
 
 MARKER="/tmp/claude-mcp-monitor-${CLAUDE_SESSION_ID:-$$}"
 

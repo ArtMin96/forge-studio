@@ -7,12 +7,12 @@
 # discovery. Not always-on — that wastes tokens against zero attacker. Surface
 # the nudge at the edit boundary so the human decides when to spend the budget.
 
-set -u
+set -euo pipefail
 
 INPUT=$(cat 2>/dev/null || true)
 [ -z "$INPUT" ] && exit 0
 
-FILE_PATH=$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+FILE_PATH=$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null) || true
 [ -z "$FILE_PATH" ] && exit 0
 
 LOW=$(printf '%s' "$FILE_PATH" | tr '[:upper:]' '[:lower:]')

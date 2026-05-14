@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # UserPromptSubmit: Remind about incomplete tasks.
 # Reads task state logged by TaskCreated events.
 
@@ -10,8 +11,8 @@ if [ ! -f "$TASKFILE" ]; then
 fi
 
 # Count incomplete tasks
-INCOMPLETE=$(jq -r '[.[] | select(.status != "completed")] | length' "$TASKFILE" 2>/dev/null)
-CURRENT=$(jq -r '[.[] | select(.status == "in_progress")][0].subject // empty' "$TASKFILE" 2>/dev/null)
+INCOMPLETE=$(jq -r '[.[] | select(.status != "completed")] | length' "$TASKFILE" 2>/dev/null || true)
+CURRENT=$(jq -r '[.[] | select(.status == "in_progress")][0].subject // empty' "$TASKFILE" 2>/dev/null || true)
 
 if [ "${INCOMPLETE:-0}" -gt 0 ]; then
   MSG="You have ${INCOMPLETE} incomplete task(s)."

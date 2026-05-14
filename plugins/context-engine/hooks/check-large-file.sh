@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 INPUT=$(cat)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
 if [[ -z "$FILE_PATH" || ! -f "$FILE_PATH" ]]; then

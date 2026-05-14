@@ -1,7 +1,7 @@
 ---
 name: aggregate-results
 description: Use after a /federated-fan-out run to collect per-repo result.json files, de-duplicate identical summaries by content hash, and emit a per-repo verdict matrix and aggregated.json summary into the workspace.
-when_to_use: Reach for this when a fan-out run has completed (or partially completed) and you want a unified report. Do NOT use to dispatch work across repos — use `/federated-fan-out` instead; do NOT use to score a single run against a rubric — use `/score-rubric` instead.
+when_to_use: Reach for this when a fan-out run has completed (or partially completed) and you want a unified report. Do NOT use for dispatching work across repos — use `/federated-fan-out` instead. Do NOT use for scoring a single run against a rubric — use `/score-rubric` instead.
 disable-model-invocation: true
 scheduling: a /federated-fan-out run completed (or partially completed) and the user wants a unified report across the per-repo result.json files
 structural:

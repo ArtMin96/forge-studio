@@ -3,13 +3,13 @@
 # surface a one-line nudge to capture the decision via /remember.
 # Reads tool input from stdin (Claude Code hook contract). Silent on non-commits.
 
-set -u
+set -euo pipefail
 
 INPUT=$(cat 2>/dev/null || true)
 [ -z "$INPUT" ] && exit 0
 
-CMD=$(printf '%s' "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)
-EXIT=$(printf '%s' "$INPUT" | jq -r '.tool_response.exit_code // empty' 2>/dev/null)
+CMD=$(printf '%s' "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null || true)
+EXIT=$(printf '%s' "$INPUT" | jq -r '.tool_response.exit_code // empty' 2>/dev/null || true)
 
 case "$CMD" in
   *"git commit"*) ;;

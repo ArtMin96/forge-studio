@@ -48,6 +48,7 @@ Three artifacts:
 | `SessionStart` | bootstrap-substrate | Ensure `.claude/` scaffolding exists |
 | `SessionStart` | surface-progress | Read artifacts and brief the session |
 | `PreToolUse:Edit\|Write` | spec-drift-detect | Surface matching `.claude/spec.md` lines when the edited file's basename or parent dir matches a symbol in the spec; silent on `.claude/`, `node_modules/`, `vendor/`, `.git/`, `docs/research/`, `dist/`, `build/`; exits `0`, never blocks |
+| `UserPromptSubmit` | budget-trigger | Graduated context-budget advisory: silent below 70%, then warn / offload / prune / emergency messages at 70/80/90/99% of `CLAUDE_CONTEXT_WINDOW_USED_PCT`. Advisory only — emits a system-reminder string; Claude acts on the signal. Dedupes within a session (same stage = silent). Env overrides: `FORGE_BUDGET_WARN_PCT`, `FORGE_BUDGET_OFFLOAD_PCT`, `FORGE_BUDGET_PRUNE_PCT`, `FORGE_BUDGET_EMERGENCY_PCT`. `FORGE_REMINDER_FORCE=1` bypasses dedup. |
 
 ## Disable
 

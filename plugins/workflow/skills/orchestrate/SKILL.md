@@ -1,7 +1,7 @@
 ---
 name: orchestrate
 description: Manually invoke the agentic workflow for the current task. Reads the active plan and dispatches the right pattern (single-agent, pipeline, fan-out, TDD loop).
-when_to_use: Reach for this when you want to skip the automatic router, override its routing decision, or explicitly choose a dispatch pattern (single-agent, pipeline, fan-out, TDD loop). Do NOT use to *decide* which pattern fits — that's `/dispatch`; orchestrate is the executor once the pattern is already chosen.
+when_to_use: Reach for this when you want to skip the automatic router, override its routing decision, or explicitly choose a dispatch pattern (single-agent, pipeline, fan-out, TDD loop). Do NOT use for pattern selection — use `/dispatch` instead.
 disable-model-invocation: true
 argument-hint: [pattern]
 allowed-tools:
@@ -9,6 +9,21 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
+counterexamples:
+  - "Routing a new task — use /dispatch to classify scope and pick a pattern first."
+  - "A single-line edit or conversational follow-up with no plan file."
+  - "No plan exists in .claude/plans/ — orchestrate has nothing to read."
+  - "Deciding which sub-pattern fits — that classification is /dispatch's job."
+contract:
+  required_outputs:
+    - "One-line dispatch report naming the chosen pattern and the next gate."
+  budget: "1 model turn"
+  permission_scope: "Read-only on .claude/plans/"
+  completion_conditions:
+    - "Exactly one pattern dispatched (single | pipeline | fan-out | tdd)."
+    - "Next gate named (hook or skill that fires after dispatch)."
+  output_paths:
+    - "stdout"
 scheduling: an active plan exists in `.claude/plans/` and the user invokes manual entry into the agentic workflow (overriding route-prompt.sh classification)
 structural:
   - Locate the active plan via mtime
@@ -35,8 +50,10 @@ The `route-prompt.sh` hook auto-classifies every prompt. This skill is the manua
 ### Step 1 — Locate the active plan
 
 ```bash
-stat -c '%Y %n' .claude/plans/*.md 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-
+bash plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh
 ```
+
+Plans are picked in natural numeric-prefix order (`sort -V`): `s1-…` before `s2-…` before `s3-…`. A plan is skipped when all its feature-gate entries in `.claude/gate/features.json` have `passed: true`; the first non-complete plan is returned. Override with `FORGE_ACTIVE_PLAN_OVERRIDE=<path>`.
 
 If no plan exists, tell the user: **"No active plan. Run the planner first (agents plugin → `/dispatch` → planner) or write a plan by hand in `.claude/plans/`."** Do not fabricate a plan.
 
@@ -57,7 +74,7 @@ Read the plan's `## Contract` section. If absent, tell the user — a plan witho
 For `pipeline`:
 
 1. Invoke `/dispatch` from the agents plugin once at the start, scoped to the whole plan, so its routing logic stays the single source of truth. Do **not** re-implement routing here.
-2. Parse the plan for `#### T<n>` headings under `### Tasks`. Build an ordered task list `[T1, T2, …]`; the loop iterates this list one task at a time. If the plan has no `#### T<n>` headings, fall back to a single-pass dispatch and emit one warning line. (Most plans in `.claude/plans/` follow the heading convention; the fallback exists for old or hand-written plans.)
+2. Run `bash plugins/workflow/skills/orchestrate/scripts/parse-tasks.sh <plan-path>` to extract the ordered task id list. If the output is empty, fall back to single-pass dispatch and emit one warning line.
 3. For each task in order:
    - Invoke `/contract` (agents plugin) so the plan's full Contract is re-read from disk fresh for this task (prevents context decay through compaction — `HARNESS_SPEC.md` §Sprint Contract).
    - Dispatch one `agents:generator` subagent scoped to **only this task's** Files / Success criteria block. Do not include sibling tasks in the subagent's prompt — keep its tool-call surface small to stay under the agent-loop budget (`maxTurns` / `task_budget`).

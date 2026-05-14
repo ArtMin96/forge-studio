@@ -1,7 +1,7 @@
 ---
 name: commit-proposal
 description: Use to apply an assessed self-evolution proposal — snapshots the prior resource version under `.claude/lineage/versions/`, writes the new content, and appends a commit entry to the ledger. Refuses to run unless the most recent `assess` verdict is `pass` and the user has explicitly approved.
-when_to_use: Reach for this only after `/evolve` has produced a proposal and `/assess-proposal` has returned `pass`, with explicit user approval to ship. Do NOT use to undo a prior commit — that's `/rollback`; do NOT use for plain git commits — this is the SEPL operator that mutates versioned harness resources only.
+when_to_use: Reach for this only after `/evolve` has produced a proposal and `/assess-proposal` has returned `pass`, with explicit user approval to ship. Do NOT use for undoing a prior commit — use `/rollback` instead. Do NOT use for plain git commits — this is the SEPL operator that mutates versioned harness resources only.
 disable-model-invocation: true
 argument-hint: <proposal-path>
 allowed-tools:

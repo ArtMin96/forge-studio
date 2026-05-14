@@ -10,7 +10,7 @@
 #
 # When all hold, exit 0 with a JSON permissionDecision=deny (preferred over exit 2).
 
-set -u
+set -euo pipefail
 
 # Opt-in gate
 if [ "${FORGE_DIRECTORY_OWNERSHIP:-0}" != "1" ]; then
@@ -46,7 +46,8 @@ if [ -z "$OWNED" ]; then
 fi
 
 # Normalize target to repo-relative if possible
-REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+# git may not be available in all environments; safe to proceed without it
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || true)
 REL_TARGET="$TARGET"
 if [ -n "$REPO_ROOT" ]; then
   case "$TARGET" in
@@ -57,7 +58,8 @@ fi
 # Check if REL_TARGET starts with any owned prefix
 ALLOWED=0
 while IFS= read -r prefix; do
-  [ -z "$prefix" ] && continue
+  # Rewrite as if/continue so set -e doesn't abort on a false [ ] test
+  if [ -z "$prefix" ]; then continue; fi
   # Normalize prefix (strip trailing slash)
   prefix="${prefix%/}"
   case "$REL_TARGET" in

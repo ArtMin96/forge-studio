@@ -106,6 +106,8 @@ The following fields are forge-studio additions not defined by the agentskills.i
 | `hooks` | Skill-scoped lifecycle hooks active during skill execution. Same format as plugin `hooks.json`. | Claude Code only. |
 | `paths` | Glob patterns limiting auto-activation to matching files. Not in canonical spec. | Claude Code only. |
 | `shell` | Shell for inline `!command` blocks (`bash` or `powershell`). Not in canonical spec. | Claude Code only. |
+| `counterexamples` | List of 2–4 strings: scenarios where the skill should NOT be used. Sourced from the skill's `when_to_use` exclusion text and real near-misses. Helps the router reject false-positive invocations. | Non-portable. |
+| `contract` | κ-tuple mapping per NL Harness 2603.25723 App.A: `required_outputs`, `budget`, `permission_scope`, `completion_conditions`, `output_paths`. Machine-readable preconditions and success criteria for the skill. | Non-portable. |
 
 **Design decision:** forge-studio does not namespace these extensions under `metadata.forge.*` (which would be spec-round-trippable). Readability and direct field access are prioritized over strict-spec round-tripping. The trade-off is documented here so future maintainers can make an informed migration decision.
 

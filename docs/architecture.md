@@ -103,7 +103,7 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 
 ## Forge Hook Deployment
 
-62 hook command registrations across 13 plugins. Hooks fire automatically on events — no commands needed. For the underlying Claude Code event API catalog see [`HARNESS_SPEC.md` §Hook Events Reference](../HARNESS_SPEC.md#hook-events-reference); the tables below describe **what forge actually deploys** at each event.
+69 hook command registrations across 16 plugins. Hooks fire automatically on events — no commands needed. For the underlying Claude Code event API catalog see [`HARNESS_SPEC.md` §Hook Events Reference](../HARNESS_SPEC.md#hook-events-reference); the tables below describe **what forge actually deploys** at each event.
 
 ### Session Lifecycle
 
@@ -124,6 +124,7 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | PostCompact | context-engine | post-compact.sh | Re-inject scope, plan, tasks, modified files from recovery |
 | PostCompact | caveman | caveman-restore.sh | Re-inject compressed communication rules |
 | SessionEnd | traces | session-summary.sh | Write session summary to trace file |
+| SessionEnd | forge-meta | session-end-digest.sh | Write a ≤10KB AHE-pillar digest (Component/Experience/Decision) to `.claude/sessions/<session-id>-digest.md` |
 
 ### Every User Message (UserPromptSubmit)
 
@@ -135,8 +136,9 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | context-engine | task-guardian.sh | Remind about incomplete tasks |
 | workflow | route-prompt.sh | Agentic router: classify prompt (shell/hybrid/LLM), nudge pattern |
 | traces | collect-user-turn.sh | Append `user_turn` JSONL entry (prompt_length, session_id; no content stored) for clarification-timing analysis |
+| long-session | budget-trigger.sh | Graduated context-budget advisory at 70/80/90/99% of `CLAUDE_CONTEXT_WINDOW_USED_PCT` |
 
-### Before Tool Use (PreToolUse — 9 hooks, deny-chain)
+### Before Tool Use (PreToolUse — 11 hooks, deny-chain)
 
 | Matcher | Plugin | Hook | What It Does |
 |---------|--------|------|-------------|
@@ -148,9 +150,10 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | Bash\|Edit\|Write | policy-gateway | scan-injection.sh | **Block** on prompt-injection pattern; ledger `policy-block` |
 | Bash | evaluator | pre-commit-gate.sh | Warn if plan exists but `/verify` not run |
 | Edit\|Write | agents | directory-ownership.sh | Worktree-team scope guard (opt-in: `FORGE_DIRECTORY_OWNERSHIP=1`) |
+| Edit\|Write | forge-meta | pre-edit-guard.sh | **Block** edits to protected verifier paths when `FORGE_META_EVOLVE=1`; human edits pass silently |
 | Read | token-efficiency | track-duplicate-reads.sh | Warn on duplicate reads |
 
-### After Tool Use (PostToolUse — 18 hooks)
+### After Tool Use (PostToolUse — 21 hooks)
 
 | Matcher | Plugin | Hook | What It Does |
 |---------|--------|------|-------------|
@@ -172,6 +175,7 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | Write\|Edit | traces | collect-file-trace.sh | Log file change to session trace |
 | Bash | traces | collect-bash-trace.sh | Log command, exit code, output to session trace |
 | Bash | code-graph | code-graph-update.sh | Refresh graph after `git commit/merge/rebase/pull/checkout/reset/cherry-pick` |
+| (any) | diagnostics | doom-loop.sh | Fingerprint last 20 tool calls; warn at ≥3 identical (exit 1), block at ≥5 (exit 2); delete `/tmp/forge-doom-<session>` to override |
 
 ### Failure & Task Events
 
@@ -183,6 +187,12 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | TaskCompleted | evaluator | task-completion-gate.sh | Warn if task marked done without verification evidence |
 | StopFailure | traces | log-stop-failure.sh | Log API errors and rate limits to session trace |
 
+### Agent Dispatch (SubagentStart)
+
+| Event | Plugin | Hook | What It Does |
+|-------|--------|------|-------------|
+| SubagentStart | agents | contract-reread.sh | Extract `## Contract` from the most-recent plan file and write it to `.claude/state/active-contract.md` so the subagent gets a fresh copy rather than a decayed in-context version; exit 1 (warn) if no plan or no contract |
+
 ### Agent Lifecycle
 
 | Event | Plugin | Hook | What It Does |
@@ -190,6 +200,8 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | SubagentStop | agents | contract-check.sh | Warn if sprint contract criteria not verified by reviewer |
 | SubagentStop | agents | output-schema-check.sh | Warn if generator finished without producing declared artifacts |
 | SubagentStop | workflow | after-subagent.sh | Nudge next phase (planner→generator→reviewer→/verify); append spec.md delta; flip features.json `F<n>` to done |
+| SubagentStop | evaluator | auto-verify.sh | Emit structured-gradient signal (Dimension/Direction/Magnitude) for generator/reviewer stops; PASS when `gate/features.json` all passing, FAIL otherwise; disable with `FORGE_AUTO_VERIFY=0` |
+| SubagentStop | forge-meta | manifest-writer.sh | Append one change-manifest entry to `.claude/evolution/change_manifest.jsonl` when the agent emits a `change_manifest:` marker or git shows recent uncommitted changes |
 
 ### Turn Completion
 

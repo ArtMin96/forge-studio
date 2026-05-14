@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Traces: Collect tool failure traces.
 # Logs tool name, input, error message, and whether it was a user interrupt.
+set -euo pipefail
 
 [[ "${FORGE_TRACES_ENABLED:-1}" == "0" ]] && exit 0
 

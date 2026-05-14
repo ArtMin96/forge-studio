@@ -7,7 +7,7 @@
 # Complementary to contract-check.sh (which warns on missing reviewer validation).
 # This hook warns on missing generator output — earlier in the pipeline.
 
-set -u
+set -euo pipefail
 
 INPUT=$(cat)
 AGENT_TYPE=$(echo "$INPUT" | jq -r '.agent_type // empty' 2>/dev/null)
@@ -22,11 +22,9 @@ if [ ! -d "$PLANS_DIR" ]; then
   exit 0
 fi
 
-# Find most recently modified plan within last 2 hours
-LATEST_PLAN=$(find "$PLANS_DIR" -name '*.md' -mmin -120 -printf '%T@ %p\n' 2>/dev/null \
-  | sort -rn \
-  | head -1 \
-  | cut -d' ' -f2-)
+# Find the active plan via numeric-prefix order (deterministic, not mtime).
+_REPO_ROOT="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || echo '.')}"
+LATEST_PLAN=$(bash "${_REPO_ROOT}/plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh" 2>/dev/null || true)
 
 if [ -z "$LATEST_PLAN" ] || [ ! -r "$LATEST_PLAN" ]; then
   exit 0
@@ -57,7 +55,7 @@ fi
 
 MISSING=()
 while IFS= read -r path; do
-  [ -z "$path" ] && continue
+  if [ -z "$path" ]; then continue; fi
   # Skip anchors / URLs / relative refs starting with http or ./
   case "$path" in
     http*|\#*|\.\/*) continue ;;

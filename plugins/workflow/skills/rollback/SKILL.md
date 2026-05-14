@@ -1,7 +1,7 @@
 ---
 name: rollback
 description: Use to reverse a prior self-evolution commit — restores a snapshot from `.claude/lineage/versions/<slug>/<version>` and appends a rollback entry to the ledger. The rollback itself is logged so history stays append-only and auditable.
-when_to_use: Reach for this when a recent `/commit-proposal` produced a regression, when `/lineage-audit` flags a bad commit, or when reverting to a known-good resource version. Do NOT use to undo an arbitrary working-tree change — that's `git`; rollback only reverses versioned harness resources tracked in the lineage ledger.
+when_to_use: Reach for this when a recent `/commit-proposal` produced a regression, when `/lineage-audit` flags a bad commit, or when reverting to a known-good resource version. Do NOT use for arbitrary working-tree changes — use `git revert` instead. Do NOT use for assessing whether rollback is needed — use `/lineage-audit` instead.
 disable-model-invocation: true
 argument-hint: <resource-slug> [target-version]
 allowed-tools:

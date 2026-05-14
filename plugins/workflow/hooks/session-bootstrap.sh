@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # SessionStart: surface recent progress + active plan so the session resumes
 # in-context without the user typing /session-resume. Silent when nothing to report.
 #
@@ -25,10 +26,11 @@ fi
 # Active plan + unchecked item count.
 PLANS_DIR=".claude/plans"
 if [ -d "$PLANS_DIR" ]; then
-  LATEST_PLAN=$(find "$PLANS_DIR" -maxdepth 1 -name '*.md' -printf '%T@ %p\n' 2>/dev/null \
-    | sort -rn | head -1 | cut -d' ' -f2-)
+  _REPO_ROOT="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || echo '.')}"
+  LATEST_PLAN=$(bash "${_REPO_ROOT}/plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh" 2>/dev/null || true)
   if [ -n "$LATEST_PLAN" ]; then
-    UNCHECKED=$(grep -c '^\s*- \[ \]' "$LATEST_PLAN" 2>/dev/null || echo 0)
+    UNCHECKED=$(grep -c '^\s*- \[ \]' "$LATEST_PLAN" 2>/dev/null || true)
+    UNCHECKED=${UNCHECKED:-0}
     MSG="${MSG}[workflow] Active plan: $(basename "$LATEST_PLAN") (${UNCHECKED} unchecked items)."$'\n'
   fi
 fi

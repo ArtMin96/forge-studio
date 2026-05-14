@@ -1,7 +1,7 @@
 ---
 name: lineage-audit
 description: Audit .claude/lineage/ledger.jsonl for protocol invariants — operator sequence, registry slugs, snapshot presence, append-only discipline. Reports only.
-when_to_use: Reach for this before trusting the SEPL ledger as evidence (e.g., before a `/rollback`), after a suspected crash during `/commit-proposal` or `/rollback`, or on a monthly sanity-check schedule. Do NOT use to validate marketplace or harness drift — that's `/entropy-scan` and `/validate-marketplace`; lineage-audit only inspects `.claude/lineage/`.
+when_to_use: Reach for this before trusting the SEPL ledger as evidence (e.g., before a `/rollback`), after a suspected crash during `/commit-proposal` or `/rollback`, or on a monthly sanity-check schedule. Do NOT use for validating marketplace or harness drift — use `/entropy-scan` or `/validate-marketplace` instead; lineage-audit only inspects `.claude/lineage/`.
 paths:
   - ".claude/lineage/*"
   - ".claude/lineage/ledger.jsonl"

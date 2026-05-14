@@ -7,7 +7,7 @@
 # Real-repo gate identical to surface-progress.sh — bail on non-project dirs.
 # Opt-out: FORGE_LONG_SESSION_BOOTSTRAP=0. Silent unless something is created.
 
-set -u
+set -euo pipefail
 
 [ "${FORGE_LONG_SESSION_BOOTSTRAP:-1}" = "0" ] && exit 0
 

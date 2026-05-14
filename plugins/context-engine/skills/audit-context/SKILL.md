@@ -1,7 +1,7 @@
 ---
 name: audit-context
 description: Use when sessions feel slow, CLAUDE.md has grown unwieldy, MCP server overhead is unclear, or you want to audit token overhead before a large task — measures CLAUDE.md size, system reminder weight, MCP server token cost, and per-skill description length, then ranks the top offenders.
-when_to_use: Reach for this near the start of a long-running session, after the user complains about latency, or before a planned heavy task where every token matters. Do NOT use to track per-tool-call cost in real time — that's `/checkpoint` (drift detection) and `/token-audit` (after-the-fact session waste).
+when_to_use: Reach for this near the start of a long-running session, after the user complains about latency, or before a planned heavy task where every token matters. Do NOT use for real-time per-tool-call cost tracking — use `/checkpoint` for drift detection or `/token-audit` for after-the-fact session waste instead.
 disable-model-invocation: true
 allowed-tools:
   - Read

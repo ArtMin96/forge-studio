@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # Edit Safety: Track edits per file. Warn after 3 edits without a re-read.
 # Triggers on PostToolUse for Edit and Read.
 # - Edit: increment counter for that file
 # - Read: reset counter for that file
 
 INPUT=$(cat)
-TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null || true)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null || true)
 
 if [ -z "$FILE_PATH" ]; then
   exit 0

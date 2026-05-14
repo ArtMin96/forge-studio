@@ -7,6 +7,20 @@ paths:
 allowed-tools:
   - Read
   - Glob
+counterexamples:
+  - "One-line edits or trivial typo fixes — direct work is fine; no plan contract to read."
+  - "When no plan file exists in .claude/plans/ — nothing to re-read."
+  - "When the task itself needs definition — use /scope instead."
+contract:
+  required_outputs:
+    - "Contract criteria printed verbatim with UNDERSTOOD or UNCLEAR per item."
+  budget: "1 model turn"
+  permission_scope: "Read-only on .claude/plans/"
+  completion_conditions:
+    - "All criteria acknowledged (each marked UNDERSTOOD or UNCLEAR with explanation)."
+    - "Any UNCLEAR item causes STOP — no Edit/Write proceeds."
+  output_paths:
+    - "stdout"
 logical: sprint contract criteria re-printed verbatim and acknowledged before any Edit/Write
 ---
 

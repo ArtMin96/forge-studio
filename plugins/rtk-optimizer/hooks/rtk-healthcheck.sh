@@ -6,7 +6,7 @@
 #
 # Opt-out: export FORGE_RTK_DISABLED=1
 
-set -u
+set -euo pipefail
 
 [ "${FORGE_RTK_DISABLED:-0}" = "1" ] && exit 0
 

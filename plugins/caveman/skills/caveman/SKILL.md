@@ -1,7 +1,7 @@
 ---
 name: caveman
 description: Use whenever the user wants to change token-compression aggressiveness mid-session — switches caveman intensity between `lite` (no filler), `full` (drop articles, fragments OK; default active via hooks), and `ultra` (telegraphic, single-noun replies). The hook re-injects the chosen rule set on every UserPromptSubmit so the change persists.
-when_to_use: Reach for this when output feels too verbose ("/caveman ultra"), too clipped ("/caveman lite"), or when context is tight and you want maximum compression. Do NOT use to compress code-block contents — caveman governs prose only; code, errors, and tool output stay verbatim.
+when_to_use: Reach for this when output feels too verbose ("/caveman ultra"), too clipped ("/caveman lite"), or when context is tight and you want maximum compression. Do NOT use to compress code-block contents — caveman governs prose only; code, errors, and tool output stay verbatim. Do NOT use for session token-overhead reduction — use `/token-audit` instead; caveman changes prose style, not session token usage.
 argument-hint: <lite|full|ultra>
 disable-model-invocation: true
 logical: caveman intensity flag updated; subsequent prose follows the new compression level

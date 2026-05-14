@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # PreToolUse(Edit|Write): Scope compliance check.
 # Warns when editing files outside the active scope's file list.
 # Non-blocking: provides additionalContext, does not deny.

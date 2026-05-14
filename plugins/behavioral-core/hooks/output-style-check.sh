@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # SessionStart: One-time output style safety check.
 # Warns if any configured output style suppresses coding instructions.
 
-SESSION_ID="${CLAUDE_SESSION_ID:-$(echo "$(pwd)-$(date +%Y%m%d)" | md5sum | cut -c1-8)}"
+# md5sum may be absent; fall back to a simpler unique string rather than aborting
+SESSION_ID="${CLAUDE_SESSION_ID:-$(echo "$(pwd)-$(date +%Y%m%d)" | md5sum 2>/dev/null | cut -c1-8 || echo "fallback")}"
 TRACKDIR="${CLAUDE_PLUGIN_DATA:-/tmp/claude-self-review}/${SESSION_ID}"
 MARKER="${TRACKDIR}/output-style-check-ran"
 

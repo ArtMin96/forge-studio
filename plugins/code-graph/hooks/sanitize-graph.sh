@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # code-graph: prune CALLS edges whose target has no matching node.
 #
 # Upstream's tree-sitter extractor records every function-call-shaped token
@@ -13,8 +14,6 @@
 # those targets to nodes anyway.
 #
 # Intended to run right after `code-review-graph build` or `update`.
-
-set -u
 
 PROJECT_DIR="${1:-${CLAUDE_PROJECT_DIR:-$(pwd)}}"
 DB="$PROJECT_DIR/.code-review-graph/graph.db"

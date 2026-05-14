@@ -5,7 +5,7 @@
 # environment bootstrapping eliminates 2-4 wasted exploratory turns.
 # Guarded by timeout — fails silently if environment can't be probed.
 
-set -o pipefail
+set -euo pipefail
 
 MARKER="/tmp/claude-env-bootstrap-${CLAUDE_SESSION_ID:-$$}"
 
@@ -24,7 +24,7 @@ OUTPUT+="Working directory: ${WD}"$'\n'
 
 # OS info
 if [[ -f /etc/os-release ]]; then
-  OS_NAME=$(. /etc/os-release && echo "${PRETTY_NAME:-$NAME}")
+  OS_NAME=$(. /etc/os-release && echo "${PRETTY_NAME:-${NAME:-unknown}}")
 elif [[ "$(uname)" == "Darwin" ]]; then
   OS_NAME="macOS $(sw_vers -productVersion 2>/dev/null)"
 else

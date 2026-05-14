@@ -1,7 +1,7 @@
 ---
 name: postmortem
 description: Use after fixing a non-trivial bug, or after a `/safe-mode` exit, or whenever the user wants to convert a recent failure into a durable lesson — runs a structured autopsy with root-cause, bug classification (logic/race/state/env/integration), and a "could this have been caught earlier?" answer that points at a hook or rule to add.
-when_to_use: Reach for this after the fix is in and verified, before closing the loop on the work. Do NOT use as a way to debug a still-open bug — debugging happens first; postmortem is the after-the-fact analysis that produces a prevention recommendation.
+when_to_use: Reach for this after the fix is in and verified, before closing the loop on the work. Do NOT use as a way to debug a still-open bug — debugging happens first; postmortem is the after-the-fact analysis that produces a prevention recommendation. Do NOT use for adversarial pre-fix review — use `/challenge` instead; postmortem runs after the failure, not during it.
 disable-model-invocation: true
 effort: xhigh
 argument-hint: [description of the bug]

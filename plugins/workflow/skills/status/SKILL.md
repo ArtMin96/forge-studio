@@ -1,7 +1,7 @@
 ---
 name: status
 description: On-demand snapshot of where the session stands — active plan, last progress-log entry, recent traces, context pressure. Composes existing plugins; no new persistence.
-when_to_use: Reach for this anytime you want a quick situational report on session state without creating new artifacts — handy after returning from a break, before deciding what to work on next, or as a sanity check mid-session. Do NOT use to *write* state — status is read-only and composes existing plugins; for cross-session persistence use `/progress-log`.
+when_to_use: Reach for this anytime you want a quick situational report on session state without creating new artifacts — handy after returning from a break, before deciding what to work on next, or as a sanity check mid-session. Do NOT use for writing state — use `/progress-log` instead.
 disable-model-invocation: true
 model: haiku
 allowed-tools:
@@ -21,7 +21,7 @@ Produces a compact situation report in under ~200 tokens. Read-only. Pulls from 
 ### 1. Active plan
 
 ```bash
-stat -c '%Y %n' .claude/plans/*.md 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-
+bash plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh
 ```
 
 If found: basename, age (days), count of `- [ ]` unchecked items, count of `- [x]` checked items.

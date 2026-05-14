@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # PreCompact: advisory only. Nudge the user to run /progress-log so durable state
 # survives compaction. We do NOT exit 2 here — context-engine's pre-compact-guard
 # already blocks when state would genuinely be lost. Stacking blocks is noise.

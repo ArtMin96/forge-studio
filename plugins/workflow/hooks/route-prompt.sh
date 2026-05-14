@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # UserPromptSubmit: classify the incoming prompt and nudge toward the right
 # orchestration pattern. Shell-first deterministic classifier (zero token cost).
 # Optional LLM fallback when WORKFLOW_ROUTER_MODE=hybrid|llm.
@@ -48,7 +49,10 @@ classify_shell() {
   # Checked before fan-out because "implement X across modules" is a feature build,
   # not the same-op-many-places pattern fan-out targets.
   elif has '\b(implement|build|design|architect|add (a )?(new )?(feature|module|endpoint|system|page|component|api))\b'; then
-    if has '\b(across|multiple|several|entire|whole)\b' || [ "$WORD_COUNT" -ge 40 ]; then
+    # Word-count alone is not a scope signal — long narrow prompts (e.g. a detailed
+    # single-function implementation) were being mis-routed to pipeline. Require an
+    # explicit scope marker instead.
+    if has '\b(across|multiple|several|entire|whole|end-to-end|throughout)\b'; then
       route="pipeline"
       reason="feature/architecture work with non-trivial scope"
       confidence="0.85"
@@ -142,7 +146,34 @@ case "$ROUTE" in
     ;;
 esac
 
+# One-shot cap: suppress identical (route, reason, prompt) reminders within a
+# session so the same nudge doesn't fire every turn for the same context.
+# Scope decision: applied here only. Other hooks are either event-rare
+# (pre-compact-handoff, session-bootstrap), rate-gated by their own mechanism
+# (turn-gate self-review-nudge), or intentionally fire-every-turn
+# (behavioral-anchor — load-bearing steering). See S2-T4 in the sprint plan.
+#
+# The trace write above is intentionally before this guard so classification
+# telemetry is always recorded, even when the reminder is suppressed.
+REMINDERS_DIR=".claude/state/reminders"
+mkdir -p "$REMINDERS_DIR" 2>/dev/null || true
+STATE_FILE="$REMINDERS_DIR/route-prompt-${SESSION_ID}"
+
+PROMPT_MD5=$(printf '%s' "$PROMPT" | md5sum | cut -d' ' -f1)
+STATE_HASH=$(printf '%s:%s:%s' "$ROUTE" "$REASON" "$PROMPT_MD5" | md5sum | cut -d' ' -f1)
+
+EXISTING_HASH=""
+if [ -f "$STATE_FILE" ]; then
+  EXISTING_HASH=$(cat "$STATE_FILE" 2>/dev/null || true)
+fi
+
+if [ "$EXISTING_HASH" = "$STATE_HASH" ] && [ "${FORGE_REMINDER_FORCE:-0}" != "1" ]; then
+  exit 0
+fi
+
 printf '[workflow router] route=%s confidence=%s reason=%s\n%s\n' \
   "$ROUTE" "$CONFIDENCE" "$REASON" "$SUGGESTION"
+
+printf '%s' "$STATE_HASH" > "$STATE_FILE"
 
 exit 0

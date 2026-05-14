@@ -6,7 +6,7 @@
 #
 # Opt-out: export FORGE_CODE_GRAPH_DISABLED=1
 
-set -u
+set -euo pipefail
 
 [ "${FORGE_CODE_GRAPH_DISABLED:-0}" = "1" ] && exit 0
 

@@ -1,7 +1,7 @@
 ---
 name: policies-list
 description: Print every policy enforcement point declared in plugins/diagnostics/registry/policies.json — id, verdict, plugin, hook event, severity, bypass — grouped by verdict. Single discoverable index of what the harness blocks, anchors, nudges, or logs at runtime.
-when_to_use: Reach for this when onboarding to forge-studio, before turning a plugin off and wanting to know what enforcement disappears with it, or while writing docs that need to cite a policy by id (FS01–FS42). Do NOT use to *change* a policy — the registry indexes existing scripts; edits go in the source script and `rules.d/` patterns, not here.
+when_to_use: Reach for this when onboarding to forge-studio, before turning a plugin off and wanting to know what enforcement disappears with it, or while writing docs that need to cite a policy by id (FS01–FS42). Do NOT use to *change* a policy — the registry indexes existing scripts; edits go in the source script and `rules.d/` patterns, not here. Do NOT use for behavioral compliance audits — use `/rules-audit` instead; policies-list only inventories enforcement points.
 disable-model-invocation: true
 allowed-tools:
   - Read

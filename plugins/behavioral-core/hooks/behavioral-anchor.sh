@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # Behavioral Steering: Modular anchor injected on every user message.
 # Reads priority-ordered rule fragments from rules.d/ to prevent behavioral drift.
 # Users can add/remove/reorder rules by managing files in the directory.
 
-RULES_DIR="${CLAUDE_PLUGIN_ROOT}/hooks/rules.d"
+# CLAUDE_PLUGIN_ROOT is set by the harness; default to empty so set -u doesn't abort
+RULES_DIR="${CLAUDE_PLUGIN_ROOT:-}/hooks/rules.d"
 
 echo "<behavioral_rules>"
 

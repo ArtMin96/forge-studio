@@ -1,7 +1,7 @@
 ---
 name: router-tune
 description: Analyze router classification history, cluster miss-fires, emit a proposal artifact tweaking route-prompt.sh thresholds or regex rules. Feeds /evolve.
-when_to_use: Reach for this once `route-prompt.sh` has logged enough classifications to make patterns visible (≥50 entries), or after the user reports the router picked the wrong pattern repeatedly. Do NOT use to apply tuning changes directly — router-tune only produces a proposal; the SEPL pipeline (`/evolve` → `/assess-proposal` → `/commit-proposal`) is what mutates the router.
+when_to_use: Reach for this once `route-prompt.sh` has logged enough classifications to make patterns visible (≥50 entries), or after the user reports the router picked the wrong pattern repeatedly. Do NOT use for applying tuning changes directly — use `/evolve` instead.
 disable-model-invocation: true
 effort: xhigh
 allowed-tools:

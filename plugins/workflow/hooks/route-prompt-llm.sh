@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # LLM fallback classifier. Invoked by route-prompt.sh when mode=llm or
 # mode=hybrid + shell confidence is low. Emits tab-separated route<TAB>confidence<TAB>reason
 # on stdout, or nothing if unavailable (graceful degradation).
@@ -38,9 +39,10 @@ Output nothing else. No preamble, no trailing commentary.'
 # Truncate to protect against overly long prompts.
 TRUNCATED=$(printf '%s' "$PROMPT" | head -c 4000)
 
+# Swallow non-zero: claude may exit non-zero on API errors; graceful degradation is intentional.
 RESPONSE=$(printf '%s' "$TRUNCATED" \
   | claude -p --model "$MODEL" --system "$SYSTEM_PROMPT" --max-turns 1 2>/dev/null \
-  | head -1)
+  | head -1) || true
 
 # Basic sanity: must contain tab-separated fields and a known route.
 if echo "$RESPONSE" | grep -qE '^(single-agent|pipeline|fan-out|tdd-loop|none)'; then

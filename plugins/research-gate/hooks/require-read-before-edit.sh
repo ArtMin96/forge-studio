@@ -8,13 +8,15 @@
 #
 # Disable: set FORGE_RESEARCH_GATE=0 in settings.json env
 
+set -euo pipefail
+
 if [ "${FORGE_RESEARCH_GATE:-1}" = "0" ]; then
   exit 0
 fi
 
-INPUT=$(cat)
-TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+INPUT=$(cat 2>/dev/null || true)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null) || true
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null) || true
 
 if [ -z "$FILE_PATH" ]; then
   exit 0

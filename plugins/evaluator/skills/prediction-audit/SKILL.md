@@ -1,7 +1,7 @@
 ---
 name: prediction-audit
 description: Join SEPL proposal predictions against post-commit trace observations and report per-resource prediction error. Pure read — never mutates harness files or the ledger.
-when_to_use: Reach for this monthly, after several SEPL commits have landed, to check whether `/assess-proposal` impact estimates hold up. Run after `/trace-evolve` so the trace summaries are fresh. Do NOT use to evaluate a single un-committed proposal — that's `/assess-proposal`; this skill audits predictions across already-committed proposals.
+when_to_use: Reach for this monthly, after several SEPL commits have landed, to check whether `/assess-proposal` impact estimates hold up. Run after `/trace-evolve` so the trace summaries are fresh. Do NOT use for evaluating a single un-committed proposal — use `/assess-proposal` instead; this skill audits predictions across already-committed proposals.
 disable-model-invocation: true
 allowed-tools:
   - Read

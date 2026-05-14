@@ -1,7 +1,7 @@
 ---
 name: tdd-loop
 description: Use when building a new feature or reproducing a bug test-first — drives a Red-Green-Refactor loop with three real-command completion gates (failing test exists → test passes → no regressions). Each phase runs in an isolated subagent so context from one phase can't leak into the next and produce premature green.
-when_to_use: Reach for this when the contract or features.json defines clear acceptance criteria and tests are the right verification. Do NOT use for exploratory spikes (no tests yet), pure-refactor work (`/orchestrate refactor`), or one-line fixes — TDD overhead isn't justified there.
+when_to_use: Reach for this when the contract or features.json defines clear acceptance criteria and tests are the right verification. Do NOT use for exploratory spikes (no tests yet), pure-refactor work (use `/orchestrate pipeline` for staged refactors, or do them inline if scope is single-file), or one-line fixes — TDD overhead isn't justified there.
 disable-model-invocation: true
 argument-hint: <feature-or-bug-description>
 allowed-tools:

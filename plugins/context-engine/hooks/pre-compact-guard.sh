@@ -10,6 +10,8 @@
 #
 # Silent when safe (back-pressure principle).
 
+set -euo pipefail
+
 STATE_DIR="${HOME}/.claude"
 STATE_FILE="${STATE_DIR}/pre-compact-state.md"
 PROGRESS_FILE="claude-progress.txt"

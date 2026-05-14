@@ -3,6 +3,8 @@
 # Re-injects essential pointers after compaction so the model
 # can quickly restore working context.
 
+set -euo pipefail
+
 STATE_DIR="${HOME}/.claude"
 STATE_FILE="${STATE_DIR}/pre-compact-state.md"
 SESSION_ID="${CLAUDE_SESSION_ID:-$(echo "$(pwd)-$(date +%Y%m%d)" | md5sum | cut -c1-8)}"

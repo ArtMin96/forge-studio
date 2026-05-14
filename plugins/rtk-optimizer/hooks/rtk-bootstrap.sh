@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # rtk-optimizer: auto-install rtk-ai/rtk and register its global Bash rewrite hook.
 #
 # First session: downloads rtk via `curl | sh` from rtk-ai/rtk master and runs
@@ -12,8 +13,6 @@
 # - `rtk init -g` mutates ~/.claude/settings.json. Uninstalling this plugin does
 #   NOT remove that hook — run `rtk init -g --uninstall` manually if needed.
 # - Always exits 0 so session startup never fails.
-
-set -u
 
 [ "${FORGE_RTK_DISABLED:-0}" = "1" ] && exit 0
 

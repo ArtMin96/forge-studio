@@ -1,7 +1,7 @@
 ---
 name: token-audit
 description: Use when the user asks to "audit token use", "find waste", "why is this session expensive" — scans the current session for duplicate file reads, oversized tool outputs, excessive tool-call density, and large pasted blocks. Returns a compact findings table plus the top three optimization recommendations.
-when_to_use: Reach for this near the end of an expensive session, after a noticeable latency spike, or whenever the user feels overhead is climbing. Do NOT use to audit pre-task context (CLAUDE.md, MCP, skills) — that's `/audit-context`; token-audit measures runtime waste, not setup waste.
+when_to_use: Reach for this near the end of an expensive session, after a noticeable latency spike, or whenever the user feels overhead is climbing. Do NOT use for pre-task setup overhead — use `/audit-context` instead (CLAUDE.md size, MCP servers, loaded skills); token-audit measures runtime waste, not configuration overhead.
 disable-model-invocation: true
 model: haiku
 allowed-tools:

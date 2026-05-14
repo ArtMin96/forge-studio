@@ -151,6 +151,20 @@
       "source": "./plugins/cross-repo",
       "category": "orchestration",
       "tags": ["cross-repo", "harness:multi-agent", "overhead:moderate"]
+    },
+    {
+      "name": "forge-meta",
+      "description": "Self-evolution boundary: change-manifest writer, evolution-history ledger, session-digest, auto-tune-skill outer loop, controllability invariant (POLICY.md).",
+      "version": "1.0.0",
+      "source": "./plugins/forge-meta",
+      "category": "self-evolution",
+      "keywords": [
+        "self-evolution",
+        "observability",
+        "harness:observability",
+        "harness:self-evolution",
+        "overhead:moderate"
+      ]
     }
   ]
 }

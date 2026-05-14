@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # Caveman: Load compressed communication rules at session start.
 # Loaded once, not per-message — avoids burning tokens on repeated injection.
 

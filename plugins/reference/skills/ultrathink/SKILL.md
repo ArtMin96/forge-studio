@@ -1,7 +1,7 @@
 ---
 name: ultrathink
 description: Use when the user asks about "thinking modes", "effort levels", "how hard should Claude think", or wants to pick between low/medium/high/xhigh/max for a task — explains the cost/quality tradeoff per level and recommends one based on the work shape.
-when_to_use: Reach for this when picking an `effort:` value for a new skill or `/effort` for the current turn, or when teaching the reasoning modes. Do NOT use to *change* the level — that's the `/effort` command; ultrathink is the explanation, not the switch.
+when_to_use: Reach for this when picking an `effort:` value for a new skill or `/effort` for the current turn, or when teaching the reasoning modes. Do NOT use for changing the effort level — use the `/effort` command instead; ultrathink is the explanation, not the switch.
 disable-model-invocation: true
 model: haiku
 logical: explanation of effort levels emitted with cost/quality tradeoff per level

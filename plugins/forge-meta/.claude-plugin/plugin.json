@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "forge-meta",
+  "description": "Self-evolution boundary: change-manifest writer, evolution-history ledger, session-digest, auto-tune-skill outer loop, controllability invariant (POLICY.md).",
+  "version": "1.0.0",
+  "keywords": [
+    "self-evolution",
+    "observability",
+    "harness:observability",
+    "harness:self-evolution",
+    "overhead:moderate"
+  ]
+}

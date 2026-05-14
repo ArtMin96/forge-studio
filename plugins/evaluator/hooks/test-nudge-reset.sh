@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # PostToolUse(Bash): Reset test-nudge counter when tests are run.
 # Detects common test runner patterns in the command.
+set -euo pipefail
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)

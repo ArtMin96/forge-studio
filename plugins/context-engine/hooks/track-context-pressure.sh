@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # Context Engine: Progressive context pressure tracking.
 # 5-stage warnings calibrated to approximate context usage.
 # Replaces fixed-threshold message counting with graduated urgency.

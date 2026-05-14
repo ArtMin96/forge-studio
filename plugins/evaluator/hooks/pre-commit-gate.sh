@@ -2,6 +2,7 @@
 # Pre-commit: Test reminder + evaluation gate.
 # Reminds about tests, warns when committing planned work without /verify.
 # Exit 1 = warn (non-blocking). Set FORGE_EVALUATION_GATE=0 to disable the gate check.
+set -euo pipefail
 
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null)

@@ -8,6 +8,23 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+counterexamples:
+  - "Deep adversarial review — use /challenge for fork-based critique after verify passes."
+  - "Routine compile check during active development with no contract to gate against."
+  - "Change set is empty (clean tree with no recent commits or edits)."
+  - "Marking a task done on a doc-only change without running git diff --stat first."
+contract:
+  required_outputs:
+    - "Per-criterion evidence report with command output quoted."
+    - ".claude/gate/features.json populated for features with verify_cmd."
+  budget: "Per-criterion test timeout (command exit determines pass/fail)"
+  permission_scope: "Read + Bash (test runners only; no Write outside gate path)"
+  completion_conditions:
+    - "Every Contract success criterion has an evidence line (command output or file:line reference)."
+    - "Overall verdict is PASS only if all criteria show evidence; FAIL if any criterion lacks evidence."
+  output_paths:
+    - "stdout"
+    - ".claude/gate/features.json"
 scheduling: an active plan exists in `.claude/plans/` with verification commands declared in its Contract section, OR a generator has just stopped and contract-check.sh nudged
 structural:
   - Read the plan's verification commands verbatim
@@ -72,6 +89,44 @@ If you CANNOT verify the change:
 ```text
 UNVERIFIED: Cannot verify this change.
 NEEDED: [What would be needed to verify — test command, expected output, etc.]
+```
+
+### 5a. Per-Criterion Structured Gradient (on FAIL only)
+
+When one or more criteria fail, emit one structured triple per failed criterion immediately after the verdict block. The `plugins/evaluator/hooks/auto-verify.sh` hook (SubagentStop) already emits this same schema automatically — the /verify skill's output should match it so downstream readers see one consistent signal.
+
+```text
+- Dimension: <criterion-id from Contract or features.json entry id>
+- Direction: FAIL  (or MIXED for partial-evidence cases)
+- Magnitude: <one-line remediation suggestion>
+```
+
+**Field sourcing rules** — Dimension and Direction come from deterministic sources: test runner exit code, file existence check, or `features.json` `verify_cmd` result. Magnitude is the only LLM-inferred field; everything else is a quoted artifact.
+
+**Example — FAIL path:**
+
+```text
+VERIFIED: No
+METHOD: features.json + tests
+EVIDENCE: 2 of 4 criteria failed (see gradient below)
+REMAINING RISK: gate/features.json shows exit_code=1 for auto-verify entry
+
+- Dimension: contract-criterion-3
+- Direction: FAIL
+- Magnitude: run-evals.sh exits 1 — expected output schema changed; update evals.json assertions to match new format
+
+- Dimension: contract-criterion-4
+- Direction: FAIL
+- Magnitude: plugins/evaluator/hooks/auto-verify.sh not executable; run chmod +x to fix
+```
+
+**Example — PASS path (no gradient emitted):**
+
+```text
+VERIFIED: Yes
+METHOD: tests
+EVIDENCE: all 42 tests pass (exit 0)
+REMAINING RISK: None identified
 ```
 
 ## 6. Clear the Evaluation Gate (if applicable)

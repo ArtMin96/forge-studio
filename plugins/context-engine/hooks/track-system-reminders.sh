@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # Context Engine: System-reminder accumulation awareness.
 # Piggybacks on track-context-pressure's exchange counter to warn
 # when system-reminder noise is likely high.

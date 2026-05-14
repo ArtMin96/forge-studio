@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Quality Gates: Run static analysis on PHP files after write/edit.
 # Only triggers for .php files. Runs Larastan/PHPStan if available.
+set -euo pipefail
 
 INPUT=$(cat)
 FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
@@ -24,16 +25,18 @@ if echo "$FILE" | grep -q "migrations/"; then
 fi
 
 # Run PHPStan/Larastan if available
-if command -v vendor/bin/phpstan &>/dev/null && [ -f "phpstan.neon" -o -f "phpstan.neon.dist" ]; then
-  RESULT=$(vendor/bin/phpstan analyse "$FILE" --no-progress --error-format=raw 2>/dev/null)
-  if [ $? -ne 0 ] && [ -n "$RESULT" ]; then
+if command -v vendor/bin/phpstan &>/dev/null && { [ -f "phpstan.neon" ] || [ -f "phpstan.neon.dist" ]; }; then
+  RESULT=$(vendor/bin/phpstan analyse "$FILE" --no-progress --error-format=raw 2>/dev/null) || PHPSTAN_EXIT=$?
+  PHPSTAN_EXIT="${PHPSTAN_EXIT:-0}"
+  if [ "$PHPSTAN_EXIT" -ne 0 ] && [ -n "$RESULT" ]; then
     echo "PHPStan issues in $FILE:"
     echo "$RESULT" | head -10
     exit 1
   fi
 elif command -v ./vendor/bin/phpstan &>/dev/null; then
-  RESULT=$(./vendor/bin/phpstan analyse "$FILE" --no-progress --error-format=raw 2>/dev/null)
-  if [ $? -ne 0 ] && [ -n "$RESULT" ]; then
+  RESULT=$(./vendor/bin/phpstan analyse "$FILE" --no-progress --error-format=raw 2>/dev/null) || PHPSTAN_EXIT=$?
+  PHPSTAN_EXIT="${PHPSTAN_EXIT:-0}"
+  if [ "$PHPSTAN_EXIT" -ne 0 ] && [ -n "$RESULT" ]; then
     echo "PHPStan issues in $FILE:"
     echo "$RESULT" | head -10
     exit 1

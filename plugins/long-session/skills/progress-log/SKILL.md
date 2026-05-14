@@ -13,8 +13,28 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+counterexamples:
+  - "In-conversation task tracking — use TaskCreate / TaskUpdate for that."
+  - "Per-commit changelog entries — those belong in the commit message, not the progress log."
+  - "When no net state changed this session (no commits, no new blockers, no decisions)."
+contract:
+  required_outputs:
+    - "Appended dated block in claude-progress.txt matching the documented entry shape."
+    - "Ledger entry in .claude/lineage/ledger.jsonl."
+  budget: "1 model turn"
+  permission_scope: "Read/Write on claude-progress.txt and .claude/lineage/ledger.jsonl only"
+  completion_conditions:
+    - "New entry block appended to claude-progress.txt with done/in-progress/blockers/next sections."
+    - "Ledger has a matching entry with ts, operator, resource, and evidence fields."
+  output_paths:
+    - "claude-progress.txt"
+    - ".claude/lineage/ledger.jsonl"
 logical: new entry appended to claude-progress.txt with done / in-progress / blockers / next sections plus ledger entry
 ---
+
+## When this fires automatically
+
+A companion hook `budget-trigger.sh` watches `CLAUDE_CONTEXT_WINDOW_USED_PCT` on every prompt and emits a graduated advisory at 70/80/90/99%. The hook does not run /progress-log for you — it surfaces the signal; you (or Claude reacting to the signal) decide whether to invoke.
 
 # /progress-log — Append-Only Session Log
 

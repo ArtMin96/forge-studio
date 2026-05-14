@@ -2,6 +2,7 @@
 # PostToolUse(Edit|Write): Nudge to run tests after N edits.
 # IDE-Bench: only 8% of post-edit transitions go to testing.
 # Configurable via FORGE_TEST_NUDGE_INTERVAL (default 3).
+set -euo pipefail
 
 INPUT=$(cat)
 TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)

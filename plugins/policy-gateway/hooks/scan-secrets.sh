@@ -3,12 +3,12 @@
 # Uses the same permissionDecision:deny JSON contract as behavioral-core/block-destructive.
 # Patterns live in rules.d/secrets.txt (evolvable via SEPL).
 
-set -u
+set -euo pipefail
 
 INPUT=$(cat 2>/dev/null || true)
 # We scan whatever is being written: new_string for Edit, content for Write, file_path as fallback context.
-CONTENT=$(echo "$INPUT" | jq -r '.tool_input.content // .tool_input.new_string // empty' 2>/dev/null)
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+CONTENT=$(echo "$INPUT" | jq -r '.tool_input.content // .tool_input.new_string // empty' 2>/dev/null) || true
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null) || true
 
 # Nothing to scan → pass through.
 if [ -z "$CONTENT" ]; then

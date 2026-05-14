@@ -3,6 +3,8 @@
 # Warns when same file edited 5+ times or same region edited 3+ times.
 # Different from track-edits.sh which tracks edits-without-re-reading.
 
+set -euo pipefail
+
 INPUT=$(cat)
 TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
@@ -34,7 +36,8 @@ if [ -n "$LINE_HINT" ]; then
   echo "$LINE_HINT" >> "$REGIONFILE"
   # Check for region oscillation (same region 3+ times)
   if [ -f "$REGIONFILE" ]; then
-    REGION_HITS=$(grep -c "^${LINE_HINT}$" "$REGIONFILE" 2>/dev/null)
+    REGION_HITS=$(grep -c "^${LINE_HINT}$" "$REGIONFILE" 2>/dev/null) || true
+    REGION_HITS=${REGION_HITS:-0}
     if [ "$REGION_HITS" -ge 3 ]; then
       BASENAME=$(basename "$FILE_PATH")
       echo "Oscillating on ${BASENAME} — same region edited ${REGION_HITS} times. Stop. Re-read the whole function. What's the actual requirement?"

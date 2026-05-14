@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # SubagentStop: nudge the next step in the planner → generator → reviewer → verify chain,
 # AND append a delta block to .claude/spec.md (if it exists) so the living spec tracks
 # completed work as it happens. Complements (does not duplicate) contract-check.sh.
 #
-# Silent when agent_type is missing or unrecognized.
+# Silent when agent_type is missing (line 11 early-exit). Unknown but present values emit a warning.
 
 INPUT=$(cat 2>/dev/null || true)
 AGENT_TYPE=$(echo "$INPUT" | jq -r '.agent_type // empty' 2>/dev/null)
@@ -63,29 +64,78 @@ mark_features_done() {
     "$FEATURES_FILE" > "$tmp" && mv "$tmp" "$FEATURES_FILE"
 }
 
+# Dedup helper: suppress repeated nudge emissions for the same (agent_type, plan_basename) within a TTL.
+# Dedup key is (nudge-id, plan-basename) rather than handoff_id because handoff_id is regenerated on
+# every handoff_open call and therefore cannot identify "same logical phase transition".
+# Returns 0 (already fired — suppress) or 1 (not yet fired — emit and record).
+# FORGE_REMINDER_FORCE=1 bypasses the check and always returns 1.
+nudge_already_fired() {
+  local nudge_id="$1"
+  local plan_base="$2"
+  local ttl="${FORGE_AFTER_SUBAGENT_TTL_SECS:-1800}"
+  local state_dir=".claude/state/reminders"
+  local state_file="${state_dir}/after-subagent-${nudge_id}-${plan_base}"
+
+  if [ "${FORGE_REMINDER_FORCE:-0}" = "1" ]; then
+    mkdir -p "$state_dir"
+    touch "$state_file"
+    return 1
+  fi
+
+  if [ -f "$state_file" ]; then
+    local now
+    now=$(date +%s)
+    local mtime
+    mtime=$(stat -c '%Y' "$state_file" 2>/dev/null || stat -f '%m' "$state_file" 2>/dev/null || echo 0)
+    local age=$(( now - mtime ))
+    if [ "$age" -lt "$ttl" ]; then
+      return 0
+    fi
+  fi
+
+  mkdir -p "$state_dir"
+  touch "$state_file"
+  return 1
+}
+
+# Resolve the active plan once, before the case block, so all three arms
+# (planner, generator, reviewer) share LATEST_PLAN_FILE and LATEST_PLAN_FILE_BASENAME.
+# Uses the find-active-plan.sh helper for deterministic numeric-prefix order
+# instead of mtime; falls back to mtime-newest when all plans are gate-complete.
+LATEST_PLAN_FILE=""
+LATEST_PLAN_FILE_BASENAME=""
+_REPO_ROOT="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || echo '.')}"
+LATEST_PLAN_FILE=$(bash "${_REPO_ROOT}/plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh" 2>/dev/null || true)
+if [ -n "$LATEST_PLAN_FILE" ]; then
+  LATEST_PLAN_FILE_BASENAME=$(basename "$LATEST_PLAN_FILE")
+fi
+
+# Accepted agent_type values: planner|Plan, generator|agents:generator, reviewer|agents:reviewer|evaluator:adversarial-reviewer
 case "$AGENT_TYPE" in
   planner|Plan)
     if [ "$HAS_ACTIVE_PLAN" = "1" ]; then
-      echo "[workflow] Planner finished. Next: dispatch the generator. Ensure the plan has a ## Contract section before generating."
+      if ! nudge_already_fired "planner" "${LATEST_PLAN_FILE_BASENAME:-_no_plan}"; then
+        echo "[workflow] Planner finished. Next: dispatch the generator. Ensure the plan has a ## Contract section before generating."
+      fi
     fi
     append_spec_delta "planner"
     ;;
   generator|agents:generator)
     if [ "$HAS_ACTIVE_PLAN" = "1" ]; then
-      echo "[workflow] Generator finished. Next: dispatch the reviewer (read-only). Agent self-evaluation is unreliable."
+      if ! nudge_already_fired "generator" "${LATEST_PLAN_FILE_BASENAME:-_no_plan}"; then
+        echo "[workflow] Generator finished. Next: dispatch the reviewer (read-only). Agent self-evaluation is unreliable."
+      fi
     fi
     append_spec_delta "generator"
     mark_features_done
 
     # Emit handoff advisory when a plan with ## Contract section exists.
-    # The helper appends a handoff_open entry that turn-gate.sh ages and finalizes.
-    if [ -d "$PLANS_DIR" ]; then
-      LATEST_PLAN_FILE=$(find "$PLANS_DIR" -maxdepth 1 -name '*.md' -printf '%T@ %p\n' 2>/dev/null \
-        | sort -rn | head -1 | cut -d' ' -f2-)
-      if [ -n "$LATEST_PLAN_FILE" ] && grep -q '^## Contract' "$LATEST_PLAN_FILE" 2>/dev/null; then
-        PLAN_BASE=$(basename "$LATEST_PLAN_FILE")
-        LIB_DIR="$(dirname "$0")/../lib"
-        HANDOFF_ID=$(bash "${LIB_DIR}/handoff-state.sh" open "$PLAN_BASE" 2>/dev/null || true)
+    # handoff_open always runs to create the ledger entry; only the user-facing nudge text is deduplicated.
+    if [ -n "$LATEST_PLAN_FILE" ] && grep -q '^## Contract' "$LATEST_PLAN_FILE" 2>/dev/null; then
+      PLAN_BASE="$LATEST_PLAN_FILE_BASENAME"
+      LIB_DIR="$(dirname "$0")/../lib"
+      HANDOFF_ID=$(bash "${LIB_DIR}/handoff-state.sh" open "$PLAN_BASE" 2>/dev/null || true)
+      if ! nudge_already_fired "generator-handoff" "$PLAN_BASE"; then
         {
           printf '[handoff] generator complete. plan: %s | next gate: /verify %s\n' \
             "$PLAN_BASE" "${PLAN_BASE%.md}"
@@ -97,8 +147,14 @@ case "$AGENT_TYPE" in
     fi
     ;;
   reviewer|agents:reviewer|evaluator:adversarial-reviewer)
-    echo "[workflow] Reviewer finished. Before claiming done: run /verify (evaluator plugin) with evidence — commands, outputs, diffs."
+    if ! nudge_already_fired "reviewer" "${LATEST_PLAN_FILE_BASENAME:-_no_plan}"; then
+      echo "[workflow] Reviewer finished. Before claiming done: run /verify (evaluator plugin) with evidence — commands, outputs, diffs."
+    fi
     append_spec_delta "reviewer"
+    ;;
+  *)
+    echo "[forge-workflow] unknown agent_type='$AGENT_TYPE' — handoff not opened" >&2
+    exit 1
     ;;
 esac
 
