@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-# run-iteration.sh — outer-loop scaffold for /auto-tune-skill
-#
-# Implements the harness shape of Meta-Harness 2603.28052 Algorithm 1 (p.5):
-# validate → propose mutations → score → keep Pareto-best → write proposal.
-#
-# The autonomous mutation subagent (context: fork dispatch) is a planned
-# follow-up. This script ships the file-I/O skeleton and proposal format so
-# the rest of the pipeline (evals, ledger, guard hooks) can be verified now.
-#
-# Args: <plugin>:<skill-id>  e.g. diagnostics:entropy-scan
-# Env:  FORGE_AUTO_TUNE_ITERS — iteration cap (default 5)
-
 set -euo pipefail
+# run-iteration.sh — workspace coordinator for /auto-tune-skill
+#
+# Creates the per-run proposal workspace, logs iteration metadata to
+# .claude/evolution/auto-tune-runs.jsonl, and triggers ledger rotation.
+# Subagent dispatch is the model's job (see SKILL.md); this script does NOT
+# invoke Claude or spawn subagents.
+#
+# Args: <plugin>:<skill-id>
+# Env:
+#   FORGE_AUTO_TUNE_ITERS  — iteration cap passed into log entry (default 3)
+#   FORGE_AUTO_TUNE_K      — candidates per iteration for log entry (default 3)
+#   FORGE_AUTO_TUNE_MOCK   — "1" = mock mode; written into log entry
 
 # ---------------------------------------------------------------------------
 # Parse argument
@@ -22,8 +22,6 @@ if [[ $# -lt 1 ]]; then
 fi
 
 ARG="$1"
-
-# Split on colon
 PLUGIN="${ARG%%:*}"
 SKILL="${ARG##*:}"
 
@@ -33,7 +31,7 @@ if [[ -z "$PLUGIN" || -z "$SKILL" || "$PLUGIN" == "$ARG" ]]; then
 fi
 
 # ---------------------------------------------------------------------------
-# Resolve paths relative to the repo root (two dirs above this script)
+# Resolve paths
 # ---------------------------------------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../../../.." && pwd)"
@@ -57,59 +55,24 @@ fi
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-ITERS="${FORGE_AUTO_TUNE_ITERS:-5}"
+ITERS="${FORGE_AUTO_TUNE_ITERS:-3}"
+K="${FORGE_AUTO_TUNE_K:-3}"
+MOCK="${FORGE_AUTO_TUNE_MOCK:-0}"
+MODE="$( [[ "$MOCK" == "1" ]] && echo "mock" || echo "live" )"
 
 # ---------------------------------------------------------------------------
-# Ensure output directories exist
+# Create workspace: .claude/proposals/<plugin>-<skill>-<iso-ts>/iter-1/
 # ---------------------------------------------------------------------------
 PROPOSALS_DIR="$REPO_ROOT/.claude/proposals"
 EVOLUTION_DIR="$REPO_ROOT/.claude/evolution"
 mkdir -p "$PROPOSALS_DIR" "$EVOLUTION_DIR"
 
-# ---------------------------------------------------------------------------
-# Outer loop (stub: harness shape without live mutation subagent)
-# ---------------------------------------------------------------------------
 TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)"
-PROPOSAL_FILE="$PROPOSALS_DIR/${PLUGIN}-${SKILL}-${TIMESTAMP}.md"
-
-echo "auto-tune-skill: $PLUGIN:$SKILL — running $ITERS iteration(s) (stub mode)"
-
-for ITER_N in $(seq 1 "$ITERS"); do
-  echo "  iteration $ITER_N/$ITERS"
-  # In the full implementation each iteration would:
-  #   1. Dispatch a context:fork subagent to propose 2 body mutations
-  #   2. Run /run-evals for each candidate
-  #   3. Score by (pass_rate, -token_cost) and update Pareto frontier
-  # Stub: copy current SKILL.md as the baseline candidate for this iteration.
-done
+WORKSPACE_DIR="$PROPOSALS_DIR/${PLUGIN}-${SKILL}-${TIMESTAMP}"
+mkdir -p "$WORKSPACE_DIR/iter-1"
 
 # ---------------------------------------------------------------------------
-# Write proposal file
-# ---------------------------------------------------------------------------
-# Prepend a status header outside the YAML frontmatter block, then the
-# original SKILL.md content, then a reviewer footer.
-
-{
-  printf 'proposal_status: unreviewed\n\n'
-  cat "$SKILL_MD"
-  printf '\n\n---\n'
-  printf '<!-- auto-tune proposal footer -->\n'
-  printf '## Reviewer Instructions\n\n'
-  printf 'This file was produced by `/auto-tune-skill %s:%s` on %s.\n\n' \
-    "$PLUGIN" "$SKILL" "$TIMESTAMP"
-  printf 'The frontmatter above is unchanged from the original.\n'
-  printf 'The body is the baseline (autonomous mutation in a future release).\n\n'
-  printf '**To apply:** copy the body section back into `plugins/%s/skills/%s/SKILL.md`.\n\n' \
-    "$PLUGIN" "$SKILL"
-  printf '**To verify:** run `/run-evals %s:%s` and compare pass-rate to baseline.\n\n' \
-    "$PLUGIN" "$SKILL"
-  printf '**To discard:** delete this file — the original SKILL.md is untouched.\n'
-} > "$PROPOSAL_FILE"
-
-echo "  proposal written: .claude/proposals/${PLUGIN}-${SKILL}-${TIMESTAMP}.md"
-
-# ---------------------------------------------------------------------------
-# Log to evolution ledger
+# Log iteration metadata to auto-tune-runs.jsonl
 # ---------------------------------------------------------------------------
 LOG_FILE="$EVOLUTION_DIR/auto-tune-runs.jsonl"
 
@@ -117,18 +80,28 @@ ISO_TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 SESSION_ID="${CLAUDE_SESSION_ID:-unknown}"
 
 python3 -c "
-import json, sys
+import json
 entry = {
     'iso_timestamp': '$ISO_TS',
     'session_id': '$SESSION_ID',
     'skill': '$PLUGIN:$SKILL',
-    'iterations_run': $ITERS,
-    'proposal_file': '.claude/proposals/${PLUGIN}-${SKILL}-${TIMESTAMP}.md',
-    'mode': 'stub',
-    'note': 'Baseline candidate only; autonomous mutation subagent not yet dispatched'
+    'iteration_no': 1,
+    'candidate_count': int('$K'),
+    'mode': '$MODE',
+    'workspace_dir': '$WORKSPACE_DIR',
 }
 print(json.dumps(entry))
 " >> "$LOG_FILE"
 
-echo "  logged to .claude/evolution/auto-tune-runs.jsonl"
-echo "auto-tune-skill: done"
+# ---------------------------------------------------------------------------
+# Rotate ledger if it exceeds thresholds
+# ---------------------------------------------------------------------------
+ROTATE_SCRIPT="$SCRIPT_DIR/../../change-manifest/scripts/rotate.sh"
+if [[ -x "$ROTATE_SCRIPT" ]]; then
+  bash "$ROTATE_SCRIPT" "$LOG_FILE" 2>/dev/null || true
+fi
+
+# ---------------------------------------------------------------------------
+# Output the workspace dir so SKILL.md / the model knows where to write candidates
+# ---------------------------------------------------------------------------
+echo "$WORKSPACE_DIR"

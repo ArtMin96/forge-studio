@@ -92,3 +92,6 @@ for env_key, json_key in [
 with open(os.environ["MF_PATH"], "a") as f:
     f.write(json.dumps(entry) + "\n")
 PYEOF
+
+ROTATE_SCRIPT="$(dirname "$0")/rotate.sh"
+[ -x "$ROTATE_SCRIPT" ] && bash "$ROTATE_SCRIPT" "$MANIFEST_FILE" 2>/dev/null || true

@@ -1,110 +1,165 @@
 ---
 name: auto-tune-skill
-description: STUB — produces a baseline proposal file for a target skill at `.claude/proposals/<skill>-<timestamp>.md`. The autonomous mutation/scoring/Pareto outer loop (Meta-Harness Algorithm 1) is documented in this skill body as future work; current iteration is a no-op that emits the original SKILL.md as a starting candidate. Never modifies the original SKILL.md.
+description: Outer-loop proposer that iterates on a single SKILL.md body, scores each candidate via /run-evals-bench, computes a Pareto frontier on (pass_rate, token_cost), and writes the Pareto-best revision to .claude/proposals/<plugin>-<skill>-<timestamp>.md for human review. Never modifies the original SKILL.md; the user applies the proposal manually.
 when_to_use: Reach for this when a skill's eval pass rate is below target, the `when_to_use` guidance keeps misfiring, or you want a data-driven rewrite of the skill body without touching frontmatter. Give it a `plugin:skill-id` pair (e.g. `diagnostics:entropy-scan`) — the matching `evals/evals.json` must exist. Do NOT use for frontmatter edits or new-skill authoring — write or edit the SKILL.md directly instead.
 argument-hint: <plugin>:<skill-id>
 scheduling: a skill's eval pass rate is below target, or repeated misfires suggest the when_to_use guidance needs tightening
 structural:
-  - Parse the plugin:skill-id argument; validate SKILL.md and evals/evals.json exist
-  - Run run-iteration.sh which writes a baseline proposal (stub mode — scoring + mutation subagent not yet shipped)
-  - Each iteration would produce a candidate with mutations to the SKILL.md body only (frontmatter immutable); stub mode emits the original unchanged
-  - Score each candidate by (pass-rate via /run-evals, token-cost); keep Pareto-best — NOT YET IMPLEMENTED
-  - Write the proposal to .claude/proposals/<plugin>-<skill>-<iso-timestamp>.md
-  - Log each iteration to .claude/evolution/auto-tune-runs.jsonl with mode="stub"
-logical: .claude/proposals/<plugin>-<skill>-<timestamp>.md exists, contains the original frontmatter unchanged, and carries a footer explaining the next steps for the reviewer
+  - Validate args and confirm SKILL.md + evals/evals.json exist; invoke run-iteration.sh to create workspace
+  - For each iteration 1..N, dispatch K=FORGE_AUTO_TUNE_K context:fork subagents — each proposes one mutated SKILL.md body
+  - Score each candidate via score-candidate.sh (bench.py swap-restore); collect JSON {candidate_id, pass_rate, token_cost}
+  - Invoke pareto-best.py over cumulative non-dominated candidates to find the lex-best (max pass_rate, tie-break min token_cost)
+  - If pareto_best.pass_rate >= 1.0 or last iteration reached, break; otherwise feed Pareto-best body as next iteration baseline
+  - Write final Pareto-best body to .claude/proposals/<plugin>-<skill>-<timestamp>.md
+logical: .claude/proposals/<plugin>-<skill>-<timestamp>.md exists, contains the Pareto-best candidate body (frontmatter unchanged), and the original SKILL.md is bit-for-bit identical to before the run
 ---
 
 # /auto-tune-skill — Outer-Loop Skill Proposer
 
-Iterates on a single SKILL.md's body using the outer-loop algorithm from Meta-Harness 2603.28052 Algorithm 1 (p.5). Each iteration spawns a `context: fork` subagent to propose mutations, scores the result with `/run-evals`, and tracks the Pareto frontier by (pass-rate, token-cost). The Pareto-best candidate is written as a proposal file for human review.
+Iterates on a single SKILL.md body using the outer-loop algorithm from Meta-Harness 2603.28052 Algorithm 1 (p.5). Each iteration spawns `context: fork` subagents to propose body mutations, scores each via `/run-evals-bench`, and maintains a Pareto frontier by (pass_rate, token_cost). The Pareto-best candidate is written as a proposal file for human review.
 
-The original SKILL.md is never modified. The proposal is a standalone file the user can inspect, diff against the original, and apply manually.
+The original SKILL.md is never modified. The proposal is a standalone file the user inspects, diffs against the original, and applies manually.
 
 ## Scope Constraint
 
-This skill mutates the SKILL.md **body only**. Frontmatter fields (`name`, `description`, `when_to_use`, argument-hint, SSL overlay fields) are immutable across all iterations. The loop is barred from editing protected paths via the `pre-edit-guard.sh` hook (FORGE_META_EVOLVE=1 is set during iterations).
+This skill mutates the SKILL.md body only. Frontmatter fields (`name`, `description`, `when_to_use`, argument-hint, SSL overlay fields) are immutable across all iterations. The loop writes candidates and proposals to `.claude/proposals/` which is not a protected path — the `pre-edit-guard.sh` hook does not interfere.
 
-## Usage
+## Smoke-test Mode
+
+Set `FORGE_AUTO_TUNE_MOCK=1` to pass `--mock` to bench.py. Mock mode skips real `claude -p` API calls and returns synthetic scores so the loop can be exercised without burning eval budget. Candidates are still written and Pareto selection still runs — only the scoring uses placeholder values (pass_rate=0.5, token_cost=1000).
+
+## Orchestration Recipe
+
+Execute the following steps when invoked as `/auto-tune-skill <plugin>:<skill-id>`:
+
+### Step 1 — Validate and create workspace
 
 ```bash
-/auto-tune-skill diagnostics:entropy-scan
-/auto-tune-skill memory:recall
+WORKSPACE=$(bash plugins/forge-meta/skills/auto-tune-skill/scripts/run-iteration.sh <plugin>:<skill-id>)
 ```
 
-Or invoke `run-iteration.sh` directly with an optional iteration cap:
+This validates that `plugins/<plugin>/skills/<skill-id>/SKILL.md` and `plugins/<plugin>/skills/<skill-id>/evals/evals.json` both exist, creates the workspace at `.claude/proposals/<plugin>-<skill-id>-<timestamp>/iter-1/`, logs iteration metadata to `.claude/evolution/auto-tune-runs.jsonl`, and prints the workspace path on stdout.
+
+If `run-iteration.sh` exits nonzero, stop and report the error.
+
+### Step 2 — Outer loop (iterations 1..N)
+
+N = `${FORGE_AUTO_TUNE_ITERS:-3}`. K = `${FORGE_AUTO_TUNE_K:-3}`.
+
+For each iteration `i` from 1 to N:
+
+#### 2a — Dispatch K mutation subagents
+
+Dispatch K subagents in `context: fork` mode. Each receives the current best SKILL.md body (start of iteration 1: the original `plugins/<plugin>/skills/<skill-id>/SKILL.md`; subsequent iterations: the Pareto-best body from the previous iteration). Use this exact prompt template for each subagent:
+
+```
+You are a skill-body mutation agent. Your task is to propose ONE improved version of the following SKILL.md body. Rules:
+- You may only modify the body text below the closing `---` of the YAML frontmatter.
+- Do NOT change any frontmatter fields (name, description, when_to_use, argument-hint, SSL overlay fields).
+- Your mutation should improve clarity, instruction specificity, or eval pass rate.
+- Output ONLY the complete SKILL.md (frontmatter + mutated body), no commentary.
+
+Current best SKILL.md body:
+<insert full SKILL.md content here>
+```
+
+Write each subagent's output to `$WORKSPACE/iter-<i>/candidate-<k>.md` (where k = 1..K).
+
+#### 2b — Score each candidate
+
+For each candidate file at `$WORKSPACE/iter-<i>/candidate-<k>.md`:
 
 ```bash
-FORGE_AUTO_TUNE_ITERS=10 bash plugins/forge-meta/skills/auto-tune-skill/scripts/run-iteration.sh diagnostics:entropy-scan
+RESULT=$(bash plugins/forge-meta/skills/auto-tune-skill/scripts/score-candidate.sh \
+  "$WORKSPACE/iter-<i>/candidate-<k>.md" \
+  "<plugin>:<skill-id>" \
+  [--mock if FORGE_AUTO_TUNE_MOCK=1])
 ```
 
-## Algorithm (Meta-Harness §3, Algorithm 1)
+`score-candidate.sh` temporarily swaps the candidate into `plugins/<plugin>/skills/<skill-id>/SKILL.md`, runs `bench.py --skill <skill-id> --iterations 1`, parses the result, and restores the original. It outputs JSON on stdout:
 
-The outer loop runs up to `FORGE_AUTO_TUNE_ITERS` iterations (default 5 for smoke-test; real tuning sets 20). Per iteration:
+```json
+{"candidate_id": "candidate-<k>.md", "pass_rate": 0.87, "token_cost": 1420}
+```
 
-1. A `context: fork` subagent reads the current best candidate and proposes 2 body mutations.
-2. Each mutation is scored by running the skill's `evals/evals.json` via `/run-evals`.
-3. Score = `(pass_rate, -token_cost)` — higher pass rate wins; ties broken by lower token cost.
-4. Pareto-best replaces the current candidate if it dominates on at least one axis without regressing the other.
+Write the result JSON to `$WORKSPACE/iter-<i>/candidate-<k>.json`.
 
-Convergence: Meta-Harness p.5 baseline is ~20 iterations × 2 candidates ≈ 40 eval runs. The default smoke-test cap of 5 is intentionally low; raise `FORGE_AUTO_TUNE_ITERS` for real optimization.
+#### 2c — Compute Pareto-best
 
-## Stub Behaviour (Current Implementation)
+After all K candidates in iteration `i` are scored, collect all JSON result files from all iterations 1..i:
 
-The subagent dispatch for mutation generation requires `context: fork` semantics and an inter-process coordination protocol that a single shell script cannot safely drive. The current `run-iteration.sh` implements the harness shape:
+```bash
+python3 plugins/forge-meta/skills/auto-tune-skill/scripts/pareto-best.py \
+  $WORKSPACE/iter-*/candidate-*.json
+```
 
-- Validates paths and evals presence.
-- Copies the current SKILL.md to `.claude/proposals/<plugin>-<skill>-<iso-timestamp>.md`.
-- Prepends `proposal_status: unreviewed` outside the frontmatter block.
-- Appends a reviewer footer block describing next steps.
-- Logs each run to `.claude/evolution/auto-tune-runs.jsonl`.
+`pareto-best.py` computes the non-dominated set (a dominates b iff a.pass_rate >= b.pass_rate AND a.token_cost <= b.token_cost, with at least one strict inequality) and emits the lex-best winner (max pass_rate, tie-break min token_cost) as JSON on stdout.
 
-The autonomous mutation generator (the `context: fork` subagent that proposes body rewrites) is the planned follow-up: once the inter-process protocol is stable, `run-iteration.sh` will dispatch it per iteration and collect scores from `/run-evals`.
+#### 2d — Termination check
 
-## Proposal File Format
+- If `pareto_best.pass_rate >= 1.0`, the loop has converged — break.
+- If iteration `i` equals N, break.
+- Otherwise: the Pareto-best body (read from `$WORKSPACE/iter-<i>/candidate-<winner-k>.md`) becomes the baseline for iteration i+1. Create `$WORKSPACE/iter-<i+1>/` and proceed.
 
-The output file at `.claude/proposals/<plugin>-<skill>-<iso-timestamp>.md` looks like:
+### Step 3 — Write proposal
+
+Copy the Pareto-best candidate body to the final proposal file:
+
+```bash
+cp "$WORKSPACE/iter-<best-i>/candidate-<best-k>.md" \
+   ".claude/proposals/<plugin>-<skill-id>-<timestamp>.md"
+```
+
+Prepend the status line:
 
 ```
 proposal_status: unreviewed
+iteration_count: <N>
+pareto_pass_rate: <float>
+pareto_token_cost: <int>
 
----
-name: entropy-scan
-... (original frontmatter unchanged) ...
----
-
-... (SKILL.md body, possibly mutated by future autonomous loop) ...
-
----
-<!-- auto-tune proposal footer -->
-...reviewer instructions...
 ```
 
-## Examples
+### Step 4 — Confirm to user
 
-### Example 1: valid skill with evals
-
-Input: `diagnostics:entropy-scan` (has `evals/evals.json`)
-
-Output: `.claude/proposals/diagnostics-entropy-scan-20260513T090000Z.md` written; `.claude/evolution/auto-tune-runs.jsonl` gains one entry.
-
-### Example 2: skill without evals
-
-Input: `workflow:orchestrate` (no `evals/evals.json`)
-
-Output: exit 1 with message "evals.json not found for workflow:orchestrate — add evals/evals.json before auto-tuning".
+Report:
+- The proposal file path.
+- The Pareto-best score: `pass_rate=<X>, token_cost=<Y>`.
+- The original SKILL.md is unchanged (verify with `md5sum` or `diff`).
+- How to apply: `cp .claude/proposals/<...>.md plugins/<plugin>/skills/<skill-id>/SKILL.md` then run `/run-evals <plugin>:<skill-id>`.
 
 ## Execution Checklist
 
-- [ ] Identify the target skill: `<plugin>:<skill-id>`
-- [ ] Confirm `plugins/<plugin>/skills/<skill>/evals/evals.json` exists (or create it first)
+- [ ] Identify the target: `<plugin>:<skill-id>`
+- [ ] Confirm `plugins/<plugin>/skills/<skill>/evals/evals.json` exists (create it first if not)
+- [ ] (Optional) set `FORGE_AUTO_TUNE_MOCK=1` for a smoke test without burning eval budget
 - [ ] Run: `/auto-tune-skill <plugin>:<skill-id>`
-- [ ] Inspect the proposal file in `.claude/proposals/`
+- [ ] Run-iteration.sh creates workspace and logs — confirm workspace path printed
+- [ ] Dispatch K mutation subagents per iteration
+- [ ] Score each candidate with score-candidate.sh
+- [ ] Run pareto-best.py to select winner
+- [ ] Write proposal file to `.claude/proposals/`
 - [ ] Diff against original: `diff plugins/<plugin>/skills/<skill>/SKILL.md .claude/proposals/<plugin>-<skill>-<timestamp>.md`
-- [ ] If satisfied, copy proposal body back into the original SKILL.md (frontmatter stays unchanged)
+- [ ] If satisfied: `cp .claude/proposals/<...>.md plugins/<plugin>/skills/<skill>/SKILL.md`
 - [ ] Re-run `/run-evals <plugin>:<skill-id>` on the updated SKILL.md to confirm score improvement
+
+## Input / Output Examples
+
+### Example 1: successful tune
+
+Input: `/auto-tune-skill memory:recall` (has evals/evals.json, pass_rate currently 0.6)
+
+Output: `.claude/proposals/memory-recall-20260514T090000Z.md` — body rewritten to improve scoring guidance; Pareto-best candidate shows pass_rate=0.9, token_cost=1200. Original `plugins/memory/skills/recall/SKILL.md` unchanged.
+
+### Example 2: skill without evals
+
+Input: `/auto-tune-skill workflow:orchestrate` — wait, this skill has evals.json. Bad example: `/auto-tune-skill workflow:plan-session`
+
+Output: exit 1, "evals.json not found for workflow:plan-session — add evals/evals.json before auto-tuning".
 
 ## Known Failure Modes
 
-- **No evals.json**: the script exits 1 with a clear message. Auto-tuning without evals is meaningless — add eval cases first.
-- **Protected path blocked**: if `FORGE_META_EVOLVE=1` is set during an iteration and the loop tries to write to a protected path, `pre-edit-guard.sh` blocks the edit (exit 2). The proposal file is written to `.claude/proposals/` which is never a protected path.
-- **Proposal directory missing**: `run-iteration.sh` creates `.claude/proposals/` with `mkdir -p` before writing.
+- **No evals.json**: run-iteration.sh exits 1 with a clear message. Auto-tuning without evals is meaningless — add eval cases first.
+- **score-candidate.sh fails to restore**: the EXIT trap handles this; a `*.autotune-bak.<pid>` orphan may remain in the skill directory if the process is kill -9'd, but normal exits always restore. Clean up with `find plugins -name '*.autotune-bak.*' -delete`.
+- **flock unavailable**: score-candidate.sh uses `flock`; on macOS the syntax differs. On Linux (this project's target platform) `flock -x <fd>` is standard.
+- **All candidates dominate each other** (identical scores): pareto-best.py still returns the first candidate alphabetically by candidate_id as the lex-best — the proposal is written and the run completes normally.

@@ -19,7 +19,7 @@ The three roles are defined in `plugins/agents/agents/`. You dispatch them via t
 |------|-------------|--------------|
 | `agents:planner` | Read, Grep, Glob, Bash (no Edit/Write) | Explores the codebase and produces a plan with a `## Contract` section and `#### T<n>` task headings |
 | `agents:generator` | Read, Write, Edit, Bash | Implements one task from the plan; one task per dispatch |
-| `agents:reviewer` | Read, Grep, Glob, Bash (no Edit/Write) | Adversarial critique of the generator's diff; verifies contract compliance |
+| `agents:reviewer` | Read, Grep, Glob, Bash (no Edit/Write) | Adversarial critique of the generator's diff; verifies contract compliance; emits Verdict in first 2 lines (truncation-safe format) |
 
 The planner cannot write code. The reviewer cannot change code. The generator cannot publish a plan. Capability isolation is schema-level, not instruction-level.
 

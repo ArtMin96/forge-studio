@@ -73,6 +73,19 @@ Estimated scope: <files/operations count>
 Risk level: <low/medium/high>
 ```
 
+## Reviewer prompt template
+
+When dispatching a reviewer subagent, structure the prompt so the response starts with a 2-line verdict, then evidence, then findings. This survives output truncation: the verdict is always readable even if the tail is cut.
+
+```
+Verdict (≤2 lines): ACCEPT | REJECT | NEEDS DISCUSSION
+Per-check evidence:
+1. <criterion> — <quoted output / file:line>
+...
+Findings:
+[SEVERITY: …] [path:line] Issue: … Impact: … Fix: …
+```
+
 ## Injecting the active contract
 
 Before constructing any generator or reviewer subagent prompt, run:

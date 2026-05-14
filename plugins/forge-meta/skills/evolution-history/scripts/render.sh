@@ -2,17 +2,53 @@
 set -euo pipefail
 
 MANIFEST=".claude/evolution/change_manifest.jsonl"
+INCLUDE_ARCHIVE=0
 
-if [ ! -f "$MANIFEST" ]; then
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --include-archive) INCLUDE_ARCHIVE=1; shift ;;
+    *) shift ;;
+  esac
+done
+
+# Collect input files: archive (chronological) then live manifest.
+INPUT_FILES=()
+if [[ "$INCLUDE_ARCHIVE" -eq 1 ]]; then
+  archive_dir=".claude/evolution/archive"
+  if [[ -d "$archive_dir" ]]; then
+    while IFS= read -r -d '' f; do
+      INPUT_FILES+=("$f")
+    done < <(find "$archive_dir" -maxdepth 1 -name "change_manifest*.jsonl" -print0 | sort -z)
+  fi
+fi
+if [[ -f "$MANIFEST" ]]; then
+  INPUT_FILES+=("$MANIFEST")
+fi
+
+if [[ ${#INPUT_FILES[@]} -eq 0 ]]; then
   printf '# Evolution History\n\n_No manifest yet._\n'
   exit 0
 fi
 
+# Pass file list via env to Python to avoid shell-quoting issues.
+export EH_FILES
+EH_FILES=$(printf '%s\n' "${INPUT_FILES[@]}")
+
 python3 -c '
-import sys, json, collections, signal
+import sys, json, collections, signal, os
 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
-lines = sys.stdin.read().splitlines()
+file_list = [f for f in os.environ.get("EH_FILES", "").splitlines() if f.strip()]
+
+raw_lines = []
+for path in file_list:
+    try:
+        with open(path) as fh:
+            raw_lines.extend(fh.readlines())
+    except OSError:
+        pass
+
+lines = [l.rstrip("\n") for l in raw_lines]
 
 entries = []
 for line in lines:
@@ -82,4 +118,4 @@ for date in sorted_dates:
         if why:
             print(f"- **why_this_component**: {why}")
         print()
-' < "$MANIFEST"
+'
