@@ -16,6 +16,8 @@ logical: .claude/proposals/<plugin>-<skill>-<timestamp>.md exists, contains the 
 
 # /auto-tune-skill — Outer-Loop Skill Proposer
 
+> Candidate selection: before running this skill on an unfamiliar SKILL.md, use `bash plugins/forge-meta/skills/skill-staleness-audit/scripts/score.sh --format=json | jq '.skills | map(select(.score < 0.5)) | .[].path'` to surface the skills with the lowest staleness scores. They are the highest-leverage targets.
+
 Iterates on a single SKILL.md body using the outer-loop algorithm from Meta-Harness 2603.28052 Algorithm 1 (p.5). Each iteration spawns `context: fork` subagents to propose body mutations, scores each via `/run-evals-bench`, and maintains a Pareto frontier by (pass_rate, token_cost). The Pareto-best candidate is written as a proposal file for human review.
 
 The original SKILL.md is never modified. The proposal is a standalone file the user inspects, diffs against the original, and applies manually.

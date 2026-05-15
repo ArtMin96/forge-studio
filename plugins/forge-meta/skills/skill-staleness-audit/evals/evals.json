@@ -1,0 +1,43 @@
+{
+  "skill_name": "skill-staleness-audit",
+  "evals": [
+    {
+      "id": "fresh-skill-scores-high",
+      "prompt": "/skill-staleness-audit — A SKILL.md was committed yesterday, has a sibling evals/evals.json with 5 cases, declares scheduling/structural/logical fields, cites arXiv:2604.25850 in its body, and its description+when_to_use total 900 chars. The body has no inline code blocks. Should this skill score in the fresh tier?",
+      "files": [
+        {
+          "path": "plugins/sample/skills/example-fresh/SKILL.md",
+          "content": "---\nname: example-fresh\ndescription: One-line that fits well under the cap.\nwhen_to_use: Reach for this when the conditions match. Do NOT use for siblings — use /other instead.\nscheduling: precondition X holds\nstructural:\n  - step one\n  - step two\nlogical: postcondition Y is true\n---\n\nBody refers to arXiv:2604.25850 for the controllability invariant.\n"
+        }
+      ],
+      "assertions": [
+        "The response runs `bash plugins/forge-meta/skills/skill-staleness-audit/scripts/score.sh` (human or json form).",
+        "The example-fresh skill is classified in the `fresh` tier (score >= 0.75) given recency, evals, full SSL overlay, recent citation, exclusion clause, and lack of inline code blocks.",
+        "The response does not propose modifying the example-fresh SKILL.md — the audit is read-only and the skill is healthy.",
+        "Counts in the report sum to the total number of SKILL.md files under plugins/ (excluding plugins/_*/)."
+      ]
+    },
+    {
+      "id": "stale-skill-flagged",
+      "prompt": "/skill-staleness-audit — A SKILL.md was last edited 400 days ago, has no evals/evals.json, declares none of scheduling/structural/logical, cites no arXiv ID, has no `Do NOT use for` exclusion clause, and contains a 25-line inline bash code block. Should this skill be flagged in the stale tier and surfaced as an auto-tune candidate?",
+      "files": [],
+      "assertions": [
+        "The response classifies a SKILL.md with the described profile as `stale` (score < 0.50) given the multiple zero sub-scores (recency=0, evals=0, ssl=0/3, exclusion=0, helper=0).",
+        "The response notes the skill is a candidate for `/auto-tune-skill` — staleness audit composes with auto-tune via JSON output (`--format=json | jq`).",
+        "The response does NOT modify the flagged SKILL.md — the audit is strictly read-only per its frontmatter (`disable-model-invocation: true`, `allowed-tools: [Read, Bash, Glob]`).",
+        "The response surfaces which sub-signals drove the low score (recency, evals, ssl, exclusion, helper extraction) so the maintainer knows what to fix."
+      ]
+    },
+    {
+      "id": "json-format-stable-for-pipeline",
+      "prompt": "/skill-staleness-audit --format=json — The user wants to pipe the output into `/auto-tune-skill` to find the worst-scoring skills automatically. What command runs the audit in JSON mode, and what jq filter extracts the paths of all stale skills sorted by ascending score?",
+      "files": [],
+      "assertions": [
+        "The response invokes `bash plugins/forge-meta/skills/skill-staleness-audit/scripts/score.sh --format=json` (or equivalent path-relative command).",
+        "The jq filter selects `.skills[] | select(.tier == \"stale\")` (or equivalent `select(.score < 0.5)`) and projects `.path`, optionally sorting by `.score`.",
+        "The JSON schema described matches the SKILL.md spec: top-level `runs_at`, `totals` (with `skills`/`stale`/`aging`/`fresh` keys), and `skills` array of `{path, score, tier, signals}` objects.",
+        "The response does not propose merging stale skills or auto-applying auto-tune — selection is read-only; application requires explicit user approval."
+      ]
+    }
+  ]
+}
