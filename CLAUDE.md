@@ -53,6 +53,8 @@ context: fork                          # optional, runs in isolated subagent
 allowed-tools:                         # optional, capability isolation
   - Read
   - Bash
+paths:                                 # optional, glob list — restrict matcher activation to these paths
+  - "plugins/**/SKILL.md"              # 15 skills currently use this; field is empirically honored
 compatibility: "requires: bash>=4"     # optional, environment requirements (≤500 chars)
 license: MIT                           # optional, license name or path to LICENSE file
 metadata:                              # optional, vendor extension map
