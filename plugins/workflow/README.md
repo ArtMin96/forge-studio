@@ -90,6 +90,8 @@ Override the picker entirely by setting `FORGE_ACTIVE_PLAN_OVERRIDE=<absolute-pa
 | `FORGE_AFTER_SUBAGENT_TTL_SECS` | `1800` | Dedup TTL for after-subagent nudges |
 | `WORKFLOW_ROUTER_MODE` | `shell` | Router mode: `shell` (deterministic), `hybrid` (escalate uncertain to LLM), `llm` (always LLM) |
 | `WORKFLOW_ROUTER_CONFIDENCE_THRESHOLD` | `0.75` | Below this confidence, hybrid mode escalates to LLM |
+| `WORKFLOW_ROUTER_DIRECTIVE_THRESHOLD` | `0.90` | At/above this confidence, the advisory nudge is upgraded to a directive block ("ROUTE SELECTED / EXECUTE / WHY") that prompts immediate action. `single-agent` routes are exempt to avoid noise on narrow fixes |
+| `WORKFLOW_ROUTER_DIRECTIVE_MODE` | `on` | `off` reverts to advisory-only behavior bit-for-bit. Use as the override hatch when directive output is interfering |
 | `WORKFLOW_TURN_GATE_INTERVAL` | `3` | How often (in turns) the turn-gate fires |
 | `WORKFLOW_HANDOFF_PCT` | `75` | Context-use percentage at which turn-gate warns about compaction |
 

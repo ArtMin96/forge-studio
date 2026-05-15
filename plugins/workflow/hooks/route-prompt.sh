@@ -22,6 +22,8 @@ fi
 
 MODE="${WORKFLOW_ROUTER_MODE:-shell}"
 THRESHOLD="${WORKFLOW_ROUTER_CONFIDENCE_THRESHOLD:-0.75}"
+DIRECTIVE_THRESHOLD="${WORKFLOW_ROUTER_DIRECTIVE_THRESHOLD:-0.90}"
+DIRECTIVE_MODE="${WORKFLOW_ROUTER_DIRECTIVE_MODE:-on}"
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(dirname "$(dirname "$(readlink -f "$0")")")}"
 TRACE_DIR="/tmp/claude-router-${SESSION_ID}"
 mkdir -p "$TRACE_DIR" 2>/dev/null || true
@@ -170,8 +172,37 @@ if [ "$EXISTING_HASH" = "$STATE_HASH" ] && [ "${FORGE_REMINDER_FORCE:-0}" != "1"
   exit 0
 fi
 
-printf '[workflow router] route=%s confidence=%s reason=%s\n%s\n' \
-  "$ROUTE" "$CONFIDENCE" "$REASON" "$SUGGESTION"
+USE_DIRECTIVE=0
+if [ "$DIRECTIVE_MODE" = "on" ] && [ "$ROUTE" != "single-agent" ] \
+  && awk -v c="$CONFIDENCE" -v t="$DIRECTIVE_THRESHOLD" 'BEGIN{exit !(c>=t)}'; then
+  USE_DIRECTIVE=1
+fi
+
+if [ "$USE_DIRECTIVE" = "1" ]; then
+  case "$ROUTE" in
+    pipeline)
+      HUMAN="pipeline"
+      EXEC="/orchestrate pipeline   # iterates each #### T<n> with planner→generator→reviewer→/verify"
+      ;;
+    tdd-loop)
+      HUMAN="TDD loop"
+      EXEC="/tdd-loop   # RED→GREEN→REFACTOR gates against the real test runner"
+      ;;
+    fan-out)
+      HUMAN="fan-out batch"
+      EXEC="/fan-out --workers 3-5   # parallel-safe batch across enumerated targets"
+      ;;
+    *)
+      HUMAN="$ROUTE"
+      EXEC="/orchestrate $ROUTE"
+      ;;
+  esac
+  printf '[workflow router: directive] route=%s confidence=%s reason=%s\n\nROUTE SELECTED: %s\nEXECUTE: %s\nWHY: %s\n\nIf you have a concrete reason this route is wrong, state it in one sentence and proceed differently. Otherwise execute the route above.\n\nOverride: set WORKFLOW_ROUTER_DIRECTIVE_MODE=off (advisory mode), or run with WORKFLOW_ROUTER_CONFIDENCE_THRESHOLD raised above %s to suppress.\n' \
+    "$ROUTE" "$CONFIDENCE" "$REASON" "$HUMAN" "$EXEC" "$REASON" "$CONFIDENCE"
+else
+  printf '[workflow router] route=%s confidence=%s reason=%s\n%s\n' \
+    "$ROUTE" "$CONFIDENCE" "$REASON" "$SUGGESTION"
+fi
 
 printf '%s' "$STATE_HASH" > "$STATE_FILE"
 
