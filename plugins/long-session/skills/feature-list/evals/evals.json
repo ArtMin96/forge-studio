@@ -1,0 +1,48 @@
+{
+  "skill_name": "feature-list",
+  "evals": [
+    {
+      "id": "contract-to-features-json",
+      "prompt": "/feature-list — A plan exists at .claude/plans/notify-refactor.md with a `## Contract` section listing 3 testable bullets. Build .claude/features.json.",
+      "files": [
+        {
+          "path": ".claude/plans/notify-refactor.md",
+          "content": "# Notification refactor\n\n## Contract\n- [ ] POST /notify/send returns 200 when channel is valid\n- [ ] Slack channel handler emits a metric `notify.slack.dispatched`\n- [ ] tests/Notify/SendTest.php covers the new branch (./vendor/bin/pest --filter=Send)\n\n## Tasks\n#### T1 — endpoint\n#### T2 — Slack handler\n"
+        }
+      ],
+      "assertions": [
+        "The response writes .claude/features.json containing one entry per Contract bullet (3 entries) — derived from the plan's `## Contract` section per the SKILL.md `logical:` postcondition.",
+        "Each feature includes a `verify_cmd` derived from the criterion text — the third bullet's verify_cmd uses `./vendor/bin/pest --filter=Send` per the 'Derive verify_cmd' step heuristic.",
+        "The response Globs `.claude/plans/*.md` first to pick the most recently modified plan — does not assume a hardcoded filename.",
+        "The skill is invoked with `disable-model-invocation: true` semantics — it runs as a deterministic conversion, not a free-form interpretation."
+      ]
+    },
+    {
+      "id": "missing-contract-aborts",
+      "prompt": "/feature-list — A plan exists but has no `## Contract` section. What happens?",
+      "files": [
+        {
+          "path": ".claude/plans/loose.md",
+          "content": "# Loose plan\n\nWe should add a feature for X.\n\n## Tasks\n#### T1 — Build it\n"
+        }
+      ],
+      "assertions": [
+        "The response Reads the plan, observes no `## Contract` section, and stops with an explicit message: 'Plan has no ## Contract section. /feature-list expects one.' (per SKILL.md step 2).",
+        "The response does NOT fabricate features from `## Tasks` or free-form prose — features.json must derive from the contract per the description.",
+        "The response does NOT write an empty .claude/features.json — silent empty output would mislead /tdd-loop and /verify downstream.",
+        "The response recommends the user run Plan mode again to produce a plan with a contract."
+      ]
+    },
+    {
+      "id": "no-plan-found",
+      "prompt": "/feature-list — No file exists in .claude/plans/. What does the skill do?",
+      "files": [],
+      "assertions": [
+        "The response Globs `.claude/plans/*.md` and confirms no plan exists.",
+        "The response stops with the message 'No plan found. Run Plan mode first.' per the SKILL.md step 1.",
+        "The response does NOT create a plan stub or default features.json content — empty input does not produce fabricated output.",
+        "The response does NOT proceed to invoke /tdd-loop or /verify, since they depend on features.json existing — proper sequencing per the SKILL.md description."
+      ]
+    }
+  ]
+}

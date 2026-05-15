@@ -12,6 +12,38 @@
         "the report shows 1 skill missing logical field",
         "the report emits no WARN/INFO findings"
       ]
+    },
+    {
+      "id": "full-ssl-overlay-skill-passes",
+      "prompt": "/ssl-audit — A skill declares all three SSL fields (scheduling, structural, logical) in its frontmatter. The audit should not flag it.",
+      "files": [
+        {
+          "path": "plugins/x/skills/well-formed/SKILL.md",
+          "content": "---\nname: well-formed\ndescription: example with full SSL overlay\nwhen_to_use: when conditions match. Do NOT use for siblings — use /other.\nscheduling: precondition X holds\nstructural:\n  - step one\n  - step two\nlogical: postcondition Y is true\n---\nbody\n"
+        }
+      ],
+      "assertions": [
+        "The audit script reports the skill in the 'with scheduling' / 'with structural' / 'with logical' counts per the SKILL.md output format.",
+        "The skill is NOT listed under 'missing logical' — full overlay means full pass per the `logical:` postcondition formula 'CLEAN summary'.",
+        "Both audit.sh (presence count) and validate.py (typed checks) treat this skill as compliant — the SKILL.md mentions both tools as available; either should pass for a full-overlay skill.",
+        "The audit is read-only — no Write/Edit invoked, consistent with `allowed-tools: [Read, Bash, Glob]` and the SKILL.md description 'Read-only.'"
+      ]
+    },
+    {
+      "id": "partial-ssl-flagged-as-missing-logical",
+      "prompt": "/ssl-audit — A skill declares scheduling and structural but no logical field. Should the audit flag it?",
+      "files": [
+        {
+          "path": "plugins/x/skills/half-formed/SKILL.md",
+          "content": "---\nname: half-formed\ndescription: example missing logical field\nwhen_to_use: when conditions match. Do NOT use for siblings — use /other.\nscheduling: precondition X\nstructural:\n  - step one\n---\nbody\n"
+        }
+      ],
+      "assertions": [
+        "The audit lists this skill in the 'missing logical' bucket per the SKILL.md `structural` step 'Bucket each skill by which SSL field is present / absent.'",
+        "The `logical:` postcondition for the audit ('returns a non-zero count of skills missing logical: field') is satisfied — the skill is part of the non-zero count.",
+        "The report distinguishes 'scheduling: present' and 'structural: present' from 'logical: missing' — partial overlay is partial credit per the bucket semantics.",
+        "The skill is reported in the per-skill table for missing-logical, not silently aggregated — per the SKILL.md output format which lists skills missing logical individually."
+      ]
     }
   ]
 }

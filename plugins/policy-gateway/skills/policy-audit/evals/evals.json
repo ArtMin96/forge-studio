@@ -1,0 +1,43 @@
+{
+  "skill_name": "policy-audit",
+  "evals": [
+    {
+      "id": "ledger-replay-grouped-by-label",
+      "prompt": "/policy-audit — The lineage ledger has accumulated entries from policy-gateway hooks across the last week. Produce a security checkup report.",
+      "files": [
+        {
+          "path": ".claude/lineage/ledger.jsonl",
+          "content": "{\"ts\":\"2026-05-10T10:00:00Z\",\"operator\":\"policy-block\",\"resource\":\"file/src/.env\",\"trigger\":\"scan-secrets\",\"evidence\":\"secret-detected:aws-access-key\",\"actor\":\"policy-gateway:scan-secrets\"}\n{\"ts\":\"2026-05-11T11:00:00Z\",\"operator\":\"policy-block\",\"resource\":\"file/src/secrets.json\",\"trigger\":\"scan-secrets\",\"evidence\":\"secret-detected:aws-access-key\",\"actor\":\"policy-gateway:scan-secrets\"}\n{\"ts\":\"2026-05-12T12:00:00Z\",\"operator\":\"policy-block\",\"resource\":\"tool-input\",\"trigger\":\"scan-injection\",\"evidence\":\"pattern:ignore previous\",\"actor\":\"policy-gateway:scan-injection\"}\n{\"ts\":\"2026-05-13T13:00:00Z\",\"operator\":\"sensitive-op-audit\",\"resource\":\"file/config/prod.env\",\"trigger\":\"Write\",\"evidence\":\"postwrite\",\"actor\":\"policy-gateway:audit-sensitive-ops\"}\n"
+        }
+      ],
+      "assertions": [
+        "The response Pass-1 reads `.claude/lineage/ledger.jsonl` and filters entries where `operator` is `policy-block` or `sensitive-op-audit` per the SKILL.md Pass 1 step 2.",
+        "The response groups results: `secret-detected:aws-access-key` count = 2; `pattern:ignore previous` count = 1; `sensitive-op-audit` count = 1 — per the SKILL.md Pass 1 step 3 grouping.",
+        "The response Pass-2 then scans the live working tree using the same `rules.d/secrets.txt` patterns the runtime hook uses, per Pass 2 step 1.",
+        "The output matches the `logical:` postcondition: counts policy-block ledger entries by label and lists secret-pattern findings as <file>:<line>."
+      ]
+    },
+    {
+      "id": "no-ledger-graceful-degrade",
+      "prompt": "/policy-audit — `.claude/lineage/ledger.jsonl` does not exist (this is a fresh project). Pass-2 live scan still runs.",
+      "files": [],
+      "assertions": [
+        "The response Pass-1 detects the missing ledger file and reports zero ledger entries instead of erroring out — graceful per the 'if present' qualifier in SKILL.md Pass 1 step 1.",
+        "The response Pass-2 still runs the live repo scan — Pass 2 does not depend on the ledger.",
+        "The response makes clear in output that Pass-1 found no historical entries (vs. silently omitting it).",
+        "The response does NOT create or seed an empty ledger file — that's a write the skill's `allowed-tools` ([Read, Grep, Glob, Bash]) does not authorize."
+      ]
+    },
+    {
+      "id": "wrong-tool-realtime-blocking",
+      "prompt": "User: 'I want to block writes containing AWS keys at the moment they happen, not after.' Should /policy-audit run?",
+      "files": [],
+      "assertions": [
+        "The response declines /policy-audit — the SKILL.md `when_to_use` exclusion explicitly says 'Do NOT use for real-time blocking — that's the scan-secrets.sh and scan-injection.sh PreToolUse hooks.'",
+        "The response points to the runtime hooks (`plugins/policy-gateway/hooks/scan-secrets.sh`, `scan-injection.sh`) as the correct enforcement layer.",
+        "The response confirms /policy-audit is the after-the-fact audit + live-tree backstop, not a real-time gate.",
+        "The response does NOT pretend to invoke a runtime block from a skill — skills don't intercept tool calls."
+      ]
+    }
+  ]
+}

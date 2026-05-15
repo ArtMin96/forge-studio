@@ -1,0 +1,43 @@
+{
+  "skill_name": "remember",
+  "evals": [
+    {
+      "id": "tier-2-topic-and-tier-1-pointer",
+      "prompt": "/remember — The user says: 'always use Pest for tests in this project, never PHPUnit'. Store this so future sessions inherit the rule.",
+      "files": [],
+      "assertions": [
+        "The response writes a tier-2 topic file under `.claude/memory/topics/` with a slug like `testing-framework.md` (or similar) — per the three-tier architecture in SKILL.md.",
+        "The topic file body contains the rule (use Pest, not PHPUnit), a `Last verified:` date, and a `Version: v1` header per the SKILL.md template snippet.",
+        "The response also adds (or updates) a one-line pointer in `.claude/memory/index.md` referencing the new topic — tier-1 index is always-loaded per the SKILL.md table.",
+        "The response does NOT dump the rule into CLAUDE.md — memory is for decisions that don't fit a global rules file, per the SKILL.md `when_to_use` ('too subtle to live only in CLAUDE.md')."
+      ]
+    },
+    {
+      "id": "snapshot-prior-version-when-overwriting",
+      "prompt": "/remember — A topic file already exists at `.claude/memory/topics/deploy-process.md` (v1). The user wants to update it: 'we now deploy via blue-green, not rolling.' Update the topic.",
+      "files": [
+        {
+          "path": ".claude/memory/topics/deploy-process.md",
+          "content": "# Deploy Process\n\nLast verified: 2026-04-01\nVersion: v1\nPrevious: (none)\n\nDeploys are rolling — instances replaced 25% at a time over 20 minutes.\n"
+        }
+      ],
+      "assertions": [
+        "The response writes a new version of the topic file (v2) with the updated content (blue-green) and updates the `Version:` header.",
+        "The `Previous:` field in the new version references the prior version (v1) — version chain preserved per the SKILL.md template.",
+        "The response also snapshots the prior content to the lineage ledger (`.claude/lineage/...`) per the SKILL.md description (`snapshots any prior version to the lineage ledger`).",
+        "The tier-1 pointer in `.claude/memory/index.md` is NOT duplicated — the existing pointer is reused, not re-added."
+      ]
+    },
+    {
+      "id": "wrong-tool-rejection",
+      "prompt": "User: 'remember to check the deploy logs after we ship today.' Should /remember store this?",
+      "files": [],
+      "assertions": [
+        "The response declines to write a memory topic — this is an ephemeral session-scoped reminder, not a cross-session rule per the SKILL.md `when_to_use` exclusion ('Do NOT use for ... ephemeral session notes — those belong in TaskCreate or progress-log').",
+        "The response recommends TaskCreate for the immediate reminder OR /progress-log for capturing the post-deploy check at session end.",
+        "The response does NOT silently invoke /remember as a substitute — the skill is for durable rules, not in-session todos.",
+        "The response distinguishes 'remember to do X' (todo) from 'remember that Y' (rule), choosing the right tool per the verbal cue."
+      ]
+    }
+  ]
+}

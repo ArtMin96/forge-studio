@@ -1,0 +1,43 @@
+{
+  "skill_name": "forward-briefing",
+  "evals": [
+    {
+      "id": "blockers-rewritten-as-questions",
+      "prompt": "/forward-briefing — claude-progress.txt has 5 entries, each ending with `Blockers:` lines describing failed attempts. Generate a forward-framed briefing.",
+      "files": [
+        {
+          "path": "claude-progress.txt",
+          "content": "## 2026-05-10\nWorked on auth refactor.\nBlockers: SAML lib version mismatch, CI keeps failing on 3.9.\n\n## 2026-05-11\nTried to fix SAML mismatch.\nBlockers: still failing, vendor docs are stale.\n\n## 2026-05-12\nReverted to lib v2.\nBlockers: token validation now broken in staging.\n\n## 2026-05-13\nRolled forward to v3 again.\nBlockers: CI green locally, broken in CI matrix.\n\n## 2026-05-14\nIsolated the matrix failure.\nBlockers: only fails on Python 3.9; team uses 3.11 locally.\n"
+        }
+      ],
+      "assertions": [
+        "The response writes `.claude/forward-briefing.md` with three sections per the `structural` step list: Last-session-left-at, Direct-next-steps, Open-questions.",
+        "Accumulated `Blockers:` lines are rewritten as `Open-questions` (e.g. 'What pin would the matrix accept?') rather than copied verbatim — the skill's stated reframing per arXiv:2605.08060v1 §4.5.",
+        "The output file includes a generation-timestamp header so `surface-progress.sh` can compare freshness, per the SKILL.md `structural` requirement.",
+        "claude-progress.txt is NOT modified — the skill produces a derived view, not a replacement, per the 'Append-Only Invariant' section."
+      ]
+    },
+    {
+      "id": "respects-last-5-window",
+      "prompt": "/forward-briefing — claude-progress.txt has 12 entries. Which ones get rewritten?",
+      "files": [],
+      "assertions": [
+        "The response reads only the last 5 entries from claude-progress.txt, per the `structural` step 'Read last 5 entries' — not the full log.",
+        "The response treats blank-line-separated blocks as the entry delimiter, consistent with the structural spec.",
+        "The response does not require the user to pre-trim the file — the skill itself slices the window.",
+        "Older entries (entries 1-7 of the 12) are not present in the briefing output."
+      ]
+    },
+    {
+      "id": "skip-when-not-the-right-tool",
+      "prompt": "User says: 'log what we did this session'. Should /forward-briefing run?",
+      "files": [],
+      "assertions": [
+        "The response declines to run /forward-briefing — the SKILL.md `when_to_use` exclusion explicitly says 'Do NOT use for writing the progress log itself — that's /progress-log.'",
+        "The response recommends `/progress-log` as the correct tool for appending session work to claude-progress.txt.",
+        "The response also distinguishes from `/session-resume` (full briefing including spec/features/git state), which is a separate sibling per the exclusion clause.",
+        "The response does not silently invoke /forward-briefing as a substitute — exclusion clauses are mandatory routing per CLAUDE.md skill conventions."
+      ]
+    }
+  ]
+}

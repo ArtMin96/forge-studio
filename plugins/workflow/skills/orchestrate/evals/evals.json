@@ -43,6 +43,22 @@
         "Output does not invoke the planner -> generator -> reviewer chain; fan-out delegates to /fan-out and does not run pipeline steps",
         "Final report line names 'fan-out' as the dispatched pattern, consistent with SKILL.md Step 4 'Dispatched: <pattern>. Next gate: <...>' format"
       ]
+    },
+    {
+      "id": "multi-task-pipeline-stops-on-task-failure",
+      "prompt": "/orchestrate pipeline — A plan has 4 tasks. Task T2 fails its /verify gate after the generator/reviewer cycle. What does orchestrate do?",
+      "files": [
+        {
+          "path": ".claude/plans/multi-task.md",
+          "content": "# Multi-Task Sprint\n\n## Contract\n\n- All four endpoints return 200 under their happy-path test\n- Verification: ./vendor/bin/pest --filter=Endpoints\n\n## Tasks\n\n#### T1 — GET /a\n#### T2 — POST /b\n#### T3 — PATCH /c\n#### T4 — DELETE /d\n"
+        }
+      ],
+      "assertions": [
+        "Output processes T1 successfully (generator → reviewer → /verify cycle) before advancing to T2 — per-task iteration per the SKILL.md pipeline step.",
+        "When T2's /verify gate fails, orchestrate STOPs and reports which task failed and why — does not auto-advance to T3 or T4 per the SKILL.md 'On failure: STOP. Report which task failed and why. Do not auto-advance' rule.",
+        "Output does not silently retry T2 or move on — failure surfaces a user decision point, consistent with the per-task halt-on-failure invariant.",
+        "T3 and T4 are not dispatched after T2's failure — the pipeline preserves per-task scoping rather than running unrelated tasks past a broken gate."
+      ]
     }
   ]
 }

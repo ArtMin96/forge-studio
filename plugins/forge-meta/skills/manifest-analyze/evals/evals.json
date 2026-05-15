@@ -1,0 +1,43 @@
+{
+  "skill_name": "manifest-analyze",
+  "evals": [
+    {
+      "id": "five-section-report-from-manifest",
+      "prompt": "/manifest-analyze — The change manifest at `.claude/evolution/change_manifest.jsonl` has 4 entries from the last sprint. Produce the report.",
+      "files": [
+        {
+          "path": ".claude/evolution/change_manifest.jsonl",
+          "content": "{\"ts\":\"2026-05-10T10:00:00Z\",\"session\":\"a\",\"failure_pattern\":\"premature-green\",\"risk_tasks\":\"T2,T3\",\"constraint_level\":\"hard\",\"why_this_component\":\"workflow/orchestrate\"}\n{\"ts\":\"2026-05-11T11:00:00Z\",\"session\":\"b\",\"failure_pattern\":\"premature-green\",\"risk_tasks\":\"T1\",\"constraint_level\":\"hard\",\"why_this_component\":\"workflow/orchestrate\"}\n{\"ts\":\"2026-05-12T12:00:00Z\",\"session\":\"c\",\"failure_pattern\":\"context-decay\",\"risk_tasks\":\"T4\",\"constraint_level\":\"soft\",\"why_this_component\":\"agents/contract\"}\n{\"ts\":\"2026-05-13T13:00:00Z\",\"session\":\"d\",\"failure_pattern\":\"premature-green\",\"risk_tasks\":\"T2\",\"constraint_level\":\"hard\",\"why_this_component\":\"workflow/orchestrate\"}\n"
+        }
+      ],
+      "assertions": [
+        "The response invokes `bash plugins/forge-meta/skills/manifest-analyze/scripts/analyze.sh` to produce the report — does not re-implement parsing in-line.",
+        "The output contains all five sections per the SKILL.md description: Volume, Failure-pattern frequency, Risk-task frequency, Constraint-level distribution, Why-this-component clusters.",
+        "Failure-pattern frequency reports `premature-green` as the top pattern (3 occurrences) and `context-decay` second (1) — counts match the input.",
+        "Why-this-component clusters reports `workflow/orchestrate` as the dominant cluster (3 entries) — consistent with the description ('reveals which components attract the most evolution pressure')."
+      ]
+    },
+    {
+      "id": "empty-manifest-graceful",
+      "prompt": "/manifest-analyze — `.claude/evolution/change_manifest.jsonl` does not exist (or exists but is empty). What does the skill output?",
+      "files": [],
+      "assertions": [
+        "The response runs the analyze.sh script and produces the documented placeholder output: '# Manifest Analysis\\n\\n_No entries._' per the 'When the manifest is empty or absent' clause in SKILL.md.",
+        "The response exits 0 — empty manifest is a valid state, not an error.",
+        "The response does NOT fabricate sample entries to populate the report.",
+        "The response does NOT create a manifest file — analysis is read-only over an existing artifact."
+      ]
+    },
+    {
+      "id": "include-archive-flag",
+      "prompt": "/manifest-analyze --include-archive — The live manifest has rotated 3 times (3 archive files exist under `.claude/evolution/archive/`). Run the analysis with archives included.",
+      "files": [],
+      "assertions": [
+        "The response invokes the script with `--include-archive` — the flag is documented in the SKILL.md argument-hint.",
+        "The response folds entries from `.claude/evolution/archive/change_manifest*.jsonl` into the analysis, alongside the live file — per the SKILL.md `when_to_use` description of the flag.",
+        "The Volume section reports the combined entry count (live + archives) and reflects the oldest timestamp from the archive set, not from the live file alone.",
+        "The response notes which files contributed (live + N archives) so the reader can audit the data source."
+      ]
+    }
+  ]
+}

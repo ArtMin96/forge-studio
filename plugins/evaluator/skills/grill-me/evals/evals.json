@@ -16,6 +16,38 @@
         "The response does not proceed to T1 implementation before the goal question is resolved — goal ambiguity at trajectory start is treated as a blocker per grill-me's front-loaded clarification purpose",
         "The response does not invoke `/devils-advocate` (argument against a chosen direction) — the exclusion clause in when_to_use distinguishes clarification from opposition"
       ]
+    },
+    {
+      "id": "explicit-grill-me-trigger",
+      "prompt": "User: 'grill me on this caching plan before we lock it in.' The plan has multiple unresolved decisions (TTL, eviction policy, cache backend).",
+      "files": [
+        {
+          "path": ".claude/plans/cache-plan.md",
+          "content": "# Cache plan\n\n## Open Questions\n\n- What TTL?\n- LRU vs LFU?\n- Redis vs in-process?\n\n## Tasks\n#### T1 — Implement\n"
+        }
+      ],
+      "assertions": [
+        "The response invokes /grill-me — the literal phrase 'grill me' is named in the SKILL.md description as a primary trigger.",
+        "The response asks ONE question at a time per the SKILL.md body instruction 'Ask the questions one at a time' — does not dump the full list at once.",
+        "For each question asked, the response provides a recommended answer per the SKILL.md body instruction 'For each question, provide your recommended answer.'",
+        "The response does NOT proceed to T1 implementation while open questions remain — clarification gates execution per the trajectory-start rationale."
+      ]
+    },
+    {
+      "id": "context-question-not-goal",
+      "prompt": "/grill-me — The plan has an open question tagged `(dimension: context; window: before-start)`: 'Is the existing UserNotifier service in-tree or external? The integration depends on this.' Should grill-me act?",
+      "files": [
+        {
+          "path": ".claude/plans/notifier-integration.md",
+          "content": "# Notifier integration\n\n## Open Questions\n\n- (dimension: context; window: before-start) Is the existing UserNotifier service in-tree or external? The integration depends on this.\n\n## Tasks\n#### T1 — Wire up notifier\n"
+        }
+      ],
+      "assertions": [
+        "The response invokes /grill-me — the SKILL.md when_to_use explicitly covers `(dimension: context` open questions at trajectory start, alongside `(dimension: goal`.",
+        "The response attempts to resolve the question by exploring the codebase first per the SKILL.md body 'If a question can be answered by exploring the codebase, explore the codebase instead' — searches for UserNotifier in the tree before asking the user.",
+        "If the codebase exploration is conclusive (e.g. grep finds the service in src/), the response answers the question from evidence rather than escalating to the user.",
+        "The response does NOT proceed to T1 before the context ambiguity is resolved — context ambiguity at trajectory start is a blocker per the SKILL.md rationale."
+      ]
     }
   ]
 }

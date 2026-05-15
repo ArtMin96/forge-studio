@@ -48,6 +48,22 @@
         "F2 and F3 are not flipped to status 'done' — §features.json step 4 states 'Never auto-flip on # manual'",
         "F1 (with a real verify_cmd) is executed and its actual command output is quoted in the report per §3b, demonstrating the distinction between runnable and manual entries"
       ]
+    },
+    {
+      "id": "verify-against-directive-router-output",
+      "prompt": "/verify — A plan's contract includes the criterion: 'route-prompt.sh emits a directive block (ROUTE SELECTED / EXECUTE / WHY) at confidence >= 0.90 when WORKFLOW_ROUTER_DIRECTIVE_MODE=on'. Confirm the directive-router behavior is verified against contract.",
+      "files": [
+        {
+          "path": ".claude/plans/router-directive.md",
+          "content": "# Router directive mode\n\n## Contract\n\n### Verification\n\n```bash\necho '{\"prompt\":\"write a failing test then implement\",\"session_id\":\"v-test\"}' | WORKFLOW_ROUTER_DIRECTIVE_MODE=on bash plugins/workflow/hooks/route-prompt.sh | grep -q '^ROUTE SELECTED:'\necho '{\"prompt\":\"write a failing test then implement\",\"session_id\":\"v-test2\"}' | WORKFLOW_ROUTER_DIRECTIVE_MODE=off bash plugins/workflow/hooks/route-prompt.sh | grep -qv '^ROUTE SELECTED:'\n```\n"
+        }
+      ],
+      "assertions": [
+        "Both verification commands actually run and their stdout/stderr + exit codes are captured verbatim — §3b 'copy-paste the real output' rule applies whether verifying app code or harness behavior.",
+        "The verdict block emits 'VERIFIED: Yes' only if BOTH commands exit 0 — the on-mode produces a ROUTE SELECTED line AND the off-mode does not.",
+        "EVIDENCE: line quotes the actual directive output (the 'ROUTE SELECTED: TDD loop' line, not a paraphrase like 'directive block was emitted').",
+        "If WORKFLOW_ROUTER_DIRECTIVE_MODE is unset rather than off, the second command may also produce ROUTE SELECTED (default is 'on'), causing exit 0 instead of 1 — the verifier reports the actual failure mode rather than asserting verification passed."
+      ]
     }
   ]
 }

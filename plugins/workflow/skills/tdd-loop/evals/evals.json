@@ -1,0 +1,43 @@
+{
+  "skill_name": "tdd-loop",
+  "evals": [
+    {
+      "id": "red-required-before-green",
+      "prompt": "/tdd-loop add a function `parse_iso_date(s)` that returns a date object or raises ValueError. The codebase uses pytest. Walk through the loop.",
+      "files": [
+        {
+          "path": "src/dates.py",
+          "content": "def parse_iso_date(s):\n    raise NotImplementedError\n"
+        }
+      ],
+      "assertions": [
+        "The response writes a failing test FIRST (RED phase), saving it to a tests/ file before any implementation edit, per the SKILL.md `structural` step list.",
+        "The response runs the test command (pytest) and confirms the new test fails for the expected reason — not some unrelated error — before moving to GREEN.",
+        "The response only edits src/dates.py AFTER the failing-test command output is captured; no implementation precedes a RED commit per the `logical:` postcondition.",
+        "The response does NOT mark the task done until the test transitions from RED to GREEN with a real pytest run, not a textual assertion."
+      ]
+    },
+    {
+      "id": "no-regressions-gate",
+      "prompt": "/tdd-loop — The new GREEN test passes. Two unrelated tests in the same suite now fail. Should the skill consider the criterion done?",
+      "files": [],
+      "assertions": [
+        "The response refuses to mark the criterion done — the third gate (no regressions) per the description requires the FULL suite green, not just the new test.",
+        "The response surfaces which existing tests broke and treats them as REFACTOR-phase blockers, not as 'unrelated' failures to ignore.",
+        "The response does not commit GREEN until regressions are addressed, consistent with the `logical:` invariant that the suite is fully green at sprint end.",
+        "The response does not propose disabling or skipping the failing tests as a shortcut."
+      ]
+    },
+    {
+      "id": "skip-for-pure-refactor",
+      "prompt": "/tdd-loop — The user asks to rename the variable `x` to `customer_id` in three files. There are no new acceptance criteria, just a rename. Should tdd-loop run?",
+      "files": [],
+      "assertions": [
+        "The response declines to run the full TDD loop — the SKILL.md `when_to_use` excludes pure-refactor work explicitly: 'Do NOT use for ... pure-refactor work (use /orchestrate pipeline ...).'",
+        "The response recommends `/orchestrate pipeline` for staged refactors, or inline edits if the scope is single-file, per the SKILL.md exclusion clause.",
+        "The response does not write a fake test just to satisfy the loop — that would violate the `logical:` invariant (tests must encode genuine acceptance criteria).",
+        "The response surfaces the rename as the actual task and proceeds with direct edits + an existing-test re-run, not a RED-GREEN-REFACTOR ceremony."
+      ]
+    }
+  ]
+}

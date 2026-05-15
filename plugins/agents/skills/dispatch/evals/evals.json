@@ -48,6 +48,17 @@
         "The Risk level: field emits 'medium' or 'high' consistent with §Decision Matrix row 'Risk | Medium-High' for Pipeline — not low",
         "Output does not emit Route: Single Agent or Route: Fan-Out; §Decision Matrix rows 'Task type | New feature, architecture change' and 'Interdependence | Medium (phases depend on prior phase)' both point unambiguously to Pipeline"
       ]
+    },
+    {
+      "id": "no-task-brief-graceful-stop",
+      "prompt": "/dispatch — There is no .claude/task-brief.md and the user did not paste task details inline. What should the skill do?",
+      "files": [],
+      "assertions": [
+        "The response does not fabricate a task brief or invent file lists — Routing Rules require a concrete file/scope inventory before routing can be picked.",
+        "The response stops and asks the user to either provide a task brief, paste files inline, or run a planner first to produce one.",
+        "The response does not emit a Route: line — without input there is no defensible classification per the Decision Matrix.",
+        "The response references the Known Failure Modes section's caution against premature routing on incomplete information."
+      ]
     }
   ]
 }

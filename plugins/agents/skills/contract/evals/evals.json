@@ -1,0 +1,48 @@
+{
+  "skill_name": "contract",
+  "evals": [
+    {
+      "id": "contract-reread-before-implementation",
+      "prompt": "/contract — A planner just produced .claude/plans/payment-flow.md with a `## Contract` section listing 3 success criteria. The generator subagent is about to start implementation. Re-read the contract from disk and acknowledge each criterion.",
+      "files": [
+        {
+          "path": ".claude/plans/payment-flow.md",
+          "content": "# Payment flow refactor\n\n## Contract\n- [ ] POST /payments/charge returns 200 with charge_id on success\n- [ ] PaymentDispatcher emits payment.charged event\n- [ ] Idempotency key required; duplicate request returns the prior charge_id\n\nVerification: ./vendor/bin/pest --filter=PaymentCharge\n\n## Tasks\n\n#### T1 — Add charge endpoint\n#### T2 — Wire dispatcher event\n"
+        }
+      ],
+      "assertions": [
+        "The response calls Read on .claude/plans/payment-flow.md (not just citing prior context — fresh disk read per the skill's purpose).",
+        "Each of the 3 contract criteria is printed verbatim and marked UNDERSTOOD or UNCLEAR per the SKILL.md `contract.required_outputs`.",
+        "No Edit or Write tool is invoked — `allowed-tools` lists Read and Glob only.",
+        "If any criterion is marked UNCLEAR, the response STOPs and asks the user to clarify rather than proceeding to implementation."
+      ]
+    },
+    {
+      "id": "no-plan-graceful-stop",
+      "prompt": "/contract — There is no plan file in .claude/plans/. The user expects contract re-read before generation. What does the skill do?",
+      "files": [],
+      "assertions": [
+        "The response uses Glob on `.claude/plans/*.md` (or equivalent search) to confirm no plan exists.",
+        "The response stops with an explicit message that no plan was found, rather than fabricating contract criteria from prior context.",
+        "The response does NOT proceed to implementation — the SKILL.md counterexamples explicitly cover 'When no plan file exists in .claude/plans/ — nothing to re-read.'",
+        "The response suggests the user runs `/scope` or Plan mode first, per the SKILL.md guidance."
+      ]
+    },
+    {
+      "id": "no-contract-section-stop",
+      "prompt": "/contract — A plan exists but lacks a `## Contract` section. What does the skill do, and why?",
+      "files": [
+        {
+          "path": ".claude/plans/loose-plan.md",
+          "content": "# Loose plan\n\nLet's add a notification system. Should be flexible.\n\n## Tasks\n\n- Build the notifier\n- Hook it into the dispatcher\n"
+        }
+      ],
+      "assertions": [
+        "The response Reads the plan and confirms no `## Contract` section is present.",
+        "The response stops or surfaces the missing-contract condition — does not invent criteria.",
+        "The response references the SKILL.md `logical:` postcondition (sprint contract criteria re-printed verbatim) and notes it cannot be satisfied without a contract section.",
+        "The response recommends adding a `## Contract` section (e.g. via re-planning) before re-running."
+      ]
+    }
+  ]
+}
