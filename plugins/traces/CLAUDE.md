@@ -15,7 +15,7 @@ Execution-trace collection (Bash, Edit/Write, failures, user turns, session summ
 
 ## Files to read first when changing this plugin
 
-1. `hooks/hooks.json` — the 7-event collector chain
+1. `hooks/hooks.json` — the 6-script collector chain across 4 events (SessionStart, UserPromptSubmit, PostToolUse, Stop)
 2. `hooks/collect-bash-trace.sh` — the canonical collector pattern; others mirror it
 3. `skills/trace-compile/SKILL.md` — the assembler that downstream skills depend on; its output schema is the contract
 
