@@ -10,10 +10,11 @@ SessionStart ─► session-bootstrap.sh
                  └─ list unchecked items in active plan
 
 UserPromptSubmit ─► route-prompt.sh (shell classifier)
-                     ├─ tdd intent      → nudge /tdd-loop
-                     ├─ feature build   → nudge /dispatch → planner→generator→reviewer
-                     ├─ batch same-op   → nudge /fan-out
-                     ├─ narrow change   → nudge execute-directly
+                     prints a one-line recommendation; never invokes a skill on its own
+                     ├─ tdd intent      → recommend /tdd-loop
+                     ├─ feature build   → recommend /orchestrate pipeline
+                     ├─ batch same-op   → recommend /fan-out (agents plugin)
+                     ├─ narrow change   → recommend execute-directly (no pipeline)
                      └─ low confidence  → optional LLM fallback (route-prompt-llm.sh)
 
 SubagentStop ─► after-subagent.sh
@@ -35,7 +36,7 @@ PreCompact ─► pre-compact-handoff.sh
 | Event | Hook (this plugin) | Composed plugins | Result |
 |---|---|---|---|
 | Session starts | `session-bootstrap.sh` | `long-session:/session-resume`, plan file globs | Recent progress surfaced; active plan shown |
-| Prompt submitted | `route-prompt.sh` | `agents:/dispatch`, `agents:/fan-out`, this plugin's `/tdd-loop` | Pattern auto-selected |
+| Prompt submitted | `route-prompt.sh` | `agents:/dispatch`, `agents:/fan-out`, this plugin's `/tdd-loop` | Pattern recommended (advisory text — user invokes the chosen skill) |
 | Subagent finishes | `after-subagent.sh` | `agents:/contract`, `evaluator:/verify`, `workflow:/living-spec`, `long-session:/feature-list` | Sprint-contract + living-spec delta + features.json status update |
 | Turn ends | `turn-gate.sh` | `long-session:/progress-log` (nudge) | Plan + budget reconciled |
 | Auto-compact pending | `pre-compact-handoff.sh` | `long-session:/progress-log` | State persisted before potential loss |

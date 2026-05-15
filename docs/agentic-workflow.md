@@ -1,6 +1,6 @@
 # Agentic Workflow
 
-The `workflow` plugin automates how Claude Code moves through a development session. It classifies every prompt, dispatches the right multi-agent pattern, enforces the sprint contract across subagents, and nudges a handoff before context is lost — all through harness hooks, with zero manual commands on the happy path.
+The `workflow` plugin instruments a development session with hook-driven advisories. Every prompt is classified into a recommended pattern (single-agent / pipeline / fan-out / tdd-loop), each subagent transition prints a next-step nudge, and context-pressure thresholds trigger handoff reminders. The hooks **only emit text suggestions** — they do not invoke skills or dispatch subagents on their own. To actually run a pattern, the user (or the model on the user's behalf) types `/orchestrate <pattern>`, `/tdd-loop`, etc. Read the suggestion, decide, then invoke.
 
 ---
 
@@ -26,19 +26,21 @@ Restart the session once. The hooks arm themselves on the next `SessionStart`.
 
 ## How a session flows
 
+The diagram below is the **logical flow**, not the wire-up. The `Route prompt` step is the only automatic hop — `route-prompt.sh` runs on every UserPromptSubmit and prints a recommended pattern. Every box downstream of `Route prompt` is invoked by the user typing the corresponding command (`/orchestrate single`, `/orchestrate pipeline`, `/orchestrate fan-out`, `/tdd-loop`, `/verify`, `/progress-log`).
+
 ```mermaid
 flowchart LR
-  A[SessionStart] --> B[Route prompt]
-  B -->|narrow fix| C[Single agent]
-  B -->|feature build| D[Planner → Generator → Reviewer]
-  B -->|batch same-op| E[Fan-out 3–5 workers]
-  B -->|test-first| F[TDD loop]
-  C --> G[Verify]
+  A[SessionStart] --> B[Route prompt &#40;auto&#41;]
+  B -->|narrow fix| C[/orchestrate single/]
+  B -->|feature build| D[/orchestrate pipeline/]
+  B -->|batch same-op| E[/orchestrate fan-out/]
+  B -->|test-first| F[/tdd-loop/]
+  C --> G[/verify/]
   D --> G
   E --> G
   F --> G
   G --> H{Context tight?}
-  H -->|yes| I[Handoff]
+  H -->|yes| I[/progress-log/]
   H -->|no| B
 ```
 

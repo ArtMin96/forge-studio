@@ -69,7 +69,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | [**long-session**](plugins/long-session/README.md) | Long-running sessions: `init.sh` bootstrap, append-only `claude-progress.txt`, `features.json` testable requirements, `surface-progress` SessionStart hook, `/session-resume` briefing. | 4 | 5 |
 | [**memory**](plugins/memory/README.md) | Three-tier memory: pointer index → topic files → searchable transcripts, version-aware updates, ledger audit | 1 | 4 |
 | [**evaluator**](plugins/evaluator/README.md) | Static analysis gates (PHP/JS/TS), adversarial review, verification (+features.json execution), reference-fidelity check, test nudge, self-evolution assessment, prediction audit, rubric scoring | 8 | 14 |
-| [**workflow**](plugins/workflow/README.md) | Hook-driven agentic orchestrator: auto-routing, sprint-contract, TDD, /progress-log nudges, self-evolution loop, **/living-spec** (auto-updating spec via after-subagent) | 5 | 10 |
+| [**workflow**](plugins/workflow/README.md) | Hook-driven agentic orchestrator: advisory routing (recommends `/orchestrate` / `/tdd-loop` / `/fan-out` per prompt), sprint-contract, TDD, /progress-log nudges, self-evolution loop, **/living-spec** (auto-updating spec via after-subagent) | 5 | 10 |
 | [**agents**](plugins/agents/README.md) | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries, worktree-team orchestration, directory-ownership + output-schema checks | 4 | 5 |
 | [**reference**](plugins/reference/README.md) | Hidden Claude Code features: thinking modes, parallel patterns, CLI piping | 0 | 3 |
 | [**traces**](plugins/traces/README.md) | JSONL execution traces, compiled views, failure mining, harness evolution | 6 | 6 |
