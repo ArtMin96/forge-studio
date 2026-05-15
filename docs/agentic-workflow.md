@@ -24,6 +24,55 @@ Restart the session once. The hooks arm themselves on the next `SessionStart`.
 
 ---
 
+## Quick Start — the 5-step workflow for a new big task
+
+When you start a non-trivial task, type these in order. Each hands a durable artifact to the next so context loss between steps doesn't matter.
+
+| # | Command | What it leaves on disk | Purpose |
+|---|---|---|---|
+| 1 | `/plan <description>` *(agents plugin)* | `.claude/plans/<slug>.md` with `## Contract` and `#### T1`/`T2`/... | Negotiate scope and success criteria before any code is written |
+| 2 | `/living-spec` | `.claude/spec.md` initialized from the contract | Subagents share the same source of truth; `after-subagent.sh` appends deltas as each phase finishes |
+| 3 | `/orchestrate pipeline` | per-task generator → reviewer → `/verify` cycles | Iterates each `T<n>` task with its own subagent context — no leakage between tasks |
+| 4 | `/reflect` *(green)* OR `/postmortem` *(red)* | `.claude/memory/topics/<topic>.md` (reflect) or root-cause writeup (postmortem) | Capture what worked or why it failed; the lesson outlives the session |
+| 5 | `/progress-log` | append to `claude-progress.txt` | Run before `/clear` or compact so the next session has continuity |
+
+Step 1 is the only one you should always type explicitly. Steps 2-5 frequently surface as router or after-subagent suggestions; you can either follow the nudge or invoke them yourself.
+
+### Split-plan workflow (multi-sprint feature)
+
+If your task is big enough to fan out across sprints, you do **not** keep one giant plan file. The active-plan resolver (`plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh`) supports a numbered split:
+
+```
+.claude/plans/
+├── s1-<slug>.md      # sprint 1
+├── s2-<slug>.md      # sprint 2
+└── s3-<slug>.md      # sprint 3
+```
+
+How auto-advance works (verbatim from `find-active-plan.sh:1-22`):
+
+1. Files are enumerated in **natural numeric order** (`sort -V`), so `s2-foo.md` comes before `s10-bar.md`.
+2. For each plan, the resolver consults `.claude/gate/features.json`. If **every** gate entry whose `id` starts with the plan's sprint prefix (e.g. `s2`) shows `"passed": true`, the plan is treated as complete and skipped.
+3. The first non-complete plan is returned to `/orchestrate`.
+4. If every plan looks complete, the resolver falls back to mtime-newest and emits a stderr warning.
+
+So the cycle for a split feature is:
+
+1. Write `s1-<slug>.md`, `s2-<slug>.md`, `s3-<slug>.md` up-front (or write one and add the next when the previous lands).
+2. Run the 5-step workflow above against `s1`. The `/verify` step at the end of step 3 populates `.claude/gate/features.json` with `passed: true` entries tagged by sprint.
+3. Re-run `/orchestrate pipeline`. The resolver auto-advances to `s2`.
+4. Repeat until every sprint is done.
+
+**Manual override**: pin a specific plan with `FORGE_ACTIVE_PLAN_OVERRIDE=.claude/plans/s3-<slug>.md /orchestrate pipeline`. Use this when you want to jump out of order — for a hotfix sprint you inserted, or when re-running a completed sprint.
+
+**Gotchas:**
+
+- Sprints without a numeric prefix (e.g. `feature-xyz.md`) sort lexically alongside `s<N>-` files; if you mix them, expect surprises in resolver order. Either prefix everything `s<N>-` or commit fully to non-prefixed names.
+- The completion check matches by sprint prefix (`s5`), so a gate entry named `s5-T1-checkout` counts; one named `feat-checkout` does not. If your `/verify` outputs don't carry the prefix, the resolver will keep returning the same plan forever.
+- The fallback to mtime-newest is a safety net, not a feature — if you see the stderr warning, it usually means the gate file is missing or outdated.
+
+---
+
 ## How a session flows
 
 The diagram below is the **logical flow**, not the wire-up. The `Route prompt` step is the only automatic hop — `route-prompt.sh` runs on every UserPromptSubmit and prints a recommended pattern. Every box downstream of `Route prompt` is invoked by the user typing the corresponding command (`/orchestrate single`, `/orchestrate pipeline`, `/orchestrate fan-out`, `/tdd-loop`, `/verify`, `/progress-log`).
