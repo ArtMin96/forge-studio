@@ -46,8 +46,9 @@ if [ "$COUNT" -ge "$SAFE_THRESH" ] && [ ! -f "$SAFE_FLAG" ]; then
   TS=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
   printf '{"entered_at":"%s","reason":"consecutive-failures","counter":%d,"last_tool":"%s"}\n' \
     "$TS" "$COUNT" "$TOOL" > "$SAFE_FLAG"
-  printf '{"ts":"%s","operator":"safe-mode-enter","resource":"session/%s","trigger":"consecutive-failure-guard","evidence":"counter:%d last:%s","actor":"context-engine:consecutive-failure-guard"}\n' \
-    "$TS" "$SESSION_ID" "$COUNT" "$TOOL" >> .claude/lineage/ledger.jsonl 2>/dev/null || true
+  LEDGER_LINE=$(printf '{"ts":"%s","operator":"safe-mode-enter","resource":"session/%s","trigger":"consecutive-failure-guard","evidence":"counter:%d last:%s","actor":"context-engine:consecutive-failure-guard"}' \
+    "$TS" "$SESSION_ID" "$COUNT" "$TOOL")
+  bash plugins/_lib/jsonl-append.sh .claude/lineage/ledger.jsonl "$LEDGER_LINE"
   echo "SAFE MODE ENTERED after ${COUNT} consecutive failures. Write/Edit/destructive Bash are now blocked. Diagnose the root cause, then run: /safe-mode off"
 fi
 

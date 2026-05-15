@@ -19,14 +19,12 @@ fi
 
 append_ledger() {
   local pattern="$1"
-  local ledger_dir=".claude/lineage"
-  mkdir -p "$ledger_dir" 2>/dev/null || return 0
-  local ts
+  local ts safe_pat line
   ts=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
-  local safe_pat
   safe_pat=$(printf '%s' "$pattern" | sed 's/"/\\\\"/g')
-  printf '{"ts":"%s","operator":"policy-block","resource":"tool-input","trigger":"scan-injection","evidence":"pattern:%s","actor":"policy-gateway:scan-injection"}\n' \
-    "$ts" "$safe_pat" >> "${ledger_dir}/ledger.jsonl" || true
+  line=$(printf '{"ts":"%s","operator":"policy-block","resource":"tool-input","trigger":"scan-injection","evidence":"pattern:%s","actor":"policy-gateway:scan-injection"}' \
+    "$ts" "$safe_pat")
+  bash plugins/_lib/jsonl-append.sh .claude/lineage/ledger.jsonl "$line"
 }
 
 deny() {

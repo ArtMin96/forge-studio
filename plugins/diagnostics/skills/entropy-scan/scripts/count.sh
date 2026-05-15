@@ -3,9 +3,10 @@
 set -euo pipefail
 cd "${1:-.}"
 
-plugins=$(/usr/bin/find plugins -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
-skills=$(/usr/bin/find plugins -name SKILL.md 2>/dev/null | wc -l)
-agents=$(/usr/bin/find plugins -mindepth 3 -maxdepth 3 -type f -name '*.md' -path 'plugins/*/agents/*.md' 2>/dev/null | wc -l)
+# Underscore-prefixed dirs (e.g. plugins/_lib) hold shared helpers, not plugins.
+plugins=$(/usr/bin/find plugins -mindepth 1 -maxdepth 1 -type d -not -name '_*' 2>/dev/null | wc -l)
+skills=$(/usr/bin/find plugins -name SKILL.md -not -path 'plugins/_*' 2>/dev/null | wc -l)
+agents=$(/usr/bin/find plugins -mindepth 3 -maxdepth 3 -type f -name '*.md' -path 'plugins/*/agents/*.md' -not -path 'plugins/_*' 2>/dev/null | wc -l)
 rules=$(/usr/bin/find plugins/behavioral-core/hooks/rules.d -mindepth 1 -maxdepth 1 -type f -name '*.txt' 2>/dev/null | wc -l)
 
 hooks=$(python3 - <<'PY'

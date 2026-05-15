@@ -25,11 +25,9 @@ if [ "$SENSITIVE" != "1" ]; then
   exit 0
 fi
 
-LEDGER_DIR=".claude/lineage"
-mkdir -p "$LEDGER_DIR" 2>/dev/null || exit 0
-
 TS=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
-printf '{"ts":"%s","operator":"sensitive-op-audit","resource":"file/%s","trigger":"%s","evidence":"postwrite","actor":"policy-gateway:audit-sensitive-ops"}\n' \
-  "$TS" "${FILE_PATH//\"/\\\"}" "${TOOL:-unknown}" >> "${LEDGER_DIR}/ledger.jsonl" || true
+LEDGER_LINE=$(printf '{"ts":"%s","operator":"sensitive-op-audit","resource":"file/%s","trigger":"%s","evidence":"postwrite","actor":"policy-gateway:audit-sensitive-ops"}' \
+  "$TS" "${FILE_PATH//\"/\\\"}" "${TOOL:-unknown}")
+bash plugins/_lib/jsonl-append.sh .claude/lineage/ledger.jsonl "$LEDGER_LINE"
 
 exit 0

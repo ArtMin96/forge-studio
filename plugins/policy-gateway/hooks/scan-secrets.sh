@@ -24,12 +24,11 @@ fi
 append_ledger() {
   local label="$1"
   local file="$2"
-  local ledger_dir=".claude/lineage"
-  mkdir -p "$ledger_dir" 2>/dev/null || return 0
-  local ts
+  local ts line
   ts=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
-  printf '{"ts":"%s","operator":"policy-block","resource":"file/%s","trigger":"scan-secrets","evidence":"%s","actor":"policy-gateway:scan-secrets"}\n' \
-    "$ts" "${file//\"/\\\"}" "$label" >> "${ledger_dir}/ledger.jsonl" || true
+  line=$(printf '{"ts":"%s","operator":"policy-block","resource":"file/%s","trigger":"scan-secrets","evidence":"%s","actor":"policy-gateway:scan-secrets"}' \
+    "$ts" "${file//\"/\\\"}" "$label")
+  bash plugins/_lib/jsonl-append.sh .claude/lineage/ledger.jsonl "$line"
 }
 
 deny() {
