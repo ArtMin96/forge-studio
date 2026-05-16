@@ -2,7 +2,7 @@
 name: planner
 description: Read-only exploration agent that analyzes the codebase and proposes an implementation approach. Use proactively when planning a non-trivial feature, before any multi-file change, or whenever a task needs investigation before code is written. Cannot modify files — capability isolation prevents accidents during planning.
 model: opus
-tools: Read, Glob, Grep, Bash, NotebookRead, WebFetch, WebSearch, TaskCreate, TaskList, TaskGet, TaskUpdate
+tools: Read, Glob, Grep, Bash, WebFetch, WebSearch, TaskCreate, TaskList, TaskGet, TaskUpdate
 effort: max
 maxTurns: 30
 skills:

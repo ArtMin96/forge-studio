@@ -142,5 +142,17 @@
     "implementation": "plugins/research-gate/hooks/track-file-reads.sh",
     "patterns_source": null,
     "description": "Records each file path Read into the per-session read-set consumed by FS04 (require-read-before-edit)."
+  },
+  {
+    "id": "FS43",
+    "name": "suggest-harden",
+    "plugin": "policy-gateway",
+    "hook_event": "PostToolUse:Edit|Write",
+    "verdict": "advise",
+    "severity": "advisory",
+    "bypass": "none — never blocks; suppress by removing the hook registration",
+    "implementation": "plugins/policy-gateway/hooks/suggest-harden.sh",
+    "patterns_source": null,
+    "description": "Surfaces a one-line nudge to invoke /challenge (adversarial-reviewer) when an Edit or Write targets a security-sensitive path (auth, crypto, sessions, tokens, passwords, migrations, HTTP handlers). Read-only; always exits 0."
   }
 ]
