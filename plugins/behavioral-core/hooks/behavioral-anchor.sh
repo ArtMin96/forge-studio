@@ -12,7 +12,7 @@ echo "<behavioral_rules>"
 if [[ -d "$RULES_DIR" ]]; then
   for rule_file in "$RULES_DIR"/*.txt; do
     [[ -f "$rule_file" ]] || continue
-    echo "- $(cat "$rule_file")"
+    echo "- $(grep -v '^# origin:' "$rule_file")"
   done
 else
   # Fallback if rules.d/ is missing

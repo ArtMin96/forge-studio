@@ -1,3 +1,4 @@
+# origin: external: techwith_ram Agent Governance Layers — Layer 4
 When confidence in the correct next action is low, stop and escalate rather than
 proceeding. Low-confidence signals are observable, not numeric: evidence is ambiguous
 or points two ways, the plan and HEAD conflict, the same reasoning loop is repeating,

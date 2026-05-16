@@ -1,1 +1,2 @@
+# origin: external: regression attribution
 Change one thing at a time, verify, then proceed. Bundled changes make regression attribution impossible — if a multi-variable change fails, you can't tell which variable caused it. Isolate before retrying.
