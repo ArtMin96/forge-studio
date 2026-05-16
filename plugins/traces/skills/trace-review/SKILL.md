@@ -5,6 +5,10 @@ when_to_use: Reach for this after `/trace-compile`, when investigating a session
 disable-model-invocation: true
 paths:
   - ".claude/traces/*.jsonl"
+allowed-tools:
+  - Read
+  - Bash
+  - Glob
 logical: report enumerates recurring failures, file hotspots, and session-health trend with recommendations
 ---
 

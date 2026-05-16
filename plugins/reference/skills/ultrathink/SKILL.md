@@ -4,6 +4,7 @@ description: Use when the user asks about "thinking modes", "effort levels", "ho
 when_to_use: Reach for this when picking an `effort:` value for a new skill or `/effort` for the current turn, or when teaching the reasoning modes. Do NOT use for changing the effort level — use the `/effort` command instead; ultrathink is the explanation, not the switch.
 disable-model-invocation: true
 model: haiku
+allowed-tools: []
 logical: explanation of effort levels emitted with cost/quality tradeoff per level
 ---
 

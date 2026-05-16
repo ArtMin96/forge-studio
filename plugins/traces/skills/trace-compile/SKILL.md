@@ -5,6 +5,11 @@ when_to_use: Reach for this when analyzing a session's execution log, triaging r
 disable-model-invocation: true
 paths:
   - ".claude/traces/*.jsonl"
+allowed-tools:
+  - Read
+  - Bash
+  - Glob
+  - Write
 logical: per-source summary.md and errors.md written under ~/.claude/traces/ with one-line entry per trace event
 ---
 

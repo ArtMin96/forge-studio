@@ -3,6 +3,10 @@ name: sync-discovery
 description: Use when you want to know whether a code pattern present in one repo also exists in another — shared utilities, copy-pasted blocks, or divergent implementations of the same convention. Searches both repos and emits a discovery.json classifying matches as only-in-a, only-in-b, or in-both (with a content-hash divergence flag).
 when_to_use: Reach for this when comparing two repos for a specific pattern (regex). Do NOT use for dispatching work to multiple repos — use `/federated-fan-out` instead; do NOT use to aggregate results from a completed fan-out run — use `/aggregate-results` instead.
 disable-model-invocation: true
+allowed-tools:
+  - Bash
+  - Read
+  - Write
 scheduling: user wants to know whether a code pattern present in repo-a also exists in repo-b (e.g., shared utility, copy-pasted block, divergent implementation of the same convention)
 structural:
   - Resolve absolute paths for repo-a and repo-b; validate both directories exist

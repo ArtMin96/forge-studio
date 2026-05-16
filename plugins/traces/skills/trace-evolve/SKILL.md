@@ -6,6 +6,11 @@ disable-model-invocation: true
 effort: xhigh
 paths:
   - ".claude/traces/*.jsonl"
+allowed-tools:
+  - Read
+  - Bash
+  - Glob
+  - Write
 logical: proposal artifact written to .claude/lineage/proposals/ with cluster-derived rule / hook / skill suggestions
 ---
 

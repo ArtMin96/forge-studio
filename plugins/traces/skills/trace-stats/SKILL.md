@@ -6,6 +6,10 @@ disable-model-invocation: true
 model: haiku
 paths:
   - ".claude/traces/*.jsonl"
+allowed-tools:
+  - Read
+  - Bash
+  - Glob
 logical: numeric summary table emitted for last N sessions (commands / errors / files / error rate)
 ---
 

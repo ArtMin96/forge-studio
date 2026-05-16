@@ -3,6 +3,11 @@ name: federated-fan-out
 description: Use when the same operation (convention change, audit, patch) must be applied to 2–5 independent sibling repos. Spawns one subagent per repo with a shared prompt template, captures per-repo results under a workspace ledger, and prints a summary table.
 when_to_use: Reach for this when repos are independent (no cross-repo shared state in this batch) and the operation is the same for each. Do NOT use for pattern comparison between repos — use `/sync-discovery` instead; do NOT use to collate an already-completed run — use `/aggregate-results` instead.
 disable-model-invocation: true
+allowed-tools:
+  - Bash
+  - Read
+  - Write
+  - Task
 scheduling: user has 2-5 sibling repos requiring the same operation (sync convention, apply patch, run audit) AND each repo has independent state (no cross-repo dependencies in this batch)
 structural:
   - Read the repos-file (one absolute path per line, ≤5 entries)
