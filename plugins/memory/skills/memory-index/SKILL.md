@@ -4,6 +4,11 @@ description: Use when the user wants to review, prune, or sanity-check stored me
 when_to_use: Reach for this for periodic memory hygiene, before relying on a recalled fact, or when the user says "what do you remember about X". Do NOT use for retrieving a specific memory for the current turn — use `/recall` instead. Do NOT use for writing a memory — use `/remember` instead.
 disable-model-invocation: true
 model: haiku
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash
 logical: every topic file listed with last-verified date; stale (>90d) and duplicate entries flagged
 ---
 

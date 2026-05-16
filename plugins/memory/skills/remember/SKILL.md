@@ -3,6 +3,11 @@ name: remember
 description: Use whenever the user shares (or you discover) something that should survive session boundaries — architectural decisions, recurring user preferences, non-obvious constraints, "always do it this way" rules. Writes a tier-2 topic file in `.claude/memory/topics/`, adds a tier-1 pointer to the index, and snapshots any prior version to the lineage ledger.
 when_to_use: Reach for this when the user says "remember that...", when a hard-won insight emerges from debugging, or when a constraint is too subtle to live only in CLAUDE.md. Do NOT use for retrieving a memory — use `/recall` instead; do NOT use for ephemeral session notes — those belong in TaskCreate or progress-log.
 disable-model-invocation: true
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
 logical: new topic file written under .claude/memory/topics/<slug>.md and pointer added to .claude/memory/index.md
 ---
 

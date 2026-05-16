@@ -4,6 +4,10 @@ description: Run a 5-iteration description-optimization loop for a skill. Splits
 when_to_use: Reach for this when a skill's description causes false-positive or false-negative trigger rates — you have a representative query corpus and want a data-driven improved description. Do NOT use for rubric scoring — use /score-rubric instead; do NOT use for benchmarking skill impact on outputs — use /run-evals-bench instead.
 disable-model-invocation: true
 argument-hint: --skill <path> --corpus <queries.json> [--iterations N] [--seed S] [--mock] [--out <dir>]
+allowed-tools:
+  - Bash
+  - Read
+  - Write
 scheduling: target SKILL.md exists and a corpus JSON with ≥8 positive and ≥8 negative queries is available
 structural:
   - Validate corpus has positive array (min 8) and negative array (min 8)
