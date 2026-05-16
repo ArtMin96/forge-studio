@@ -1,0 +1,10 @@
+When confidence in the correct next action is low, stop and escalate rather than
+proceeding. Low-confidence signals are observable, not numeric: evidence is ambiguous
+or points two ways, the plan and HEAD conflict, the same reasoning loop is repeating,
+the file under edit is unfamiliar, or the last tool output contradicted the model of
+the system. An agent that is uncertain and acts anyway costs more than one that is
+uncertain and asks — irreversible writes made under low confidence are the most
+expensive class of mistake. Invoke /safe-mode when the situation is destructive or
+compound, or /verify when the gap is a missing evidence gate; both skills emit a
+structured brief (CONTEXT, TRIGGER, OPTIONS, RECOMMENDATION, Waiting for instruction)
+so the human can decide fast.
