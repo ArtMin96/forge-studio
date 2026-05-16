@@ -3,6 +3,11 @@ name: auto-tune-skill
 description: Outer-loop proposer that iterates on a single SKILL.md body, scores each candidate via /run-evals-bench, computes a Pareto frontier on (pass_rate, token_cost), and writes the Pareto-best revision to .claude/proposals/<plugin>-<skill>-<timestamp>.md for human review. Never modifies the original SKILL.md; the user applies the proposal manually.
 when_to_use: Reach for this when a skill's eval pass rate is below target, the `when_to_use` guidance keeps misfiring, or you want a data-driven rewrite of the skill body without touching frontmatter. Give it a `plugin:skill-id` pair (e.g. `diagnostics:entropy-scan`) — the matching `evals/evals.json` must exist. Do NOT use for frontmatter edits or new-skill authoring — write or edit the SKILL.md directly instead.
 argument-hint: <plugin>:<skill-id>
+allowed-tools:
+  - Bash
+  - Read
+  - Write
+  - Task
 scheduling: a skill's eval pass rate is below target, or repeated misfires suggest the when_to_use guidance needs tightening
 structural:
   - Validate args and confirm SKILL.md + evals/evals.json exist; invoke run-iteration.sh to create workspace

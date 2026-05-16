@@ -3,6 +3,10 @@ name: fan-out
 description: Use whenever the user asks to apply the same operation to many independent files or components — bulk migration, batch refactor across controllers, parallel exploration of unrelated subsystems. Dispatches one subagent per file with a shared prompt template, then collects the results.
 when_to_use: Reach for this when an operation is mechanical, idempotent, and the file list has no shared mutable state between items. Do NOT use for sequential pipelines (use `/dispatch` to pick `/worktree-team` instead) or when items depend on each other's output (the parallel runs will race).
 disable-model-invocation: true
+allowed-tools:
+  - Task
+  - Read
+  - Bash
 scheduling: a task touches 2+ independent files or subsystems with no shared state and dispatch has classified it as fan-out
 structural:
   - Resolve the explicit file/subsystem list from the plan or prompt

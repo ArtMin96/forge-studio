@@ -3,6 +3,10 @@ name: session-digest
 description: Produce a ≤10KB Markdown digest of the current session's evolution artifacts. Writes to `.claude/sessions/<session-id>-digest.md`. Useful after any multi-agent run to get a compact rollup without reading raw JSONL files.
 when_to_use: Reach for this when you want a human-readable summary of what changed, what was attempted, and what the manifest recorded during a session. Also fires automatically on SessionEnd via the `session-end-digest.sh` hook. Do NOT use for full manifest browsing across sessions — use `/evolution-history` instead.
 argument-hint: [--session-id <id>]
+allowed-tools:
+  - Bash
+  - Read
+  - Write
 scheduling: a session is ending, or the user wants a rollup of the current session's activity
 structural:
   - Determine the session ID (arg, env CLAUDE_SESSION_ID, or "unknown")

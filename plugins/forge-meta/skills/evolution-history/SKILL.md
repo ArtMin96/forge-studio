@@ -2,6 +2,9 @@
 name: evolution-history
 description: Use when you want to review the project's evolution ledger — renders the append-only change manifest as a reverse-chronological Markdown timeline grouped by date (newest first), capped at the last 200 entries.
 when_to_use: "Reach for this after a sprint or series of generator/reviewer passes when you want a human-readable audit trail of what changed, what agents touched which files, and what failure patterns were recorded. Do NOT use for live session output — use /session-digest instead."
+allowed-tools:
+  - Bash
+  - Read
 ---
 
 Renders `.claude/evolution/change_manifest.jsonl` as a dated Markdown timeline.

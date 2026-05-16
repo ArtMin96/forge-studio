@@ -3,6 +3,9 @@ name: change-manifest
 description: Write a structured change-manifest entry to `.claude/evolution/change_manifest.jsonl`. Each entry captures what changed, why, and predicted impact — forming the evolution ledger that `forge-meta` reads for session digests and history views.
 when_to_use: Reach for this when a generator or reviewer agent finishes a meaningful change and wants to declare predicted fixes, risk tasks, or constraint context for the evolution ledger. Typically called via `manifest-writer.sh` (SubagentStop hook) automatically; invoke directly only to record a change the hook could not auto-detect. Do NOT use for session-end summaries — use `/session-digest` instead.
 argument-hint: --type <type> --description <desc> [--files <comma-list>] [--failure-pattern <p>] [--predicted-fixes <text>] [--risk-tasks <list>] [--constraint-level <none|soft|hard>] [--why-this-component <text>]
+allowed-tools:
+  - Bash
+  - Read
 scheduling: a generator or reviewer subagent has just finished work that modifies plugin files, hooks, or skills
 structural:
   - Collect required fields (type, description) and any optional context fields

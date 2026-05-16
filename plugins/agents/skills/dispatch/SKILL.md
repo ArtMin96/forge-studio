@@ -3,6 +3,8 @@ name: dispatch
 description: Use when the user describes a multi-step feature or refactor and you need to decide whether to handle it solo, dispatch a parallel `/fan-out`, or run a `/worktree-team` planner→generator→reviewer pipeline. Outputs a routing recommendation with the reasoning behind it.
 when_to_use: Reach for this before starting any task that may touch 5+ files, has independent sub-tasks worth parallelizing, or carries enough risk to warrant separated planning and review. Do NOT use for executing the dispatched pattern — use `/fan-out` for parallel batches or `/worktree-team` for full pipelines instead.
 disable-model-invocation: true
+allowed-tools:
+  - Read
 counterexamples:
   - "Executing the dispatched pattern — use /fan-out or /worktree-team after the route is picked."
   - "A one-line fix or small bug touching ≤2 files — execute directly without routing overhead."

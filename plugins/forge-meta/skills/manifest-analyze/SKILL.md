@@ -3,6 +3,9 @@ name: manifest-analyze
 description: Use when you want a structured report on what the change manifest contains — frequency of failure patterns, risk task distribution, constraint-level split, and top "why this component" clusters. Reads `.claude/evolution/change_manifest.jsonl` and emits a 5-section Markdown report to stdout.
 when_to_use: Reach for this after a sprint or extended tuning run to understand which failure patterns dominate the manifest, which risk tasks recur most, and whether soft vs. hard constraints are balanced. Pass `--include-archive` to fold in rotated archive files when the live manifest has been rotated. Do NOT use for browsing individual entries chronologically — use `/evolution-history` instead.
 argument-hint: "[--include-archive]"
+allowed-tools:
+  - Bash
+  - Read
 ---
 
 ## What this produces
