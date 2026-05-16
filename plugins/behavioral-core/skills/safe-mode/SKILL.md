@@ -61,3 +61,56 @@ Report: `Safe-mode active. Mutations blocked until /safe-mode off.`
 
 - Do not clear the flag silently or auto-reset it. The human checkpoint is the value.
 - Do not extend safe-mode with new blocking scopes in this skill — that belongs in block-destructive.sh, which is the enforcement layer.
+
+## Escalation Brief
+
+When this skill activates — automatically via consecutive-failure-guard, or manually via `/safe-mode on` — emit a structured brief in this exact shape so a human can decide fast. Reproduce the labels verbatim; a downstream parser detects a brief by them.
+
+```text
+CONTEXT: <one line — what was the agent trying to do>
+TRIGGER: <one line — what stopped it: failure-count threshold, low-confidence signals, denied permission, conflicting evidence>
+OPTIONS:
+1. <option, agent can do this without help>
+2. <option, requires your action>
+3. <option, requires your action>
+RECOMMENDATION: <option #N>. <one-line reason>
+
+Waiting for instruction. <thing the agent is paused on> is not blocked yet.
+```
+
+The brief is not a substitute for `/postmortem` after `/safe-mode off` — it precedes the human decision; postmortem follows the resolution.
+
+Input: consecutive-failure-guard wrote `.claude/safe-mode` after 5 failed `pytest -k user_signup` runs; the agent invokes `/safe-mode status`.
+Output:
+```text
+SAFE MODE: active
+Entered: 2026-05-16T14:22:01Z
+Reason: consecutive-failures
+Failure counter: 5
+
+CONTEXT: Reproduce the user_signup test failure flagged by /verify.
+TRIGGER: Failure-count threshold (5 consecutive pytest exits, last was assertion error in fixture teardown).
+OPTIONS:
+1. Roll back the last commit and re-run from a known-green tree.
+2. Show you the failing fixture and the last three diff hunks for a manual decision.
+3. Skip user_signup and gate only on the other 41 tests for now.
+RECOMMENDATION: Option 2. The failure is in fixture teardown, not the assertion under test — a human glance at the diff is cheaper than another speculative rewrite.
+
+Waiting for instruction. The working tree is not blocked yet — no further edits will be attempted until you reply.
+```
+
+Input: the agent invokes `/safe-mode on risky-migration` before running a one-shot database schema change it cannot easily undo.
+Output:
+```text
+Safe-mode active. Mutations blocked until /safe-mode off.
+
+CONTEXT: Apply the `add_audit_columns` migration to the production-shape staging DB before the release window.
+TRIGGER: Manual entry — operation is one-shot and the rollback path requires a snapshot restore.
+OPTIONS:
+1. Run the migration with `--dry-run` first and report the planned DDL.
+2. Pause for you to confirm the migration plan and the rollback steps you want recorded.
+3. Hand off the migration entirely — I draft the SQL, you run it.
+RECOMMENDATION: Option 1. A dry-run is reversible and surfaces any unexpected DDL before the destructive write.
+
+Waiting for instruction. The migration is not blocked yet — the connection is open and the dry-run command is queued.
+```
