@@ -44,8 +44,27 @@ fi
 if [ "$COUNT" -ge "$SAFE_THRESH" ] && [ ! -f "$SAFE_FLAG" ]; then
   mkdir -p .claude .claude/lineage 2>/dev/null || true
   TS=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
-  printf '{"entered_at":"%s","reason":"consecutive-failures","counter":%d,"last_tool":"%s"}\n' \
-    "$TS" "$COUNT" "$TOOL" > "$SAFE_FLAG"
+  jq -n \
+    --arg ts "$TS" \
+    --arg reason "consecutive-failures" \
+    --argjson counter "$COUNT" \
+    --arg last_tool "$TOOL" \
+    '{
+      entered_at: $ts,
+      reason: $reason,
+      counter: $counter,
+      last_tool: $last_tool,
+      brief_template: {
+        context: "<one line — what was the agent trying to do before the failure chain>",
+        trigger: ("Failure-count threshold (" + ($counter|tostring) + " consecutive failures, last tool: " + $last_tool + ")"),
+        options: [
+          "Roll back the last change and re-run from a known-green state.",
+          "Show the failing output and the last diff hunks for a manual decision.",
+          "Skip the failing target and gate on the remaining work."
+        ],
+        recommendation: "<option #N>. <one-line reason — fill in after reading the failure chain>"
+      }
+    }' > "$SAFE_FLAG"
   LEDGER_LINE=$(printf '{"ts":"%s","operator":"safe-mode-enter","resource":"session/%s","trigger":"consecutive-failure-guard","evidence":"counter:%d last:%s","actor":"context-engine:consecutive-failure-guard"}' \
     "$TS" "$SESSION_ID" "$COUNT" "$TOOL")
   bash plugins/_lib/jsonl-append.sh .claude/lineage/ledger.jsonl "$LEDGER_LINE"
