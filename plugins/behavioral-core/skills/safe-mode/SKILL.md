@@ -18,7 +18,7 @@ Controls `.claude/safe-mode`. When present, `block-destructive.sh` denies Bash/W
 ## Subcommands
 
 ### `/safe-mode status`
-Read the flag. Print:
+Read the flag. Print the four base fields, then — when `.brief_template` is a non-null object — emit a populated 4-field brief using its values, per `## Escalation Brief` below. `jq -r '.brief_template.trigger // empty'` returns the pre-filled trigger string for auto-written flags; manual writes seed `.context` / `.recommendation` placeholders that the agent then fills before printing.
 ```text
 SAFE MODE: <active|inactive>
 Entered: <ISO8601> (if active)
@@ -27,9 +27,24 @@ Failure counter: <N> (if active)
 ```
 
 ### `/safe-mode on [reason]`
-Manual entry. Write the flag:
+Manual entry. Write the flag with the same shape `consecutive-failure-guard.sh` uses, so `/safe-mode status` and any future reader can treat auto and manual entries uniformly:
 ```json
-{"entered_at":"<UTC>","reason":"<reason or 'manual'>","counter":0}
+{
+  "entered_at": "<UTC>",
+  "reason": "<reason or 'manual'>",
+  "counter": 0,
+  "last_tool": "manual",
+  "brief_template": {
+    "context": "<one line — what the agent is about to do>",
+    "trigger": "Manual entry — <one line reason>",
+    "options": [
+      "<option, agent can do this without help>",
+      "<option, requires your action>",
+      "<option, requires your action>"
+    ],
+    "recommendation": "<option #N>. <one-line reason>"
+  }
+}
 ```
 Append ledger entry `{operator:"safe-mode-enter", trigger:"/safe-mode", actor:"behavioral-core:/safe-mode"}`.
 Report: `Safe-mode active. Mutations blocked until /safe-mode off.`
