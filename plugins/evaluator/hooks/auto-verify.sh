@@ -36,8 +36,7 @@ gate_file="${CLAUDE_PROJECT_DIR:-.}/.claude/gate/features.json"
 # Find the active plan via numeric-prefix order (deterministic, not mtime).
 most_recent_plan=""
 if [[ -d "$plan_dir" ]]; then
-  _repo_root="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || echo '.')}"
-  most_recent_plan="$(bash "${_repo_root}/plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh" 2>/dev/null || true)"
+  most_recent_plan="$(bash "${CLAUDE_PLUGIN_ROOT}/../workflow/skills/orchestrate/scripts/find-active-plan.sh" 2>/dev/null || true)"
 fi
 
 # --- check gate/features.json for task evidence ---

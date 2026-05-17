@@ -28,7 +28,7 @@ append_ledger() {
   ts=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
   line=$(printf '{"ts":"%s","operator":"policy-block","resource":"file/%s","trigger":"scan-secrets","evidence":"%s","actor":"policy-gateway:scan-secrets"}' \
     "$ts" "${file//\"/\\\"}" "$label")
-  bash plugins/_lib/jsonl-append.sh --with-turn-id .claude/lineage/ledger.jsonl "$line" <<< "$INPUT"
+  bash "${CLAUDE_PLUGIN_ROOT}/../_lib/jsonl-append.sh" --with-turn-id .claude/lineage/ledger.jsonl "$line" <<< "$INPUT"
 }
 
 deny() {

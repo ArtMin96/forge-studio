@@ -104,8 +104,7 @@ nudge_already_fired() {
 # instead of mtime; falls back to mtime-newest when all plans are gate-complete.
 LATEST_PLAN_FILE=""
 LATEST_PLAN_FILE_BASENAME=""
-_REPO_ROOT="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || echo '.')}"
-LATEST_PLAN_FILE=$(bash "${_REPO_ROOT}/plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh" 2>/dev/null || true)
+LATEST_PLAN_FILE=$(bash "${CLAUDE_PLUGIN_ROOT}/skills/orchestrate/scripts/find-active-plan.sh" 2>/dev/null || true)
 if [ -n "$LATEST_PLAN_FILE" ]; then
   LATEST_PLAN_FILE_BASENAME=$(basename "$LATEST_PLAN_FILE")
 fi

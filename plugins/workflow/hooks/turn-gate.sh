@@ -76,8 +76,7 @@ fi
 # Unchecked plan items.
 PLANS_DIR=".claude/plans"
 if [ -d "$PLANS_DIR" ]; then
-  _REPO_ROOT="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || echo '.')}"
-  LATEST_PLAN=$(bash "${_REPO_ROOT}/plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh" 2>/dev/null || true)
+  LATEST_PLAN=$(bash "${CLAUDE_PLUGIN_ROOT}/skills/orchestrate/scripts/find-active-plan.sh" 2>/dev/null || true)
   if [ -n "$LATEST_PLAN" ]; then
     UNCHECKED=$(grep -c '^\s*- \[ \]' "$LATEST_PLAN" 2>/dev/null || true)
     UNCHECKED=${UNCHECKED:-0}

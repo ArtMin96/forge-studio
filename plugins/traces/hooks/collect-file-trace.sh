@@ -25,7 +25,7 @@ if [[ -z "$FILE_PATH" ]]; then
 fi
 
 TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-TURN_ID=$(printf '%s' "$INPUT" | bash plugins/_lib/turn-id.sh --from-stdin 2>/dev/null || true)
+TURN_ID=$(printf '%s' "$INPUT" | bash "${CLAUDE_PLUGIN_ROOT}/../_lib/turn-id.sh" --from-stdin 2>/dev/null || true)
 jq -n -c \
   --arg ts "$TIMESTAMP" \
   --arg type "file" \

@@ -28,6 +28,6 @@ fi
 TS=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
 LEDGER_LINE=$(printf '{"ts":"%s","operator":"sensitive-op-audit","resource":"file/%s","trigger":"%s","evidence":"postwrite","actor":"policy-gateway:audit-sensitive-ops"}' \
   "$TS" "${FILE_PATH//\"/\\\"}" "${TOOL:-unknown}")
-bash plugins/_lib/jsonl-append.sh --with-turn-id .claude/lineage/ledger.jsonl "$LEDGER_LINE" <<< "$INPUT"
+bash "${CLAUDE_PLUGIN_ROOT}/../_lib/jsonl-append.sh" --with-turn-id .claude/lineage/ledger.jsonl "$LEDGER_LINE" <<< "$INPUT"
 
 exit 0

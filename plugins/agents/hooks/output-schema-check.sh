@@ -23,8 +23,7 @@ if [ ! -d "$PLANS_DIR" ]; then
 fi
 
 # Find the active plan via numeric-prefix order (deterministic, not mtime).
-_REPO_ROOT="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || echo '.')}"
-LATEST_PLAN=$(bash "${_REPO_ROOT}/plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh" 2>/dev/null || true)
+LATEST_PLAN=$(bash "${CLAUDE_PLUGIN_ROOT}/../workflow/skills/orchestrate/scripts/find-active-plan.sh" 2>/dev/null || true)
 
 if [ -z "$LATEST_PLAN" ] || [ ! -r "$LATEST_PLAN" ]; then
   exit 0

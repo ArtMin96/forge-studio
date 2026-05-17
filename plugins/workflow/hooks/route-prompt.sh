@@ -99,7 +99,7 @@ REASON=$(echo "$RESULT" | cut -f3)
 # Persist for trace mining (no PII beyond what the user typed — trace is session-scoped).
 TRACE_LINE=$(printf '{"ts":"%s","mode":"%s","route":"%s","confidence":"%s","reason":"%s"}' \
   "$(date -Iseconds)" "$MODE" "$ROUTE" "$CONFIDENCE" "$REASON")
-bash plugins/_lib/jsonl-append.sh --with-turn-id "$TRACE_DIR/classifications.jsonl" "$TRACE_LINE" <<< "$INPUT"
+bash "${CLAUDE_PLUGIN_ROOT}/../_lib/jsonl-append.sh" --with-turn-id "$TRACE_DIR/classifications.jsonl" "$TRACE_LINE" <<< "$INPUT"
 
 # Hybrid / LLM escalation when shell is uncertain.
 ESCALATE=0
