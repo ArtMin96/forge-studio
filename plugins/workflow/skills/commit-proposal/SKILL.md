@@ -22,7 +22,9 @@ Third of the three SEPL operators (propose → assess → **commit**). See `docs
 
 1. **Assess verdict exists and passed**. Read `.claude/lineage/ledger.jsonl` tail. The most recent entry for this resource must be an `assess` with `verdict: pass` in its evidence JSON. If missing or failing, stop. Tell the user to run `/assess-proposal` first. Do not proceed.
 
-2. **User approval recorded**. Before mutating any file, ask the user in plain text:
+2. **Regression gate cleared (for auto-tune proposals).** When the proposal filename matches `<plugin>-<skill>-<timestamp>.md`, the most recent `assess` ledger entry's evidence file must contain a `READY_TO_COMMIT` line in its rationale.
+
+3. **User approval recorded**. Before mutating any file, ask the user in plain text:
 
    ```
    About to commit <resource> v<N> → v<N+1>. Diff preview:
@@ -32,7 +34,7 @@ Third of the three SEPL operators (propose → assess → **commit**). See `docs
 
    Only on explicit `y` or `yes` continue. On anything else, append a `reject` ledger entry and stop.
 
-3. **Ledger directory exists**. `mkdir -p .claude/lineage/versions .claude/lineage/proposals`.
+4. **Ledger directory exists**. `mkdir -p .claude/lineage/versions .claude/lineage/proposals`.
 
 ## Steps
 
