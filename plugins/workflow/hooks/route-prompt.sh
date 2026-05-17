@@ -99,7 +99,7 @@ REASON=$(echo "$RESULT" | cut -f3)
 # Persist for trace mining (no PII beyond what the user typed — trace is session-scoped).
 TRACE_LINE=$(printf '{"ts":"%s","mode":"%s","route":"%s","confidence":"%s","reason":"%s"}' \
   "$(date -Iseconds)" "$MODE" "$ROUTE" "$CONFIDENCE" "$REASON")
-bash plugins/_lib/jsonl-append.sh "$TRACE_DIR/classifications.jsonl" "$TRACE_LINE"
+bash plugins/_lib/jsonl-append.sh --with-turn-id "$TRACE_DIR/classifications.jsonl" "$TRACE_LINE" <<< "$INPUT"
 
 # Hybrid / LLM escalation when shell is uncertain.
 ESCALATE=0
@@ -152,7 +152,7 @@ esac
 # Scope decision: applied here only. Other hooks are either event-rare
 # (pre-compact-handoff, session-bootstrap), rate-gated by their own mechanism
 # (turn-gate self-review-nudge), or intentionally fire-every-turn
-# (behavioral-anchor — load-bearing steering). See S2-T4 in the sprint plan.
+# (behavioral-anchor — load-bearing steering).
 #
 # The trace write above is intentionally before this guard so classification
 # telemetry is always recorded, even when the reminder is suppressed.

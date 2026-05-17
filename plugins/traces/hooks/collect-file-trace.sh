@@ -25,14 +25,16 @@ if [[ -z "$FILE_PATH" ]]; then
 fi
 
 TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+TURN_ID=$(printf '%s' "$INPUT" | bash plugins/_lib/turn-id.sh --from-stdin 2>/dev/null || true)
 jq -n -c \
   --arg ts "$TIMESTAMP" \
   --arg type "file" \
   --arg tool "$TOOL_NAME" \
   --arg path "$FILE_PATH" \
   --arg cwd "$(pwd)" \
+  --arg turn_id "$TURN_ID" \
   --argjson dur "$DURATION_MS" \
-  '{timestamp: $ts, type: $type, tool: $tool, file_path: $path, cwd: $cwd, duration_ms: $dur}' \
+  '{timestamp: $ts, type: $type, tool: $tool, file_path: $path, cwd: $cwd, turn_id: $turn_id, duration_ms: $dur}' \
   >> "$TRACE_FILE" 2>/dev/null
 
 exit 0

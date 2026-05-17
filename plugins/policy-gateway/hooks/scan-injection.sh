@@ -24,7 +24,7 @@ append_ledger() {
   safe_pat=$(printf '%s' "$pattern" | sed 's/"/\\\\"/g')
   line=$(printf '{"ts":"%s","operator":"policy-block","resource":"tool-input","trigger":"scan-injection","evidence":"pattern:%s","actor":"policy-gateway:scan-injection"}' \
     "$ts" "$safe_pat")
-  bash plugins/_lib/jsonl-append.sh .claude/lineage/ledger.jsonl "$line"
+  bash plugins/_lib/jsonl-append.sh --with-turn-id .claude/lineage/ledger.jsonl "$line" <<< "$INPUT"
 }
 
 deny() {

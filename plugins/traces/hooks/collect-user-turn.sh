@@ -27,13 +27,15 @@ SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // empty' 2>/dev/null)
 
 # Append trace entry as JSONL
 TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+TURN_ID=$(printf '%s' "$INPUT" | bash plugins/_lib/turn-id.sh --from-stdin 2>/dev/null || true)
 jq -n -c \
   --arg ts "$TIMESTAMP" \
   --arg type "user_turn" \
   --argjson len "$PROMPT_LENGTH" \
   --arg sid "$SESSION_ID" \
   --arg cwd "$(pwd)" \
-  '{timestamp: $ts, type: $type, prompt_length: $len, session_id: $sid, cwd: $cwd}' \
+  --arg turn_id "$TURN_ID" \
+  '{timestamp: $ts, type: $type, prompt_length: $len, session_id: $sid, cwd: $cwd, turn_id: $turn_id}' \
   >> "$TRACE_FILE" 2>/dev/null
 
 exit 0

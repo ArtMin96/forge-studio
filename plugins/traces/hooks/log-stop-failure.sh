@@ -21,12 +21,14 @@ if [[ -z "$ERROR_TYPE" ]]; then
 fi
 
 TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+TURN_ID=$(printf '%s' "$INPUT" | bash plugins/_lib/turn-id.sh --from-stdin 2>/dev/null || true)
 jq -n -c \
   --arg ts "$TIMESTAMP" \
   --arg type "stop_failure" \
   --arg error_type "$ERROR_TYPE" \
   --arg cwd "$(pwd)" \
-  '{timestamp: $ts, type: $type, error_type: $error_type, cwd: $cwd}' \
+  --arg turn_id "$TURN_ID" \
+  '{timestamp: $ts, type: $type, error_type: $error_type, cwd: $cwd, turn_id: $turn_id}' \
   >> "$TRACE_FILE" 2>/dev/null
 
 exit 0
