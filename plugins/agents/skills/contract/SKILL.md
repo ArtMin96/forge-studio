@@ -7,6 +7,7 @@ paths:
 allowed-tools:
   - Read
   - Glob
+  - Bash
 counterexamples:
   - "One-line edits or trivial typo fixes — direct work is fine; no plan contract to read."
   - "When no plan file exists in .claude/plans/ — nothing to re-read."
@@ -58,6 +59,20 @@ Mechanically re-read the sprint contract from the active plan. This prevents rel
    - All criteria UNDERSTOOD → proceed with implementation
    - Any criteria UNCLEAR → STOP. Report what's ambiguous. Do not guess.
    - Criterion is infeasible given current codebase → STOP. Report why.
+
+## Baseline check
+
+Plans assert baseline state — file line counts, empty YAML fields, line references the implementation must not break. Run the baseline checker against HEAD before any Edit/Write so a stale plan cannot drag the generator into writing literally from outdated assertions.
+
+```bash
+bash plugins/agents/skills/contract/scripts/baseline-check.sh <plan-path>
+```
+
+1. Exit 0 → all assertions match HEAD; proceed.
+2. Exit 1 → at least one assertion mismatches; refuse to proceed, paste the JSON mismatched list, request a plan update.
+3. Exit 2 → plan path resolution failed; surface the error.
+
+Include the baseline-check stdout in your evidence reply.
 
 ## Why This Exists
 
