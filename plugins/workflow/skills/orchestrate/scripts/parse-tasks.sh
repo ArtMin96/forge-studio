@@ -11,7 +11,21 @@ if [ ! -f "$1" ]; then
     exit 1
 fi
 
-# Extract T<n> task ids from the ### Tasks section, in document order.
-# Sets intasks flag at ### Tasks, clears it at the next ### heading,
-# and emits the bare id (e.g. T1) for every #### T<n> line found.
-awk '/^### Tasks/{intasks=1; next} /^### /{intasks=0} intasks && /^#### T[0-9]+/{ gsub(/^#### /,""); sub(/[[:space:]].*$/,""); print }' "$1"
+# Canonical plan format (single source of truth, also enforced by planner.md):
+#   ### Tasks
+#   #### T1 short description
+#   #### T2-postpaid short description
+#   #### T5a short description
+#
+# Section heading must be exactly `### Tasks` (3-hash). Task headings must be
+# `#### T<digit>[<suffix>]` (4-hash, ID begins with T+digit, optional alnum/dash
+# suffix). Any other format is silently skipped by the awk pass — the warning
+# below names the file so callers can repair the plan.
+output=$(awk '/^### Tasks/{intasks=1; next} /^### /{intasks=0} intasks && /^#### T[0-9]+/{ gsub(/^#### /,""); sub(/[[:space:]].*$/,""); print }' "$1")
+
+if [ -z "$output" ]; then
+    echo "parse-tasks.sh: no '#### T<n>' tasks found under '### Tasks' (3-hash) section in $1" >&2
+    exit 0
+fi
+
+printf '%s\n' "$output"

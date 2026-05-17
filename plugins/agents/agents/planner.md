@@ -50,6 +50,23 @@ Open questions:
 Estimated complexity: <low/medium/high>
 ```
 
+When the plan decomposes into multiple discrete tasks that `/orchestrate pipeline` should dispatch one-by-one, append a `### Tasks` section in canonical form:
+
+```markdown
+### Tasks
+
+#### T1 short description of first task
+[per-task body: Files / Implementation / Success criteria]
+
+#### T2 short description
+[...]
+
+#### T5a short description
+[suffixed IDs allowed: T5a, T5b, T2-postpaid]
+```
+
+Format is enforced by `plugins/workflow/skills/orchestrate/scripts/parse-tasks.sh`. Section heading must be exactly `### Tasks` (3-hash). Task headings must be `#### T<digit>[<alnum/dash-suffix>]` (4-hash, T+digit prefix). Other levels or naming schemes (`## Tasks`, `## Task A`) are silently skipped — the parser emits a stderr warning naming the plan file. Single-task plans may omit the `### Tasks` section.
+
 ## Contract
 
 When used in a Pipeline (Planner → Generator → Reviewer), your output **must** include a Contract section after the Plan:
