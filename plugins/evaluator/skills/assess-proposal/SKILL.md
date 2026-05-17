@@ -125,6 +125,7 @@ Interpret the exit code:
 1. **Exit 0** — gate passed; the script prints a `READY_TO_COMMIT <plugin>:<skill> p_current=<X> p_proposal=<Y>` line that `/commit-proposal` greps for in the evidence file.
 2. **Exit 1** — regression detected; cite the first regressed eval ID from `regressed_eval_ids` in the `blockers` field of the verdict JSON.
 3. **Exit 2** — refused (proposal file not found, plugin/skill could not be resolved, or `evals.json` missing); tell the user to add `evals/evals.json` to the skill before re-running.
+4. **Exit 3** — environment error (`flock` unavailable) or restore-failure (the post-swap `md5sum` did not match the pre-swap checksum, indicating the original SKILL.md was not byte-identical after restore). Treat as a hard infrastructure failure: do not retry until the cause is understood, and inspect for any leftover `*.regression-bak.*` files under the target skill directory.
 
 The gate is additive: a proposal that passes the gate still needs the four criteria above to clear.
 

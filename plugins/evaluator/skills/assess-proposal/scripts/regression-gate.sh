@@ -110,12 +110,13 @@ MD5_BEFORE="$(md5sum "$SKILL_PATH" | awk '{print $1}')"
 
 # ── Step 8: EXIT trap — restore backup if it exists, release lock, clean up ──
 BACKUP="${SKILL_PATH}.regression-bak.$$"
+MOCK_COUNTER="$(mktemp -t regression-gate-mock.XXXXXX)"
 _cleanup() {
   if [ -f "$BACKUP" ]; then
     mv -f "$BACKUP" "$SKILL_PATH" 2>/dev/null || true
   fi
   exec 9>&- 2>/dev/null || true
-  rm -f "$BACKUP" 2>/dev/null || true
+  rm -f "$BACKUP" "$MOCK_COUNTER" 2>/dev/null || true
 }
 trap _cleanup EXIT INT TERM
 
@@ -124,15 +125,21 @@ cp "$SKILL_PATH" "$BACKUP"
 
 # ── Helper: run bench or mock it ─────────────────────────────────────────────
 # Returns JSON with with_skill.pass_rate field.
-# In mock mode, returns a fixed pass rate of 0.75 so the full gate logic (swap,
-# restore, JSON emit, READY_TO_COMMIT) can be exercised without a live claude -p
-# invocation. 0.75 satisfies a 0.5 threshold (happy path) but not 0.9 (regression
-# path), covering both test scenarios deterministically.
+# Mock mode emits a different rate on the first vs second invocation (0.70 then
+# 0.75) so the p_proposal-vs-p_current comparison is exercised non-trivially;
+# command-substitution subshells share state via the $MOCK_COUNTER tmp file.
 _bench_pass_rate() {
   if [ "${EVALUATOR_REGRESSION_MOCK:-0}" = "1" ]; then
-    printf '%s\n' '{"with_skill":{"pass_rate":0.75}}'
+    local count
+    count="$(cat "$MOCK_COUNTER" 2>/dev/null || echo 0)"
+    count=$((count + 1))
+    echo "$count" > "$MOCK_COUNTER"
+    if [ "$count" -eq 1 ]; then
+      printf '%s\n' '{"with_skill":{"pass_rate":0.70}}'
+    else
+      printf '%s\n' '{"with_skill":{"pass_rate":0.75}}'
+    fi
   else
-    # Live bench via /run-evals-bench (the SEPL evaluation harness).
     claude -p "Run /run-evals-bench skill=${PLUGIN}:${SKILL}" \
       --output-format json 2>/dev/null \
       | jq -c '{with_skill:{pass_rate:(.with_skill.pass_rate // 0)}}'
