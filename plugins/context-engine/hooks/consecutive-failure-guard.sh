@@ -67,7 +67,7 @@ if [ "$COUNT" -ge "$SAFE_THRESH" ] && [ ! -f "$SAFE_FLAG" ]; then
     }' > "$SAFE_FLAG"
   LEDGER_LINE=$(printf '{"ts":"%s","operator":"safe-mode-enter","resource":"session/%s","trigger":"consecutive-failure-guard","evidence":"counter:%d last:%s","actor":"context-engine:consecutive-failure-guard"}' \
     "$TS" "$SESSION_ID" "$COUNT" "$TOOL")
-  bash "${CLAUDE_PLUGIN_ROOT}/../_lib/jsonl-append.sh" --with-turn-id .claude/lineage/ledger.jsonl "$LEDGER_LINE" <<< "$INPUT"
+  bash "${CLAUDE_PLUGIN_ROOT}/_lib/jsonl-append.sh" --with-turn-id .claude/lineage/ledger.jsonl "$LEDGER_LINE" <<< "$INPUT"
   echo "SAFE MODE ENTERED after ${COUNT} consecutive failures. Write/Edit/destructive Bash are now blocked. Diagnose the root cause, then run: /safe-mode off"
 fi
 

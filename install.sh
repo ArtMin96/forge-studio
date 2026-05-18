@@ -101,6 +101,34 @@ fi
 CLAUDE_VER=$(claude --version 2>/dev/null | awk '{print $1}')
 ok "claude CLI detected${CLAUDE_VER:+ (${CLAUDE_VER})}"
 ok "template located at ${C_DIM}${TEMPLATE_CLAUDE_MD/#$HOME/~}${C_RESET}"
+
+# Shared helpers live at plugins/_lib/ and reach each consumer via a symlink
+# inside the plugin directory. Anthropic's installer dereferences these when
+# copying to the cache (docs: plugin caching and file resolution), so each
+# plugin ends up with a self-contained copy at runtime. Re-create them on
+# every run so a fresh checkout, a Windows clone that dropped symlinks, or a
+# manual delete always converges back to a working tree.
+LIB_CONSUMERS=(workflow traces context-engine policy-gateway)
+LIB_SRC="${SCRIPT_DIR}/plugins/_lib"
+if [ ! -d "$LIB_SRC" ]; then
+  fail "shared helpers not found at ${LIB_SRC} (run install.sh from a Forge Studio checkout)"
+fi
+LIB_LINKED=0
+for p in "${LIB_CONSUMERS[@]}"; do
+  target="${SCRIPT_DIR}/plugins/${p}/_lib"
+  [ -d "${SCRIPT_DIR}/plugins/${p}" ] || continue
+  if [ -L "$target" ] && [ "$(readlink "$target")" = "../_lib" ]; then
+    continue
+  fi
+  rm -rf "$target"
+  ln -s ../_lib "$target"
+  LIB_LINKED=$((LIB_LINKED + 1))
+done
+if [ "$LIB_LINKED" -gt 0 ]; then
+  ok "shared helpers: linked ${LIB_LINKED}/${#LIB_CONSUMERS[@]} plugins to plugins/_lib"
+else
+  ok "shared helpers: ${#LIB_CONSUMERS[@]} plugin symlinks present"
+fi
 printf "\n"
 
 # 2. CLAUDE.md install

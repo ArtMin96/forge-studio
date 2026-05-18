@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "policy-gateway",
   "description": "Policy Gateway (TRAE \u00a75.2.4) between planner and execution: PII/secrets scan, prompt-injection detection, sensitive-ops audit. Same permissionDecision:deny contract as behavioral-core block-destructive. Rules live in rules.d/ so SEPL can evolve them.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "keywords": [
     "policy",
     "security",

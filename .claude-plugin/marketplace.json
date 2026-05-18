@@ -19,7 +19,7 @@
     {
       "name": "context-engine",
       "description": "Context management: progressive pressure tracking, drift detection, edit safety, large-file warnings, plan mode hooks, MCP monitoring, prompt budget awareness, failure-escalation with safe-mode flag.",
-      "version": "1.4.0",
+      "version": "1.4.1",
       "source": "./plugins/context-engine",
       "category": "context-management",
       "keywords": ["context", "session-management", "edit-safety", "plan-mode", "mcp-monitoring", "harness:context-management", "overhead:minimal", "role:sensor-computational"]
@@ -51,7 +51,7 @@
     {
       "name": "workflow",
       "description": "Hook-driven agentic workflow orchestrator. Automatic routing (shell or LLM-hybrid), sprint-contract enforcement, TDD loop, session bootstrap, handoff nudges. Self-evolution SEPL loop (propose/assess/commit/rollback) over versioned resources. Composes agents/evaluator/context-engine/memory rather than duplicating them.",
-      "version": "2.1.0",
+      "version": "2.1.1",
       "source": "./plugins/workflow",
       "category": "orchestration",
       "keywords": ["workflow", "agentic", "orchestration", "router", "tdd", "sprint-contract", "self-evolution", "autogenesis", "harness:orchestration", "harness:self-evolution", "overhead:minimal", "role:guide-inferential"]
@@ -75,7 +75,7 @@
     {
       "name": "traces",
       "description": "Execution trace collection, analysis, and harness evolution. Stores structured JSONL traces for pattern detection and failure-driven improvement. Feeds /evolve as a proposal source, plus per-session clarification-waste analysis.",
-      "version": "1.4.0",
+      "version": "1.4.1",
       "source": "./plugins/traces",
       "category": "diagnostics",
       "keywords": ["traces", "execution-history", "diagnostics", "analytics", "harness:trace-analysis", "harness:self-evolution", "overhead:minimal", "role:sensor-computational"]
@@ -107,7 +107,7 @@
     {
       "name": "policy-gateway",
       "description": "Policy Gateway (TRAE §5.2.4) between planner and execution: PII/secrets scan, prompt-injection detection, sensitive-ops audit. Same permissionDecision:deny contract as behavioral-core block-destructive. Rules live in rules.d/ so SEPL can evolve them.",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "source": "./plugins/policy-gateway",
       "category": "behavioral-steering",
       "keywords": ["policy", "security", "secrets", "injection", "audit", "harness:behavioral-steering", "overhead:minimal", "role:guide-computational"]
