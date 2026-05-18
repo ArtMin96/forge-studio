@@ -102,32 +102,44 @@ CLAUDE_VER=$(claude --version 2>/dev/null | awk '{print $1}')
 ok "claude CLI detected${CLAUDE_VER:+ (${CLAUDE_VER})}"
 ok "template located at ${C_DIM}${TEMPLATE_CLAUDE_MD/#$HOME/~}${C_RESET}"
 
-# Shared helpers live at plugins/_lib/ and reach each consumer via a symlink
-# inside the plugin directory. Anthropic's installer dereferences these when
-# copying to the cache (docs: plugin caching and file resolution), so each
-# plugin ends up with a self-contained copy at runtime. Re-create them on
-# every run so a fresh checkout, a Windows clone that dropped symlinks, or a
-# manual delete always converges back to a working tree.
-LIB_CONSUMERS=(workflow traces context-engine policy-gateway)
-LIB_SRC="${SCRIPT_DIR}/plugins/_lib"
-if [ ! -d "$LIB_SRC" ]; then
-  fail "shared helpers not found at ${LIB_SRC} (run install.sh from a Forge Studio checkout)"
-fi
-LIB_LINKED=0
-for p in "${LIB_CONSUMERS[@]}"; do
-  target="${SCRIPT_DIR}/plugins/${p}/_lib"
-  [ -d "${SCRIPT_DIR}/plugins/${p}" ] || continue
-  if [ -L "$target" ] && [ "$(readlink "$target")" = "../_lib" ]; then
-    continue
-  fi
-  rm -rf "$target"
-  ln -s ../_lib "$target"
-  LIB_LINKED=$((LIB_LINKED + 1))
+# Cross-plugin shared resources: ${CLAUDE_PLUGIN_ROOT}/../<other-plugin>/... is
+# forbidden (Anthropic strips sibling content from the cache). Each consumer
+# plugin gets a symlink inside its own directory pointing at the shared target;
+# the installer dereferences the symlink and copies the content into each
+# plugin's cache. Re-asserted on every run for fresh checkouts and hosts where
+# symlinks were stripped.
+declare -A SHARED_TARGETS=(
+  [_lib]="../_lib"
+  [diagnostics-lib]="../diagnostics/lib"
+  [workflow-orchestrate]="../workflow/skills/orchestrate"
+)
+declare -A SHARED_CONSUMERS=(
+  [_lib]="workflow traces context-engine policy-gateway"
+  [diagnostics-lib]="behavioral-core caveman code-graph context-engine long-session rtk-optimizer workflow"
+  [workflow-orchestrate]="agents evaluator"
+)
+SHARED_LINKED=0
+SHARED_TOTAL=0
+for link_name in "${!SHARED_TARGETS[@]}"; do
+  target_rel="${SHARED_TARGETS[$link_name]}"
+  source_path="${SCRIPT_DIR}/plugins/${target_rel#../}"
+  [ -d "$source_path" ] || fail "shared resource not found at ${source_path} (run install.sh from a Forge Studio checkout)"
+  for p in ${SHARED_CONSUMERS[$link_name]}; do
+    [ -d "${SCRIPT_DIR}/plugins/${p}" ] || continue
+    SHARED_TOTAL=$((SHARED_TOTAL + 1))
+    target="${SCRIPT_DIR}/plugins/${p}/${link_name}"
+    if [ -L "$target" ] && [ "$(readlink "$target")" = "$target_rel" ]; then
+      continue
+    fi
+    rm -rf "$target"
+    ln -s "$target_rel" "$target"
+    SHARED_LINKED=$((SHARED_LINKED + 1))
+  done
 done
-if [ "$LIB_LINKED" -gt 0 ]; then
-  ok "shared helpers: linked ${LIB_LINKED}/${#LIB_CONSUMERS[@]} plugins to plugins/_lib"
+if [ "$SHARED_LINKED" -gt 0 ]; then
+  ok "shared resources: linked ${SHARED_LINKED}/${SHARED_TOTAL} symlinks across ${#SHARED_TARGETS[@]} targets"
 else
-  ok "shared helpers: ${#LIB_CONSUMERS[@]} plugin symlinks present"
+  ok "shared resources: ${SHARED_TOTAL} symlinks present across ${#SHARED_TARGETS[@]} targets"
 fi
 printf "\n"
 

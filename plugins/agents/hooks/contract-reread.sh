@@ -19,7 +19,7 @@ PLANS_DIR="${CLAUDE_PROJECT_DIR:-.}/.claude/plans"
 # plans per the feature gate; falls back to mtime-newest with a stderr warning
 # when all plans are gate-complete. The || true keeps pipefail from aborting
 # before the user-friendly "no plan files" warning below.
-PLAN_FILE=$(bash "${CLAUDE_PLUGIN_ROOT}/../workflow/skills/orchestrate/scripts/find-active-plan.sh" 2>/dev/null || true)
+PLAN_FILE=$(bash "${CLAUDE_PLUGIN_ROOT}/workflow-orchestrate/scripts/find-active-plan.sh" 2>/dev/null || true)
 
 if [[ -z "$PLAN_FILE" ]]; then
   echo "[contract-reread] no plan files in .claude/plans/" >&2

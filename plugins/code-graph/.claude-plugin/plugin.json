@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "code-graph",
   "description": "Auto-install tirth8205/code-review-graph. Claude Code queries a Tree-sitter structural graph of the current repo through MCP instead of re-reading files on every task. Second SessionStart hook surfaces a remediation warning when the MCP server is missing or unhealthy. Claude Code only. Opt-out: FORGE_CODE_GRAPH_DISABLED=1.",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "keywords": [
     "context-management",
     "mcp",

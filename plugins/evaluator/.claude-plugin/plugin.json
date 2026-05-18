@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "evaluator",
   "description": "Evaluator-optimizer pattern: adversarial review, verification gates (TaskCompleted), static analysis, postmortems, reference-fidelity check, self-evolution proposal assessment.",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "keywords": [
     "code-review",
     "quality",

@@ -5,12 +5,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "W=${CLAUDE_PLUGIN_ROOT}/../diagnostics/lib/time-hook.sh; H=${CLAUDE_PLUGIN_ROOT}/hooks/env-bootstrap.sh; if [ -x \"$W\" ]; then bash \"$W\" context-engine SessionStart bash \"$H\"; else bash \"$H\"; fi",
+            "command": "W=${CLAUDE_PLUGIN_ROOT}/diagnostics-lib/time-hook.sh; H=${CLAUDE_PLUGIN_ROOT}/hooks/env-bootstrap.sh; if [ -x \"$W\" ]; then bash \"$W\" context-engine SessionStart bash \"$H\"; else bash \"$H\"; fi",
             "timeout": 15
           },
           {
             "type": "command",
-            "command": "W=${CLAUDE_PLUGIN_ROOT}/../diagnostics/lib/time-hook.sh; H=${CLAUDE_PLUGIN_ROOT}/hooks/mcp-instruction-monitor.sh; if [ -x \"$W\" ]; then bash \"$W\" context-engine SessionStart bash \"$H\"; else bash \"$H\"; fi",
+            "command": "W=${CLAUDE_PLUGIN_ROOT}/diagnostics-lib/time-hook.sh; H=${CLAUDE_PLUGIN_ROOT}/hooks/mcp-instruction-monitor.sh; if [ -x \"$W\" ]; then bash \"$W\" context-engine SessionStart bash \"$H\"; else bash \"$H\"; fi",
             "timeout": 10
           }
         ]
