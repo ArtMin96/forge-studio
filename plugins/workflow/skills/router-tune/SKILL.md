@@ -99,6 +99,14 @@ router-tune: <N> proposals written to .claude/lineage/proposals/
 Next: /evolve router-tune
 ```
 
+## Execution Checklist
+
+- [ ] Step 1 — gather classification traces from `/tmp/claude-router-*/classifications.jsonl` (minimum 100 entries across ≥5 sessions; otherwise abort)
+- [ ] Step 2 — detect miss-fires: low-confidence routes overridden by `/orchestrate`, and `route=none` followed by dispatched work
+- [ ] Step 3 — cluster miss-fires into at most 3 groups (threshold tweak, regex add, regex narrow)
+- [ ] Step 4 — write one proposal artifact per cluster to `.claude/lineage/proposals/<YYMMDD>-router-<slug>-v<N>.md`
+- [ ] Step 5 — report proposals-written count and the `/evolve router-tune` next-step hint
+
 ## Examples
 
 Input: `/tmp/claude-router-*/classifications.jsonl` aggregated to 247 entries across 8 sessions. 18 cases where router emitted `route=single-agent confidence=0.68` and user invoked `/orchestrate pipeline` within 3 turns.

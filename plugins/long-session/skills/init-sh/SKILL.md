@@ -42,6 +42,14 @@ Write an executable `init.sh` at the repo root that recreates the dev environmen
 
 5. **Report** — one line: `init.sh written (<N> bytes). Run: bash init.sh`.
 
+## Execution Checklist
+
+- [ ] Detect stack: read package.json / composer.json / pyproject.toml / Cargo.toml / go.mod / Makefile / .env.example / docker files
+- [ ] Compose init.sh: `set -euo pipefail`, idempotent installs, .env copy guard, optional migrations, dev-server + test commands as docs
+- [ ] Verify idempotency — every step gated by `[ ! -f ]`/`[ ! -d ]` or a no-op-friendly command
+- [ ] Write the file and `chmod +x init.sh`
+- [ ] Report one line: `init.sh written (<N> bytes). Run: bash init.sh`
+
 ## Output Structure
 
 ```bash

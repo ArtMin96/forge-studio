@@ -57,6 +57,13 @@ After all agents complete:
 2. Check for conflicts or inconsistencies
 3. Present unified summary to user
 
+## Execution Checklist
+
+- [ ] Step 1 — describe the operation as Operation / Files / Constraints template
+- [ ] Step 2 — confirm each file is independently modifiable; if not, switch to pipeline
+- [ ] Step 3 — dispatch subagents in batches of 3–5 with matched tool set (Read-only vs. write); use `isolation: worktree` for writes
+- [ ] Step 4 — collect results from each agent, surface conflicts/inconsistencies, present unified summary
+
 ## Limits
 
 - Max 5 parallel agents (more is hard to review)

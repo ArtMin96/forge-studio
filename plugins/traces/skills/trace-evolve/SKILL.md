@@ -96,6 +96,13 @@ For each proposal:
 - [suggested re-analysis date]
 ```
 
+## Execution Checklist
+
+- [ ] Phase 1 — load compiled summary views; run `/trace-compile` first if absent
+- [ ] Phase 2 — categorize each failure (premature editing / thrashing / context loss / spec compliance / tool misuse / environment), prioritize by total_failures and sessions_affected
+- [ ] Phase 3 — for each top-5 cluster propose ONE single-variable change (rule / hook / skill / no-change) with token impact and regression risk
+- [ ] Phase 4 — emit the markdown evolution report (Period, Sessions, Method, per-cluster sections, Summary table, Next Steps)
+
 ## Examples
 
 Input: `~/.claude/traces/` contains summary views showing 7 sessions where Edit was called before any Read on the target file, total 14 occurrences across 5 sessions.

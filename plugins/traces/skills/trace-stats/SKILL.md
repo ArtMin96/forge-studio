@@ -24,6 +24,13 @@ Quick overview of recent session activity from `~/.claude/traces/`.
 3. **Aggregate**: total commands, total errors, total files, sessions count
 4. **Show today's session** detail if available
 
+## Execution Checklist
+
+- [ ] List up to 10 most-recent JSONL trace files under `~/.claude/traces/`
+- [ ] Read each file's `session_end` entry (last line where `"type":"session_end"`)
+- [ ] Aggregate totals across sessions: commands, errors, files-modified, error rate
+- [ ] Render the summary table and the "Today" line if today's session exists
+
 ## Output Format
 
 ```markdown

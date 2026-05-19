@@ -73,6 +73,13 @@ Forward ratio: 18/65 = 0.28
 tilt:history  [cursed-regime: paper threshold ≈ 0.340, flag at < 0.40]
 ```
 
+## Execution Checklist
+
+- [ ] Identify the target trace file (argument or most recent under `~/.claude/traces/`)
+- [ ] Run `bash scripts/score.sh [trace.jsonl]`
+- [ ] Surface the ratio and tilt classification line from the scorer output
+- [ ] Flag if ratio < 0.40 (absolute floor) or ≥ 0.10 below the trailing-3-session average
+
 ## Threshold Guidance
 
 | Ratio | Classification | Implication |

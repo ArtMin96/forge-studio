@@ -44,6 +44,14 @@ Given the decision or approach in $ARGUMENTS, construct the strongest possible a
 - If yes: state why the risks are acceptable
 - If no: state what should change
 
+## Execution Checklist
+
+- [ ] Analyze "What Could Go Wrong?" — failure conditions, scaling, maintenance burden, future-change cost
+- [ ] Analyze "What's Being Sacrificed?" — explicit tradeoff, awareness, whether worth-it
+- [ ] Propose "The Alternative" — at least one concrete alternative with rationale
+- [ ] Reach "The Verdict" — proceed / reconsider / strong-objection with the reason
+- [ ] Emit the DEVIL'S ADVOCATE block (Against / Strongest objection / Risk / Alternative / Verdict)
+
 ## Output
 ```text
 DEVIL'S ADVOCATE

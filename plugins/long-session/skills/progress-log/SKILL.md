@@ -75,6 +75,15 @@ Append this session's outcomes to `claude-progress.txt` at the repo root. Durabl
 
 6. **Report** — one line: `Progress logged (entry #N). /session-resume will surface it in the next session.`
 
+## Execution Checklist
+
+- [ ] Parse topic from `$ARGUMENTS` (default `session`)
+- [ ] Gather net state: `git log --since="6 hours ago"`, `git diff --name-only HEAD~1 HEAD`, `git status --short`
+- [ ] Compose the dated entry block (Done / In progress / Blockers / Next)
+- [ ] Append to `claude-progress.txt` at the repo root (create if missing; never edit prior entries)
+- [ ] Append a matching ledger entry to `.claude/lineage/ledger.jsonl` (mkdir -p `.claude/lineage` first)
+- [ ] Report one line: `Progress logged (entry #N). /session-resume will surface it in the next session.`
+
 ## Constraints
 
 - **Append-only.** Never rewrite previous entries. If a past entry is wrong, add a correction entry — do not edit history.

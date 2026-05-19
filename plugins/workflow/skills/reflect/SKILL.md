@@ -66,6 +66,14 @@ One line:
 Reflect: <topic-slug> (<new|updated|skipped-duplicate>)
 ```
 
+## Execution Checklist
+
+- [ ] Step 1 — read the plan's `## Contract` section; capture `git diff HEAD~1 HEAD --stat` and the newest test-trace summary
+- [ ] Step 2 — draft the three-line insight (Worked / Surprised / Watch), each ≤120 chars, no hedging
+- [ ] Step 3 — dedupe against `.claude/memory/topics/*.md`; bump `Last verified:` instead of new write if matched
+- [ ] Step 4 — if novel, hand off to `/remember` with topic slug `sprint-<YYMMDD>-<kebab-plan-name>`
+- [ ] Step 5 — report the one-line outcome: `Reflect: <topic-slug> (new|updated|skipped-duplicate)`
+
 ## Examples
 
 Input: `.claude/plans/s7-stability-and-docs-refresh.md` has a `## Contract` section, `git diff HEAD~1 HEAD --stat` shows 35 files changed, traces summary records green test run.

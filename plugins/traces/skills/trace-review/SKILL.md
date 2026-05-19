@@ -27,6 +27,13 @@ Analyze execution traces stored in `~/.claude/traces/` to identify patterns acro
    - **Session health**: Error rate per session, trend over time
 4. **Report findings**: Actionable insights, not raw data
 
+## Execution Checklist
+
+- [ ] List the 5 most-recent JSONL trace files under `~/.claude/traces/`
+- [ ] Parse each entry's `type`, `timestamp`, and type-specific fields
+- [ ] Aggregate recurring failures (exit_code != 0), file hotspots, wasted turns, per-session error rate
+- [ ] Emit the four-section markdown report (Recurring Failures, File Hotspots, Session Health Trend, Recommendations)
+
 ## Entry Types
 
 - `bash`: command, exit_code, output_preview, cwd

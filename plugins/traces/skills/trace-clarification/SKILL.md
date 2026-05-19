@@ -34,6 +34,13 @@ For each candidate, the helper counts `bash` and `file` entries between the prev
 3. **Read the table output** and surface it inline.
 4. **Flag sessions with high ratios** (>0.5) as candidates for earlier goal clarification.
 
+## Execution Checklist
+
+- [ ] Identify the trace file (argument or most recent under `~/.claude/traces/`)
+- [ ] Run `bash scripts/compute-waste.sh [path]`
+- [ ] Surface the helper's per-session table inline
+- [ ] Flag any session with waste_ratio > 0.5 as a candidate for earlier goal clarification
+
 ## Output Format
 
 ```markdown

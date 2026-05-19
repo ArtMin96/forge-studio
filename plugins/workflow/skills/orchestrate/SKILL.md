@@ -97,6 +97,13 @@ For `single`:
 
 End with one line: `Dispatched: <pattern>. Next gate: <which hook / skill will fire next>.`
 
+## Execution Checklist
+
+- [ ] Step 1 — locate the active plan via `find-active-plan.sh`; read its `## Contract` section (abort if missing)
+- [ ] Step 2 — resolve `$ARGUMENTS` to one of `single | pipeline | fan-out | tdd | auto` (auto applies the dispatch matrix)
+- [ ] Step 3 — dispatch the chosen pattern; for pipeline, per-task loop is `/contract` → generator → reviewer → `/verify`, stop on first failure
+- [ ] Step 4 — emit one summary line: `Dispatched: <pattern>. Next gate: <hook/skill>.`
+
 ## Do NOT
 
 - Do not rewrite the plan unless the user asked

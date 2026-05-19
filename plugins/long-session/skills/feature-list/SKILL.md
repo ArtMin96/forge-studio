@@ -46,6 +46,15 @@ Convert the latest plan's `## Contract` into `.claude/features.json`. This file 
 
 6. **Report**: `Expanded N features from <plan>. Run /tdd-loop or /verify to execute verify_cmds.`
 
+## Execution Checklist
+
+- [ ] Glob `.claude/plans/*.md`; pick most-recent (abort if none)
+- [ ] Extract `## Contract` section (abort if missing)
+- [ ] Parse each top-level bullet as one feature; fold sub-bullets into the parent's description
+- [ ] Derive per-item `verify_cmd` using the criterion text + repo stack (test runner / `test -f` / `grep -q` / `# manual`)
+- [ ] Write `.claude/features.json` with stable IDs `F1`, `F2`, … preserving any prior `done` entries
+- [ ] Report: `Expanded N features from <plan>. Run /tdd-loop or /verify to execute verify_cmds.`
+
 ## Integration
 
 - `.claude/features.json` is read by:

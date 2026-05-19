@@ -30,6 +30,13 @@ started: {ISO 8601 timestamp}
 
 > **Timebox set: {N} messages.** You have {N} messages to complete this task. No unnecessary exploration, no verbose explanations, no over-engineering. Be surgical.
 
+## Execution Checklist
+
+- [ ] Parse the message count from `$ARGUMENTS` (default 15)
+- [ ] Create `.claude/scopes/` if missing
+- [ ] Write `.claude/scopes/.timebox` with `budget:`, `remaining:`, `started:` lines
+- [ ] Output the "Timebox set: {N} messages." confirmation block
+
 ## Ongoing Behavior
 
 After each message, decrement the `remaining` count in `.claude/scopes/.timebox` and remind yourself:

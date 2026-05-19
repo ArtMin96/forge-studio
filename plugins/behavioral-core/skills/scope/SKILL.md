@@ -23,6 +23,14 @@ Define a focused scope for: **$ARGUMENTS**
 3. Create the directory `.claude/scopes/` if it does not exist.
 4. Generate a scope document at `.claude/scopes/{task-name}.md` where `{task-name}` is a slugified version of the task (lowercase, hyphens, no spaces).
 
+## Execution Checklist
+
+- [ ] Parse the task description from `$ARGUMENTS`
+- [ ] Use Glob/Grep to identify the files that need to change; keep the list tight
+- [ ] Create `.claude/scopes/` if missing
+- [ ] Write `.claude/scopes/{task-name}.md` using the Task / Files / Boundaries / Done When / Max Files structure
+- [ ] Present the scope to the user and ask for confirmation before any implementation
+
 ## Scope Document Format
 
 The document must be under 15 lines. Use this exact structure:

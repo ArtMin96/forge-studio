@@ -79,6 +79,13 @@ Write to `~/.claude/traces/{source-name}-errors.md`.
 - Most edited file: {path} ({N} edits)
 ```
 
+## Execution Checklist
+
+- [ ] Step 1 — find the target session JSONL under `~/.claude/traces/`
+- [ ] Step 2 — write the summary view to `~/.claude/traces/{source-name}-summary.md` (one line per entry)
+- [ ] Step 3 — write the error view to `~/.claude/traces/{source-name}-errors.md` (each error plus its preceding-entry context)
+- [ ] Step 4 — emit the trace-compilation report (source, totals, view paths, quick stats)
+
 ## Examples
 
 ### Example 1: clean session, low error rate

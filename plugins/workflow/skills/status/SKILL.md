@@ -58,6 +58,14 @@ stat -c '%Y %n' /tmp/claude-router-*/classifications.jsonl 2>/dev/null | sort -r
 
 If found: count of classifications by route (single-agent, pipeline, fan-out, tdd-loop, none). Gives a quick sense of what the session has actually been doing.
 
+## Execution Checklist
+
+- [ ] Section 1 — resolve the active plan via `find-active-plan.sh`; report basename, age, checked/unchecked counts (or `No active plan.`)
+- [ ] Section 2 — report `claude-progress.txt` age + last entry tail (or `No progress recorded.`)
+- [ ] Section 3 — render last 5 events from the newest `~/.claude/traces/*.jsonl` if traces plugin is active (silent if absent)
+- [ ] Section 4 — context pressure: `$CLAUDE_CONTEXT_WINDOW_USED_PCT` with stage label, else turn-gate counter, else `unknown`
+- [ ] Section 5 — router stats: count classifications by route from the newest `/tmp/claude-router-*/classifications.jsonl` (skip silently if none)
+
 ## Output Format
 
 Six lines max. Example:
