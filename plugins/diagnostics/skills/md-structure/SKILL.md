@@ -76,6 +76,14 @@ Audits (or scaffolds) CLAUDE.md against the four sections Karpathy's failure-mod
 
 5. **Never overwrite** existing CLAUDE.md silently. Ask first.
 
+## Execution Checklist
+
+- [ ] Parse `$ARGUMENTS` (default `./CLAUDE.md`); offer scaffold if missing
+- [ ] Audit each of the four sections (Think Before Coding / Simplicity First / Surgical Changes / Goal-Driven Execution) — check for heading or alias, concrete rule, and concrete example
+- [ ] Emit the CLAUDE.md STRUCTURE AUDIT block with PRESENT / WEAK / MISSING per section and a Notes list citing `file:line`
+- [ ] If scaffold mode is requested, emit the four-section starter document
+- [ ] Never overwrite an existing CLAUDE.md silently — ask first
+
 ## Examples
 
 ### Example 1: existing CLAUDE.md, all four sections present

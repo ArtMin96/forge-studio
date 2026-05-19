@@ -44,6 +44,13 @@ For stale or invalid entries:
 3. Update `Last verified:` date if still accurate
 4. Flag or remove if outdated
 
+## Execution Checklist
+
+- [ ] List action — read `.claude/memory/index.md` and render the Topic / Last Verified / Age / Status table (fresh <7d / aging 7–30d / stale >30d)
+- [ ] Audit-for-staleness action — for each topic file in `.claude/memory/topics/`: read `Last verified:`, flag entries >30 days, confirm referenced files/functions still exist, report findings
+- [ ] Clean-up action — for stale or invalid entries: remove the topic file, remove the matching line from `index.md`, report what was removed and why
+- [ ] Verify-a-specific-memory action — read the topic file, check every factual claim against current state, update `Last verified:` if accurate, flag or remove if outdated
+
 ## Rules
 
 - Never delete without reporting what was removed

@@ -81,6 +81,16 @@ Read the nearby resources:
 
 Any contradiction → fail the criterion with the conflicting file path cited.
 
+## Execution Checklist
+
+- [ ] Load the proposal artifact (`$ARGUMENTS` or most-recent under `.claude/lineage/proposals/`); confirm the five sections (target, current, proposed, rationale, impact)
+- [ ] Criterion 1 — Single-Variable Change: reject if the proposal changes more than one resource/dimension
+- [ ] Criterion 2 — Addresses Root Cause: reject when the proposal patches the symptom instead of the underlying mechanism
+- [ ] Criterion 3 — Honest Impact: verify the token/behavior estimate (or the structured-prediction fields when present); fail if missing or off by an order of magnitude
+- [ ] Criterion 4 — No Regression: read at least one neighboring resource and cite any contradiction by `file:line`
+- [ ] If the proposal came from `/auto-tune-skill`, also run `bash plugins/evaluator/skills/assess-proposal/scripts/regression-gate.sh <proposal-path>` and interpret exit 0/1/2/3
+- [ ] Write the verdict JSON to `.claude/lineage/verdicts/<basename>.json` and append the matching `assess` entry to `.claude/lineage/ledger.jsonl`
+
 ## Output
 
 Write a verdict JSON to `.claude/lineage/verdicts/<proposal-basename>.json`:

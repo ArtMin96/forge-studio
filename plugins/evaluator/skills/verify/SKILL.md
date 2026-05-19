@@ -142,6 +142,18 @@ If UNVERIFIED, do NOT clear the gate — the warning serves its purpose.
 
 Never claim work is done without evidence. Evidence, not assertions.
 
+## Execution Checklist
+
+- [ ] Step 1 — list every modified file with `git diff --stat` and a one-line description of each
+- [ ] Step 2 — pick the verification method(s): features.json (preferred), tests, build, manual, type-check
+- [ ] features.json path — for each `pending`/`in_progress` entry: run its `verify_cmd`, capture exit code + tail, write `.claude/gate/features.json` with `[{id, verify_cmd, exit_code, passed, tail}]`, flip `status: done` only on `passed: true` (skip `# manual`)
+- [ ] Step 3/3b — actually run the verification; quote the literal output, never paraphrase
+- [ ] Step 4 — name the most likely failure mode, null/empty/boundary handling, and double-run behavior
+- [ ] Step 5 — emit the verdict block (VERIFIED / METHOD / EVIDENCE / REMAINING RISK) or the UNVERIFIED + NEEDED block
+- [ ] Step 5a — on FAIL, emit one Dimension/Direction/Magnitude triple per failed criterion immediately after the verdict
+- [ ] Step 6 — if VERIFIED=Yes and an active plan exists, `echo "{plan-name}" > ~/.claude/evaluation-gate.flag` to clear the commit gate
+- [ ] When verdict is `VERIFIED: No` and the gap exceeds the agent's autonomy, emit the Escalation Brief in the CONTEXT / TRIGGER / OPTIONS / RECOMMENDATION shape
+
 ## Rebuttals
 
 Common rationalizations for skipping verify, with rebuttals:

@@ -14,6 +14,14 @@ logical: drift report compares stated goal against current trajectory and recomm
 
 Quick drift check: compare current work against the original plan. Keep this analysis SHORT.
 
+## Execution Checklist
+
+- [ ] Find the active plan or handoff in `.claude/plans/` then `.claude/handoffs/` (else ask the user to state the current task)
+- [ ] Gather work state: `git diff --stat`, `git log --oneline -10`
+- [ ] If plan exists, compare file lists — "Unplanned" (in diff, not in plan) and "Planned but untouched" (in plan, not in diff)
+- [ ] Report drift in the documented Checkpoint format, with one Recommendation line
+- [ ] Keep the entire output under 150 words
+
 ## Instructions
 
 1. **Find the plan or original task.** Check these locations in order:

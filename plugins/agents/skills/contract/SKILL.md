@@ -60,6 +60,15 @@ Mechanically re-read the sprint contract from the active plan. This prevents rel
    - Any criteria UNCLEAR → STOP. Report what's ambiguous. Do not guess.
    - Criterion is infeasible given current codebase → STOP. Report why.
 
+## Execution Checklist
+
+- [ ] Glob `.claude/plans/*.md`; Read the most-recently-modified plan file
+- [ ] Locate the `## Contract` section (report `NO CONTRACT FOUND` if absent and continue without one)
+- [ ] Print every criterion verbatim with `UNDERSTOOD` or `UNCLEAR: <ambiguity>` per item plus the VERIFICATION line
+- [ ] Decide: all UNDERSTOOD → proceed; any UNCLEAR or infeasible → STOP and report
+- [ ] Run `bash "${CLAUDE_PLUGIN_ROOT}/skills/contract/scripts/baseline-check.sh" <plan-path>`; include stdout in the evidence reply
+- [ ] Interpret baseline-check exit code: 0 proceed, 1 refuse and paste the mismatched-JSON list, 2 surface path-resolution error, other STOP and report the unreachable path verbatim
+
 ## Baseline check
 
 Plans assert baseline state — file line counts, empty YAML fields, line references the implementation must not break. Run the baseline checker against HEAD before any Edit/Write so a stale plan cannot drag the generator into writing literally from outdated assertions.

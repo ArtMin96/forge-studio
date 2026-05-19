@@ -51,6 +51,14 @@ Write `.claude/spec.md` from the latest plan's `## Contract`. Unlike `/contract`
 
 5. **Report:** `spec.md initialized with N contract items. after-subagent.sh will append deltas as agents complete.`
 
+## Execution Checklist
+
+- [ ] Glob `.claude/plans/*.md` and pick the most-recent (abort if none)
+- [ ] Extract `## Contract` (abort if missing)
+- [ ] If `.claude/spec.md` exists and its `Plan:` header matches, report `spec.md already initialized for this plan.` and stop
+- [ ] Write `.claude/spec.md` with Plan / Initialized / `## Contract (from plan)` / `## Deltas` sections (verbatim contract copy)
+- [ ] Report: `spec.md initialized with N contract items. after-subagent.sh will append deltas as agents complete.`
+
 ## Integration
 
 **Writers:**

@@ -169,6 +169,24 @@ Reports four metrics with WARN / ALARM thresholds: total plugin count, max skill
 
 When two events tie for top collision count (Counter ordering), the script reports only one — note both in any output if a second event is also at the same count. Cross-plugin references that originate predominantly from `diagnostics/` are structural (diagnostics enumerates plugins as its job) and not a sign of sprawl per se; surface the WARN but contextualize.
 
+## Execution Checklist
+
+- [ ] Check 1 — plugin/skill/hook/agent/rule counts (`count.sh` vs README header line)
+- [ ] Check 2 — marketplace registration gap (directories ↔ marketplace entries)
+- [ ] Check 3 — SKILL.md frontmatter completeness (description, effort, agent preload constraints, unknown keys)
+- [ ] Check 4 — hook script executability (`find … ! -perm -u+x`)
+- [ ] Check 5 — memory staleness (`Last verified:` >90 days or missing)
+- [ ] Check 6 — HARNESS_SPEC invariants (hooks.json present, planner/reviewer no Write/Edit, async-blocking mismatch, monitors manifest)
+- [ ] Check 7 — skill token weight (`check-skill-size-quick.sh`; flag >2k, >5k)
+- [ ] Check 8 — rule provenance (`check-rule-provenance.sh`; advisory)
+- [ ] Check 9a — `/rest-audit`; Check 9b — `/md-structure` on CLAUDE.md
+- [ ] Check 10 — tool-menu inflation (`check-tool-menu.py`)
+- [ ] Check 11 — sibling reference resolution (`check-sibling-refs.py`)
+- [ ] Check 12 — description budget (`check-desc-length.py`)
+- [ ] Check 13 — policy registry drift (`check-policy-registry.py`)
+- [ ] Check 14 — sprawl signals (`sprawl.sh`; exit 1 on WARN/ALARM)
+- [ ] Emit one-section-per-check report in the Output Format shape (no writes, advisory only)
+
 ## Output Format
 
 ```markdown

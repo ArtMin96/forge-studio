@@ -70,6 +70,14 @@ npx vitest run 2>/dev/null || npx jest --no-coverage 2>/dev/null
 ```
 Report: tests passed/failed
 
+## Execution Checklist
+
+- [ ] Detect project type: `composer.json` → PHP, `package.json` → JS, `tsconfig.json` → TS (run pipelines for each detected)
+- [ ] PHP pipeline: pint (or php-cs-fixer dry-run) → phpstan → pest/phpunit (last step skipped with `--quick`)
+- [ ] JS/TS pipeline: prettier --check → `tsc --noEmit` + `eslint --quiet` → vitest/jest (last step skipped with `--quick`)
+- [ ] Stop at the first FAIL unless `--full` is passed; otherwise run every step
+- [ ] Emit the HEALTHCHECK block (per-language step lines + Overall) and the first 10 lines of any failing output
+
 ## Arguments
 - `--quick`: Formatting + static analysis only. Fast.
 - `--full` (default): All steps including tests.

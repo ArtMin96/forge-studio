@@ -35,6 +35,16 @@ Based on Boris Cherny's (Claude Code creator) workflow: ~100 lines that outperfo
    - Same critical rules at the BOTTOM (last 5 lines)
    - Less critical in the middle
 
+## Execution Checklist
+
+- [ ] Read the CLAUDE.md at `$ARGUMENTS` (default `./CLAUDE.md`)
+- [ ] For every line ask "If I remove this, would Claude make mistakes?" — mark KEEP / REMOVE
+- [ ] Cut anything redundant with Claude's defaults (reads-before-edit, git workflow, language conventions, generic test prompts)
+- [ ] Tag lines that should live in a hook instead (`always run X` → PostToolUse; `never X` → PreToolUse block)
+- [ ] Apply primacy/recency placement — most-violated rules at top and bottom
+- [ ] Present the annotated original ([KEEP]/[REMOVE]/[→ HOOK]) + trimmed version side-by-side
+- [ ] Ask before overwriting; suggest saving the prior file as `CLAUDE.md.backup`
+
 ## Output
 
 Present two versions:

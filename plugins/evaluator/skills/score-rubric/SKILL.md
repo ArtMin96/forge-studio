@@ -47,6 +47,14 @@ The script:
    - `reference-based`: raw must be 0 or 1 (matches reference); contribution is `raw * weight`.
 5. Emits result JSON to stdout.
 
+## Execution Checklist
+
+- [ ] Load and structurally validate `rubric.json` (required keys present, `criteria` non-empty array)
+- [ ] Assert `abs(sum(criteria[].weight) - 1.0) < 1e-6` — exit 1 with `WEIGHT_SUM_FAIL` on violation
+- [ ] Read `scores.json`; assert every rubric criterion id appears — exit 2 with `INPUT_ERROR` on any missing id
+- [ ] Compute per-criterion weighted contribution (scored: range-normalise; binary/reference-based: `raw * weight`)
+- [ ] Emit result JSON to stdout per `result.schema.json`; A/B fields null for single-run
+
 ## Output
 
 ```json

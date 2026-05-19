@@ -60,6 +60,13 @@ Report: `Safe-mode active. Mutations blocked until /safe-mode off.`
    Recommend: run /postmortem on the root cause before continuing.
    ```
 
+## Execution Checklist
+
+- [ ] `/safe-mode status` — read `.claude/safe-mode`; print the four base fields (state, Entered, Reason, Failure counter) and, when `.brief_template` is non-null, render its populated 4-field Escalation Brief
+- [ ] `/safe-mode on [reason]` — write `.claude/safe-mode` with the `consecutive-failure-guard.sh` JSON shape (entered_at, reason, counter, last_tool, brief_template); append `safe-mode-enter` ledger entry; report `Safe-mode active. Mutations blocked until /safe-mode off.`
+- [ ] `/safe-mode off` — refuse if no flag; delete `.claude/safe-mode`; reset `/tmp/claude-failure-guard/<session>/consecutive-failures`; append `safe-mode-exit` ledger entry; suggest `/postmortem` on the failure chain
+- [ ] When activating (auto or manual), emit the Escalation Brief in the documented CONTEXT / TRIGGER / OPTIONS / RECOMMENDATION shape so a human can decide fast
+
 ## Integration
 
 - **Writer:** `plugins/context-engine/hooks/consecutive-failure-guard.sh` writes the flag at `FORGE_SAFE_MODE_THRESHOLD` (default 5).

@@ -54,6 +54,17 @@ Recommendations:
   - Add .env.backup to .gitignore
 ```
 
+## Execution Checklist
+
+- [ ] Pass 1.1 — read `.claude/lineage/ledger.jsonl` (if present)
+- [ ] Pass 1.2 — filter entries where `operator ∈ {policy-block, sensitive-op-audit}`
+- [ ] Pass 1.3 — summarize by `evidence` label (`secret-detected:<label>`, `pattern:<rule>`, `sensitive-op-audit`)
+- [ ] Pass 1.4 — emit top-line counts
+- [ ] Pass 2.1 — load patterns from `rules.d/secrets.txt` (same source as `scan-secrets.sh`)
+- [ ] Pass 2.2 — `grep -rEn -I --exclude-dir={.git,node_modules,vendor,.venv,dist,build}` for each pattern
+- [ ] Pass 2.3 — print `<file>:<line> <label>` per match (never the matched string)
+- [ ] Pass 2.4 — emit the POLICY AUDIT report combining ledger + live-scan findings
+
 ## Examples
 
 Input: `.claude/lineage/ledger.jsonl` contains 3 `policy-block` entries (2 `secret-detected:aws-access-key`, 1 injection-rule match from `rules.d/injection.txt:5`) and 8 `sensitive-op-audit` entries. Live scan finds 1 match in `src/config.php:42` and 1 in `.env.backup:8`.

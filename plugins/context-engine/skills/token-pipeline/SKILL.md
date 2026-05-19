@@ -81,6 +81,14 @@ Emit ONE concrete recommendation, chosen by highest expected payoff:
 
 Print the recommendation in a boxed line so it's hard to miss.
 
+## Execution Checklist
+
+- [ ] Stage 1 (Collection) — inventory CLAUDE.md, MCP instructions, memory index, plan/spec/features, progress tail, system-reminder log; print a size table
+- [ ] Stage 2 (Ranking) — score each source 1–5 on recency and relevance; flag low-score + high-size as Lost-in-the-Middle candidates
+- [ ] Stage 3 (Compression) — for each source scoring <6, name the corrective skill (`/lean-md`, `/progress-log` + `/compact`, plan trim, `/memory-index`)
+- [ ] Stage 4 (Budgeting) — print per-category token cap table
+- [ ] Stage 5 (Assembly) — emit ONE boxed recommendation (highest expected payoff)
+
 ## Integration
 
 - **Triggered by:** `plugins/context-engine/hooks/track-context-pressure.sh` at P2 / S2 thresholds (≈65% pressure / ~15 exchanges).

@@ -35,6 +35,15 @@ Each row is:
 4. Cold vs warm: a session is "cold" if any hook in it has `duration_ms > 5000`; otherwise warm. Report counts and median totals separately.
 5. Failures: list any rows with non-zero `exit_code`.
 
+## Execution Checklist
+
+- [ ] Window = last 20 sessions (override via `LAST=N`)
+- [ ] Group rows by `(plugin, event)`; emit median + p95 ms per group
+- [ ] Group rows by `session`; report per-session-total median + p95
+- [ ] Split cold (any hook >5000 ms) vs warm; report counts and median totals separately
+- [ ] List any rows with non-zero `exit_code`
+- [ ] Run `bash plugins/diagnostics/skills/startup-profile/scripts/profile.sh` and surface the report in the documented format
+
 ## Run
 
 ```bash

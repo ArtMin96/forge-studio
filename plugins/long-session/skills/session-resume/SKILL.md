@@ -59,6 +59,16 @@ Reads the long-session artifacts; outputs a briefing so work continues without r
    Ready. What's next?
    ```
 
+## Execution Checklist
+
+- [ ] Check `init.sh` at repo root; remind the user to run `bash init.sh` if present
+- [ ] Read the last 3 entries from `claude-progress.txt` verbatim
+- [ ] Read `.claude/spec.md` tail (last 20 lines or last delta block)
+- [ ] Summarize `.claude/features.json` (pending / in_progress / done counts; list in-progress items)
+- [ ] Capture git state: `git status --short`, `git log --oneline -5`
+- [ ] Detect the test command from package.json / composer.json / Makefile / pytest / cargo / go (don't run it)
+- [ ] Emit the briefing in the documented shape, ending with `Ready. What's next?`
+
 ## Integration
 
 - Reads produced by `/progress-log`, `/living-spec`, `/feature-list`, `/init-sh`.
