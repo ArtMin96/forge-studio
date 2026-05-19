@@ -48,7 +48,19 @@ else
 fi
 
 ts=$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo "unknown")
-session="${CLAUDE_SESSION_ID:-unknown}"
+# Claude Code passes session_id in the stdin JSON, not as $CLAUDE_SESSION_ID env.
+# stdin_buf already holds the payload we forwarded to the wrapped command; peek
+# at it (jq if available, python3 fallback) without disturbing the wrapped call.
+session=""
+if [ -n "$stdin_buf" ]; then
+  session=$(printf '%s' "$stdin_buf" | jq -r '.session_id // empty' 2>/dev/null || true)
+  if [ -z "$session" ]; then
+    session=$(printf '%s' "$stdin_buf" | python3 -c 'import sys,json
+try: print(json.loads(sys.stdin.read()).get("session_id",""))
+except Exception: pass' 2>/dev/null || true)
+  fi
+fi
+session="${session:-${CLAUDE_SESSION_ID:-unknown}}"
 cmd_safe=$(printf '%s' "$*" | tr '\\"' '__' | head -c 200)
 
 printf '{"ts":"%s","session":"%s","plugin":"%s","event":"%s","duration_ms":%d,"exit_code":%d,"cmd":"%s"}\n' \
