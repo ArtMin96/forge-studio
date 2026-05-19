@@ -21,7 +21,7 @@ Runs in ~30 seconds. Skip when the sprint is trivial (one-line fix, no new contr
 
 ## Input
 
-Optional `[plan-path]`. Default: most recent `.claude/plans/*.md`.
+Optional `[plan-path]`. Default: the active plan resolved via `bash plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh` (single source of truth — `sort -V` numeric-prefix order, skips gate-complete plans).
 
 ## Flow
 

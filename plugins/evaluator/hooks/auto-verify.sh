@@ -29,14 +29,14 @@ emit() {
   exit "$rc"
 }
 
-# --- locate most-recent plan ---
+# --- locate active plan via find-active-plan.sh (single source of truth) ---
 plan_dir="${CLAUDE_PROJECT_DIR:-.}/.claude/plans"
 gate_file="${CLAUDE_PROJECT_DIR:-.}/.claude/gate/features.json"
 
 # Find the active plan via numeric-prefix order (deterministic, not mtime).
-most_recent_plan=""
+active_plan=""
 if [[ -d "$plan_dir" ]]; then
-  most_recent_plan="$(bash "${CLAUDE_PLUGIN_ROOT}/workflow-orchestrate/scripts/find-active-plan.sh" 2>/dev/null || true)"
+  active_plan="$(bash "${CLAUDE_PLUGIN_ROOT}/workflow-orchestrate/scripts/find-active-plan.sh" 2>/dev/null || true)"
 fi
 
 # --- check gate/features.json for task evidence ---
@@ -64,10 +64,10 @@ PY
 fi
 
 # --- no gate file: check whether a plan exists as minimum evidence ---
-if [[ -z "$most_recent_plan" ]]; then
+if [[ -z "$active_plan" ]]; then
   # No plan, no gate — nothing to verify against; treat as no-evidence (PASS-silent)
   exit 0
 fi
 
 # Plan exists but no gate file — verification has not been run
-emit "gate-features" "FAIL" "no gate/features.json — run /verify against $(basename "$most_recent_plan")" 1
+emit "gate-features" "FAIL" "no gate/features.json — run /verify against $(basename "$active_plan")" 1

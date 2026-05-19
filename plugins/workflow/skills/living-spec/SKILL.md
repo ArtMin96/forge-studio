@@ -20,7 +20,7 @@ Write `.claude/spec.md` from the latest plan's `## Contract`. Unlike `/contract`
 
 ## Process
 
-1. **Find the latest plan.** Glob `.claude/plans/*.md`; pick the most recently modified. If none, stop: `No plan found. Run Plan mode first.`
+1. **Find the active plan.** Run `bash plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh` (the single source of truth — `sort -V` numeric-prefix order, skips gate-complete plans). If it prints empty, stop: `No plan found. Run Plan mode first.`
 
 2. **Extract `## Contract`.** If missing, stop: `Plan has no ## Contract section. /living-spec expects one.`
 
@@ -53,7 +53,7 @@ Write `.claude/spec.md` from the latest plan's `## Contract`. Unlike `/contract`
 
 ## Execution Checklist
 
-- [ ] Glob `.claude/plans/*.md` and pick the most-recent (abort if none)
+- [ ] Resolve the active plan via `bash plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh` (abort if it prints empty)
 - [ ] Extract `## Contract` (abort if missing)
 - [ ] If `.claude/spec.md` exists and its `Plan:` header matches, report `spec.md already initialized for this plan.` and stop
 - [ ] Write `.claude/spec.md` with Plan / Initialized / `## Contract (from plan)` / `## Deltas` sections (verbatim contract copy)
@@ -94,7 +94,7 @@ Write `.claude/spec.md` from the latest plan's `## Contract`. Unlike `/contract`
 
 Input:
 ```text
-plan file: .claude/plans/2026-04-28-cache-rewrite.md
+plan file: .claude/plans/s7-cache-rewrite.md
 ## Contract excerpt:
 - Cache layer behind a single `CacheService` interface
 - All call sites use the interface; no direct Redis client imports outside `app/Cache/`
@@ -106,7 +106,7 @@ Output:
 ```markdown
 # Living Spec
 
-Plan: .claude/plans/2026-04-28-cache-rewrite.md
+Plan: .claude/plans/s7-cache-rewrite.md
 Initialized: 2026-04-28T15:00:00Z
 
 ## Contract (from plan)

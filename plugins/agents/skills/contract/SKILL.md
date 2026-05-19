@@ -32,10 +32,10 @@ Mechanically re-read the sprint contract from the active plan. This prevents rel
 ## Instructions
 
 1. **Find the active plan:**
+   ```bash
+   bash plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh
    ```
-   Glob: .claude/plans/*.md
-   ```
-   Read the most recently modified plan file.
+   Returns the absolute path of the first non-gate-complete plan in `sort -V` order (see `plugins/workflow/CLAUDE.md` §Canonical plan filename format). Read that file. If the script prints an empty line, abort with `No active plan.`
 
 2. **Extract the Contract section:**
    Look for `## Contract` in the plan. If not found:
@@ -62,7 +62,7 @@ Mechanically re-read the sprint contract from the active plan. This prevents rel
 
 ## Execution Checklist
 
-- [ ] Glob `.claude/plans/*.md`; Read the most-recently-modified plan file
+- [ ] Resolve the active plan via `bash plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh`; Read that file (abort if the script prints empty)
 - [ ] Locate the `## Contract` section (report `NO CONTRACT FOUND` if absent and continue without one)
 - [ ] Print every criterion verbatim with `UNDERSTOOD` or `UNCLEAR: <ambiguity>` per item plus the VERIFICATION line
 - [ ] Decide: all UNDERSTOOD → proceed; any UNCLEAR or infeasible → STOP and report

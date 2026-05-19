@@ -16,7 +16,7 @@ Quick drift check: compare current work against the original plan. Keep this ana
 
 ## Execution Checklist
 
-- [ ] Find the active plan or handoff in `.claude/plans/` then `.claude/handoffs/` (else ask the user to state the current task)
+- [ ] Resolve the active plan via `bash plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh`; if empty, check `.claude/handoffs/`; else ask the user to state the current task
 - [ ] Gather work state: `git diff --stat`, `git log --oneline -10`
 - [ ] If plan exists, compare file lists — "Unplanned" (in diff, not in plan) and "Planned but untouched" (in plan, not in diff)
 - [ ] Report drift in the documented Checkpoint format, with one Recommendation line
@@ -24,9 +24,9 @@ Quick drift check: compare current work against the original plan. Keep this ana
 
 ## Instructions
 
-1. **Find the plan or original task.** Check these locations in order:
-   - `.claude/plans/` — use Glob to find any plan files, read the most recent
-   - `.claude/handoffs/` — if no plan, check for a handoff that may describe the task
+1. **Find the active plan or original task.** Check these locations in order:
+   - `.claude/plans/` — run `bash plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh` (the single source of truth — `sort -V` numeric-prefix order, skips gate-complete plans). Read what it returns.
+   - `.claude/handoffs/` — if the script printed empty, check for a handoff that may describe the task
    - If neither exists, report: "No plan or handoff found. State your current task so I can track drift against it."
 
 2. **Gather current work state:**

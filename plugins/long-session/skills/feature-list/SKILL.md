@@ -18,7 +18,7 @@ Convert the latest plan's `## Contract` into `.claude/features.json`. This file 
 
 ## Process
 
-1. **Locate the latest plan.** Glob `.claude/plans/*.md`; pick the most recently modified. If none, stop: `No plan found. Run Plan mode first.`
+1. **Locate the active plan.** Run `bash plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh` (the single source of truth — `sort -V` numeric-prefix order, skips gate-complete plans). If it prints empty, stop: `No plan found. Run Plan mode first.`
 
 2. **Extract `## Contract`.** Read the plan; find the `## Contract` section. If missing, stop: `Plan has no ## Contract section. /feature-list expects one.`
 
@@ -48,7 +48,7 @@ Convert the latest plan's `## Contract` into `.claude/features.json`. This file 
 
 ## Execution Checklist
 
-- [ ] Glob `.claude/plans/*.md`; pick most-recent (abort if none)
+- [ ] Resolve the active plan via `bash plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh` (abort if it prints empty)
 - [ ] Extract `## Contract` section (abort if missing)
 - [ ] Parse each top-level bullet as one feature; fold sub-bullets into the parent's description
 - [ ] Derive per-item `verify_cmd` using the criterion text + repo stack (test runner / `test -f` / `grep -q` / `# manual`)

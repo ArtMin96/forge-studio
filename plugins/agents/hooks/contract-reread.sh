@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Reads stdin (SubagentStart event payload — unused in v1, hook is generic).
-# Finds the most-recent .claude/plans/*.md file, extracts the ## Contract
+# Resolves the active .claude/plans/*.md file via find-active-plan.sh, extracts the ## Contract
 # block, and writes it to .claude/state/active-contract.md so downstream
 # agents can read a fresh copy without relying on in-context memory.
 # Exit 1 = warning (non-blocking); exit 0 = success.
