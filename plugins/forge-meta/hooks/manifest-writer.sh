@@ -13,27 +13,32 @@ TMP_INPUT=$(mktemp)
 printf '%s' "$INPUT" > "$TMP_INPUT"
 trap 'rm -f "$TMP_INPUT"' EXIT
 
-# Extract agent_type and tool_result.stdout via Python reading the temp file.
+# Extract session_id, agent_type, and tool_result.stdout via Python reading the temp file.
+# Claude Code passes session_id in the stdin JSON payload, NOT as $CLAUDE_SESSION_ID env.
 # read returns non-zero when python3 produces fewer fields than expected; || true is safe
-# because AGENT_TYPE and STDOUT_ENCODED are defaulted below.
-read -r AGENT_TYPE STDOUT_ENCODED < <(python3 - "$TMP_INPUT" <<'PYEOF'
+# because all three vars are defaulted below.
+read -r SESSION_FROM_INPUT AGENT_TYPE STDOUT_ENCODED < <(python3 - "$TMP_INPUT" <<'PYEOF'
 import sys, json, base64
 
 path = sys.argv[1]
 try:
     with open(path) as f:
         d = json.load(f)
+    session_id = d.get("session_id", "")
     agent_type = d.get("agent_type", "")
     stdout_raw = d.get("tool_result", {}).get("stdout", "")
     # Base64-encode stdout so it survives the shell read without newline splitting
     encoded = base64.b64encode(stdout_raw.encode()).decode()
-    print(agent_type, encoded)
+    # Empty placeholders so the read picks up three positional fields even when missing
+    print(session_id or "_", agent_type or "_", encoded or "_")
 except Exception:
-    print("", "")
+    print("_", "_", "_")
 PYEOF
 ) || true
-AGENT_TYPE="${AGENT_TYPE:-}"
-STDOUT_ENCODED="${STDOUT_ENCODED:-}"
+# Convert the "_" placeholder back to empty
+[[ "$SESSION_FROM_INPUT" = "_" ]] && SESSION_FROM_INPUT=""
+[[ "$AGENT_TYPE" = "_" ]] && AGENT_TYPE=""
+[[ "$STDOUT_ENCODED" = "_" ]] && STDOUT_ENCODED=""
 
 # Decode stdout_raw back from base64
 STDOUT_RAW=$(python3 -c "import base64,sys; print(base64.b64decode(sys.argv[1]).decode('utf-8','replace'))" "$STDOUT_ENCODED" 2>/dev/null || true)
@@ -141,9 +146,12 @@ fi
 # Export agent_type for the append script's envelope
 export CLAUDE_AGENT_TYPE="${AGENT_TYPE:-unknown}"
 
+# Resolve session_id: stdin JSON (canonical per Claude Code hook spec) → env fallback → "unknown".
+SESSION_ID="${SESSION_FROM_INPUT:-${CLAUDE_SESSION_ID:-unknown}}"
+ARGS+=(--session-id "$SESSION_ID")
+
 # --- Dedup guard: skip the append if this (session_id, git-tree-hash) was already written ---
 # Prevents a planner→generator→reviewer chain with one logical change from recording 3 entries.
-SESSION_ID="${CLAUDE_SESSION_ID:-unknown}"
 STATE_FILE=".claude/state/manifest-writer-${SESSION_ID}"
 
 # Compute a tree-hash representing the current working-tree delta vs HEAD.

@@ -13,6 +13,7 @@ PREDICTED_FIXES=""
 RISK_TASKS=""
 CONSTRAINT_LEVEL=""
 WHY_THIS_COMPONENT=""
+SESSION_ID_ARG=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -24,6 +25,7 @@ while [[ $# -gt 0 ]]; do
     --risk-tasks)       RISK_TASKS="$2";         shift 2 ;;
     --constraint-level) CONSTRAINT_LEVEL="$2";   shift 2 ;;
     --why-this-component) WHY_THIS_COMPONENT="$2"; shift 2 ;;
+    --session-id)       SESSION_ID_ARG="$2";     shift 2 ;;
     *) shift ;;
   esac
 done
@@ -39,7 +41,9 @@ if [[ -z "$DESCRIPTION" ]]; then
 fi
 
 ISO_TIMESTAMP=$(date -u +%FT%TZ)
-SESSION_ID="${CLAUDE_SESSION_ID:-unknown}"
+# session_id resolution order: --session-id flag (preferred, set by manifest-writer.sh
+# from the stdin JSON payload) → $CLAUDE_SESSION_ID env (legacy fallback) → "unknown".
+SESSION_ID="${SESSION_ID_ARG:-${CLAUDE_SESSION_ID:-unknown}}"
 AGENT_TYPE_ENV="${CLAUDE_AGENT_TYPE:-unknown}"
 
 EPOCH=$(date +%s)

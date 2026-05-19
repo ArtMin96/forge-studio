@@ -26,7 +26,7 @@ Each entry follows AHE p.20 with an envelope:
 |---|---|---|
 | `id` | auto | `chg-<unix-epoch>-<random6hex>` |
 | `iso_timestamp` | auto | `date -u` at write time |
-| `session_id` | auto | `$CLAUDE_SESSION_ID` env, else `unknown` |
+| `session_id` | auto | `--session-id` flag (set by `manifest-writer.sh` from the stdin JSON's `session_id` field, per Claude Code hook spec), else `$CLAUDE_SESSION_ID` env, else `unknown` |
 | `agent_type` | auto | `$CLAUDE_AGENT_TYPE` env, else `unknown` |
 | `type` | required | caller-supplied |
 | `description` | required | caller-supplied |
