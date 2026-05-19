@@ -73,6 +73,53 @@ bash plugins/diagnostics/skills/startup-profile/scripts/profile.sh
 
 When the report breaches a budget, the fix lives in the offending hook script — wrap external installs behind first-run markers, defer non-critical work to background, or split the hook into a hot-path SessionStart + a heavier deferred-task hook.
 
+## Examples
+
+### Example 1: warm-only window, one slow hook
+
+Input: `~/.local/share/forge-studio/startup.jsonl` with 40 rows across 5 sessions, all warm. `code-graph/code-graph-bootstrap.sh` median 612 ms, p95 1,140 ms; rest under 80 ms.
+
+Output:
+```markdown
+## SessionStart Latency Profile
+**Window:** last 5 sessions (0 cold, 5 warm)
+**Log:** ~/.local/share/forge-studio/startup.jsonl
+
+### Per-plugin (SessionStart only)
+| Plugin | Hook | Calls | median ms | p95 ms |
+|---|---|---|---|---|
+| code-graph | code-graph-bootstrap.sh | 5 | 612 | 1140 |
+| context-engine | env-bootstrap.sh | 5 | 38 | 52 |
+| ...                            
+
+### Per-session totals
+- Warm session median: 940 ms, p95: 1480 ms
+- Cold session median: --, p95: --
+
+### Non-zero exits
+none
+
+### Slowest single hook
+code-graph/code-graph-bootstrap.sh at 1140 ms on session abc7d3
+```
+
+### Example 2: one cold session in the window, exit failure surfaced
+
+Input: 24 rows across 6 sessions; one session has a `rtk-bootstrap.sh` row with `duration_ms: 18_300, exit_code: 1` (pipx install retry storm).
+
+Output: excerpt
+```markdown
+### Per-session totals
+- Warm session median: 720 ms, p95: 980 ms
+- Cold session median: 18950 ms, p95: 18950 ms  (1 cold session)
+
+### Non-zero exits
+- session cold-9f3a, rtk-optimizer/rtk-bootstrap.sh, duration 18300 ms, exit 1
+
+### Slowest single hook
+rtk-optimizer/rtk-bootstrap.sh at 18300 ms on session cold-9f3a
+```
+
 ## Failure Modes
 
 - **Log missing:** `~/.local/share/forge-studio/startup.jsonl` does not exist. The wrapper has not run yet. Open one new session, then re-run.

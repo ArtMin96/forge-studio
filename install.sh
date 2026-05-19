@@ -14,6 +14,8 @@ MARKETPLACE_REPO="ArtMin96/forge-studio"
 MARKETPLACE_NAME="forge-studio"
 TEMPLATE_CLAUDE_MD="${SCRIPT_DIR}/templates/CLAUDE.md"
 TARGET_CLAUDE_MD="${HOME}/.claude/CLAUDE.md"
+TEMPLATE_STATUSLINE="${SCRIPT_DIR}/templates/statusline.sh"
+TARGET_STATUSLINE="${HOME}/.claude/statusline.sh"
 
 PLUGINS=(
   behavioral-core
@@ -58,7 +60,7 @@ banner() {
   printf "\n"
   printf "  %s%sForge Studio%s   %sharness marketplace for Claude Code%s\n" \
     "$C_BOLD" "$C_CYAN" "$C_RESET" "$C_DIM" "$C_RESET"
-  printf "  %s19 plugins, 74 skills, 68 hooks%s\n\n" "$C_DIM" "$C_RESET"
+  printf "  %s19 plugins, 76 skills, 69 hooks%s\n\n" "$C_DIM" "$C_RESET"
 }
 
 section() {
@@ -159,6 +161,25 @@ if [ -f "$TARGET_CLAUDE_MD" ]; then
 else
   cp "$TEMPLATE_CLAUDE_MD" "$TARGET_CLAUDE_MD"
   ok "installed -> ${TARGET_CLAUDE_MD/#$HOME/~}"
+fi
+printf "\n"
+
+section "User statusline"
+if [ -f "$TARGET_STATUSLINE" ]; then
+  if cmp -s "$TEMPLATE_STATUSLINE" "$TARGET_STATUSLINE"; then
+    skip "${TARGET_STATUSLINE/#$HOME/~} already matches template"
+  else
+    BACKUP="${TARGET_STATUSLINE}.bak.$(date +%Y%m%d-%H%M%S)"
+    cp "$TARGET_STATUSLINE" "$BACKUP"
+    info "backup -> ${C_DIM}${BACKUP/#$HOME/~}${C_RESET}"
+    cp "$TEMPLATE_STATUSLINE" "$TARGET_STATUSLINE"
+    chmod +x "$TARGET_STATUSLINE"
+    ok "installed -> ${TARGET_STATUSLINE/#$HOME/~}"
+  fi
+else
+  cp "$TEMPLATE_STATUSLINE" "$TARGET_STATUSLINE"
+  chmod +x "$TARGET_STATUSLINE"
+  ok "installed -> ${TARGET_STATUSLINE/#$HOME/~}"
 fi
 printf "\n"
 

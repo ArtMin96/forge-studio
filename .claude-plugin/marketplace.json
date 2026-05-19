@@ -150,7 +150,7 @@
       "version": "0.1.0",
       "source": "./plugins/cross-repo",
       "category": "orchestration",
-      "tags": ["cross-repo", "harness:multi-agent", "overhead:moderate"]
+      "keywords": ["cross-repo", "harness:multi-agent", "overhead:moderate"]
     },
     {
       "name": "forge-meta",

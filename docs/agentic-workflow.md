@@ -323,7 +323,7 @@ Hooks are advisory — none exit with code 2. They surface signals; the decision
 
 ## See also
 
-- [Architecture](architecture.md) — 7-component harness model + hook mechanics
+- [Architecture](architecture.md) — 8-component harness model + hook mechanics
 - [Harness Spec](../HARNESS_SPEC.md) — Sprint Contract Protocol (§ Sprint Contract Protocol)
 - [Settings](settings.md) — full env-var reference including the `WORKFLOW_*` variables
 - [Lifecycle](../plugins/workflow/LIFECYCLE.md) — event → hook → composed-plugin map

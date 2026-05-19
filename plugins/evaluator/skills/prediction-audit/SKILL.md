@@ -100,7 +100,7 @@ predicted_failure_clusters_resolved: none
 predicted_negative_effects: none
 ```
 
-Output row:
+Output:
 ```text
 | rules.d/<rule>.txt | +132 | +118 | 3/4 | accurate |
 ```

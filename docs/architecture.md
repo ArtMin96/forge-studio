@@ -138,7 +138,7 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | traces | collect-user-turn.sh | Append `user_turn` JSONL entry (prompt_length, session_id; no content stored) for clarification-timing analysis |
 | long-session | budget-trigger.sh | Graduated context-budget advisory at 70/80/90/99% of `CLAUDE_CONTEXT_WINDOW_USED_PCT` |
 
-### Before Tool Use (PreToolUse — 11 hooks, deny-chain)
+### Before Tool Use (PreToolUse — 12 hooks, deny-chain)
 
 | Matcher | Plugin | Hook | What It Does |
 |---------|--------|------|-------------|
@@ -151,9 +151,11 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | Bash | evaluator | pre-commit-gate.sh | Warn if plan exists but `/verify` not run |
 | Edit\|Write | agents | directory-ownership.sh | Worktree-team scope guard (opt-in: `FORGE_DIRECTORY_OWNERSHIP=1`) |
 | Edit\|Write | forge-meta | pre-edit-guard.sh | **Block** edits to protected verifier paths when `FORGE_META_EVOLVE=1`; human edits pass silently |
+| Edit\|Write | long-session | spec-drift-detect.sh | Detect drift between active plan and HEAD on edit attempts |
+| (any) | diagnostics | doom-loop.sh | Fingerprint last 20 tool calls; warn at ≥3 identical (exit 1), **block** at ≥5 (exit 2); delete `/tmp/forge-doom-<session>` to override |
 | Read | token-efficiency | track-duplicate-reads.sh | Warn on duplicate reads |
 
-### After Tool Use (PostToolUse — 21 hooks)
+### After Tool Use (PostToolUse — 20 hooks)
 
 | Matcher | Plugin | Hook | What It Does |
 |---------|--------|------|-------------|
@@ -170,12 +172,13 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | Bash | evaluator | test-nudge-reset.sh | Reset test-nudge counter when tests detected |
 | Bash | evaluator | filter-test-output.sh | Replace verbose passing test output with summary |
 | Edit\|Write | policy-gateway | audit-sensitive-ops.sh | Audit writes to `.env` / `secrets/` / key files; ledger `sensitive-op-audit` |
+| Edit\|Write | policy-gateway | suggest-harden.sh | Suggest hardening when touching auth/permission code; ledger advisory |
+| Bash | memory | post-commit-prompt.sh | After `git commit`, prompt for memory-worthy patterns from the change |
 | Read | research-gate | track-file-reads.sh | Record file read for edit gate |
 | Read\|Grep\|Glob | research-gate | track-exploration.sh | Track exploration depth |
 | Write\|Edit | traces | collect-file-trace.sh | Log file change to session trace |
 | Bash | traces | collect-bash-trace.sh | Log command, exit code, output to session trace |
 | Bash | code-graph | code-graph-update.sh | Refresh graph after `git commit/merge/rebase/pull/checkout/reset/cherry-pick` |
-| (any) | diagnostics | doom-loop.sh | Fingerprint last 20 tool calls; warn at ≥3 identical (exit 1), block at ≥5 (exit 2); delete `/tmp/forge-doom-<session>` to override |
 
 ### Failure & Task Events
 
@@ -183,9 +186,11 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 |-------|--------|------|-------------|
 | PostToolUseFailure | context-engine | consecutive-failure-guard.sh | Warn at `FORGE_FAILURE_THRESHOLD`; write `.claude/safe-mode` + ledger at `FORGE_SAFE_MODE_THRESHOLD` |
 | PostToolUseFailure | traces | collect-failure-trace.sh | Log tool failures to session trace |
-| TaskCreated | context-engine | task-guardian-log.sh | Log task for progress guardian |
-| TaskCompleted | evaluator | task-completion-gate.sh | Warn if task marked done without verification evidence |
+| TaskCreated¹ | context-engine | task-guardian-log.sh | Log task for progress guardian |
+| TaskCompleted¹ | evaluator | task-completion-gate.sh | Warn if task marked done without verification evidence |
 | StopFailure | traces | log-stop-failure.sh | Log API errors and rate limits to session trace |
+
+¹ `TaskCreated` and `TaskCompleted` are agent-teams events — they only fire when `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` is set. Without that env var, these two hooks are inert.
 
 ### Agent Dispatch (SubagentStart)
 
@@ -276,7 +281,7 @@ Forge Studio uses hooks for enforcement, skills for guidance. Anything that must
 
 ## Behavioral Rules (`rules.d/`)
 
-12 rules in `plugins/behavioral-core/hooks/rules.d/`. Each `.txt` file = one behavioral rule. Re-injected every message via `behavioral-anchor.sh`.
+14 rules in `plugins/behavioral-core/hooks/rules.d/`. Each `.txt` file = one behavioral rule. Re-injected every message via `behavioral-anchor.sh`.
 
 | # | Rule | Purpose |
 |---|------|---------|
@@ -285,9 +290,12 @@ Forge Studio uses hooks for enforcement, skills for guidance. Anything that must
 | 30 | intellectual-honesty | Challenge own work, admit uncertainty |
 | 35 | no-code-narration | No what-comments, no changelog notes in source |
 | 40 | solve-underlying-goal | Read intent, name inferred preconditions before coding |
+| 45 | clarify-goal-before-acting | Surface goal/scope ambiguity early — one targeted question, not mid-way pivots |
 | 50 | faithful-reporting | Report outcomes accurately, no false claims |
 | 55 | evidence-before-claims | Attach proof to every "done / fixed / passing" claim |
 | 60 | minimal-changes | Fix the bug only, no scope creep |
+| 65 | deliberation-suppression | Don't reach for /ultrathink etc on polluted context — CoT can amplify the failure pattern (arXiv:2605.08060) |
+| 70 | confidence-escalation | When confidence low, escalate (/safe-mode, /verify) rather than guess and act |
 | 70 | follow-plans | Execute approved plans exactly |
 | 80 | no-redundant-exploration | Reasonable defaults, vary search terms |
 | 90 | single-variable-changes | Change one thing, verify, proceed |

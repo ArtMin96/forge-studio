@@ -18,7 +18,8 @@
           {
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/collect-bash-trace.sh",
-            "timeout": 5
+            "timeout": 5,
+            "async": true
           }
         ]
       },
@@ -28,7 +29,8 @@
           {
             "type": "command",
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/collect-file-trace.sh",
-            "timeout": 5
+            "timeout": 5,
+            "async": true
           }
         ]
       }

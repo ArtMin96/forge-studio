@@ -121,6 +121,50 @@ Overall: {CLEAN / {N} issues}
 {One-line fix suggestion per issue kind}
 ```
 
+## Examples
+
+### Example 1: clean ledger after a small proposal cycle
+
+Input: `.claude/lineage/ledger.jsonl` with 4 entries — one propose, one assess (verdict pass), one commit, one rollback, all on `rules.d/95-no-hardcoded-paths.txt`. Snapshots at `.claude/lineage/versions/rules.d/95-no-hardcoded-paths.txt/v0` and `/v1`.
+
+Output:
+```markdown
+## Lineage Audit
+Ledger: .claude/lineage/ledger.jsonl
+Entries scanned: 4
+
+### Check 1 — Parse
+Status: CLEAN
+### Check 2 — Operator Values
+Status: CLEAN
+### Check 3 — Resource Slugs
+Status: CLEAN
+### Check 4 — Commit Preconditions
+Status: CLEAN
+### Check 5 — Snapshots
+Status: CLEAN
+### Check 6 — Post-Reject Commits
+Status: CLEAN
+
+### Summary
+Overall: CLEAN
+```
+
+### Example 2: missing snapshot after crash mid-commit
+
+Input: ledger lists a `commit` entry on `memory/topics/onboarding-rules` at `v2`, but `.claude/lineage/versions/memory/topics/onboarding-rules/v1` doesn't exist on disk.
+
+Output: excerpt
+```markdown
+### Check 5 — Snapshots
+Status: 1 missing
+- entry line 17: commit memory/topics/onboarding-rules v2 — expected snapshot at .claude/lineage/versions/memory/topics/onboarding-rules/v1 (not found)
+
+### Summary
+Overall: 1 issue
+- Missing snapshot suggests a crash between snapshot copy and ledger append. Manual fix: restore from backup or roll forward; do not silently re-snapshot the current file (that would conflate v1 with v2).
+```
+
 ## Rules
 
 - This skill never modifies the ledger, snapshots, or the `.claude/lineage/` tree.

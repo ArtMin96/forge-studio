@@ -60,6 +60,30 @@ Append one line to `.claude/memory/index.md`:
 - [<Topic Title>](topics/<slug>.md) — <one-line hook, under 120 chars>
 ```
 
+## Examples
+
+### Example 1: new topic — first capture
+
+Input: user says "remember that we never enable SAML on staging — auth team owns that toggle and we'd be stepping on their tests."
+
+Output: 
+- `.claude/memory/topics/staging-saml-policy.md` created with `Version: v1`, `Previous: (none)`, body explaining the rule + why (auth team test territory).
+- `.claude/memory/index.md` gains `- [Staging SAML policy](topics/staging-saml-policy.md) — auth team owns SAML toggle on staging; do not enable.`
+- No ledger entry (first version has nothing to reverse).
+
+### Example 2: existing topic — update with snapshot
+
+Input: user says "update the staging SAML note — the rule is now 'never on staging or preview'."
+
+Output:
+- `.claude/lineage/versions/memory/topics/staging-saml-policy/v1` snapshot taken.
+- `.claude/memory/topics/staging-saml-policy.md` rewritten with `Version: v2`, `Previous: v1`, updated body.
+- One JSON line appended to `.claude/lineage/ledger.jsonl`:
+  ```json
+  {"ts":"2026-05-19T10:00:00Z","operator":"commit","resource":"memory/topics/staging-saml-policy","version":"v2","prev":"v1","trigger":"remember","evidence":".claude/memory/topics/staging-saml-policy.md","actor":"memory:/remember"}
+  ```
+- Index pointer unchanged (same file).
+
 ## Rules
 
 - Check if a related topic already exists before creating a new one — update instead

@@ -107,8 +107,7 @@ git log --since="6 hours ago": a1b2c3d feat(auth): swap session middleware
 git diff --name-only HEAD~1 HEAD: app/Http/Middleware/Session.php, tests/Feature/AuthTest.php
 ```
 
-Output (appended to `claude-progress.txt`):
-
+Output: appended to `claude-progress.txt`:
 
 ```text
 === 2026-04-28T14:32:00Z — auth-rewrite ===

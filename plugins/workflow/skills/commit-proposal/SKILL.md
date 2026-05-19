@@ -73,7 +73,7 @@ source: .claude/settings.json
 key: env.<VAR>
 ```
 
-The snapshot MUST exist before step 4 runs. If the copy fails, stop — no ledger entry, no mutation.
+Step 4 mutates the live file. If the snapshot copy in step 3 fails, stop — the ledger entry would reference a snapshot that doesn't exist, breaking the rollback chain.
 
 ### Step 4 — Apply the proposal
 
@@ -122,6 +122,8 @@ If `WORKFLOW_EVOLVE_AUTOCOMMIT=1` AND `resource` starts with `env/` AND the prop
 - [ ] Verified post-conditions: snapshot file exists, ledger entry parses, target file matches the proposal
 
 ## Examples
+
+> Examples are illustrative. `FORGE_CONTEXT_PRESSURE_THRESHOLD`, the proposal paths, and dates are stand-ins for the shape of a real proposal — they don't name a live env var or file on disk.
 
 ### Example 1: Rule addition
 

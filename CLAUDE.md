@@ -21,7 +21,7 @@ Every change must be complete. Before calling work done:
 
 1. **Follow references** — If you add/modify a plugin, check every file that references it (README.md, docs/architecture.md, marketplace.json, other plugins that interact with it)
 2. **Update docs** — New plugin? Update README.md (install command, plugin reference section, active hooks table, architecture diagram). Modified hook? Update the Active Hooks table. New skill? Add to the plugin's reference table.
-3. **Update architecture.md** — If the change affects harness components, the 7-component table, the three-layer diagram, or any architectural pattern
+3. **Update architecture.md** — If the change affects harness components, the 8-component table, the three-layer diagram, or any architectural pattern
 4. **Update marketplace.json** — Every plugin must be registered in `.claude-plugin/marketplace.json`
 5. **Verify JSON** — After editing any JSON file, validate it parses: `python3 -c "import json; json.load(open('path'))"`
 6. **Test hooks** — Run new/modified shell scripts with `bash path/to/script.sh` and verify exit code and output

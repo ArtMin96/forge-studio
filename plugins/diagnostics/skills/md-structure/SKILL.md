@@ -76,6 +76,49 @@ Audits (or scaffolds) CLAUDE.md against the four sections Karpathy's failure-mod
 
 5. **Never overwrite** existing CLAUDE.md silently. Ask first.
 
+## Examples
+
+### Example 1: existing CLAUDE.md, all four sections present
+
+Input: `./CLAUDE.md` (210 lines) has top-level headings `## Think Before Coding`, `## Simplicity First`, `## Surgical Changes`, `## Goal-Driven Execution`, each with concrete rules.
+
+Output:
+```text
+CLAUDE.md STRUCTURE AUDIT
+=========================
+
+Section 1 — Think Before Coding     PRESENT
+Section 2 — Simplicity First        PRESENT
+Section 3 — Surgical Changes        PRESENT
+Section 4 — Goal-Driven Execution   PRESENT
+
+Notes:
+  - (none)
+
+Next: run /lean-md to trim, or accept this structure as-is.
+```
+
+### Example 2: CLAUDE.md with weak section 3 and missing section 4
+
+Input: `./CLAUDE.md` has `## Surgical Changes` heading but only the line "be careful when editing" (no actionable rule). No `## Goal-Driven Execution` heading or alias.
+
+Output:
+```text
+CLAUDE.md STRUCTURE AUDIT
+=========================
+
+Section 1 — Think Before Coding     PRESENT
+Section 2 — Simplicity First        PRESENT
+Section 3 — Surgical Changes        WEAK
+Section 4 — Goal-Driven Execution   MISSING
+
+Notes:
+  - Section 3 (CLAUDE.md:84) — heading present but only "be careful when editing"; needs an actionable rule (e.g. "touch only the files the request names").
+  - Section 4 — no `Goal-Driven Execution` heading or alias (`Verify`, `Loop until verified`, etc.). Recommend scaffolding.
+
+Next: scaffold section 4 with `/md-structure --scaffold`, then /lean-md.
+```
+
 ## Integration
 
 - **Partner skill:** `/lean-md` (context-engine) — trims; this skill structures. Run this first to set sections, then trim.

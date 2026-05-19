@@ -56,6 +56,27 @@ A shell snippet or natural-language task description passed verbatim to each sub
     result.json                     # {status, exit_code, stdout_tail, stderr_tail, summary}
 ```
 
+## Examples
+
+### Example 1: convention sync across 3 repos
+
+Input: `repos.txt` lists 3 paths; `prompt.txt` says "Update CLAUDE.md sections to match the canonical 4-section template; commit on a branch named `chore/claude-md-sync`."
+
+Output: `~/.forge-cross-repo/sync-2026-05-19/`
+```text
+ledger.jsonl                      # 6 lines: 3 start + 3 complete
+repo-a/result.json                # {"status":"complete","exit_code":0,"summary":"committed on chore/claude-md-sync"}
+repo-b/result.json                # {"status":"complete","exit_code":0,"summary":"already canonical, no commit"}
+repo-c/result.json                # {"status":"complete","exit_code":0,"summary":"committed on chore/claude-md-sync"}
+```
+Stdout: a 3-row summary table; verdict matrix runs via `/aggregate-results sync-2026-05-19`.
+
+### Example 2: one repo path missing
+
+Input: `repos.txt` lists 3 paths but `/home/user/code/repo-c` was renamed.
+
+Output: 2 repos complete; `repo-c/result.json` contains `{"status":"failed","exit_code":1,"stderr_tail":"path does not exist: /home/user/code/repo-c"}`. Ledger ends with one `failed` line for repo-c instead of `complete`. Exit code from `run.py` is 1 (any failure surfaces non-zero).
+
 ## Execution Checklist
 
 - [ ] repos-file has ≤5 entries (validated at startup)

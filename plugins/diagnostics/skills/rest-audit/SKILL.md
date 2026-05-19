@@ -96,6 +96,61 @@ Overall: PASS / WARN / FAIL
 Axis status = worst individual check.
 Overall = worst axis.
 
+## Examples
+
+### Example 1: healthy project
+
+Input: ledger has 12 entries in the last 7 days (no safe-mode runaway), CLAUDE.md is 142 lines, `block-destructive.sh` + `scan-secrets.sh` both registered, 4 traces collectors registered, `/lineage-audit` runs clean.
+
+Output:
+```text
+R.E.S.T. AUDIT — 2026-05-19T10:00Z
+=============================================
+Reliability    PASS
+  claude-progress.txt: 14 entries  [PASS]
+  safe-mode events last 7d: 0     [PASS]
+  Next: none
+
+Efficiency     PASS
+  CLAUDE.md size: 142 lines        [PASS]
+  Memory topics: 18                [PASS]
+  Next: none
+
+Security       PASS
+  policy-gateway present            [PASS]
+  block-destructive + scan-secrets  [PASS both]
+  policy-block events last 30d: 3   [PASS]
+  Next: none
+
+Traceability   PASS
+  traces collectors: 4              [PASS]
+  /lineage-audit: clean             [PASS]
+  Next: none
+
+Overall: PASS
+```
+
+### Example 2: Security WARN driven by no recent policy-block
+
+Input: policy-gateway present and armed, but no `policy-block` ledger entries in 30 days (plugin armed but unexercised); everything else green.
+
+Output:
+```text
+R.E.S.T. AUDIT — 2026-05-19T10:00Z
+=============================================
+Reliability    PASS
+Efficiency     PASS
+Security       WARN
+  policy-gateway present            [PASS]
+  block-destructive + scan-secrets  [PASS both]
+  policy-block events last 30d: 0   [WARN — armed, never fired]
+  Next: Run /policy-audit to confirm scanners are reaching the working tree (a 0-count could mean clean repo OR misconfigured matchers).
+
+Traceability   PASS
+
+Overall: WARN
+```
+
 ## Integration
 
 **Reads from everywhere** — this is the meta-surface:

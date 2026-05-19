@@ -96,6 +96,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | `/scope <task>` | behavioral-core | Define task boundaries and acceptance criteria |
 | `/progress-log [topic]` | long-session | Append session outcomes to `claude-progress.txt`; emits ledger entry |
 | `/session-resume` | long-session | Brief the current session from progress log + spec.md + features.json |
+| `/forward-briefing` | long-session | Re-present the last 5 progress entries with blockers reframed as open questions; preferred over raw progress on next `SessionStart` |
 | `/init-sh` | long-session | Generate executable `init.sh` so fresh sessions can bootstrap the dev env in one command |
 | `/feature-list` | long-session | Expand a plan's `## Contract` into `.claude/features.json` (testable requirements consumed by /tdd-loop and /verify) |
 | `/living-spec` | workflow | Initialize `.claude/spec.md` from the plan; after-subagent appends deltas per phase |

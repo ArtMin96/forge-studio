@@ -1,1 +1,11 @@
-{"name":"cross-repo","version":"0.1.0","description":"Parallel work across sibling repos with result aggregation"}
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "cross-repo",
+  "description": "Parallel work across sibling repos with result aggregation",
+  "version": "0.1.0",
+  "keywords": [
+    "cross-repo",
+    "harness:multi-agent",
+    "overhead:moderate"
+  ]
+}

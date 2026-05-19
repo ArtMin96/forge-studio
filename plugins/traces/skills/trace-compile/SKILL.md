@@ -79,6 +79,34 @@ Write to `~/.claude/traces/{source-name}-errors.md`.
 - Most edited file: {path} ({N} edits)
 ```
 
+## Examples
+
+### Example 1: clean session, low error rate
+
+Input: `~/.claude/traces/session-abc123.jsonl` with 84 entries (60 Bash, 18 Edit, 6 Read), 2 entries with `exit_code: 1` from pest runs.
+
+Output:
+- `~/.claude/traces/session-abc123-summary.md` (84 lines, one per event)
+- `~/.claude/traces/session-abc123-errors.md` (4 entries — 2 errors + 2 preceding context lines)
+- Quick stats report on stdout:
+  ```markdown
+  ## Trace Compilation
+  **Source:** session-abc123.jsonl
+  **Entries:** 84 (2 errors, 2.4% error rate)
+  ### Quick Stats
+  - Commands run: 60
+  - Files modified: 18
+  - Most edited file: src/auth.php (5 edits)
+  ```
+
+### Example 2: high-failure session, build error compilation
+
+Input: `~/.claude/traces/session-xyz789.jsonl` with 30 entries (12 npm/test commands), 9 entries with `exit_code != 0` or matching `Error|Exception|FATAL` in `output_preview`.
+
+Output:
+- `summary.md` (30 lines)
+- `errors.md` (18 entries — 9 errors + 9 preceding context). Each error block includes the failing command and the entry immediately before it for triage. Quick-stats reports 30% error rate. Following step: invoke `/trace-evolve` to mine failure patterns.
+
 ## Usage Pattern
 
 1. Run `/trace-compile` to generate views

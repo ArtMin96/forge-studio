@@ -65,7 +65,7 @@ change_manifest: {"type":"hook-edit","description":"...","predicted_fixes":"..."
 
 Input: agent emits on stdout: `change_manifest: {"type":"skill-add","description":"added /auto-tune-skill","predicted_fixes":"auto-tuning now available"}`
 
-Output in `.claude/evolution/change_manifest.jsonl`:
+Output: appended to `.claude/evolution/change_manifest.jsonl`:
 ```json
 {"id":"chg-1715600000-a3f8c1","iso_timestamp":"2026-05-13T09:00:00Z","session_id":"abc123","agent_type":"agents:generator","type":"skill-add","description":"added /auto-tune-skill","predicted_fixes":"auto-tuning now available"}
 ```

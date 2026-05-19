@@ -138,6 +138,8 @@ The gate is additive: a proposal that passes the gate still needs the four crite
 
 ## Examples
 
+> Examples are illustrative. `FORGE_CONTEXT_PRESSURE_THRESHOLD`, the proposal paths, and dates are stand-ins for the shape of a real proposal — they don't name a live env var or file on disk.
+
 ### Example 1: a clean pass
 
 Input:

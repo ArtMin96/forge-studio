@@ -1,6 +1,5 @@
 # Claude Code Token Optimization — Research Report
 
-Date: 2026-04-07
 Confidence: High (primarily sourced from official Anthropic docs, the Claude Code team's own engineering posts, and verified community benchmarks)
 
 ---

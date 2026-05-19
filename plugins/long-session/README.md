@@ -40,6 +40,7 @@ Three artifacts:
 | `/progress-log` | Append the current session's net outcomes to `claude-progress.txt` |
 | `/feature-list` | Expand plan contract → `features.json` |
 | `/session-resume` | Brief the current session from the long-session artifacts |
+| `/forward-briefing` | Re-present the last 5 progress entries with blockers as open questions; preferred over raw progress on next `SessionStart` |
 
 ## Hooks
 

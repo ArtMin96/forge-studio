@@ -1,6 +1,6 @@
 # Forge Studio — Harness Specification
 
-> Canonical specification of mechanical invariants and architectural primitives. Machine-readable section headers enable automated validation via `/entropy-scan`. Last updated: 2026-04-14.
+> Canonical specification of mechanical invariants and architectural primitives. Machine-readable section headers enable automated validation via `/entropy-scan`.
 
 ## Research Basis
 

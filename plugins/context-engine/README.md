@@ -49,7 +49,7 @@ Seven events, sixteen scripts.
 | `UserPromptSubmit` | `*` | track-context-pressure | Sample token pressure each turn; flag thresholds |
 | `UserPromptSubmit` | `*` | track-system-reminders | Track cumulative system-reminder weight |
 | `UserPromptSubmit` | `*` | task-guardian | Re-anchor the active task; warn on drift |
-| `TaskCreated` | `*` | task-guardian-log | Record new task to the task-guardian log |
+| `TaskCreated`¹ | `*` | task-guardian-log | Record new task to the task-guardian log |
 | `PostToolUse` | `Read` | check-large-file | Flag oversized file reads |
 | `PostToolUse` | `Bash\|Grep` | warn-tool-truncation | Flag commands whose output will likely truncate |
 | `PostToolUse` | `Edit\|Read` | track-edits | Maintain the per-session edit history |
@@ -60,6 +60,8 @@ Seven events, sixteen scripts.
 | `PreCompact` | `*` | pre-compact-guard | Block compaction when essential context would be lost |
 | `PreCompact` | `*` | pre-compact | Emit a structured summary before compaction runs |
 | `PostCompact` | `*` | post-compact | Restore essentials and re-check the budget after compaction |
+
+¹ `TaskCreated` is an agent-teams event — only fires when `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` is set. Without that env var the hook is inert.
 
 Duplicate-read detection lives in the `token-efficiency` plugin.
 

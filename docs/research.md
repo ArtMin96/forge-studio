@@ -1,6 +1,6 @@
 # Research Findings
 
-Research backing Forge Studio's design decisions. Each finding links to a specific paper or source and maps to a concrete marketplace implementation. Last updated: 2026-04-09.
+Research backing Forge Studio's design decisions. Each finding links to a specific paper or source and maps to a concrete marketplace implementation.
 
 ---
 
