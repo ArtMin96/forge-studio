@@ -51,9 +51,9 @@ tilt:forward
 
 ## Examples
 
-**Input**: trace with many "let me try", "next step", "plan to" commands.
+Input: trace with many "let me try", "next step", "plan to" bash commands and output_preview lines.
 
-**Output**:
+Output:
 ```
 Trace: ~/.claude/traces/2026-05-12-eb66bb3d.jsonl
 Forward tokens: 84
@@ -62,9 +62,9 @@ Forward ratio: 84/120 = 0.70
 tilt:forward
 ```
 
-**Input**: trace with repeated "blocked again", "still failing", "can't" output previews.
+Input: trace with repeated "blocked again", "still failing", "can't" output_preview content.
 
-**Output**:
+Output:
 ```
 Trace: ~/.claude/traces/2026-05-10-abcd1234.jsonl
 Forward tokens: 18

@@ -96,6 +96,36 @@ For each proposal:
 - [suggested re-analysis date]
 ```
 
+## Examples
+
+Input: `~/.claude/traces/` contains summary views showing 7 sessions where Edit was called before any Read on the target file, total 14 occurrences across 5 sessions.
+
+Output:
+```markdown
+### Cluster 1: premature editing on unread files
+- **Category:** premature editing
+- **Frequency:** 14 occurrences across 5 sessions
+- **Example traces:** 2026-05-08-aa12, 2026-05-11-bb34, 2026-05-14-cc56
+- **Root cause:** Edit issued before sufficient Read of the target region
+- **Proposed change:** new `rules.d/read-before-edit.md` — "Read the target file region before issuing Edit; the Edit tool errors when state is stale anyway."
+- **Token impact:** ~45 chars/message, ~12 tokens
+- **Regression risk:** low — restates existing tool contract
+```
+
+Input: error views show `tsc --noEmit` failing 9 times across 3 sessions with "Cannot find module" after a rename refactor.
+
+Output:
+```markdown
+### Cluster 2: rename refactors leave stale imports
+- **Category:** specification compliance
+- **Frequency:** 9 occurrences across 3 sessions
+- **Example traces:** 2026-05-09-dd78, 2026-05-12-ee90, 2026-05-15-ff12
+- **Root cause:** grep-driven rename misses dynamic imports and re-exports
+- **Proposed change:** skill enhancement — add a post-rename verification step to `/skill-creator` or a new `refactor-verify` checklist invoking `tsc --noEmit` before commit.
+- **Token impact:** none (skill-local)
+- **Regression risk:** low — additive checklist
+```
+
 ## Guidelines
 
 - Minimum 3 occurrences across 2+ sessions before clustering

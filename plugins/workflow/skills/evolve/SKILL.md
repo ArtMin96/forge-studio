@@ -101,6 +101,40 @@ Snapshots:      .claude/lineage/versions/
 - Do not auto-commit file resources. Auto-commit is reserved for `env/<VAR>` numeric tweaks under `WORKFLOW_EVOLVE_AUTOCOMMIT=1` (see `/commit-proposal`).
 - Do not delete rejected proposals. They stay on disk as negative evidence — informs future rounds of `/trace-evolve`.
 
+## Examples
+
+Input: `/evolve router-tune` — `/router-tune` produces one proposal at `.claude/lineage/proposals/260519-router-threshold-v4.md`; `/assess-proposal` returns verdict `pass`; user types `y`.
+
+Output:
+
+Ledger entry appended to `.claude/lineage/ledger.jsonl`:
+```json
+{"ts":"2026-05-19T09:30:11Z","operator":"propose","resource":"env/WORKFLOW_ROUTER_CONFIDENCE_THRESHOLD","version":"v4","prev":"v3","trigger":"router-tune","evidence":".claude/lineage/proposals/260519-router-threshold-v4.md","actor":"workflow:/evolve"}
+```
+Stdout summary:
+```text
+Evolve cycle complete.
+  Proposals received:  1
+  Assessed pass:       1
+  Committed:           1
+  Rejected by user:    0
+  Failed assessment:   0
+  Skipped:             0
+```
+
+Input: `/evolve trace-evolve` — `/trace-evolve` reports zero clusters above threshold.
+
+Output:
+```text
+Evolve cycle complete.
+  Proposals received:  0
+  Assessed pass:       0
+  Committed:           0
+  Rejected by user:    0
+  Failed assessment:   0
+  Skipped:             0
+```
+
 ## Execution Checklist
 
 - [ ] Located the source proposal artifact (path or signal source)

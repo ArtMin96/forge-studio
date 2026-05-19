@@ -40,6 +40,40 @@ _<N> manifest entries, last 200 shown._
 
 Groups are sorted newest-date first. Within a date, entries are sorted newest-timestamp first. Fields `files`, `failure_pattern`, `predicted_fixes`, `risk_tasks`, `constraint_level`, and `why_this_component` are omitted from the output when they are absent or empty in the manifest entry.
 
+## Examples
+
+Input: `.claude/evolution/change_manifest.jsonl` does not exist (fresh project, no generator/reviewer pass yet).
+
+Output:
+```
+# Evolution History
+
+_No manifest yet._
+```
+
+Input: manifest has 2 entries — one on 2026-05-18 (skill-edit by generator), one on 2026-05-19 (hook-edit by reviewer).
+
+Output:
+```
+# Evolution History
+
+_2 manifest entries._
+
+## 2026-05-19
+
+### 2026-05-19T08:22:03Z — hook-edit: doom-loop moved PreToolUse
+- **id**: 4a1c-…
+- **agent**: reviewer (session: s-9f2)
+- **files**: plugins/diagnostics/hooks/doom-loop.sh
+
+## 2026-05-18
+
+### 2026-05-18T14:11:09Z — skill-edit: added Input/Output pairs
+- **id**: 7bd2-…
+- **agent**: generator (session: s-9f1)
+- **files**: plugins/traces/skills/trace-evolve/SKILL.md
+```
+
 ## Execution Checklist
 
 - [ ] Run `bash scripts/render.sh`

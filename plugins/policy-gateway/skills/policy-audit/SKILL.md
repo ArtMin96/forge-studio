@@ -54,6 +54,43 @@ Recommendations:
   - Add .env.backup to .gitignore
 ```
 
+## Examples
+
+Input: `.claude/lineage/ledger.jsonl` contains 3 `policy-block` entries (2 `secret-detected:aws-access-key`, 1 injection-rule match from `rules.d/injection.txt:5`) and 8 `sensitive-op-audit` entries. Live scan finds 1 match in `src/config.php:42` and 1 in `.env.backup:8`.
+
+Output:
+```text
+POLICY AUDIT — 2026-05-19T09:42:11Z
+=============================================
+
+Ledger (last 30 days):
+  secret-detected:aws-access-key  ×2
+  pattern:system-prompt-override  ×1
+  sensitive-op-audit  ×8  (distinct files: 5)
+
+Live scan:
+  src/config.php:42   aws-access-key
+  .env.backup:8       api-key-sk
+
+Recommendations:
+  - Rotate the 2 secrets found in the working tree
+  - Add .env.backup to .gitignore
+```
+
+Input: fresh project — no `.claude/lineage/ledger.jsonl`, working tree clean.
+
+Output:
+```text
+POLICY AUDIT — 2026-05-19T09:42:11Z
+=============================================
+
+Ledger (last 30 days):
+  no blocks recorded
+
+Live scan:
+  (no matches)
+```
+
 ## Integration
 
 - **Readers:** `/rest-audit` Security axis invokes this skill for deep dive.

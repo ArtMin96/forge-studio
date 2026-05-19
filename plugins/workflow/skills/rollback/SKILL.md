@@ -73,6 +73,25 @@ The report hints at the re-roll-forward path: the user can `/rollback` back to t
 - Do not roll back to a version that has no snapshot file — the `v0` state (original shipped file) is not automatically snapshotted. Use git for pre-evolution history.
 - Do not rollback batch. One resource per call.
 
+## Examples
+
+Input: `/rollback skills/workflow/router-tune v2` — current is v3 with snapshot present; target v2 snapshot present.
+
+Output:
+```json
+{"ts":"2026-05-19T09:14:22Z","operator":"rollback","resource":"skills/workflow/router-tune","version":"v2","prev":"v3","trigger":"user","evidence":".claude/lineage/versions/skills/workflow/router-tune/v2","actor":"workflow:/rollback"}
+```
+```text
+Rolled back skills/workflow/router-tune v3 → v2. Forward version snapshot saved: /rollback skills/workflow/router-tune v3
+```
+
+Input: `/rollback rules.d/read-before-edit v1` — ledger has no `commit` entry for this resource.
+
+Output:
+```text
+nothing to roll back: no commit entry found for rules.d/read-before-edit
+```
+
 ## Execution Checklist
 
 - [ ] Read the resource slug and target version from arguments

@@ -99,6 +99,43 @@ router-tune: <N> proposals written to .claude/lineage/proposals/
 Next: /evolve router-tune
 ```
 
+## Examples
+
+Input: `/tmp/claude-router-*/classifications.jsonl` aggregated to 247 entries across 8 sessions. 18 cases where router emitted `route=single-agent confidence=0.68` and user invoked `/orchestrate pipeline` within 3 turns.
+
+Output:
+
+Proposal artifact `.claude/lineage/proposals/260519-router-threshold-v4.md`:
+```markdown
+# Proposal: Lower router confidence threshold
+
+**Resource:** env/WORKFLOW_ROUTER_CONFIDENCE_THRESHOLD
+**Current version:** v3 (value: 0.75)
+**Target version:** v4 (value: 0.70)
+
+## Rationale
+
+Detected 18 miss-fires across 8 sessions where shell confidence
+landed in 0.60–0.75 and user overrode via /orchestrate. Pattern:
+single-agent → pipeline, e.g. "refactor the billing module".
+
+## Proposed change
+
+Change env.WORKFLOW_ROUTER_CONFIDENCE_THRESHOLD: 0.75 → 0.70 (in .claude/settings.json).
+```
+Stdout:
+```text
+router-tune: 1 proposals written to .claude/lineage/proposals/
+Next: /evolve router-tune
+```
+
+Input: `/tmp/claude-router-*/classifications.jsonl` has only 42 entries.
+
+Output:
+```text
+router-tune: insufficient data (42 classifications, need ≥100 across ≥5 sessions). Run more sessions or wait.
+```
+
 ## Do NOT
 
 - Do not write ledger entries directly — that's `/evolve`'s job.

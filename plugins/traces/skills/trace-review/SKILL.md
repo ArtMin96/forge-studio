@@ -52,3 +52,47 @@ Analyze execution traces stored in `~/.claude/traces/` to identify patterns acro
 ### Recommendations
 - [actionable suggestion based on patterns]
 ```
+
+## Examples
+
+Input: 5 most-recent JSONL files in `~/.claude/traces/` containing 23 bash entries with `exit_code != 0` for `npm test` and 11 file entries touching `src/auth/middleware.ts`.
+
+Output:
+```markdown
+## Trace Review (last 5 sessions)
+
+### Recurring Failures
+- `npm test` exit 1: 23 occurrences across 4 sessions — same assertion failure in auth.test.ts
+
+### File Hotspots
+- src/auth/middleware.ts: modified 11 times (consider: missing test for session-timeout branch)
+
+### Session Health Trend
+- Avg error rate: 18%
+- Avg commands/session: 47
+- Trend: degrading
+
+### Recommendations
+- Add an assertion-level test for the session-timeout branch before further edits to middleware.ts
+```
+
+Input: traces show low error rate but `rg` and `grep` commands repeated 6+ times per session against the same paths with empty output.
+
+Output:
+```markdown
+## Trace Review (last 5 sessions)
+
+### Recurring Failures
+- (none above threshold)
+
+### File Hotspots
+- (no file modified ≥3 times)
+
+### Session Health Trend
+- Avg error rate: 3%
+- Avg commands/session: 62
+- Trend: stable
+
+### Recommendations
+- Wasted-turn pattern: 6+ near-duplicate rg/grep queries per session. Vary search terms or consult `semantic_search_nodes_tool` first.
+```

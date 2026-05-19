@@ -49,6 +49,54 @@ The script is deterministic: for a given manifest file the output is identical a
 - [ ] Run with `--include-archive` if ledger rotation has moved older entries to `.claude/evolution/archive/`
 - [ ] Pipe through `head -40` for a quick preview of the top sections
 
+## Examples
+
+Input: `.claude/evolution/change_manifest.jsonl` is empty or missing.
+
+Output:
+```
+# Manifest Analysis
+
+_No entries._
+```
+
+Input: `.claude/evolution/change_manifest.jsonl` contains 12 entries, 8 with `failure_pattern: premature-edit`, 4 with `failure_pattern: stale-import`, all `constraint_level: soft`, across 3 sessions.
+
+Output:
+```
+# Manifest Analysis
+
+## Volume
+
+| Metric | Value |
+|--------|-------|
+| Total entries | 12 |
+| Oldest | 2026-05-10T09:01:14Z |
+| Newest | 2026-05-19T08:22:03Z |
+| Distinct sessions | 3 |
+
+## Failure-Pattern Frequency
+
+| Rank | Failure pattern | Count |
+|------|----------------|-------|
+| 1 | premature-edit | 8 |
+| 2 | stale-import | 4 |
+
+## Risk-Task Frequency
+
+_No `risk_tasks` values recorded._
+
+## Constraint-Level Distribution
+
+| Constraint level | Count |
+|-----------------|-------|
+| soft | 12 |
+
+## Why-This-Component Clusters
+
+_No `why_this_component` values recorded._
+```
+
 ## Known Failure Modes
 
 - If all entries lack `failure_pattern`, that section shows an empty table rather than an error.

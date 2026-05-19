@@ -66,6 +66,31 @@ One line:
 Reflect: <topic-slug> (<new|updated|skipped-duplicate>)
 ```
 
+## Examples
+
+Input: `.claude/plans/s7-stability-and-docs-refresh.md` has a `## Contract` section, `git diff HEAD~1 HEAD --stat` shows 35 files changed, traces summary records green test run.
+
+Output:
+
+Hand-off to `/remember`:
+```text
+Worked:     count-drift contract held; install.sh + plugin descriptors + docs all agree with count.sh after sweep
+Surprised:  doom-loop.sh exit-2 was dead code under PostToolUse; required event move, not just code change
+Watch:      five PostToolUse logging hooks gained async:true — silent failure if async runner regresses
+Source:     .claude/plans/s7-stability-and-docs-refresh.md
+```
+Stdout:
+```text
+Reflect: sprint-260519-s7-stability-and-docs-refresh (new)
+```
+
+Input: plan has no `## Contract` section.
+
+Output:
+```text
+Reflect: skipped — no contract to reflect against
+```
+
 ## When To Skip
 
 - Sprint had no `## Contract` section.

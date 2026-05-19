@@ -72,6 +72,28 @@ Router:   pipeline:5 single-agent:3 tdd-loop:2
 
 Silent on empty sections — no `None` spam.
 
+## Examples
+
+Input: active plan `refactor-billing.md` is 2 days old with 3/7 boxes checked; `claude-progress.txt` was last touched 2 days ago; newest trace JSONL has 42 events; `CLAUDE_CONTEXT_WINDOW_USED_PCT=58`; router log shows 5 pipeline, 3 single-agent, 2 tdd-loop classifications.
+
+Output:
+```text
+Plan:     refactor-billing.md (2d old, 3/7 done)
+Progress: claude-progress.txt (2d ago) — /session-resume to load
+Traces:   42 events, last: Bash grep "Subscription"
+Pressure: 58% (Moderate) — consider /compact
+Router:   pipeline:5 single-agent:3 tdd-loop:2
+```
+
+Input: no active plan, no progress file, no traces, no env pressure var, no router log.
+
+Output:
+```text
+No active plan.
+No progress recorded.
+Pressure: unknown
+```
+
 ## Do NOT
 
 - Do not create any files
