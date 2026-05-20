@@ -123,6 +123,10 @@ git add claude-progress.txt && git commit -m "session: progress"
 
 Paper §4.5 + Appendix Table 13 prove that at *fixed* context length, swapping accumulated negative content for forward-framed content restores cooperative behaviour. The skill applies the same content-shift idea to dev-session resume content. The mechanism is the transferable bit — the cooperation-game framing is not.
 
+### Structured briefing as compaction mitigation
+
+The `/forward-briefing` skill addresses tone. A separate mechanism — the `forward-briefing.sh` PreCompact hook — addresses *state reconstruction*. arXiv:2605.18747 §3.2.6 shows that bare prose summaries at compaction boundaries silently drop the highest-signal items (failing test names, stack frames, suspect file:line references). The hook emits a YAML document with four structured fields (`open_failures`, `recent_edits`, `pending_verifications`, `belief_snapshots`) written to `.claude/state/forward-briefing-<session-id>.yaml`. The companion `post-compact-recovery.sh` PostCompact hook reads that file and re-injects it as the first model-visible turn, giving the post-compact session concrete data instead of prose narration. Rule 65 addresses a different mechanism — it suppresses deliberation that would amplify failure context already in the window; the structured briefing addresses what data enters the window in the first place. Both are necessary because the tone-of-content problem (Rule 65) and the state-loss problem (structured briefing) are orthogonal failure modes. See [`docs/compaction-briefing.md`](compaction-briefing.md) for the full user guide.
+
 ---
 
 ## Rule 65 — Deliberation Suppression

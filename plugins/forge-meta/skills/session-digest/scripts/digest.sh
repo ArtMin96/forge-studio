@@ -167,6 +167,33 @@ def section_decision(entries):
         lines.append("**Constraint levels**: " + ", ".join(f"{k}: {v}" for k, v in sorted(ctr.items())))
         lines.append("")
 
+    # Assumptions count — aggregate from all entries with assumptions lists
+    total_assumptions = 0
+    for e in entries:
+        a = e.get("assumptions", [])
+        if isinstance(a, list):
+            total_assumptions += len(a)
+        elif a:
+            total_assumptions += 1
+    if total_assumptions > 0:
+        lines.append(f"**Total assumptions declared: {total_assumptions}**")
+        lines.append("")
+
+    # Remaining risks — surface any non-empty lists verbatim (high signal for follow-up)
+    all_remaining = []
+    for e in entries:
+        bundle = e.get("evidence_bundle") or {}
+        remaining = bundle.get("remaining_risks", [])
+        if isinstance(remaining, list):
+            all_remaining.extend(remaining)
+        elif remaining:
+            all_remaining.append(remaining)
+    if all_remaining:
+        lines.append("**Remaining risks**:")
+        for r in all_remaining:
+            lines.append(f"- {r}")
+        lines.append("")
+
     return "\n".join(lines)
 
 # --- Assemble full document ---

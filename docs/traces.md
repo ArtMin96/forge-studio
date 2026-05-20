@@ -200,9 +200,74 @@ Traces create a **feedback loop** that closes the gap between static harness con
 
 Without traces, harness improvements are reactive — you notice a problem, you manually debug, you add a rule. With traces, improvements are **systematic** — failure patterns emerge from data, not anecdotes.
 
+## Failure Attribution
+
+When a regression surfaces — a test that passed last week fails today, or behavior changed without an obvious cause — the key question is: *which change introduced it?*
+
+With the v2 manifest schema (arXiv:2605.18747 §5.2.4), every manifest entry declares `verifier_obligations`: shell commands that must exit 0 to confirm the change held up. Attribution becomes mechanical: walk recent entries in reverse-chronological order, re-run each entry's verifier obligations, and the first one that fails today (but passed at write-time) is the primary suspect.
+
+arXiv:2605.18747 §3.5.2 describes this as the Evolution Agent's *diagnose stage*. §5.1.1 reports that production attribution accuracy under naive approaches (Who&When, AgenTracer baselines) sits at only 14–53%; structured verifier replay closes that gap substantially.
+
+### End-to-end example
+
+A regression is reported today. The last 5 manifest entries are:
+
+```
+chg-AAA  2026-05-14  agent:generator  verifier: python3 -c "..."    evidence: checks_run: [json-parse]
+chg-BBB  2026-05-15  agent:generator  verifier: test -f plugins/x/SKILL.md  evidence: checks_run: [hook-exit]
+chg-CCC  2026-05-16  agent:generator  (no evidence_bundle)
+chg-DDD  2026-05-17  agent:generator  verifier: bash count.sh . | grep ...  evidence: checks_run: [count-check]
+chg-EEE  2026-05-18  agent:generator  verifier: test -f README.md            evidence: checks_run: [smoke]
+```
+
+`/failure-attribute` walks them newest-first:
+
+1. `chg-EEE` — evidence non-empty; verifier passes → skip
+2. `chg-DDD` — evidence non-empty; verifier passes → skip
+3. `chg-CCC` — **no evidence_bundle** → flagged priority 1 (suspect-by-default), reason: `no_evidence`
+4. `chg-BBB` — evidence non-empty; `test -f plugins/x/SKILL.md` fails (file was renamed) → flagged priority 2, reason: `verifier_failed`
+5. `chg-AAA` — evidence non-empty; verifier passes → skip
+
+**Primary suspect**: `chg-CCC` (priority 1 outranks priority 2). The missing evidence is itself the signal — entries with no declared checks are the highest-risk candidates.
+
+```bash
+bash plugins/traces/skills/failure-attribute/scripts/attribute.sh \
+  .claude/evolution/change_manifest.jsonl 20
+```
+
+Output excerpt:
+```json
+{
+  "primary_suspect": {
+    "id": "chg-CCC",
+    "agent": "generator",
+    "ts": "2026-05-16T09:00:00Z",
+    "reason": "no_evidence",
+    "priority": 1
+  }
+}
+```
+
+### Empty-evidence predicate
+
+Entries are flagged suspect-by-default — priority above any verifier-failure — when:
+
+| Shape | Flagged |
+|-------|---------|
+| `evidence_bundle` key absent | yes |
+| `evidence_bundle: null` | yes |
+| `evidence_bundle: {}` | yes |
+| `evidence_bundle.checks_run` absent, null, or `[]` | yes |
+
+The rationale: an entry that made no checkable claim provides no basis for clearing itself. Flagging it forces the engineer to either add evidence retroactively or accept it as the most likely suspect.
+
+### Integration with `/rollback`
+
+`/rollback` runs `/failure-attribute` before asking which version to revert. If a `primary_suspect` is found, it is shown as the suggested rollback target. The user confirms or overrides.
+
 ## Token Cost
 
-**Zero.** Trace hooks write to files, not to the model's context window. The only token cost comes from invoking the analysis skills (`/trace-stats`, `/trace-review`, `/trace-evolve`), and those are on-demand.
+**Zero.** Trace hooks write to files, not to the model's context window. The only token cost comes from invoking the analysis skills (`/trace-stats`, `/trace-review`, `/trace-evolve`, `/failure-attribute`), and those are on-demand.
 
 ## Configuration
 

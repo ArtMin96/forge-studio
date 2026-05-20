@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-19 plugins. 76 skills. 69 hooks. 4 agents. 14 behavioral rules.
+19 plugins. 80 skills. 74 hooks. 4 agents. 14 behavioral rules.
 
 ---
 
@@ -65,14 +65,14 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | Plugin | Purpose | Hooks | Skills |
 |--------|---------|-------|--------|
 | [**behavioral-core**](plugins/behavioral-core/README.md) | Modular `rules.d/` steering, destructive command blocking, safe-mode layer (gated by `.claude/safe-mode`), scope discipline | 5 | 4 |
-| [**context-engine**](plugins/context-engine/README.md) | Context management: progressive pressure, edit safety, environment bootstrap, compaction recovery, task tracking, failure escalation, safe-mode trigger | 16 | 5 |
+| [**context-engine**](plugins/context-engine/README.md) | Context management: progressive pressure, edit safety, environment bootstrap, compaction recovery, task tracking, failure escalation, safe-mode trigger, belief-state drift detection | 21 | 6 |
 | [**long-session**](plugins/long-session/README.md) | Long-running sessions: `init.sh` bootstrap, append-only `claude-progress.txt`, `features.json` testable requirements, `surface-progress` SessionStart hook, `/session-resume` briefing. | 4 | 5 |
 | [**memory**](plugins/memory/README.md) | Three-tier memory: pointer index → topic files → searchable transcripts, version-aware updates, ledger audit | 1 | 4 |
 | [**evaluator**](plugins/evaluator/README.md) | Static analysis gates (PHP/JS/TS), adversarial review, verification (+features.json execution), reference-fidelity check, test nudge, self-evolution assessment, prediction audit, rubric scoring | 8 | 14 |
-| [**workflow**](plugins/workflow/README.md) | Hook-driven agentic orchestrator: advisory routing (recommends `/orchestrate` / `/tdd-loop` / `/fan-out` per prompt), sprint-contract, TDD, /progress-log nudges, self-evolution loop, **/living-spec** (auto-updating spec via after-subagent) | 5 | 10 |
+| [**workflow**](plugins/workflow/README.md) | Hook-driven agentic orchestrator: advisory routing (recommends `/orchestrate` / `/tdd-loop` / `/fan-out` per prompt), sprint-contract, TDD, /progress-log nudges, self-evolution loop, **/living-spec** (auto-updating spec via after-subagent) | 5 | 11 |
 | [**agents**](plugins/agents/README.md) | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries, worktree-team orchestration, directory-ownership + output-schema checks | 4 | 5 |
 | [**reference**](plugins/reference/README.md) | Hidden Claude Code features: thinking modes, parallel patterns, CLI piping | 0 | 3 |
-| [**traces**](plugins/traces/README.md) | JSONL execution traces, compiled views, failure mining, harness evolution | 6 | 6 |
+| [**traces**](plugins/traces/README.md) | JSONL execution traces, compiled views, failure mining, failure attribution, harness evolution | 6 | 7 |
 | [**diagnostics**](plugins/diagnostics/README.md) | `/entropy-scan` + `/validate-marketplace` + `/docs-maintenance` + **`/rest-audit`** (R.E.S.T. outcomes) + **`/md-structure`** (Karpathy 4-section audit) + **`/ssl-audit`** (SSL frontmatter coverage) + `/policies-list` + `/startup-profile` | 1 | 8 |
 | [**caveman**](plugins/caveman/README.md) | Always-on compressed output (~65% token savings). Survives compaction. | 2 | 1 |
 | [**token-efficiency**](plugins/token-efficiency/README.md) | Duplicate read detection, session token audit | 1 | 1 |
@@ -82,7 +82,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | [**code-graph**](plugins/code-graph/README.md) | Auto-installs [tirth8205/code-review-graph](https://github.com/tirth8205/code-review-graph). Registers a Tree-sitter MCP graph per repo so Claude Code queries structural context instead of re-reading files. Claude Code only. Opt-out: `FORGE_CODE_GRAPH_DISABLED=1`. | 3 | 0 |
 | [**themes**](plugins/themes/README.md) | Curated color themes for `/theme`: **Catppuccin Mocha**, **Tokyo Night**, **Nord**. Switch via `/theme`; `Ctrl+E` forks any theme into `~/.claude/themes/` for editing. Pure cosmetic — zero hooks. | 0 | 0 |
 | [**cross-repo**](plugins/cross-repo/README.md) | Parallel work across sibling repos: `/federated-fan-out` (per-repo subagents), `/sync-discovery` (pattern comparison across two repos), `/aggregate-results` (verdict matrix from fan-out run) | 0 | 3 |
-| [**forge-meta**](plugins/forge-meta/README.md) | Self-evolution boundary: change-manifest writer, evolution-history ledger, session-digest, auto-tune-skill outer loop, manifest-analyze reporter, skill-staleness-audit (read-only scoring → auto-tune candidate selector), controllability invariant (POLICY.md) | 3 | 6 |
+| [**forge-meta**](plugins/forge-meta/README.md) | Self-evolution boundary: change-manifest writer, evolution-history ledger, session-digest, auto-tune-skill outer loop, manifest-analyze reporter, skill-staleness-audit (read-only scoring → auto-tune candidate selector), harness-metrics scorecard, controllability invariant (POLICY.md) | 3 | 7 |
 
 ### Key Skills
 
@@ -93,6 +93,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | `/status` | workflow | Snapshot of plan, handoff, traces, context pressure, router stats |
 | `/verify` | evaluator | Evidence-based completion check before claiming done |
 | `/verify-refs` | evaluator | Cross-check file paths, symbols, URLs in prior turn against the repo; advisory warning on fabricated references |
+| `/convergence-check` | workflow | Helper (called by /verify and /status): evaluate a plan's declared convergence criterion; exits 0 met, 1 unmet, 2 no block, 3 not found |
 | `/scope <task>` | behavioral-core | Define task boundaries and acceptance criteria |
 | `/progress-log [topic]` | long-session | Append session outcomes to `claude-progress.txt`; emits ledger entry |
 | `/session-resume` | long-session | Brief the current session from progress log + spec.md + features.json |
@@ -111,6 +112,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | `/trace-clarification` | traces | Compute pre-clarification action ratio per session from JSONL traces |
 | `/healthcheck` | evaluator | Run quality pipeline (Pint + Larastan + optional tests) |
 | `/audit-context` | context-engine | Analyze token overhead from CLAUDE.md, plugins, MCP servers |
+| `/belief-audit [N]` | context-engine | Diff disk against last sha256 snapshot for N most-recently-edited files; surfaces belief-state drift after compaction or long absence |
 | `/entropy-scan` | diagnostics | Full 6-check codebase health scan |
 | `/validate-marketplace` | diagnostics | Pre-commit validator: marketplace JSON, SKILL.md schema (2026 fields), hook exec, agent preload coherence, skill size |
 | `/docs-maintenance [mode]` | diagnostics | Project docs QA: audit freshness, validate links/images, enforce style, optimize structure. Modes: `--audit`, `--validate`, `--optimize`, `--update`, `--comprehensive` |
@@ -120,6 +122,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | `/assess-proposal` | evaluator | Adversarial 4-criteria review of a self-evolution proposal |
 | `/commit-proposal` | workflow | Apply an approved proposal; snapshot prior version to `.claude/lineage/` |
 | `/rollback` | workflow | Reverse a commit; restore prior snapshot; logged append-only |
+| `/failure-attribute [N]` | traces | Walk last N manifest entries (default 20), re-run verifier obligations, surface the primary suspect that introduced a regression |
 | `/reflect` | workflow | Three-line Reflect-Memorize insight after TDD loop → memory |
 | `/router-tune` | workflow | Analyze router miss-fires, emit threshold/regex proposals |
 | `/score-rubric` | evaluator | Aggregate weighted criterion scores into a single rubric result; outputs match `result.schema.json` |
@@ -129,6 +132,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | `/evolution-history` | forge-meta | Render the change manifest as a reverse-chronological Markdown timeline (newest first, up to 200 entries) grouped by date |
 | `/session-digest` | forge-meta | Produce a ≤10KB per-session rollup at `.claude/sessions/<id>-digest.md` with Component/Experience/Decision sections. Also fires automatically on SessionEnd |
 | `/auto-tune-skill <plugin>:<skill>` | forge-meta | Produce a baseline proposal for a skill at `.claude/proposals/`. The autonomous Pareto-outer-loop is future work; current mode emits the original SKILL.md as a starting candidate for human review |
+| `/harness-metrics` | forge-meta | Compute six harness-level quality dimensions (trajectory_efficiency, verification_strength, recovery_ability, state_consistency, safety_compliance, replayability) from existing artifacts; render Markdown table and write `.claude/metrics/<date>.json` |
 
 ### Agents
 
@@ -143,11 +147,11 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 
 ## Active Hooks
 
-Hooks fire automatically. No commands needed. 69 hook command registrations across 16 plugins, spanning all major events:
+Hooks fire automatically. No commands needed. 74 hook command registrations across 16 plugins, spanning all major events:
 
-- **Session lifecycle** — `SessionStart` (11 hooks), `SessionEnd` (2), `PreCompact` (3), `PostCompact` (2)
+- **Session lifecycle** — `SessionStart` (11 hooks), `SessionEnd` (2), `PreCompact` (4), `PostCompact` (4)
 - **Per-turn** — `UserPromptSubmit` (7 hooks), `Stop`, `StopFailure`
-- **Tool execution** — `PreToolUse` (11 deny-chain hooks), `PostToolUse` (21), `PostToolUseFailure` (2)
+- **Tool execution** — `PreToolUse` (13 deny-chain hooks), `PostToolUse` (21), `PostToolUseFailure` (2)
 - **Agent / Task** — `SubagentStart` (1), `SubagentStop` (5), `TaskCreated`, `TaskCompleted`
 
 For the full event-by-event table — every hook, matcher, plugin, and behavior — see [`HARNESS_SPEC.md` §Hook Events Reference](HARNESS_SPEC.md#hook-events-reference). Architectural framing in [`docs/architecture.md`](docs/architecture.md).
@@ -189,3 +193,9 @@ For the full event-by-event table — every hook, matcher, plugin, and behavior 
 | [Code Graph](docs/code-graph.md) | Auto-bundled tirth8205/code-review-graph: MCP registration, Tree-sitter graph, update cadence |
 | [Agentic Workflow](docs/agentic-workflow.md) | Workflow plugin usage, configuration, skills, worked examples |
 | [Workflow Lifecycle](plugins/workflow/LIFECYCLE.md) | Event → hook → composed-plugin map |
+| [Transactional Manifest](docs/transactional-manifest.md) | Contributor guide: writing change-manifest entries with read_set, assumptions, evidence_bundle |
+| [Belief Audit](docs/belief-audit.md) | Belief-state drift detection: sha256 snapshots, /belief-audit usage, when belief drifts from disk |
+| [Convergence Criteria](docs/convergence.md) | Six convergence types, /verify refusal flow, when implicit is fine vs dangerous |
+| [Harness Metrics](docs/harness-metrics.md) | Six harness quality dimensions: formulas, source artifacts, expected ranges, and how to improve each score |
+| [Compaction Briefing](docs/compaction-briefing.md) | What survives compaction (4 structured fields), what is lost, how to manually trigger, when briefing fails |
+| [Code as Harness](docs/code-as-harness.md) | Decision table, architecture diagram, and try-it commands for the eight S8 capabilities (belief-audit, metrics, convergence, failure-attribution, change-contract, adaptive pool, compaction briefing) |

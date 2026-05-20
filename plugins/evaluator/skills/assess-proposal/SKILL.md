@@ -39,6 +39,39 @@ A proposal artifact contains:
 4. Rationale + trigger source
 5. Expected token / behavior impact
 
+## Contract Check (runs before all other criteria)
+
+Before scoring any criterion, verify that the proposal contains a `change_contract:` block. This check applies to all proposals — including those produced by `/auto-tune-skill`. The rationale: a missing `falsifiable_by` means there is no agreed test to confirm the change works, which makes safe rollback guesswork rather than procedure.
+
+**How to check**: read the proposal file and search for the literal string `change_contract:`. If absent, stop immediately and emit a refusal verdict. Do not proceed to the four criteria.
+
+**What constitutes a valid contract block**: the `change_contract:` block must contain all six required fields, each non-empty:
+
+| Field | Acceptance rule |
+|---|---|
+| `component` | Non-empty string |
+| `failure_mode_targeted` | Non-empty string |
+| `predicted_improvement` | Non-empty string |
+| `invariants_preserved` | List with at least one entry |
+| `falsifiable_by` | Non-empty string containing a verb token: `bash`, `python3`, `python`, `grep`, `test`, or `jq` |
+| `rollback_steps` | List with at least one entry |
+
+The `falsifiable_by` verb-token heuristic catches free-form descriptions masquerading as shell commands. If `falsifiable_by` reads `"see above"` or `"manual inspection"` it fails this check.
+
+**Refusal format**: the verdict `fail` with a `blockers` entry that quotes the missing field name verbatim, so the author knows exactly what to fix:
+
+```json
+{
+  "verdict": "fail",
+  "blockers": ["change_contract: block missing — required field not found in proposal"],
+  "rationale": "Proposal does not include a change_contract block. The missing field is: change_contract. ..."
+}
+```
+
+If the block exists but a field is missing, name the field verbatim — e.g. `"falsifiable_by: field is absent or empty"`.
+
+Do NOT skip the contract check just because the proposal looks reasonable — a missing `falsifiable_by` means the change cannot be verified or undone safely. Refuse and let the user revise.
+
 ## The Four Criteria
 
 Assess the proposal against each. All four must pass for verdict `pass`. Any fail → verdict `fail`. Mixed signal with a cleanup path → verdict `conditional` (document what needs to change).
@@ -84,6 +117,8 @@ Any contradiction → fail the criterion with the conflicting file path cited.
 ## Execution Checklist
 
 - [ ] Load the proposal artifact (`$ARGUMENTS` or most-recent under `.claude/lineage/proposals/`); confirm the five sections (target, current, proposed, rationale, impact)
+- [ ] Contract check: search proposal for `change_contract:` — if absent, emit fail verdict with blocker `"change_contract: block missing — required field not found in proposal"` and stop; do not proceed to criteria
+- [ ] If contract block present: verify all six fields are non-empty; for `invariants_preserved` and `rollback_steps` verify list has at least one entry; for `falsifiable_by` verify it contains `bash`, `python3`, `python`, `grep`, `test`, or `jq`; if any field fails, emit fail verdict with the field name quoted verbatim in blockers
 - [ ] Criterion 1 — Single-Variable Change: reject if the proposal changes more than one resource/dimension
 - [ ] Criterion 2 — Addresses Root Cause: reject when the proposal patches the symptom instead of the underlying mechanism
 - [ ] Criterion 3 — Honest Impact: verify the token/behavior estimate (or the structured-prediction fields when present); fail if missing or off by an order of magnitude
@@ -148,7 +183,47 @@ The gate is additive: a proposal that passes the gate still needs the four crite
 
 ## Examples
 
-> Examples are illustrative. `FORGE_CONTEXT_PRESSURE_THRESHOLD`, the proposal paths, and dates are stand-ins for the shape of a real proposal — they don't name a live env var or file on disk.
+> Examples are illustrative. Proposal paths and dates are stand-ins for the shape of real proposals — they don't name a live env var or file on disk.
+
+### Example A: contract check passes, assessment passes
+
+Input: `.claude/proposals/memory-recall-20260514T090000Z.md` contains a valid `## Change Contract` section with all six fields plus a clear single-variable change to `plugins/memory/skills/recall/SKILL.md`.
+
+Output:
+```json
+{
+  "proposal": ".claude/proposals/memory-recall-20260514T090000Z.md",
+  "verdict": "pass",
+  "criteria": {
+    "contract_present": true,
+    "single_variable": true,
+    "root_cause": true,
+    "honest_impact": true,
+    "no_regression": true
+  },
+  "rationale": "Contract block present with all six required fields; falsifiable_by is a literal bash command. Single-skill body change, addresses root cause (stale topic after session restore), impact estimate reasonable, no neighbor conflicts.",
+  "blockers": []
+}
+```
+
+### Example B: contract check fails — missing change_contract block
+
+Input: `.claude/proposals/memory-recall-20260514T090001Z.md` — a proposal without a `## Change Contract` section.
+
+Output:
+```json
+{
+  "proposal": ".claude/proposals/memory-recall-20260514T090001Z.md",
+  "verdict": "fail",
+  "criteria": {
+    "contract_present": false
+  },
+  "rationale": "Proposal does not include a change_contract block. The missing field is: change_contract. Add a ## Change Contract section with all six required fields (component, failure_mode_targeted, predicted_improvement, invariants_preserved, falsifiable_by, rollback_steps) before re-submitting.",
+  "blockers": ["change_contract: block missing — required field not found in proposal"]
+}
+```
+
+Assessment stopped after the contract check — no further criteria evaluated.
 
 ### Example 1: a clean pass
 

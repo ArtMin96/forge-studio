@@ -85,6 +85,26 @@ Read the proposal's `Proposed value` (or `Diff`) section. For file resources, us
 {"ts":"<UTC>","operator":"commit","resource":"<slug>","version":"<target>","prev":"<prev>","trigger":"proposal:<basename>","evidence":"<proposal-path>","actor":"workflow:/commit-proposal"}
 ```
 
+### Step 5b — Write contract to change manifest
+
+After appending the ledger entry, copy the `change_contract:` block from the proposal into the change manifest. This makes the contract durable in `.claude/evolution/change_manifest.jsonl` for later attribution — the manifest entry becomes the authoritative record of why the change was made, what it was supposed to improve, and how to verify it.
+
+Extract the YAML contract block from the proposal (the content under `## Change Contract`) and pass it as `MANIFEST_CONTRACT_YAML`. The manifest writer embeds it under `evidence_bundle.contract`:
+
+```bash
+# Extract the change_contract YAML from the proposal
+CONTRACT_YAML=$(awk '/^change_contract:/,/^[^ ]/' <proposal-path> | head -n -1)
+
+MANIFEST_CONTRACT_YAML="$CONTRACT_YAML" \
+  MANIFEST_CHECKS_RUN="sepl-commit" \
+  MANIFEST_ROLLBACK_HANDLE="git revert HEAD" \
+  bash plugins/forge-meta/skills/change-manifest/scripts/manifest-writer.sh \
+    "workflow:/commit-proposal" \
+    "commit <resource> <prev> → <target>"
+```
+
+If `MANIFEST_CONTRACT_YAML` is empty (the proposal had no contract block), write the manifest entry anyway but omit `evidence_bundle.contract` — the missing contract was the author's responsibility, already checked by `/assess-proposal`.
+
 ### Step 6 — Report
 
 One line:
@@ -119,7 +139,9 @@ If `WORKFLOW_EVOLVE_AUTOCOMMIT=1` AND `resource` starts with `env/` AND the prop
 - [ ] Snapshotted the prior content to `.claude/lineage/versions/<slug>/<prev-version>`
 - [ ] Wrote new content to the resource's actual path
 - [ ] Appended a `commit` ledger entry with the proposal path as `evidence`
-- [ ] Verified post-conditions: snapshot file exists, ledger entry parses, target file matches the proposal
+- [ ] Extracted `change_contract:` YAML from the proposal and set `MANIFEST_CONTRACT_YAML`
+- [ ] Called `manifest-writer.sh` with `MANIFEST_CONTRACT_YAML` so the contract is recorded in `.claude/evolution/change_manifest.jsonl` under `evidence_bundle.contract`
+- [ ] Verified post-conditions: snapshot file exists, ledger entry parses, target file matches the proposal, manifest gained a line with `evidence_bundle.contract` present
 
 ## Examples
 

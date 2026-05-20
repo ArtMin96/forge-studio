@@ -34,7 +34,7 @@ The file is overwritten on each invocation (idempotent). Parent directory is cre
 |---|---|
 | **Component** | Which plugins fired — derived from `type` values in `change_manifest.jsonl` and handoff counts from `handoffs.jsonl` |
 | **Experience** | Per-task outcomes — each manifest entry for the session: type, description, files touched |
-| **Decision** | Change-manifest deltas — total entry count, aggregated `predicted_fixes` and `risk_tasks` |
+| **Decision** | Change-manifest deltas — total entry count, aggregated `predicted_fixes`, `risk_tasks`, total `assumptions` count, and any non-empty `remaining_risks` |
 
 ## Usage
 
@@ -60,6 +60,12 @@ Input: manifest exists but contains no entries for the requested session ID
 
 Output: `.claude/sessions/<id>-digest.md` with all three sections present, each showing `_no entries for this session_`.
 
+### Example 3: session with assumptions and remaining risks
+
+Input: two entries in `.claude/evolution/change_manifest.jsonl` with `session_id: "s2"`, both having `assumptions` lists and one having `evidence_bundle.remaining_risks`.
+
+Output: `.claude/sessions/s2-digest.md` — Decision section shows `**Total assumptions declared: 3**` and a list under `**Remaining risks**` with the verbatim risk text from the entry that declared it.
+
 ## Truncation
 
 If accumulated content exceeds 10240 bytes, the file is capped and ends with:
@@ -69,6 +75,21 @@ If accumulated content exceeds 10240 bytes, the file is capped and ends with:
 ```
 
 This preserves the file header and as many entries as fit. The 10KB bound keeps digests context-friendly when loaded into future sessions.
+
+## Harness Metrics Delta
+
+At the end of the digest, surface the harness scorecard for this session. Check `.claude/metrics/` for JSON files:
+
+- If two or more date-stamped files exist, compare today's values against the most recent prior file and show a delta row for each dimension (e.g., `verification_strength: 30% → 45% (+15pp)`).
+- If only one file exists, show the current values without a delta.
+- If no `.claude/metrics/` files exist, run `bash plugins/forge-meta/skills/harness-metrics/scripts/score.sh` to generate the current scorecard and include it inline.
+
+```bash
+# List available metric snapshots
+ls .claude/metrics/*.json 2>/dev/null | sort
+```
+
+The delta section appears after the Decision section as `## Harness Metrics`. Dimensions that moved by ≥5 percentage points are flagged with `(+)` or `(-)` for quick scanning.
 
 ## Known Failure Modes
 

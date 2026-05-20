@@ -58,6 +58,14 @@ stat -c '%Y %n' /tmp/claude-router-*/classifications.jsonl 2>/dev/null | sort -r
 
 If found: count of classifications by route (single-agent, pipeline, fan-out, tdd-loop, none). Gives a quick sense of what the session has actually been doing.
 
+### 6. Convergence criterion (if active plan declares one)
+
+```bash
+bash plugins/workflow/skills/convergence-check/scripts/check.sh
+```
+
+If the active plan has a `## Convergence` section (check.sh exit 0 or 1): show one line with `met: true` or `met: false — gap: <gap text>`. If no convergence block declared (exit 2): skip this section silently. This section is always read-only — it never updates plan state.
+
 ## Execution Checklist
 
 - [ ] Section 1 — resolve the active plan via `find-active-plan.sh`; report basename, age, checked/unchecked counts (or `No active plan.`)
@@ -65,10 +73,11 @@ If found: count of classifications by route (single-agent, pipeline, fan-out, td
 - [ ] Section 3 — render last 5 events from the newest `~/.claude/traces/*.jsonl` if traces plugin is active (silent if absent)
 - [ ] Section 4 — context pressure: `$CLAUDE_CONTEXT_WINDOW_USED_PCT` with stage label, else turn-gate counter, else `unknown`
 - [ ] Section 5 — router stats: count classifications by route from the newest `/tmp/claude-router-*/classifications.jsonl` (skip silently if none)
+- [ ] Section 6 — convergence: run `convergence-check/scripts/check.sh`; show `met: true` or `met: false — gap: <text>`; silent if no convergence block (exit 2)
 
 ## Output Format
 
-Six lines max. Example:
+Six lines max (seven when convergence declared). Example without convergence:
 
 ```text
 Plan:     refactor-billing.md (2d old, 3/7 done)
@@ -82,7 +91,7 @@ Silent on empty sections — no `None` spam.
 
 ## Examples
 
-Input: active plan `refactor-billing.md` is 2 days old with 3/7 boxes checked; `claude-progress.txt` was last touched 2 days ago; newest trace JSONL has 42 events; `CLAUDE_CONTEXT_WINDOW_USED_PCT=58`; router log shows 5 pipeline, 3 single-agent, 2 tdd-loop classifications.
+Input: active plan `refactor-billing.md` is 2 days old with 3/7 boxes checked; `claude-progress.txt` was last touched 2 days ago; newest trace JSONL has 42 events; `CLAUDE_CONTEXT_WINDOW_USED_PCT=58`; router log shows 5 pipeline, 3 single-agent, 2 tdd-loop classifications; plan has no convergence block.
 
 Output:
 ```text
@@ -91,6 +100,22 @@ Progress: claude-progress.txt (2d ago) — /session-resume to load
 Traces:   42 events, last: Bash grep "Subscription"
 Pressure: 58% (Moderate) — consider /compact
 Router:   pipeline:5 single-agent:3 tdd-loop:2
+```
+
+Input: active plan `s8-code-as-harness.md` with convergence `criterion: "bash plugins/diagnostics/skills/entropy-scan/scripts/count.sh . | grep '^19 plugins'"`, criterion exits 0 (met).
+
+Output:
+```text
+Plan:       s8-code-as-harness.md (0d old, 8/12 done)
+Convergence: met: true (type: hybrid)
+```
+
+Input: same plan, criterion not yet met — count.sh reports 18 plugins, expected 19.
+
+Output:
+```text
+Plan:       s8-code-as-harness.md (0d old, 6/12 done)
+Convergence: met: false — gap: criterion exited 1 — review evidence_lines above
 ```
 
 Input: no active plan, no progress file, no traces, no env pressure var, no router log.

@@ -71,6 +71,8 @@ Failure modes are safe by construction:
 
 `/rollback <slug> [version]` (workflow) reverses a commit. Snapshots the *current* version first (so a subsequent `/rollback` can roll forward), then restores the target. Rollbacks are themselves logged — the ledger is never rewritten, only appended.
 
+Before asking the user which version to target, `/rollback` invokes `/failure-attribute` to suggest an evidence-grounded default. If the attribution finds a `primary_suspect` in the change manifest — either an entry with no evidence bundle or one whose verifier obligations fail today — it presents that entry as the suggested rollback target. The user confirms or overrides; rollback never executes automatically. If the manifest is absent or attribution finds no suspects, the prompt falls back to asking the user directly.
+
 ## The Loop In Practice
 
 ### Typical session
@@ -204,8 +206,169 @@ For `env/<VAR>` resources, the snapshot file contains the prior value plus the p
 
 The formal invariants — append-only ledger, matching propose/assess/commit lineage, snapshot existence, slug-registry enforcement, no-go list — live in [`HARNESS_SPEC.md` §Ledger Invariants and §No-Go List](../HARNESS_SPEC.md#ledger-invariants). Authoritative source; check there before changing protocol expectations.
 
+## Change Contracts
+
+arXiv:2605.18747 §5.2.3 argues that a harness mutation should be treated like a code change to a safety-critical runtime. Every proposed edit should carry a *change contract* specifying: which component is modified, which failure mode it targets, what improvement it predicts, which invariants it must preserve, what evaluation can falsify it, and how it can be rolled back.
+
+Forge Studio enforces this end-to-end across three SEPL operators:
+
+| Stage | What happens |
+|---|---|
+| `/auto-tune-skill` (propose) | Writes a `## Change Contract` YAML block at the top of every proposal file |
+| `/assess-proposal` (assess) | Refuses any proposal missing `change_contract:` — quotes the missing field name verbatim in the rejection |
+| `/commit-proposal` (commit) | Copies the contract into `evidence_bundle.contract` in the change manifest |
+
+### Contract Fields
+
+```yaml
+change_contract:
+  component: "<plugin>/<skill-or-hook>"
+  failure_mode_targeted: "<observable failure — what the user actually saw>"
+  predicted_improvement: "<falsifiable before→after metric>"
+  invariants_preserved:
+    - "<POLICY.md invariant ref or free-form invariant statement>"
+  falsifiable_by: "<literal shell command containing bash/python3/grep/test>"
+  rollback_steps:
+    - "git revert <sha>"
+```
+
+Each field serves a specific audit purpose:
+
+- `component` — anchors attribution: if the change causes a regression, this names where to look.
+- `failure_mode_targeted` — prevents cargo-cult proposals that address symptoms rather than root causes.
+- `predicted_improvement` — provides the falsifiable claim that `/prediction-audit` checks post-commit.
+- `invariants_preserved` — lists what the change must not break; references `plugins/forge-meta/POLICY.md` when applicable, or states a free-form invariant when no policy line matches. Either form is accepted.
+- `falsifiable_by` — the literal shell command that produces evidence of improvement. `/assess-proposal` checks that it contains a verb token (`bash`, `python3`, `grep`, `test`, or `jq`) so it's a real command, not prose.
+- `rollback_steps` — ordered steps to reverse the change; the first step is typically `git revert <sha>` after commit lands.
+
+### Worked Example: Proposal Lifecycle
+
+**Step 1 — /auto-tune-skill proposes**
+
+`/auto-tune-skill memory:recall` completes three iterations and selects a Pareto-best candidate. It writes `.claude/proposals/memory-recall-20260520T093000Z.md` beginning with:
+
+```
+proposal_status: unreviewed
+iteration_count: 3
+pareto_pass_rate: 0.90
+pareto_token_cost: 1200
+
+## Change Contract
+
+change_contract:
+  component: "memory/recall"
+  failure_mode_targeted: "recall returns stale topic after session restore — evals fail with wrong-context assertions"
+  predicted_improvement: "pass_rate rises from 0.60 to ≥0.85 on memory/recall/evals/evals.json"
+  invariants_preserved:
+    - "POLICY.md: auto-tune-skill never mutates the original SKILL.md"
+  falsifiable_by: "bash plugins/forge-meta/skills/auto-tune-skill/scripts/score-candidate.sh .claude/proposals/memory-recall-20260520T093000Z.md memory:recall"
+  rollback_steps:
+    - "git revert HEAD"
+```
+
+**Step 2 — /assess-proposal checks**
+
+`/assess-proposal .claude/proposals/memory-recall-20260520T093000Z.md`:
+
+1. Finds `change_contract:` in the file — contract check passes.
+2. Verifies all six fields are present and non-empty; `falsifiable_by` contains `bash` — valid.
+3. Runs the four SEPL criteria (single-variable, root-cause, honest-impact, no-regression).
+4. Emits verdict `pass` with `evidence_bundle.contract` present.
+
+If the proposal had no `## Change Contract` section, assess-proposal would emit:
+
+```json
+{
+  "verdict": "fail",
+  "blockers": ["change_contract: block missing — required field not found in proposal"]
+}
+```
+
+**Step 3 — /commit-proposal records**
+
+After user approval, `/commit-proposal` applies the change and writes to `.claude/evolution/change_manifest.jsonl`:
+
+```json
+{
+  "id": "chg-1748000000-a1b2c3",
+  "iso_timestamp": "2026-05-20T09:35:00Z",
+  "agent_type": "workflow:/commit-proposal",
+  "type": "manifest-entry",
+  "description": "commit memory/recall v1 → v2",
+  "evidence_bundle": {
+    "checks_run": ["sepl-commit"],
+    "contract": {
+      "component": "memory/recall",
+      "failure_mode_targeted": "recall returns stale topic after session restore — evals fail with wrong-context assertions",
+      "predicted_improvement": "pass_rate rises from 0.60 to ≥0.85 on memory/recall/evals/evals.json",
+      "invariants_preserved": ["POLICY.md: auto-tune-skill never mutates the original SKILL.md"],
+      "falsifiable_by": "bash plugins/forge-meta/skills/auto-tune-skill/scripts/score-candidate.sh ...",
+      "rollback_steps": ["git revert HEAD"]
+    }
+  },
+  "rollback_handle": "git revert HEAD"
+}
+```
+
+The contract is now durable in the manifest. Future `/failure-attribute` runs can re-run `falsifiable_by` and compare against the `predicted_improvement` claim to determine whether the change held up.
+
+## Evidence-Bundle Format
+
+Every entry in `.claude/evolution/change_manifest.jsonl` can carry an `evidence_bundle` sub-object. The bundle answers the question: "what did the agent verify before declaring this change done?" Without it, attribution tooling has no signal — it can see that a change landed, but cannot tell whether it was checked. The pattern follows arXiv:2605.18747 §5.2.1, which argues every accepted action should ship with the checks run, the assumptions preserved, the untested regions, and the remaining risks.
+
+### Fields
+
+| Field | Meaning |
+|---|---|
+| `checks_run` | List of checks that passed at write time (e.g. `json-parse`, `hook-exit-code`). At minimum one entry here shows something was verified. |
+| `assumptions_preserved` | Subset of `assumptions` that were actively checked before writing. Crossing off assumptions before commit, not after. |
+| `untested_regions` | Areas changed but not tested. Explicit `[]` means fully tested; absent means unknown — treated as suspect by `/failure-attribute`. |
+| `remaining_risks` | Risks the agent could not rule out. Surfaced verbatim by `/session-digest` so the next agent can pick them up. |
+
+### Worked example
+
+A generator finishes editing `README.md` to update hook counts. Here is what each field captures:
+
+```json
+{
+  "id": "chg-1747987210-c1d2e3",
+  "iso_timestamp": "2026-05-20T10:05:00Z",
+  "session_id": "s-abc",
+  "agent_type": "generator",
+  "type": "doc-edit",
+  "description": "update hook count in README header to match count.sh output",
+  "read_set": ["README.md"],
+  "write_set": ["README.md"],
+  "assumptions": ["count.sh output is stable across concurrent calls"],
+  "verifier_obligations": ["bash plugins/diagnostics/skills/entropy-scan/scripts/count.sh ."],
+  "rollback_handle": "git revert HEAD",
+  "evidence_bundle": {
+    "checks_run": ["count.sh-output-matches-header", "json-parse"],
+    "assumptions_preserved": ["count.sh output is stable across concurrent calls"],
+    "untested_regions": [],
+    "remaining_risks": []
+  }
+}
+```
+
+- `read_set: ["README.md"]` — the agent Read the file before editing. Stale-read attribution compares this against the file's sha256 at read time.
+- `assumptions` + `assumptions_preserved` — the agent declared one assumption and then verified it before writing. Both lists match, so the assumption was not left hanging.
+- `untested_regions: []` — explicit empty list. Signals full coverage of the touched region, not just "forgot to fill this in."
+- `remaining_risks: []` — same: explicit empty. `/session-digest` sees no residual risks to surface.
+
+### How `/session-digest` aggregates them
+
+At session end, `digest.sh` scans all entries for this session and:
+1. Sums `len(assumptions)` across entries → reports `Total assumptions declared: N`.
+2. Collects all non-empty `remaining_risks` lists → lists them verbatim under `Remaining risks`.
+
+This lets the next session's agent start with a clear view of what the previous session left unresolved.
+
+See [`docs/transactional-manifest.md`](transactional-manifest.md) for the full field reference and contributor guidance.
+
 ## Pointers
 
 - [Architectural invariant](../HARNESS_SPEC.md) — §Self-Evolution Protocol
 - [Lifecycle diagram](../plugins/workflow/LIFECYCLE.md) — §Self-Evolution Loop (SEPL)
 - [Autogenesis paper](https://arxiv.org/abs/2604.15034) — source material
+- [Transactional manifest guide](transactional-manifest.md) — contributor reference for writing manifest entries

@@ -98,6 +98,7 @@ Append this session's outcomes to `claude-progress.txt` at the repo root. Durabl
 - `surface-progress.sh` (SessionStart) reads the tail to prime the next session.
 - `/session-resume` replays the log + spec + features into a briefing.
 - `/rest-audit` Traceability axis checks log-coverage rate (sessions-with-log / total-sessions).
+- The structured YAML briefing written by `forward-briefing.sh` (PreCompact) is the canonical post-compact state record; progress-log appends ongoing session outcomes and does not duplicate what the briefing captured.
 
 ## Failure Modes
 

@@ -321,9 +321,115 @@ Hooks are advisory — none exit with code 2. They surface signals; the decision
 
 ---
 
+## Convergence Criteria
+
+A sprint contract defines *what* to build. A convergence criterion defines *when* it's built — machine-checkable rather than vibes-based.
+
+Paper reference: arXiv:2605.18747 §4.3.2 enumerates six types for multi-step agent work.
+
+### Six convergence types
+
+| Type | What passes | When to use |
+|---|---|---|
+| **test-gated** | Designated tests exit 0 | Feature work with a test suite |
+| **security-gated** | Policy scan finds no violations | Any change touching secrets handling or input parsing |
+| **performance-gated** | Metric stays within a bound | Optimizations, latency-sensitive paths |
+| **score-based** | Rubric aggregate ≥ threshold | Doc quality, eval benchmarks |
+| **consensus** | Multiple reviewers all pass | High-stakes architectural changes |
+| **hybrid** | Combination of the above | Most non-trivial sprints |
+| **implicit** | User judgment, no criterion | One-shot edits, exploration |
+
+Forge Studio defaults to `implicit`. Declaring any other type converts sprint termination into a quoted artifact: the criterion runs, its output is recorded, and `/verify` refuses "done" until exit code is 0.
+
+### Declaring a criterion
+
+Add a `## Convergence` section to the plan file after `## Why this sprint exists`:
+
+```
+## Convergence
+```yaml
+convergence:
+  type: hybrid
+  criterion: "python3 -c \"import json; json.load(open('.claude-plugin/marketplace.json'))\" && bash plugins/diagnostics/skills/entropy-scan/scripts/count.sh . | grep '^19 plugins'"
+  max_iterations: 5
+```
+```
+
+The `criterion` value is a shell command. It runs with a 10-second timeout. Exit 0 = done. The user wrote the plan, so the user accepts that criterion commands run with their privilege.
+
+### How /verify enforces it
+
+When the active plan declares `## Convergence`, `/verify` calls `convergence-check/scripts/check.sh` and quotes the result verbatim before the verdict. If `met: false`, the verdict is `VERIFIED: No` regardless of other gates. See [docs/convergence.md](convergence.md) for the full refusal flow with an ASCII sequence diagram.
+
+### Worked sprint contract with convergence
+
+```markdown
+## Contract
+- [ ] `bash count.sh . | grep '^19 plugins'` exits 0
+- [ ] `python3 -c "import json; json.load(open('.claude-plugin/marketplace.json'))"` exits 0
+- [ ] All new shell scripts are executable (`ls -la plugins/**/hooks/*.sh | grep ^-r-x`)
+
+## Convergence
+```yaml
+convergence:
+  type: hybrid
+  criterion: "python3 -c \"import json; json.load(open('.claude-plugin/marketplace.json'))\" && bash plugins/diagnostics/skills/entropy-scan/scripts/count.sh . | grep '^19 plugins'"
+  max_iterations: 3
+```
+```
+
+Sprint is done when the convergence criterion exits 0 and `/verify` quotes that exit code as evidence.
+
+---
+
+## Adaptive Reviewer Pool
+
+The planner→generator→reviewer triad is a fixed structure. When the planner enumerates a large number of independent files, a single reviewer must hold all of them in context at once — coverage thins at the edges. The adaptive pool scales reviewer count to the declared file set, keeping each reviewer focused on one file while an aggregator merges the findings.
+
+Paper reference: arXiv:2605.18747 §4.1.3 (SoA, MAGIS) — pool size should scale with task complexity; fixed-size pools leave coverage gaps on large file sets.
+
+### How the pool decision works
+
+`/dispatch` scans the planner's output for an explicitly enumerated list of independent files (numbered list, `FILES:` block, or markdown `- [ ]` task list). It counts only what the planner declared — it does not infer independence from file content. "Independent" is the planner's call to make.
+
+```
+N = count of explicitly enumerated independent files
+N = min(N, 5)     ← hard cap; context overhead at 6+ reviewers outweighs coverage gain
+
+N < 3  →  single reviewer  (current behavior)
+N ≥ 3  →  N parallel reviewers + 1 aggregator
+```
+
+### Sequence diagram
+
+```
+planner ──► enumerate N files
+          │
+          ├── N < 3:  generator ──► reviewer ──► /verify
+          │
+          └── N ≥ 3:  generator ──► [reviewer-1, reviewer-2, ..., reviewer-N] (parallel)
+                                 │
+                                 └── aggregator ──► /verify
+```
+
+Each parallel reviewer receives a `target_file:` argument that scopes it to one file and its direct callers/tests. The aggregator receives all individual findings (not the original source) and has a distinct job: merge, deduplicate, surface inter-file inconsistencies, and emit a single unified verdict.
+
+### Why an aggregator is separate from the per-file reviewers
+
+A per-file reviewer sees one file and its immediate context. It cannot detect a type declared in `a.py` used incorrectly in `b.py` — each reviewer's scope excludes the other's file. The aggregator is the only agent with visibility across all findings. Its job is cross-file analysis, not re-review of individual files.
+
+### When not to use the pool
+
+Pool reviewers work well when files are genuinely independent — each can be reviewed without knowing the internals of the others. If files share mutable state, a common type hierarchy, or a protocol that spans all of them, a single reviewer with full context is more reliable. The planner signals this by not emitting a list (or by noting coupling explicitly). Do not spawn a pool when the planner marks files as mutually coupled.
+
+The pool decision and the file list are logged to `.claude/handoffs.jsonl` as `event: reviewer_pool_decision` for each pipeline run.
+
+---
+
 ## See also
 
 - [Architecture](architecture.md) — 8-component harness model + hook mechanics
 - [Harness Spec](../HARNESS_SPEC.md) — Sprint Contract Protocol (§ Sprint Contract Protocol)
 - [Settings](settings.md) — full env-var reference including the `WORKFLOW_*` variables
 - [Lifecycle](../plugins/workflow/LIFECYCLE.md) — event → hook → composed-plugin map
+- [Convergence Criteria](convergence.md) — full reference: six types, /verify flow, when implicit is dangerous

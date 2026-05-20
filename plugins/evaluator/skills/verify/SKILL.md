@@ -1,7 +1,7 @@
 ---
 name: verify
 description: Use whenever a task is about to be marked done — runs the listed verification commands (tests, lint, type-check, behavioral spot-check), captures the actual output, and compares against `.claude/features.json` or the `/contract` criteria. Refuses to mark done unless every gate produced evidence; closes the trust-then-verify gap that produces "I think it works" claims.
-when_to_use: Reach for this before committing, merging, or telling the user "fixed". Do NOT use for deep adversarial review — that's `/challenge` (fork-based critique); verify is the cheap, in-line evidence gate that runs first.
+when_to_use: Reach for this before committing, merging, or telling the user "fixed". Do NOT use for deep adversarial review — that's `/challenge` (fork-based critique); verify is the cheap, in-line evidence gate that runs first. Do NOT skip the convergence check just because tasks look complete — use /safe-mode if convergence is ambiguous.
 effort: xhigh
 allowed-tools:
   - Read
@@ -62,6 +62,18 @@ If `.claude/features.json` is present:
 5. Report pass/fail counts in the verdict.
 
 This is the evidence the reviewer and /gate-report read.
+
+### 2b. Convergence criterion check (if plan declares one)
+
+If the active plan has a `## Convergence` section, run the criterion before claiming done:
+
+```bash
+bash plugins/workflow/skills/convergence-check/scripts/check.sh
+```
+
+Quote the full output verbatim. If `met: false`, the verdict is `VERIFIED: No` regardless of other gates — the sprint is not done until the declared criterion is satisfied.
+
+If the plan has no `## Convergence` section (exit code 2 from check.sh), proceed with current verification behavior — implicit convergence is valid for one-shot edits.
 
 ## 3. Run the Verification
 Actually run it. Show the output. Don't say "it should work" — show that it DOES work.
@@ -147,6 +159,7 @@ Never claim work is done without evidence. Evidence, not assertions.
 - [ ] Step 1 — list every modified file with `git diff --stat` and a one-line description of each
 - [ ] Step 2 — pick the verification method(s): features.json (preferred), tests, build, manual, type-check
 - [ ] features.json path — for each `pending`/`in_progress` entry: run its `verify_cmd`, capture exit code + tail, write `.claude/gate/features.json` with `[{id, verify_cmd, exit_code, passed, tail}]`, flip `status: done` only on `passed: true` (skip `# manual`)
+- [ ] Step 2b — Convergence criterion verified (if plan declares one): run `bash plugins/workflow/skills/convergence-check/scripts/check.sh` and quote the criterion + result verbatim; refuse "done" if `met: false`
 - [ ] Step 3/3b — actually run the verification; quote the literal output, never paraphrase
 - [ ] Step 4 — name the most likely failure mode, null/empty/boundary handling, and double-run behavior
 - [ ] Step 5 — emit the verdict block (VERIFIED / METHOD / EVIDENCE / REMAINING RISK) or the UNVERIFIED + NEEDED block

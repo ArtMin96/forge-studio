@@ -117,5 +117,16 @@ for date in sorted_dates:
         why = e.get("why_this_component", "")
         if why:
             print(f"- **why_this_component**: {why}")
+        # High-signal evidence-bundle fields — surface when present, skip silently when absent
+        sep = "; "
+        bundle = e.get("evidence_bundle") or {}
+        untested = bundle.get("untested_regions", [])
+        if untested:
+            regions = untested if isinstance(untested, list) else [untested]
+            print("- **untested_regions**: " + sep.join(str(r) for r in regions))
+        remaining = bundle.get("remaining_risks", [])
+        if remaining:
+            risks = remaining if isinstance(remaining, list) else [remaining]
+            print("- **remaining_risks**: " + sep.join(str(r) for r in risks))
         print()
 '

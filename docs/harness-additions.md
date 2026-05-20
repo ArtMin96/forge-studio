@@ -116,3 +116,24 @@ Some external patterns the blog discusses are intentionally absent. See `HARNESS
 - Ralph-loop auto-continuation (conflicts with human-gated self-evolution)
 - Sandbox plugin (Claude Code host owns this boundary)
 - Parallel `AGENTS.md` support (Claude Code reads `CLAUDE.md` natively; dual files fragment config)
+
+---
+
+## Code-as-Harness Additions
+
+Eight capabilities adopted from arXiv:2605.18747. Each one closes a gap where Forge Studio previously relied on user judgment or convention in place of a machine-checkable artifact.
+
+| # | Capability | Where it lives | Surfaced via |
+|---|---|---|---|
+| 1 | Belief-state audit | `plugins/context-engine/hooks/belief-snapshot.sh`, `plugins/context-engine/hooks/belief-verify.sh`, `plugins/context-engine/skills/belief-audit/SKILL.md` | `/belief-audit`, PreToolUse + PostToolUse hooks on Edit/Write |
+| 2 | Transactional manifest schema | `plugins/forge-meta/skills/change-manifest/SKILL.md`, `plugins/forge-meta/skills/change-manifest/scripts/manifest-writer.sh` | `/change-manifest` (extended schema: `read_set`, `assumptions`, `evidence_bundle`, `rollback_handle`) |
+| 3 | Per-plan convergence criterion | `plugins/workflow/skills/convergence-check/SKILL.md`, `plugins/workflow/skills/convergence-check/scripts/check.sh` | `/convergence-check`, enforced by `/verify` when `convergence:` block is declared in plan |
+| 4 | Failure attribution | `plugins/traces/skills/failure-attribute/SKILL.md`, `plugins/traces/skills/failure-attribute/scripts/attribute.sh` | `/failure-attribute [N]` — walks last N manifest entries, re-runs verifier_obligations, localizes suspect |
+| 5 | Harness metrics scorecard | `plugins/forge-meta/skills/harness-metrics/SKILL.md`, `plugins/forge-meta/skills/harness-metrics/scripts/score.sh` | `/harness-metrics` — 6-row Markdown table + JSON written to `.claude/metrics/<date>.json` |
+| 6 | Evolution change contract | `plugins/forge-meta/skills/auto-tune-skill/SKILL.md`, `plugins/evaluator/skills/assess-proposal/SKILL.md` | `/auto-tune-skill` proposals must carry `change_contract:` block; `/assess-proposal` refuses if absent |
+| 7 | Adaptive reviewer pool | `plugins/agents/skills/dispatch/SKILL.md` | `/dispatch` — spawns one reviewer per independent file when planner enumerates ≥ 3 files (cap: 5) |
+| 8 | Compaction with provenance | `plugins/context-engine/hooks/forward-briefing.sh`, `plugins/context-engine/hooks/post-compact-recovery.sh` | PreCompact emits structured YAML; PostCompact re-injects it as first turn |
+
+These eight capabilities share a design principle: state that previously lived only in the context window (Claude's belief about a file, a sprint's exit criterion, what was checked before shipping) is now written to a named artifact on disk. That makes it recoverable after compaction and verifiable by a later agent or session.
+
+For the user-facing tour of all eight — what changed, when to reach for each, and a decision table for common symptoms — see [docs/code-as-harness.md](code-as-harness.md).

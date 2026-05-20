@@ -23,6 +23,20 @@ Cross-cutting plugins: `evaluator`, `workflow`, `reference`, `traces`, `diagnost
 
 Component 8 is drawn from *Autogenesis: A Self-Evolving Agent Protocol* (arXiv:2604.15034, Apr 2026). See `docs/self-evolution.md` for the protocol and `HARNESS_SPEC.md` §Self-Evolution Protocol for invariants.
 
+#### Change Contract Requirement
+
+Every harness mutation that passes through the SEPL loop carries a *change contract* — a structured declaration of component, failure mode targeted, predicted improvement, invariants preserved, falsifiable verification command, and rollback steps. The requirement follows arXiv:2605.18747 §5.2.3, which treats harness mutations as changes to a safety-critical runtime and argues each must ship with a falsifiable claim and a revert path.
+
+Enforcement is structural across three operators:
+
+- `/auto-tune-skill` — proposal output includes a `## Change Contract` YAML block with all six required fields.
+- `/assess-proposal` — contract check runs before any rubric criterion; missing or incomplete contract blocks the assessment immediately with a quoted field name in the rejection.
+- `/commit-proposal` — on commit, copies the contract into `evidence_bundle.contract` in the change manifest, making it durable for future attribution.
+
+The `invariants_preserved` field may reference named invariants from `plugins/forge-meta/POLICY.md` or state free-form invariants — either form is accepted, so proposals are not blocked when POLICY.md has no matching entry.
+
+See [`docs/self-evolution.md` §Change Contracts](self-evolution.md#change-contracts) for the worked lifecycle example.
+
 ### Capability Levels (per arXiv:2604.22748)
 
 *Agentic World Modeling* (Chu et al., Apr 2026) defines a three-tier capability ladder for agents that model environmental dynamics:
@@ -138,7 +152,7 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | traces | collect-user-turn.sh | Append `user_turn` JSONL entry (prompt_length, session_id; no content stored) for clarification-timing analysis |
 | long-session | budget-trigger.sh | Graduated context-budget advisory at 70/80/90/99% of `CLAUDE_CONTEXT_WINDOW_USED_PCT` |
 
-### Before Tool Use (PreToolUse — 12 hooks, deny-chain)
+### Before Tool Use (PreToolUse — 13 hooks, deny-chain)
 
 | Matcher | Plugin | Hook | What It Does |
 |---------|--------|------|-------------|
@@ -154,8 +168,9 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | Edit\|Write | long-session | spec-drift-detect.sh | Detect drift between active plan and HEAD on edit attempts |
 | (any) | diagnostics | doom-loop.sh | Fingerprint last 20 tool calls; warn at ≥3 identical (exit 1), **block** at ≥5 (exit 2); delete `/tmp/forge-doom-<session>` to override |
 | Read | token-efficiency | track-duplicate-reads.sh | Warn on duplicate reads |
+| Edit\|Write | context-engine | belief-snapshot.sh | Record sha256 of file before edit; feeds `/belief-audit` drift detection |
 
-### After Tool Use (PostToolUse — 20 hooks)
+### After Tool Use (PostToolUse — 21 hooks)
 
 | Matcher | Plugin | Hook | What It Does |
 |---------|--------|------|-------------|
@@ -166,6 +181,7 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | Edit | context-engine | detect-thrashing.sh | Detect thrashing (5+ edits same file, oscillating regions) |
 | EnterPlanMode | context-engine | plan-mode-enter.sh | Inject plugin-aware plan mode guidance |
 | (any) | context-engine | consecutive-failure-reset.sh | Reset consecutive failure counter on success |
+| Edit\|Write | context-engine | belief-verify.sh | Record post-edit sha256; new baseline for future `/belief-audit` calls |
 | Write\|Edit (.php) | evaluator | php-static-analysis.sh | Run PHPStan on changed file |
 | Write\|Edit (.js/.ts) | evaluator | js-static-analysis.sh | Run tsc + ESLint on changed file |
 | Edit\|Write | evaluator | test-nudge.sh | Nudge to run tests after every 3rd edit |
@@ -207,6 +223,53 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | SubagentStop | workflow | after-subagent.sh | Nudge next phase (planner→generator→reviewer→/verify); append spec.md delta; flip features.json `F<n>` to done |
 | SubagentStop | evaluator | auto-verify.sh | Emit structured-gradient signal (Dimension/Direction/Magnitude) for generator/reviewer stops; PASS when `gate/features.json` all passing, FAIL otherwise; disable with `FORGE_AUTO_VERIFY=0` |
 | SubagentStop | forge-meta | manifest-writer.sh | Append one change-manifest entry to `.claude/evolution/change_manifest.jsonl` when the agent emits a `change_manifest:` marker or git shows recent uncommitted changes |
+
+### Change-Manifest Entry Format
+
+Each line in `.claude/evolution/change_manifest.jsonl` is one JSON object. The schema is backward-compatible: legacy entries (only the first six fields) continue to parse alongside v2 entries. Readers tolerate missing fields.
+
+```jsonc
+{
+  // Envelope — auto-populated by manifest-writer.sh
+  "id":            "chg-<unix-epoch>-<random6hex>",
+  "iso_timestamp": "2026-05-20T10:00:00Z",
+  "session_id":    "s-xyz",
+  "agent_type":    "generator",
+
+  // Change context — required
+  "type":          "skill-edit",
+  "description":   "extend change-manifest schema",
+
+  // Change context — optional legacy fields
+  "files":              "plugins/forge-meta/skills/change-manifest/SKILL.md",
+  "failure_pattern":    "schema too narrow for attribution",
+  "predicted_fixes":    "downstream attribution now possible",
+  "risk_tasks":         "T3 convergence depends on new fields",
+  "constraint_level":   "soft",
+  "why_this_component": "forge-meta owns the evolution ledger",
+
+  // Transactional state — optional, strongly recommended for non-trivial changes
+  "read_set":  ["plugins/forge-meta/skills/change-manifest/SKILL.md"],
+  "write_set": ["plugins/forge-meta/skills/change-manifest/SKILL.md"],
+  "assumptions":          ["append-manifest.sh omit-empty logic handles all new fields"],
+  "verifier_obligations": ["python3 -c \"import json; [json.loads(l) for l in open('.claude/evolution/change_manifest.jsonl')]\""],
+  "rollback_handle":      "git revert HEAD",
+
+  // Evidence bundle — optional sub-object; emit when at least one field is known
+  "evidence_bundle": {
+    "checks_run":           ["json-parse", "hook-exit-code"],
+    "assumptions_preserved":["append-manifest.sh omit-empty logic handles all new fields"],
+    "untested_regions":     ["post-compact behavior"],
+    "remaining_risks":      ["downstream skills unaware of new fields"]
+  }
+}
+```
+
+**Backward compatibility**: readers written before the transactional fields existed continue to work — missing fields produce `None` / empty on access. New writers should emit at minimum `evidence_bundle.checks_run` and either `untested_regions` or `remaining_risks`; an absent `evidence_bundle` is treated as suspect by failure-attribution tooling.
+
+The `evidence_bundle` concept follows the evidence-bundle pattern from arXiv:2605.18747 §5.2.1, which argues that each agent action should carry the evidence it was based on so that diagnosis and replay are possible without re-running the full session.
+
+For contributor guidance see [`docs/transactional-manifest.md`](transactional-manifest.md).
 
 ### Turn Completion
 
@@ -332,6 +395,10 @@ Capability isolation prevents error propagation between phases:
 
 Self-evaluation is unreliable — agents confidently praise their own work. Separate agents with separate tool sets prevent this.
 
+### Pooled dispatch
+
+When the planner enumerates N≥3 independent files, `/dispatch` scales the reviewer layer horizontally: N parallel reviewer subagents (each scoped to one file via `target_file:`) plus one aggregator reviewer that merges findings across all files. The cap is N=5 to bound context overhead. Below N=3, the standard single-reviewer flow applies. The aggregator's role is distinct from per-file reviewers: it deduplicates, surfaces cross-file inconsistencies, and emits a unified verdict — it does not re-read source files. See [Adaptive Reviewer Pool](agentic-workflow.md#adaptive-reviewer-pool) for the full decision sequence.
+
 ---
 
 ## Progressive Context Management
@@ -348,16 +415,63 @@ Self-evaluation is unreliable — agents confidently praise their own work. Sepa
 
 Configurable via `FORGE_CONTEXT_STAGE1`-`STAGE5` (message counts) or `FORGE_CONTEXT_PCT1`-`PCT5` (percentages).
 
+### Belief-State Audit
+
+After compaction, the model's internal representation of file contents can diverge from disk reality — particularly when other agents, hooks, or external processes wrote files between turns. arXiv:2605.18747 §4.3 (SyncMind) formalizes this as `|Bk − Sk|`: the gap between the agent's belief `Bk` and the actual system state `Sk`. Unchecked, it is the root cause of stale-belief bugs in long sessions.
+
+Three-step flow:
+
+```
+Edit (PreToolUse)  ──► sha256 ──► .claude/state/belief.jsonl {op: "pre"}
+Edit succeeds       ──► Claude's internal belief = post-edit state
+PostToolUse        ──► sha256 ──► .claude/state/belief.jsonl {op: "post"}
+
+/belief-audit       ──► re-sha256 disk  ──► diff vs latest stored signature ──► drift report
+```
+
+- Snapshots are appended by `belief-snapshot.sh` (PreToolUse) and `belief-verify.sh` (PostToolUse). Both are async and exit 0 always — they observe, never block.
+- `/belief-audit [N]` reads the N most-recently-edited paths, re-hashes each, and emits a Markdown drift report. Exit 1 if any file has changed since last snapshot. Fires automatically on PostCompact via `post-compact-belief-audit.sh`.
+- State lives in `.claude/state/belief.jsonl` (JSONL, one entry per snapshot).
+
+See [`docs/belief-audit.md`](belief-audit.md) for the user-facing guide.
+
 ---
 
 ## Context Preservation Across Compaction
 
-`PreCompact` saves, `PostCompact` restores:
-- Active scope and plan
-- Handoff state
-- Git branch and uncommitted files
-- Active task list (from task guardian)
-- Files modified in session (from trace data)
+arXiv:2605.18747 §3.2.6 identifies compaction as the point where bare prose summaries silently discard the highest-signal items — failing test names, stack frames, suspect file paths. The structured briefing emitted by `forward-briefing.sh` (PreCompact) and re-injected by `post-compact-recovery.sh` (PostCompact) preserves exactly those items in a YAML schema with four fields:
+
+| Field | Source | What it carries |
+|-------|--------|-----------------|
+| `open_failures` | `~/.claude/traces/*.jsonl` | Last 5 non-zero-exit tool calls: command, stack preview, log path |
+| `recent_edits` | `.claude/state/belief.jsonl` | Last 10 unique paths touched this session |
+| `pending_verifications` | `.claude/evolution/change_manifest.jsonl` | `verifier_obligations` from manifest entries with empty `evidence_bundle.checks_run` |
+| `belief_snapshots` | `.claude/state/belief.jsonl` | Last sha256 per path — lets the post-compact turn detect drift before re-editing |
+
+**Prose vs structured — what the model sees after a long debugging session:**
+
+```
+# v1 prose (pre-T8):
+"Context compacted. You were editing auth middleware and tests were failing."
+
+# v2 structured (T8):
+open_failures:
+  - test: "pytest tests/auth/test_middleware.py::test_token_refresh"
+    stack_top: "AssertionError: expected 401, got 500 (line 47)"
+    log_path: "/home/.claude/traces/2026-05-20-abc1.jsonl"
+recent_edits:
+  - "/app/Http/Middleware/TokenAuth.php"
+  - "tests/auth/test_middleware.py"
+pending_verifications:
+  - "pytest tests/auth/ -x"
+belief_snapshots:
+  - path: "/app/Http/Middleware/TokenAuth.php"
+    sha256: "a3f1b2..."
+```
+
+The structured form lets the post-compact turn re-read exactly the right files and re-run exactly the right verification — without asking the user to reconstruct what was happening.
+
+`pre-compact.sh` / `post-compact.sh` still handle scope, plan pointers, git state, and task-guardian tasks. The new hooks add provenance without replacing the existing recovery flow. See [`docs/compaction-briefing.md`](compaction-briefing.md) for the user-facing guide.
 
 ---
 
@@ -422,6 +536,32 @@ Default threshold: 6 exploratory calls (Read/Grep/Glob). Configurable via `FORGE
 - **Silent on success, verbose on failure**: Hooks produce no output when conditions are normal
 - **Single-variable changes**: When debugging or optimizing, change one thing at a time and verify
 - **Persistent session state**: Use `${CLAUDE_PLUGIN_DATA}` for state that must survive reconnects
+
+---
+
+## Sprint Contract and Convergence
+
+Every non-trivial sprint plan should declare two things:
+
+1. **`## Contract`** — what must be true after the sprint (testable criteria, one per bullet).
+2. **`## Convergence`** — when the sprint is done (machine-checkable shell command).
+
+The Contract is checked by the reviewer and `/verify` against each criterion's evidence. Convergence is checked by `convergence-check/scripts/check.sh` — a `criterion` shell command that exits 0 when the sprint is complete.
+
+Without a declared convergence criterion, sprint termination is `implicit` (user judgment). Implicit is fine for one-shot edits and exploration. For multi-session sprints, implicit loses falsifiability: the user's memory of what "done" means at the start may drift from what the implementation actually produced.
+
+The six types from arXiv:2605.18747 §4.3.2 — test-gated, security-gated, performance-gated, score-based, consensus, hybrid — map to Forge Studio criterion patterns:
+
+| Type | Forge Studio criterion example |
+|---|---|
+| test-gated | `"./vendor/bin/pest --filter=BillingUpgrade"` |
+| security-gated | `"bash plugins/policy-gateway/hooks/secrets-scan.sh ."` |
+| performance-gated | `"bash scripts/bench.sh \| awk '/p99/{exit($2>200)}'"` |
+| score-based | `"bash plugins/evaluator/skills/score-rubric/scripts/score.sh \| grep PASS"` |
+| consensus | `"test -f .claude/gate/reviewer-1.pass -a -f .claude/gate/reviewer-2.pass"` |
+| hybrid | `"bash run-tests.sh && python3 -c \"import json; json.load(open('.claude-plugin/marketplace.json'))\""` |
+
+`/verify` quotes the criterion output verbatim and refuses "done" if `met: false`. `/status` shows the current criterion state in its situational report. See [docs/convergence.md](convergence.md) for the full reference.
 
 ---
 

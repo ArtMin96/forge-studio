@@ -33,6 +33,24 @@ If any precondition fails, stop and report the specific gap.
 
 ## Steps
 
+### Step 0 — Suggest a rollback target via failure attribution
+
+Before asking the user which version to roll back to, run failure attribution to surface an evidence-grounded suggestion:
+
+```bash
+bash plugins/traces/skills/failure-attribute/scripts/attribute.sh .claude/evolution/change_manifest.jsonl 20
+```
+
+If `primary_suspect` is non-null, show it as the suggested default:
+
+```
+Attribution suggests: <primary_suspect.id> by <primary_suspect.agent> at <primary_suspect.ts>
+Files: <primary_suspect.files>
+Reason: <primary_suspect.reason>
+```
+
+The user can confirm this suggestion or provide their own target. If attribution returns exit 0 (no suspects) or the manifest is missing (exit 2), skip the suggestion and ask the user directly.
+
 ### Step 1 — Resolve paths
 
 Same slug → on-disk path mapping as `/commit-proposal` (see that skill for the table).
@@ -94,7 +112,8 @@ nothing to roll back: no commit entry found for rules.d/read-before-edit
 
 ## Execution Checklist
 
-- [ ] Read the resource slug and target version from arguments
+- [ ] Run `bash plugins/traces/skills/failure-attribute/scripts/attribute.sh` and show `primary_suspect` if found; ask user to confirm or override the suggested target
+- [ ] Read the resource slug and target version from arguments (or from attribution suggestion if user confirmed)
 - [ ] Confirmed `.claude/lineage/versions/<slug>/<target>` exists (otherwise abort with the entropy-scan hint)
 - [ ] Compared current file content to the snapshot — if identical, report no-op and exit
 - [ ] Restored the snapshot to the resource's actual path

@@ -117,7 +117,7 @@ cp "$WORKSPACE/iter-<best-i>/candidate-<best-k>.md" \
    ".claude/proposals/<plugin>-<skill-id>-<timestamp>.md"
 ```
 
-Prepend the status line:
+Prepend the status header and a `## Change Contract` section. The contract section is required — `/assess-proposal` refuses any proposal file that does not contain a `change_contract:` block. Compose it with real values before writing:
 
 ```
 proposal_status: unreviewed
@@ -125,7 +125,28 @@ iteration_count: <N>
 pareto_pass_rate: <float>
 pareto_token_cost: <int>
 
+## Change Contract
+
+```yaml
+change_contract:
+  component: "<plugin>/<skill-or-hook>"
+  failure_mode_targeted: "<observable failure — what the user actually saw>"
+  predicted_improvement: "<falsifiable metric movement, e.g. pass_rate climbs from 0.6 to 0.85>"
+  invariants_preserved:
+    - "<ref to POLICY.md invariant or free-form invariant statement>"
+  falsifiable_by: "bash plugins/forge-meta/skills/auto-tune-skill/scripts/score-candidate.sh <proposal-path> <plugin:skill-id>"
+  rollback_steps:
+    - "git revert HEAD"
 ```
+
+**Field guidance (one-line each):**
+
+- `component`: slug of the exact skill or hook being changed — e.g. `diagnostics/entropy-scan`.
+- `failure_mode_targeted`: the observable failure that triggered this proposal — quote from trace output or eval failure message.
+- `predicted_improvement`: a falsifiable before→after metric, not a vague claim. Example: `pass_rate rises from 0.62 to ≥0.80 on evals/evals.json`.
+- `invariants_preserved`: list of invariants this change does not violate. Reference a named invariant from `plugins/forge-meta/POLICY.md` when one applies (e.g. `POLICY.md: auto-tune-skill never mutates the original`). Free-form invariant statements are also accepted when no POLICY.md line matches.
+- `falsifiable_by`: a literal shell command (containing `bash`, `python3`, `grep`, or `test`) that produces evidence of the improvement. Quote it verbatim so `/assess-proposal` can re-run it.
+- `rollback_steps`: ordered steps to undo. The first step is typically `git revert <sha>` after commit; include any secondary cleanup (e.g. removing a proposal file or restoring a backup).
 
 ### Step 4 — Confirm to user
 
@@ -145,24 +166,59 @@ Report:
 - [ ] Dispatch K mutation subagents per iteration
 - [ ] Score each candidate with score-candidate.sh
 - [ ] Run pareto-best.py to select winner
-- [ ] Write proposal file to `.claude/proposals/`
+- [ ] Compose `change_contract:` block — fill all six fields with real values, not placeholders
+- [ ] Quote `falsifiable_by` command literally — copy the exact shell command that will be run to verify
+- [ ] Reference at least one invariant from `POLICY.md` in `invariants_preserved` (or state a free-form invariant when no policy entry matches)
+- [ ] Write proposal file to `.claude/proposals/` with the `## Change Contract` section preceding the body
 - [ ] Diff against original: `diff plugins/<plugin>/skills/<skill>/SKILL.md .claude/proposals/<plugin>-<skill>-<timestamp>.md`
-- [ ] If satisfied: `cp .claude/proposals/<...>.md plugins/<plugin>/skills/<skill>/SKILL.md`
+- [ ] Run `/assess-proposal .claude/proposals/<plugin>-<skill>-<timestamp>.md` to confirm contract passes
+- [ ] If satisfied and assessed: `cp .claude/proposals/<...>.md plugins/<plugin>/skills/<skill>/SKILL.md`
 - [ ] Re-run `/run-evals <plugin>:<skill-id>` on the updated SKILL.md to confirm score improvement
 
 ## Input / Output Examples
 
-### Example 1: successful tune
+### Example 1: successful tune with contract
 
 Input: `/auto-tune-skill memory:recall` (has evals/evals.json, pass_rate currently 0.6)
 
-Output: `.claude/proposals/memory-recall-20260514T090000Z.md` — body rewritten to improve scoring guidance; Pareto-best candidate shows pass_rate=0.9, token_cost=1200. Original `plugins/memory/skills/recall/SKILL.md` unchanged.
+Output: `.claude/proposals/memory-recall-20260514T090000Z.md` begins with:
 
-### Example 2: skill without evals
+```
+proposal_status: unreviewed
+iteration_count: 3
+pareto_pass_rate: 0.90
+pareto_token_cost: 1200
 
-Input: `/auto-tune-skill workflow:orchestrate` — wait, this skill has evals.json. Bad example: `/auto-tune-skill workflow:plan-session`
+## Change Contract
 
-Output: exit 1, "evals.json not found for workflow:plan-session — add evals/evals.json before auto-tuning".
+change_contract:
+  component: "memory/recall"
+  failure_mode_targeted: "recall returns stale topic after session restore — evals fail with wrong-context assertions"
+  predicted_improvement: "pass_rate rises from 0.60 to ≥0.85 on memory/recall/evals/evals.json"
+  invariants_preserved:
+    - "POLICY.md: auto-tune-skill never mutates the original SKILL.md"
+  falsifiable_by: "bash plugins/forge-meta/skills/auto-tune-skill/scripts/score-candidate.sh .claude/proposals/memory-recall-20260514T090000Z.md memory:recall"
+  rollback_steps:
+    - "git revert HEAD"
+```
+
+Body follows: the Pareto-best rewritten SKILL.md body. Original `plugins/memory/skills/recall/SKILL.md` unchanged.
+
+### Example 2: proposal missing contract — assess-proposal refusal
+
+Input: a proposal file at `.claude/proposals/memory-recall-20260514T090000Z.md` that was written without a `## Change Contract` section.
+
+Output from `/assess-proposal .claude/proposals/memory-recall-20260514T090000Z.md`:
+
+```json
+{
+  "verdict": "fail",
+  "blockers": ["change_contract: block missing — required field not found in proposal"],
+  "rationale": "Proposal does not include a change_contract block. The missing field is: change_contract. Add a ## Change Contract section with all six required fields (component, failure_mode_targeted, predicted_improvement, invariants_preserved, falsifiable_by, rollback_steps) before re-submitting."
+}
+```
+
+This refusal applies to any `/auto-tune-skill` proposal missing the contract, regardless of how reasonable the body looks. Revise the proposal by adding the `## Change Contract` section, then re-run `/assess-proposal`.
 
 ## Known Failure Modes
 

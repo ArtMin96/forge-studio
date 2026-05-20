@@ -38,9 +38,11 @@ _<N> manifest entries, last 200 shown._
 - **files**: plugins/forge-meta/skills/evolution-history/SKILL.md
 ```
 
-Groups are sorted newest-date first. Within a date, entries are sorted newest-timestamp first. Fields `files`, `failure_pattern`, `predicted_fixes`, `risk_tasks`, `constraint_level`, and `why_this_component` are omitted from the output when they are absent or empty in the manifest entry.
+Groups are sorted newest-date first. Within a date, entries are sorted newest-timestamp first. Fields `files`, `failure_pattern`, `predicted_fixes`, `risk_tasks`, `constraint_level`, `why_this_component`, `untested_regions`, and `remaining_risks` are omitted from the output when they are absent or empty in the manifest entry. Legacy entries (no new fields) render cleanly alongside v2 entries.
 
 ## Examples
+
+### Example 1 — empty manifest
 
 Input: `.claude/evolution/change_manifest.jsonl` does not exist (fresh project, no generator/reviewer pass yet).
 
@@ -51,7 +53,9 @@ Output:
 _No manifest yet._
 ```
 
-Input: manifest has 2 entries — one on 2026-05-18 (skill-edit by generator), one on 2026-05-19 (hook-edit by reviewer).
+### Example 2 — mixed legacy and v2 entries
+
+Input: manifest has 2 entries — one legacy (2026-05-18, skill-edit by generator with no new fields), one v2 (2026-05-19, hook-edit by reviewer with `untested_regions` and `remaining_risks`).
 
 Output:
 ```
@@ -65,6 +69,8 @@ _2 manifest entries._
 - **id**: 4a1c-…
 - **agent**: reviewer (session: s-9f2)
 - **files**: plugins/diagnostics/hooks/doom-loop.sh
+- **untested_regions**: post-compact behavior
+- **remaining_risks**: downstream plugins may cache old hook path
 
 ## 2026-05-18
 
@@ -73,6 +79,8 @@ _2 manifest entries._
 - **agent**: generator (session: s-9f1)
 - **files**: plugins/traces/skills/trace-evolve/SKILL.md
 ```
+
+The 2026-05-18 entry has no `untested_regions` or `remaining_risks` (it's a legacy entry) — those lines are simply absent. No `—` placeholder is shown; the fields are silently skipped.
 
 ## Execution Checklist
 

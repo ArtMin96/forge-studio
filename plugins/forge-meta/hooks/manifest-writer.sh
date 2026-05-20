@@ -177,6 +177,58 @@ if [[ "${FORGE_REMINDER_FORCE:-0}" != "1" && -n "$TREE_HASH" && "$TREE_HASH" = "
     exit 0
 fi
 
+# Check for a staging file written by the just-finished subagent. The staging file
+# lets a subagent pre-declare transactional fields (read_set, assumptions, etc.)
+# before the hook fires. Fields are exported as MANIFEST_* env vars so append-manifest.sh
+# picks them up without requiring argv changes.
+STAGING_FILE=".claude/state/manifest-staging-${SESSION_ID}.json"
+if [[ -f "$STAGING_FILE" ]]; then
+    eval "$(python3 - "$STAGING_FILE" <<'PYEOF'
+import sys, json, shlex
+
+path = sys.argv[1]
+try:
+    with open(path) as f:
+        d = json.load(f)
+
+    bundle = d.get("evidence_bundle", {})
+
+    # Top-level fields
+    top_fields = {
+        "read_set":             "MANIFEST_READ_SET",
+        "write_set":            "MANIFEST_WRITE_SET",
+        "assumptions":          "MANIFEST_ASSUMPTIONS",
+        "verifier_obligations": "MANIFEST_VERIFIER_OBLIGATIONS",
+        "rollback_handle":      "MANIFEST_ROLLBACK_HANDLE",
+    }
+    # Evidence-bundle sub-fields
+    bundle_fields = {
+        "checks_run":           "MANIFEST_CHECKS_RUN",
+        "assumptions_preserved":"MANIFEST_ASSUMPTIONS_PRESERVED",
+        "untested_regions":     "MANIFEST_UNTESTED_REGIONS",
+        "remaining_risks":      "MANIFEST_REMAINING_RISKS",
+    }
+
+    for field, env_var in top_fields.items():
+        val = d.get(field, "")
+        if isinstance(val, list):
+            val = "\n".join(str(v) for v in val)
+        if val:
+            print(f"export {env_var}={shlex.quote(str(val))}")
+
+    for field, env_var in bundle_fields.items():
+        val = bundle.get(field, "")
+        if isinstance(val, list):
+            val = "\n".join(str(v) for v in val)
+        if val:
+            print(f"export {env_var}={shlex.quote(str(val))}")
+except Exception:
+    pass
+PYEOF
+    )" || true
+    rm -f "$STAGING_FILE"
+fi
+
 bash "$APPEND_SCRIPT" "${ARGS[@]}" 2>/dev/null || true
 
 # Update state file with the current tree-hash so subsequent calls can compare.
