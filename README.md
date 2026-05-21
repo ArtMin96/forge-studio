@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-19 plugins. 81 skills. 75 hooks. 4 agents. 14 behavioral rules.
+19 plugins. 82 skills. 75 hooks. 4 agents. 14 behavioral rules.
 
 ---
 
@@ -82,7 +82,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | [**code-graph**](plugins/code-graph/README.md) | Auto-installs [tirth8205/code-review-graph](https://github.com/tirth8205/code-review-graph). Registers a Tree-sitter MCP graph per repo so Claude Code queries structural context instead of re-reading files. Adds `/impact-trace` (static × execution dual-view per arXiv:2605.18747 §4.4). Claude Code only. Opt-out: `FORGE_CODE_GRAPH_DISABLED=1`. | 3 | 1 |
 | [**themes**](plugins/themes/README.md) | Curated color themes for `/theme`: **Catppuccin Mocha**, **Tokyo Night**, **Nord**. Switch via `/theme`; `Ctrl+E` forks any theme into `~/.claude/themes/` for editing. Pure cosmetic — zero hooks. | 0 | 0 |
 | [**cross-repo**](plugins/cross-repo/README.md) | Parallel work across sibling repos: `/federated-fan-out` (per-repo subagents), `/sync-discovery` (pattern comparison across two repos), `/aggregate-results` (verdict matrix from fan-out run) | 0 | 3 |
-| [**forge-meta**](plugins/forge-meta/README.md) | Self-evolution boundary: change-manifest writer, evolution-history ledger, session-digest, auto-tune-skill outer loop, manifest-analyze reporter, skill-staleness-audit (read-only scoring → auto-tune candidate selector), harness-metrics scorecard, controllability invariant (POLICY.md) | 3 | 7 |
+| [**forge-meta**](plugins/forge-meta/README.md) | Self-evolution boundary: change-manifest writer, evolution-history ledger, session-digest, auto-tune-skill outer loop, manifest-analyze reporter, skill-staleness-audit (read-only scoring → auto-tune candidate selector), harness-metrics scorecard, paper-research brief writer, controllability invariant (POLICY.md) | 3 | 8 |
 
 ### Key Skills
 
