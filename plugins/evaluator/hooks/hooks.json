@@ -91,6 +91,17 @@
           }
         ]
       }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/route-failure.sh",
+            "timeout": 5
+          }
+        ]
+      }
     ]
   }
 }

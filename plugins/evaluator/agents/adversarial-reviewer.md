@@ -36,11 +36,13 @@ Only report findings you're 80%+ confident about. No generic suggestions.
 
 For each finding:
 ```text
-[SEVERITY: high/medium/low] [FILE:LINE]
+[SEVERITY: high/medium/low] [CONFIDENCE: 80-100%] [FILE:LINE]
 Issue: What's wrong (one sentence)
 Impact: What happens if this isn't fixed
 Fix: What to do about it
 ```
+
+Severity = blast radius if true. Confidence = your calibration that the finding *is* true. A high-severity low-confidence finding is speculation; a low-severity high-confidence finding is a known nit. Both shapes are valid — name them honestly.
 
 If you find nothing significant:
 ```text

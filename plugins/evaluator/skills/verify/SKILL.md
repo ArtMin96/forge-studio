@@ -94,8 +94,12 @@ Good: "Output: `Tests: 42 passed, 0 failed (0.83s)`"
 VERIFIED: [Yes/No]
 METHOD: [tests/build/manual/type-check]
 EVIDENCE: [One line summary of proof]
+COVERED: [F-ids whose verify_cmd ran and passed this turn, or "n/a" when no features.json]
+UNCOVERED: [F-ids with no executable verify_cmd, marked # manual, or skipped — or "none"]
 REMAINING RISK: [What could still go wrong, or "None identified"]
 ```
+
+`COVERED` and `UNCOVERED` make the verifier's scope falsifiable — a downstream reader can tell which criteria this gate actually exercised vs which were assumed. From arXiv:2605.18747 §5.2.2: *"Each artifact should declare what it verifies, what it cannot verify, and what confidence it provides."* When `.claude/features.json` is absent both lines may be `n/a`.
 
 If you CANNOT verify the change:
 ```text
@@ -121,6 +125,8 @@ When one or more criteria fail, emit one structured triple per failed criterion 
 VERIFIED: No
 METHOD: features.json + tests
 EVIDENCE: 2 of 4 criteria failed (see gradient below)
+COVERED: F1, F2
+UNCOVERED: F5 (# manual)
 REMAINING RISK: gate/features.json shows exit_code=1 for auto-verify entry
 
 - Dimension: contract-criterion-3
@@ -138,6 +144,8 @@ REMAINING RISK: gate/features.json shows exit_code=1 for auto-verify entry
 VERIFIED: Yes
 METHOD: tests
 EVIDENCE: all 42 tests pass (exit 0)
+COVERED: F1, F2, F3, F4
+UNCOVERED: none
 REMAINING RISK: None identified
 ```
 
@@ -162,7 +170,7 @@ Never claim work is done without evidence. Evidence, not assertions.
 - [ ] Step 2b — Convergence criterion verified (if plan declares one): run `bash plugins/workflow/skills/convergence-check/scripts/check.sh` and quote the criterion + result verbatim; refuse "done" if `met: false`
 - [ ] Step 3/3b — actually run the verification; quote the literal output, never paraphrase
 - [ ] Step 4 — name the most likely failure mode, null/empty/boundary handling, and double-run behavior
-- [ ] Step 5 — emit the verdict block (VERIFIED / METHOD / EVIDENCE / REMAINING RISK) or the UNVERIFIED + NEEDED block
+- [ ] Step 5 — emit the verdict block (VERIFIED / METHOD / EVIDENCE / COVERED / UNCOVERED / REMAINING RISK) or the UNVERIFIED + NEEDED block; COVERED lists features.json ids whose verify_cmd ran this turn, UNCOVERED lists ids with no executable verify_cmd (manual / skipped)
 - [ ] Step 5a — on FAIL, emit one Dimension/Direction/Magnitude triple per failed criterion immediately after the verdict
 - [ ] Step 6 — if VERIFIED=Yes and an active plan exists, `echo "{plan-name}" > ~/.claude/evaluation-gate.flag` to clear the commit gate
 - [ ] When verdict is `VERIFIED: No` and the gap exceeds the agent's autonomy, emit the Escalation Brief in the CONTEXT / TRIGGER / OPTIONS / RECOMMENDATION shape
@@ -203,6 +211,8 @@ Output:
 VERIFIED: No
 METHOD: features.json + manual reading
 EVIDENCE: 2 of 3 criteria gated; criterion 3 has no executable verify_cmd
+COVERED: F1, F2
+UNCOVERED: F3 (no executable verify_cmd; conflicts with README.md:42)
 REMAINING RISK: criterion 3 conflicts with the documented behavior in README.md:42
 
 CONTEXT: Verify the rename of `feature-list-nudged` marker after Task A landed.
@@ -222,6 +232,8 @@ Output:
 VERIFIED: Yes
 METHOD: tests
 EVIDENCE: all 138 tests pass (exit 0)
+COVERED: F1 (broader suite green)
+UNCOVERED: migrate.sh:88 has no direct test — covered only transitively
 REMAINING RISK: low-confidence — the changed line in plugins/foo/scripts/migrate.sh:88 has no direct test coverage and I am unfamiliar with the file
 
 CONTEXT: Bump the retry-loop ceiling in migrate.sh:88 as requested.
