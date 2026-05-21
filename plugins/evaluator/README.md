@@ -56,6 +56,7 @@ The forked `adversarial-reviewer` agent runs `/assess-proposal` and `/challenge`
 | `test-nudge-reset.sh` | `PostToolUse` | `Bash` | After any Bash tool call | Resets the test-nudge counter when the command looks like a test run, so the nudge stays quiet during active test cycles |
 | `filter-test-output.sh` | `PostToolUse` | `Bash` | After any Bash tool call | Compresses verbose test output so it doesn't flood the context window |
 | `task-completion-gate.sh` | `TaskCompleted`¹ | (none) | When a task is marked complete | Checks the evaluation gate at task-completion boundaries; warns if verification was skipped |
+| `route-failure.sh` | `PostToolUseFailure` | (none) | After any tool failure | Classifies the error into `compile-error\|test-fail\|type-error\|lint-warning` and nudges toward the corrective skill (arXiv:2605.18747 §5.2.2 feedback-type routing). Advisory; deduped per session by `(class, error-md5)` |
 
 ¹ `TaskCompleted` is an agent-teams event — only fires when `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` is set. Without that env var the hook is inert.
 

@@ -28,6 +28,12 @@ Single-file scripts and tiny repos won't benefit.
 
 Once installed, use the MCP tools: `query_graph_tool`, `detect_changes_tool`, `get_impact_radius_tool`, `semantic_search_nodes_tool`, etc. The CLAUDE.md template included in this marketplace already documents the workflow.
 
+## Skills
+
+| Skill | Purpose |
+|---|---|
+| `/impact-trace <symbol> [days]` | Static × execution dual-view (arXiv:2605.18747 §4.4). Joins `query_graph_tool callers_of` with recent execution traces. Emits three disjoint sets — intersection (real blast radius), static-only (callable but dormant), runtime-only (likely dynamic dispatch or graph drift). |
+
 ## Hooks
 
 | Event | Hook | Effect |
