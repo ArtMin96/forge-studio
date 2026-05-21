@@ -43,15 +43,50 @@ deny() {
   exit 0
 }
 
-# Iterate rules. Each non-comment line is `<regex>|<label>`.
+# arXiv:2605.18747 §5.2.5 — context-sensitive policy: same secret-shape
+# is intentional in tests/fixtures but a real leak in src/. Optional 3rd
+# tab-delimited field on each rule line restricts where the rule applies:
+#   <regex>|<label>                              global (default, unchanged)
+#   <regex>|<label>\t<glob>[;<glob>...]          only when FILE_PATH matches
+#   <regex>|<label>\t!<glob>                     except when FILE_PATH matches
+# Empty FILE_PATH (Edit on missing path) falls through as "apply rule"
+# — safer default for secret-scanning.
+match_scope() {
+  local scope="$1" path="$2"
+  [ -z "$scope" ] && return 0
+  [ -z "$path" ] && return 0
+  local has_positive=0 positive_hit=0 g
+  local IFS=';'
+  for g in $scope; do
+    if [ "${g:0:1}" = "!" ]; then
+      # shellcheck disable=SC2053
+      [[ "$path" == ${g#!} ]] && return 1
+    else
+      has_positive=1
+      # shellcheck disable=SC2053
+      [[ "$path" == $g ]] && positive_hit=1
+    fi
+  done
+  [ "$has_positive" = "1" ] && [ "$positive_hit" = "0" ] && return 1
+  return 0
+}
+
+# Iterate rules. Each non-comment line is `<regex>|<label>[<TAB><scope>]`.
 while IFS= read -r line; do
   [ -z "$line" ] && continue
   case "$line" in \#*) continue ;; esac
-  PATTERN="${line%|*}"
-  LABEL="${line##*|}"
+  RULE_PART="${line%%	*}"
+  if [ "$RULE_PART" = "$line" ]; then
+    SCOPE=""
+  else
+    SCOPE="${line#*	}"
+  fi
+  PATTERN="${RULE_PART%|*}"
+  LABEL="${RULE_PART##*|}"
+  match_scope "$SCOPE" "$FILE_PATH" || continue
   if printf '%s' "$CONTENT" | grep -qE -- "$PATTERN"; then
     append_ledger "secret-detected:${LABEL}" "${FILE_PATH:-<unknown>}"
-    deny "policy-gateway: secret pattern matched (${LABEL}) in ${FILE_PATH:-content}. Remove the secret or move it to an environment file. If this is a false positive, refine rules.d/secrets.txt."
+    deny "policy-gateway: secret pattern matched (${LABEL}) in ${FILE_PATH:-content}. Remove the secret or move it to an environment file. If this is a false positive, refine rules.d/secrets.txt (optional tab-delimited scope glob narrows scope)."
   fi
 done < "$RULES_FILE"
 

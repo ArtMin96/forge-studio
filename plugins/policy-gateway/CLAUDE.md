@@ -11,7 +11,7 @@ PreToolUse secrets scan, prompt-injection scan, and PostToolUse sensitive-ops au
 - **deny() is the only way to block.** Two PreToolUse hooks (`scan-injection.sh:32-42`, `scan-secrets.sh:35-45`) duplicate the same `jq -n` template; the third hook (`audit-sensitive-ops.sh`) is PostToolUse and only audits, never denies. If you change the deny contract shape, change scan-injection AND scan-secrets together — Claude Code reads the JSON literally.
 - **Always exit 0 on deny.** The `permissionDecision: deny` is delivered via the JSON body, not via a non-zero exit. Exit-non-zero would be treated as hook error and surface differently to the user.
 - **Ledger writes go through `plugins/_lib/jsonl-append.sh`** — bare `>>` torn lines under concurrent denies. See append_ledger() in scan-injection.sh / scan-secrets.sh.
-- **Rules files use line-oriented format.** `rules.d/secrets.txt` lines are `<regex>|<label>`; `rules.d/injection.txt` lines are bare regexes. Keep narrow — overbroad patterns generate noise that trains users to ignore the gate.
+- **Rules files use line-oriented format.** `rules.d/secrets.txt` lines are `<regex>|<label>` with an optional tab-delimited 3rd field `<scope-glob>[;<glob>...]` (negate with `!`) restricting the rule to specific FILE_PATH globs (arXiv:2605.18747 §5.2.5 — context-sensitive policy). `rules.d/injection.txt` lines are bare regexes (no scope — applies to Bash where there is no file-path context). Keep narrow — overbroad patterns generate noise that trains users to ignore the gate.
 
 ## Files to read first when changing this plugin
 
