@@ -8,7 +8,7 @@ allowed-tools:
   - Bash
 scheduling: an active plan declares a `## Convergence` section with a `criterion` field, and /verify or /status needs to evaluate it
 structural:
-  - Locate the plan file (argument or most-recently-modified plan with a convergence block)
+  - Locate the plan file (argument or active plan resolved via `find-active-plan.sh`)
   - Parse the `## Convergence` section for `type`, `criterion`, and `max_iterations`
   - Execute the criterion command with a 10-second timeout
   - Report exit code, stdout evidence, and gap description
@@ -38,7 +38,7 @@ Trust model: the user wrote the plan file. Commands in `criterion` run with the 
 
 ## Execution Checklist
 
-- [ ] Locate the plan file — use the argument if given; otherwise find the most-recently-modified `.claude/plans/*.md` that contains a `## Convergence` block
+- [ ] Locate the plan file — use the argument if given; otherwise resolve via `plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh` (single source of truth for the active plan)
 - [ ] Verify the plan file exists — exit 3 if not found
 - [ ] Parse the `## Convergence` section for `type`, `criterion`, and `max_iterations` — exit 2 if no convergence block
 - [ ] Execute `criterion` in a subshell with `timeout 10` — capture stdout, stderr, and exit code
@@ -51,7 +51,7 @@ Trust model: the user wrote the plan file. Commands in `criterion` run with the 
 bash plugins/workflow/skills/convergence-check/scripts/check.sh [plan-path]
 ```
 
-Optional `plan-path` argument: absolute or repo-relative path to a plan file. If omitted, the script scans `.claude/plans/*.md` for the most-recently-modified plan that has a `## Convergence` section.
+Optional `plan-path` argument: absolute or repo-relative path to a plan file. If omitted, the script resolves the active plan via `plugins/workflow/skills/orchestrate/scripts/find-active-plan.sh` (the canonical resolver — same one used by `/orchestrate`, `/contract`, and the after-subagent hook). If the resolved plan has no `## Convergence` section, exit 2 (skip gracefully — implicit convergence is valid for one-shot edits).
 
 ## Input / Output Examples
 

@@ -18,6 +18,10 @@ set -euo pipefail
 PLAN_PATH="${1:-}"
 
 # ── Plan resolution ────────────────────────────────────────────────────────
+# Defers to the canonical resolver (single source of truth per
+# plugins/workflow/CLAUDE.md) when no explicit path is given. Returns
+# exit 2 (no convergence block) rather than 3 when the active plan
+# exists but declares no convergence — implicit convergence is valid.
 if [[ -n "$PLAN_PATH" ]]; then
   if [[ ! -f "$PLAN_PATH" ]]; then
     echo "plan_path: $PLAN_PATH"
@@ -25,19 +29,12 @@ if [[ -n "$PLAN_PATH" ]]; then
     exit 3
   fi
 else
-  # Find the most-recently-modified plan with a convergence block
-  PLAN_PATH=""
-  while IFS= read -r -d $'\0' f; do
-    if grep -q "^## Convergence" "$f" 2>/dev/null; then
-      PLAN_PATH="$f"
-      break
-    fi
-  done < <(find .claude/plans -maxdepth 1 -name "*.md" -printf "%T@ %p\0" 2>/dev/null \
-            | sort -rz | cut -z -d' ' -f2-)
-
-  if [[ -z "$PLAN_PATH" ]]; then
+  SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+  RESOLVER="${SCRIPT_DIR}/../../orchestrate/scripts/find-active-plan.sh"
+  PLAN_PATH=$(bash "$RESOLVER" 2>/dev/null || true)
+  if [[ -z "$PLAN_PATH" || ! -f "$PLAN_PATH" ]]; then
     echo "plan_path: (none)"
-    echo "error: no plan with a convergence block found in .claude/plans/"
+    echo "error: no active plan resolved via find-active-plan.sh"
     exit 3
   fi
 fi

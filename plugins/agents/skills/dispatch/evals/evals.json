@@ -44,7 +44,7 @@
       ],
       "assertions": [
         "Output emits 'Route: Pipeline' (the exact literal from SKILL.md §Output Format line 55) — not 'Route: pipeline', not 'Route: P/G/R', not 'Route: Planner/Generator/Reviewer'",
-        "The Reason: line or Agent(s): field describes phases dispatched sequentially: planner (read-only) → generator → reviewer — matching §Route 3 §Routing Rules 'Dispatch agents sequentially: 1. Planner (read-only)... 2. Generator... 3. Reviewer'",
+        "The Reason: line or Agent(s): field describes phases dispatched sequentially: planner → generator → reviewer — matching §Route 3 §Routing Rules 'Dispatch agents sequentially: 1. Planner... 2. Generator... 3. Reviewer'",
         "The Risk level: field emits 'medium' or 'high' consistent with §Decision Matrix row 'Risk | Medium-High' for Pipeline — not low",
         "Output does not emit Route: Single Agent or Route: Fan-Out; §Decision Matrix rows 'Task type | New feature, architecture change' and 'Interdependence | Medium (phases depend on prior phase)' both point unambiguously to Pipeline"
       ]

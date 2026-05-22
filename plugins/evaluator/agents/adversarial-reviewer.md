@@ -2,6 +2,7 @@
 name: adversarial-reviewer
 description: Reviews code with a skeptical eye. Asks hard questions about edge cases, failure modes, and hidden assumptions. Use for security-sensitive or complex code.
 model: sonnet
+color: red
 tools: Read, Grep, Glob
 effort: xhigh
 maxTurns: 20

@@ -74,7 +74,7 @@ Read the plan's `## Contract` section. If absent, tell the user — a plan witho
 For `pipeline`:
 
 1. Invoke `/dispatch` from the agents plugin once at the start, scoped to the whole plan, so its routing logic stays the single source of truth. Do **not** re-implement routing here.
-2. Run `bash plugins/workflow/skills/orchestrate/scripts/parse-tasks.sh <plan-path>` to extract the ordered task id list. If the output is empty, fall back to single-pass dispatch and emit one warning line.
+2. Run `bash plugins/workflow/skills/orchestrate/scripts/parse-tasks.sh <plan-path>` to extract the ordered task id list. Exit codes: `0` + non-empty stdout → multi-task pipeline; `0` + empty stdout → single-task plan (run one generator→reviewer→/verify cycle, no per-task loop); `1` → plan is malformed (`## Tasks` instead of `### Tasks`, `### T<n>` instead of `#### T<n>`, or a Tasks heading with no matching task headings) — **STOP and report the parse-tasks stderr verbatim**. Do not silently degrade to single-pass on a malformed plan; the user must fix the format before the pipeline can honor the per-task contract.
 3. For each task in order:
    - Invoke `/contract` (agents plugin) so the plan's full Contract is re-read from disk fresh for this task (prevents context decay through compaction — `HARNESS_SPEC.md` §Sprint Contract).
    - Dispatch one `agents:generator` subagent scoped to **only this task's** Files / Success criteria block. Do not include sibling tasks in the subagent's prompt — keep its tool-call surface small to stay under the agent-loop budget (`maxTurns` / `task_budget`).

@@ -72,7 +72,7 @@ Leviathan et al.; Mohri et al. Draft-and-verify inference pattern with provably-
 - 2–3× speedup on T5-XXL; HSD extends to stacked drafts for further 1.2× gain
 - Core insight: **hierarchical verification is cheaper than monolithic generation when each tier has the minimum-capable tooling it needs**
 
-**Marketplace impact**: validates the planner→generator→reviewer→`/verify` chain used by the workflow plugin. Each agent runs with restricted tools (read-only planner/reviewer, read-write generator) so later tiers cannot undo earlier decisions silently.
+**Marketplace impact**: validates the planner→generator→reviewer→`/verify` chain used by the workflow plugin. Each agent runs with restricted tools (planner Write/Edit scoped to `.claude/plans/`, reviewer read-only, read-write generator) so later tiers cannot undo earlier decisions silently.
 
 ### Advisor Models (arXiv 2510.02453)
 

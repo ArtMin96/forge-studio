@@ -23,6 +23,7 @@ You always want it on. Routing is the entry point — without it, the harness is
  UserPromptSubmit   ──► route-prompt.sh        classify into single / pipeline / fan-out / TDD
                         (or route-prompt-llm.sh for hybrid/LLM mode)
  SubagentStop       ──► after-subagent.sh      append delta to spec.md, nudge handoff, mark features done
+ PostToolUse        ──► plan-format-check.sh   validate .claude/plans/*.md format on every Edit/Write/MultiEdit
  Stop               ──► turn-gate.sh           surface unchecked plan items and context pressure every N turns
  PreCompact         ──► pre-compact-handoff.sh advisory nudge to run /progress-log before compaction
 ```
@@ -52,6 +53,7 @@ Every step writes to `.claude/lineage/ledger.jsonl` (append-only). Snapshots liv
 | after-subagent.sh | `SubagentStop` | After any subagent finishes | Nudges the next phase in planner→generator→reviewer→/verify. Appends a delta block to `.claude/spec.md`. Flips `features.json` entries to `done` when commit messages reference their `F<n>` id. Emits a `handoff_open` ledger entry with the current plan. Deduplicates per-phase nudges with a TTL (`FORGE_AFTER_SUBAGENT_TTL_SECS`, default 1800s) — `FORGE_REMINDER_FORCE=1` bypasses. Unknown `agent_type` values emit a warning to stderr (exit 1) |
 | turn-gate.sh | `Stop` | Every N turns (default 3) | Checks for open handoffs past their age limit (`FORGE_HANDOFF_SKIP_SECS`, default 5400s), unchecked plan items in the most recent plan, context pressure above threshold (`WORKFLOW_HANDOFF_PCT`, default 75%), and recent unlogged commits. Set `WORKFLOW_TURN_GATE_INTERVAL` to change cadence |
 | pre-compact-handoff.sh | `PreCompact` | Before context compaction | Advisory nudge to run `/progress-log` before the compaction discards tool outputs |
+| plan-format-check.sh | `PostToolUse` (matcher `Edit\|Write\|MultiEdit`) | Immediately after any Edit/Write/MultiEdit on `.claude/plans/*.md` | Validates canonical plan format (`### Tasks` 3-hash + `#### T<n>` 4-hash). Warns on common drift (`## Tasks` 2-hash, `### T<n>` 3-hash, or Tasks heading without matching task headings) at write time so the orchestrator does not silently degrade to single-pass on a malformed plan. Advisory only (exit 1 warning) |
 
 ## Skills
 

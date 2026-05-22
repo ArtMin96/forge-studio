@@ -13,7 +13,7 @@ allowed-tools:
 scheduling: a multi-day or multi-role workstream needs concurrent isolated workspaces (planner + N generators + reviewer)
 structural:
   - Allocate one git worktree per declared role (≤5 roles)
-  - Bind each role to its tool isolation (planner read-only, generator read-write, reviewer read-only)
+  - Bind each role to its tool isolation (planner: Write/Edit scoped to `.claude/plans/`, generator read-write, reviewer read-only)
   - Coordinate via shared plan file and `.claude/lineage/ledger.jsonl`
   - Tear down worktrees on completion
 logical: each role completes in its own worktree without merge conflicts; ledger contains one entry per role transition; final merge produces a single integrated branch

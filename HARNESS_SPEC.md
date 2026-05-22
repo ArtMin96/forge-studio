@@ -14,7 +14,7 @@ Synthesized from 10 industry sources (2026): Anthropic Engineering, Fowler/Thoug
 
 | # | Primitive | What It Does | Forge Studio Implementation |
 |---|-----------|-------------|---------------------------|
-| 1 | Planner | Decomposes intent into structured, bounded work units | `agents/planner` (read-only) |
+| 1 | Planner | Decomposes intent into structured, bounded work units; writes `.claude/plans/s<N>-<slug>.md` | `agents/planner` (Write/Edit scoped to `.claude/plans/`) |
 | 2 | Generator/Worker | Executes bounded work with restricted tool access | `agents/generator` (read-write) |
 | 3 | Evaluator/Verifier | Independently assesses output against criteria (never self-evaluation) | `evaluator/adversarial-reviewer` + `/verify` + `/challenge` + `/assess-proposal` |
 | 4 | Context Firewall | Isolates sub-task context from parent orchestration context | Sub-agents with `context: fork` |

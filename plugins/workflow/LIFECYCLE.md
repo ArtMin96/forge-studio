@@ -123,7 +123,7 @@ Router traces are written to `/tmp/claude-router-<session_id>/classifications.js
 | `/morning` | `SessionStart` hook + `long-session:/session-resume` |
 | `/route` | `UserPromptSubmit` classifier + `agents:/dispatch` |
 | `/explore` | Built-in `Explore` subagent (invoke via Task tool or `/orchestrate`) |
-| `/plan` | `agents:planner` subagent + `.claude/plans/` file |
+| `/plan` | Dispatch the `agents:planner` subagent (via `Agent` tool with `subagent_type: planner`, or through `/dispatch`); planner writes `.claude/plans/s<N>-<slug>.md` itself |
 | `/implement` | `agents:generator` subagent + `agents:/contract` re-read |
 | `/eod` | `Stop` hook + `long-session:/progress-log` when pressure is high |
 | `/weekly` | Trigger via the harness `schedule` skill (reference plugin) with a cron expression, or run `/trace-evolve` from the traces plugin on demand |

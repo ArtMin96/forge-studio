@@ -64,7 +64,7 @@ Analyze the task against these criteria:
 - Multiple phases with different concerns
 - Higher risk warrants review before completion
 - **Action:** Dispatch agents sequentially:
-  1. **Planner** (read-only): Explore codebase, identify patterns, propose approach. **Must include a `## Contract` section** with testable criteria and verification method.
+  1. **Planner** (Write/Edit scoped to `.claude/plans/`): Explore codebase, identify patterns, propose approach, and write the plan to `.claude/plans/s<N>-<slug>.md`. **Must include a `## Contract` section** with testable criteria and verification method, plus `### Tasks` / `#### T<n>` headings for multi-task sprints.
   2. **Generator** (read-write): Invoke `/contract` to confirm criteria, then implement based on planner's output.
   3. **Reviewer** (read-only): Check contract compliance first, then challenge the implementation.
 

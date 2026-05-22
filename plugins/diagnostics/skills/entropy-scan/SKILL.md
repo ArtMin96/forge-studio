@@ -83,7 +83,7 @@ If no memory directory exists, report "N/A — no memory directory found."
 Read `HARNESS_SPEC.md` and validate these invariants:
 
 1. **Plugin Structure**: Every `plugins/*/` directory that has hooks also has `hooks/hooks.json`
-2. **Agent Tool Boundaries**: Read each `plugins/*/agents/*.md` — verify planner/reviewer don't have Write/Edit in allowed-tools
+2. **Agent Tool Boundaries**: Read each `plugins/*/agents/*.md` — verify reviewer has no Write/Edit in allowed-tools. Planner may declare Write/Edit; if so, its agent body must restrict scope to `.claude/plans/` (instruction-enforced).
 3. **Marketplace Registration**: (covered by Check 2, reference result)
 4. **Hook Exit Codes**: Grep for `exit 2` in hooks not under PreToolUse or PreCompact (informational — may have false positives)
 5. **Async Blocking Mismatch**: Check hooks.json for PreCompact hooks that use `exit 2` or `{"decision":"block"}` while also having `"async": true` — async hooks cannot block. Flag as misconfiguration.
@@ -176,7 +176,7 @@ When two events tie for top collision count (Counter ordering), the script repor
 - [ ] Check 3 — SKILL.md frontmatter completeness (description, effort, agent preload constraints, unknown keys)
 - [ ] Check 4 — hook script executability (`find … ! -perm -u+x`)
 - [ ] Check 5 — memory staleness (`Last verified:` >90 days or missing)
-- [ ] Check 6 — HARNESS_SPEC invariants (hooks.json present, planner/reviewer no Write/Edit, async-blocking mismatch, monitors manifest)
+- [ ] Check 6 — HARNESS_SPEC invariants (hooks.json present, reviewer no Write/Edit, planner Write/Edit scope is `.claude/plans/`, async-blocking mismatch, monitors manifest)
 - [ ] Check 7 — skill token weight (`check-skill-size-quick.sh`; flag >2k, >5k)
 - [ ] Check 8 — rule provenance (`check-rule-provenance.sh`; advisory)
 - [ ] Check 9a — `/rest-audit`; Check 9b — `/md-structure` on CLAUDE.md

@@ -1,6 +1,6 @@
 # agents
 
-Multi-agent decomposition for Claude Code. When a task is too large for a single context window, or when you want a critic that cannot be primed by the implementer, this plugin splits the work into three role-isolated subagents: **planner** (read-only research, produces a plan), **generator** (writes the code, one task at a time), and **reviewer** (adversarial critique of the diff). A contract-reread mechanism ensures each subagent sees the current sprint criteria from disk — not a potentially compacted or stale in-context copy.
+Multi-agent decomposition for Claude Code. When a task is too large for a single context window, or when you want a critic that cannot be primed by the implementer, this plugin splits the work into three role-isolated subagents: **planner** (research + writes `.claude/plans/s<N>-<slug>.md`; Write/Edit scoped to plan files by convention), **generator** (writes the code, one task at a time), and **reviewer** (adversarial critique of the diff; read-only). A contract-reread mechanism ensures each subagent sees the current sprint criteria from disk — not a potentially compacted or stale in-context copy.
 
 ## When to use
 
@@ -17,11 +17,11 @@ The three roles are defined in `plugins/agents/agents/`. You dispatch them via t
 
 | Role | Capabilities | What it does |
 |------|-------------|--------------|
-| `agents:planner` | Read, Grep, Glob, Bash (no Edit/Write) | Explores the codebase and produces a plan with a `## Contract` section and `#### T<n>` task headings |
+| `agents:planner` | Read, Write, Edit, Grep, Glob, Bash (Write/Edit scoped to `.claude/plans/` by convention) | Explores the codebase and writes `.claude/plans/s<N>-<slug>.md` in canonical format (`## Contract` + `### Tasks` + `#### T<n>`) |
 | `agents:generator` | Read, Write, Edit, Bash | Implements one task from the plan; one task per dispatch |
 | `agents:reviewer` | Read, Grep, Glob, Bash (no Edit/Write) | Adversarial critique of the generator's diff; verifies contract compliance; emits Verdict in first 2 lines (truncation-safe format) |
 
-The planner cannot write code. The reviewer cannot change code. The generator cannot publish a plan. Capability isolation is schema-level, not instruction-level.
+The planner writes only to `.claude/plans/` — source files are off-limits during planning (instruction-enforced, not schema-enforced). The reviewer cannot change code at all (schema-enforced). The generator cannot publish a plan. This three-role isolation is what makes the pipeline auditable.
 
 ## How it works
 
@@ -29,8 +29,9 @@ The planner cannot write code. The reviewer cannot change code. The generator ca
             ┌─────────┐    plan     ┌──────────┐    diff    ┌──────────┐
  user ───►  │ planner │   ───►      │generator │   ───►     │ reviewer │  ───► verdict
             └─────────┘             └──────────┘            └──────────┘
-        Read/Glob/Grep/Bash     Read/Write/Edit/Bash    Read/Glob/Grep/Bash
-                                /Glob/Grep              (no Write/Edit)
+        Read/Write/Edit/        Read/Write/Edit/Bash    Read/Glob/Grep/Bash
+        Glob/Grep/Bash          /Glob/Grep              (no Write/Edit)
+        (Write→.claude/plans/)
 ```
 
 `/dispatch` recommends which pattern fits the task. `/fan-out` runs the same prompt over many files in parallel. `/worktree-team` boots N agents into isolated git worktrees with optional path ownership.

@@ -2,6 +2,7 @@
 name: generator
 description: Implementation agent that writes code from an approved plan. Use proactively after a planner has produced a plan and code needs to be written, or when executing a Pipeline (Planner → Generator → Reviewer). Full read-write access; follows existing patterns and conventions.
 model: sonnet
+color: green
 tools: Read, Write, Edit, Bash, Glob, Grep
 effort: high
 maxTurns: 50

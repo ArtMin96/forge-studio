@@ -30,13 +30,13 @@ When you start a non-trivial task, type these in order. Each hands a durable art
 
 | # | Command | What it leaves on disk | Purpose |
 |---|---|---|---|
-| 1 | `/plan <description>` *(agents plugin)* | `.claude/plans/<slug>.md` with `## Contract` and `#### T1`/`T2`/... | Negotiate scope and success criteria before any code is written |
+| 1 | Dispatch the planner subagent (`Agent` tool, `subagent_type: planner` — or `/dispatch` which routes to it for high-scope tasks) | `.claude/plans/s<N>-<slug>.md` with `## Contract`, `### Tasks`, and `#### T1`/`T2`/... | Negotiate scope and success criteria before any code is written. The planner has Write/Edit scoped to `.claude/plans/` and authors the plan itself |
 | 2 | `/living-spec` | `.claude/spec.md` initialized from the contract | Subagents share the same source of truth; `after-subagent.sh` appends deltas as each phase finishes |
 | 3 | `/orchestrate pipeline` | per-task generator → reviewer → `/verify` cycles | Iterates each `T<n>` task with its own subagent context — no leakage between tasks |
 | 4 | `/reflect` *(green)* OR `/postmortem` *(red)* | `.claude/memory/topics/<topic>.md` (reflect) or root-cause writeup (postmortem) | Capture what worked or why it failed; the lesson outlives the session |
 | 5 | `/progress-log` | append to `claude-progress.txt` | Run before `/clear` or compact so the next session has continuity |
 
-Step 1 is the only one you should always type explicitly. Steps 2-5 frequently surface as router or after-subagent suggestions; you can either follow the nudge or invoke them yourself.
+Step 1 is the only one you should always initiate explicitly — dispatch the planner subagent for any non-trivial task (the `route-prompt.sh` classifier suggests `/orchestrate pipeline` for pipeline-shaped prompts, but that requires the plan to already exist on disk). Steps 2-5 frequently surface as router or after-subagent suggestions; you can either follow the nudge or invoke them yourself.
 
 ### Split-plan workflow (multi-sprint feature)
 
@@ -188,7 +188,7 @@ Claude edits the file, runs the project's test command, done. No planner, no rev
 
 Router classifies `pipeline`. Behavior you'll see:
 
-1. The **planner** (read-only subagent) explores `app/Billing/` and `app/Notifications/`, writes `.claude/plans/subscription-upgrade.md` containing a `## Contract` section with testable criteria:
+1. The **planner** subagent (Write/Edit scoped to `.claude/plans/` by convention) explores `app/Billing/` and `app/Notifications/`, writes `.claude/plans/s<N>-subscription-upgrade.md` containing a `## Contract` section with testable criteria:
 
    ```md
    ## Contract
