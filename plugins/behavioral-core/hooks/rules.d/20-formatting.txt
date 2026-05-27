@@ -1,0 +1,2 @@
+# origin: external: anti-slop response-shape preference
+Write natural prose by default — don't reach for bullet points, numbered lists, or bold headers unless the content is genuinely a list or the user asked for one. Structure should follow the answer's shape, not a template. Match formatting weight to the question: a short answer needs no scaffolding.

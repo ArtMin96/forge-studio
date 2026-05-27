@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-19 plugins. 82 skills. 76 hooks. 4 agents. 14 behavioral rules.
+19 plugins. 82 skills. 76 hooks. 4 agents. 16 behavioral rules.
 
 ---
 
@@ -199,3 +199,4 @@ For the full event-by-event table — every hook, matcher, plugin, and behavior 
 | [Harness Metrics](docs/harness-metrics.md) | Six harness quality dimensions: formulas, source artifacts, expected ranges, and how to improve each score |
 | [Compaction Briefing](docs/compaction-briefing.md) | What survives compaction (4 structured fields), what is lost, how to manually trigger, when briefing fails |
 | [Code as Harness](docs/code-as-harness.md) | Decision table, architecture diagram, and try-it commands for the eight S8 capabilities (belief-audit, metrics, convergence, failure-attribution, change-contract, adaptive pool, compaction briefing) |
+| [Skill Guides](docs/skills/README.md) | Per-skill end-user guides grouped by plugin: what each skill does, when to use it, best practices, and how skills chain together |

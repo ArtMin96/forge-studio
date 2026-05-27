@@ -33,6 +33,15 @@ Flag instances of reading files unrelated to the current task, exploring without
 ## 5. Filler Language
 Flag: "Let me...", "I'll go ahead and...", "Sure, I can help with that!", trailing summaries of completed work.
 
+## 6. Formatting Defaults
+Flag prose that was force-fit into bullet points, numbered lists, or bold headers when plain sentences would do — list scaffolding on a one- or two-item answer, headers on a short reply.
+
+## 7. Question Restatement & Padding
+Flag turns that repeat or paraphrase the user's question before answering, or pad after the point is made — answer length disproportionate to a simple question.
+
+## 8. Hedged Non-Answers
+Flag "which is better, A or B?" turns answered with a symmetric pros/cons list and no pick — the rule requires committing to one and defending it.
+
 ## Output Format
 ```text
 BEHAVIORAL AUDIT
@@ -42,6 +51,9 @@ Apologies:      [count] violations
 Scope Creep:    [count] violations
 Focus:          [count] violations
 Filler:         [count] violations
+Formatting:     [count] violations
+Restate/Pad:    [count] violations
+Hedged Answer:  [count] violations
 ---
 Overall Score:  [X/10] discipline rating
 ```
