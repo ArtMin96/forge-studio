@@ -76,7 +76,7 @@ These are usage guides, not reference. For the mechanical contract of a skill, r
 | `/evolution-history` | [evolution-history.md](forge-meta/evolution-history.md) | Renders the ledger as a chronological timeline |
 | `/manifest-analyze` | [manifest-analyze.md](forge-meta/manifest-analyze.md) | Aggregate report over the change manifest |
 | `/session-digest` | [session-digest.md](forge-meta/session-digest.md) | Compact rollup of a session's evolution artifacts |
-| `/harness-metrics` | [harness-metrics.md](forge-meta/harness-metrics.md) | Scores the six harness quality dimensions |
+| `/harness-metrics` | [harness-metrics.md](forge-meta/harness-metrics.md) | Scores the seven harness quality dimensions |
 | `/auto-tune-skill` | [auto-tune-skill.md](forge-meta/auto-tune-skill.md) | Proposes a Pareto-best rewrite of a skill body |
 | `/skill-staleness-audit` | [skill-staleness-audit.md](forge-meta/skill-staleness-audit.md) | Flags skills whose docs have drifted from behavior |
 | `/paper-research` | [paper-research.md](forge-meta/paper-research.md) | Grounds a paper's claims in the existing plugin surface |

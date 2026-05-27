@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Compute six harness-level dimensions from existing Forge Studio artifacts.
+# Compute seven harness-level dimensions from existing Forge Studio artifacts.
 # Output: Markdown table to stdout + .claude/metrics/<YYYY-MM-DD>.json
 # Usage: score.sh [manifest-path]
 set -euo pipefail
@@ -10,6 +10,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../../../../.." && pwd)"
 MANIFEST_PATH="${1:-$REPO_ROOT/.claude/evolution/change_manifest.jsonl}"
 TRACES_DIR="$REPO_ROOT/.claude/traces"
 BELIEF_LOG="$REPO_ROOT/.claude/state/belief.jsonl"
+MEMORY_TOPICS_DIR="$REPO_ROOT/.claude/memory/topics"
 METRICS_DIR="$REPO_ROOT/.claude/metrics"
 TODAY="$(date +%Y-%m-%d)"
 
@@ -127,6 +128,58 @@ PYEOF
 }
 
 # --------------------------------------------------------------------------
+# memory_hygiene_stats <topics_dir> <window_days> writes:
+#   line 1: <score_percent_string>  e.g. "80%" or "n/a"
+#   line 2: <notes_string>
+# A topic file is "fresh" if its "Last verified:" date is within window_days
+# of today. Files that lack the field are counted as stale.
+# --------------------------------------------------------------------------
+memory_hygiene_stats() {
+  python3 - "$1" "$2" <<'PYEOF'
+import sys, os, re, datetime
+
+topics_dir = sys.argv[1]
+window_days = int(sys.argv[2])
+today = datetime.date.today()
+cutoff = today - datetime.timedelta(days=window_days)
+
+total = 0
+fresh = 0
+
+try:
+    files = [f for f in os.listdir(topics_dir) if f.endswith(".md")]
+except Exception:
+    print("n/a")
+    print("topics directory unreadable")
+    sys.exit(0)
+
+if not files:
+    print("n/a")
+    print("no topic files found")
+    sys.exit(0)
+
+date_re = re.compile(r"Last verified:\s*(\d{4}-\d{2}-\d{2})")
+for fname in files:
+    fpath = os.path.join(topics_dir, fname)
+    total += 1
+    try:
+        with open(fpath) as fh:
+            content = fh.read()
+        m = date_re.search(content)
+        if m:
+            verified_date = datetime.date.fromisoformat(m.group(1))
+            if verified_date >= cutoff:
+                fresh += 1
+    except Exception:
+        pass  # unreadable file counts as stale
+
+score = round(100 * fresh / total)
+print(f"{score}%")
+print(f"{fresh} / {total} topics verified within {window_days} days")
+PYEOF
+}
+
+# --------------------------------------------------------------------------
 # 1. trajectory_efficiency
 # --------------------------------------------------------------------------
 traj_score="n/a"
@@ -224,6 +277,24 @@ if [ -f "$block_log" ]; then
 fi
 
 # --------------------------------------------------------------------------
+# 7. memory_hygiene
+# Freshness window: 30 days. A topic is "fresh" when its "Last verified:"
+# date (written by the remember skill) falls within the window. Files
+# without the field count as stale. n/a when the topics directory is absent
+# or empty — consistent with other dims' missing-artifact semantics.
+# Source: arXiv:2605.26112 §4.2 (trustworthy memory: staleness penalty).
+# --------------------------------------------------------------------------
+mh_score="n/a"
+mh_note="no memory topics directory"
+MEMORY_HYGIENE_WINDOW=30
+
+if [ -d "$MEMORY_TOPICS_DIR" ]; then
+  readarray -t mhstats < <(memory_hygiene_stats "$MEMORY_TOPICS_DIR" "$MEMORY_HYGIENE_WINDOW")
+  mh_score="${mhstats[0]:-n/a}"
+  mh_note="${mhstats[1]:-topics directory unreadable}"
+fi
+
+# --------------------------------------------------------------------------
 # Emit Markdown table
 # --------------------------------------------------------------------------
 printf "| %-22s | %-7s | %-45s |\n" "Dimension" "Score" "Notes"
@@ -234,6 +305,7 @@ printf "| %-22s | %-7s | %-45s |\n" "recovery_ability"       "$ra_score"     "$r
 printf "| %-22s | %-7s | %-45s |\n" "state_consistency"      "$sc_score"     "$sc_note"
 printf "| %-22s | %-7s | %-45s |\n" "safety_compliance"      "$safety_score" "$safety_note"
 printf "| %-22s | %-7s | %-45s |\n" "replayability"          "$rp_score"     "$rp_note"
+printf "| %-22s | %-7s | %-45s |\n" "memory_hygiene"         "$mh_score"     "$mh_note"
 
 # --------------------------------------------------------------------------
 # Write JSON to .claude/metrics/<date>.json (atomic: temp → rename)
@@ -248,6 +320,7 @@ if mkdir -p "$METRICS_DIR" 2>/dev/null; then
     "$sc_score"     "$sc_note" \
     "$safety_score" "$safety_note" \
     "$rp_score"     "$rp_note"   "$rp_with_handle" "$rp_total" \
+    "$mh_score"     "$mh_note" \
     > "$tmp_file" <<'PYEOF'
 import sys, json
 a = sys.argv
@@ -261,7 +334,8 @@ data = {
         "state_consistency":     {"score": a[10], "notes": a[11]},
         "safety_compliance":     {"score": a[12], "notes": a[13]},
         "replayability":         {"score": a[14], "notes": a[15],
-                                  "with_handle": int(a[16]), "total": int(a[17])}
+                                  "with_handle": int(a[16]), "total": int(a[17])},
+        "memory_hygiene":        {"score": a[18], "notes": a[19]}
     }
 }
 print(json.dumps(data, indent=2))

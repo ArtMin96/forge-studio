@@ -39,4 +39,32 @@ if [ ${#MISSING_LOGICAL[@]} -gt 0 ]; then
   done
 fi
 
+# Second pass: intersect missing-logical set with routing/dispatch skills.
+# Routing/dispatch skills are those whose name or description matches rout(e|ing)|dispatch|orchestrate.
+# Per arXiv:2605.26112 §4.3, S⊥G coupling means unverified routing scales unreliability fastest —
+# so any routing skill that lacks a logical post-condition is higher-priority than a non-routing gap.
+# An empty list here is the healthy, expected result.
+ROUTING_MISSING=()
+for SLUG in "${MISSING_LOGICAL[@]}"; do
+  SKILL_FILE="$ROOT/$(echo "$SLUG" | sed -E 's|^skills/([^/]+)/(.+)$|plugins/\1/skills/\2|')/SKILL.md"
+  SKILL_NAME=$(echo "$SLUG" | sed 's|.*/||')
+  SKILL_DESC=""
+  if [ -f "$SKILL_FILE" ]; then
+    SKILL_DESC=$(awk 'BEGIN{in_block=0} /^---$/{if(in_block){exit} else {in_block=1; next}} in_block{print}' "$SKILL_FILE" | grep '^description:' | head -1)
+  fi
+  if echo "$SKILL_NAME $SKILL_DESC" | grep -qiE 'rout(e|ing)|dispatch|orchestrate'; then
+    ROUTING_MISSING+=("$SLUG")
+  fi
+done
+
+echo ""
+echo "### Routing and dispatch skills missing \`logical:\`"
+if [ ${#ROUTING_MISSING[@]} -eq 0 ]; then
+  echo "(none — all routing and dispatch skills have a logical post-condition)"
+else
+  for SLUG in "${ROUTING_MISSING[@]}"; do
+    echo "- $SLUG  [HIGH PRIORITY]"
+  done
+fi
+
 exit 0

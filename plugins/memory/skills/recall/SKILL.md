@@ -8,7 +8,7 @@ allowed-tools:
   - Glob
   - Grep
   - Bash
-logical: matched topic content surfaced with source path and last-verified date staleness label
+logical: matched topic content surfaced ranked by relevance × staleness × confidence, with conflicts resolved toward the higher-trust entry; source path and staleness label included
 ---
 
 # /recall — Retrieve from Memory
@@ -31,10 +31,33 @@ grep -r "keyword" ~/.claude/projects/*/
 ```
 This is Tier 3 — never load whole files, only grep for specific terms.
 
-## Staleness Protocol
+## Retrieval Ranking and Staleness Protocol
 
-Every topic file has a `Last verified:` date. When recalling:
+Every topic file has a `Last verified:` date and an optional `Confidence:` field (`high | medium | low`; omitted ⇒ `medium`). When multiple topics match a query, order them by:
 
+```
+composite_trust = relevance × staleness_weight × confidence_weight
+```
+
+Where the weights derive from what the topic file already carries:
+
+| Age of `Last verified:` | staleness_weight |
+|-------------------------|-----------------|
+| < 7 days                | 1.0             |
+| 7–30 days               | 0.7             |
+| > 30 days               | 0.4             |
+
+| `Confidence:` value     | confidence_weight |
+|-------------------------|------------------|
+| `high`                  | 1.0              |
+| `medium` (or omitted)   | 0.7              |
+| `low`                   | 0.4              |
+
+This is a ranking convention for Claude to apply by reading the files, not a computed score. (§4.2, Table 1 — arXiv:2605.26112)
+
+**Conflict resolution**: when two topic files address the same need, prefer the one with the higher composite_trust score and surface the other as superseded-but-recorded (e.g. "Older entry also found: <slug> — lower confidence/staleness weight, shown for completeness").
+
+**Display labels** (human-facing presentation, unchanged):
 - **< 7 days old**: Present as current knowledge
 - **7-30 days old**: Present as "Previously noted (may be outdated)"
 - **> 30 days old**: Present as "Noted on <date> — verify before acting on this"

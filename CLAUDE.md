@@ -17,10 +17,12 @@ Comments explain **why the code is what it is** (hidden constraints, subtle inva
 
 ## Completeness Requirements
 
+**Documentation is part of every change, not a follow-up.** Any change that alters behavior, counts, paths, output shape, or capability must update the docs that describe it *in the same change* — before calling the work done. Docs that contradict the code are a defect of that change. This applies to edits of existing skills/scripts, not just new plugins: if a skill's behavior or a count moves, every doc that states the old value is now stale and must be fixed.
+
 Every change must be complete. Before calling work done:
 
 1. **Follow references** — If you add/modify a plugin, check every file that references it (README.md, docs/architecture.md, marketplace.json, other plugins that interact with it)
-2. **Update docs** — New plugin? Update README.md (install command, plugin reference section, active hooks table, architecture diagram). Modified hook? Update the Active Hooks table. New skill? Add to the plugin's reference table.
+2. **Update docs** — New plugin? Update README.md (install command, plugin reference section, active hooks table, architecture diagram). Modified hook? Update the Active Hooks table. New skill? Add to the plugin's reference table. Changed an existing skill or script's behavior, dimension count, or output? Update its `docs/skills/<plugin>/<skill>.md` guide and every other doc that describes that behavior (grep the old value across `docs/`, `README.md`, `HARNESS_SPEC.md`).
 3. **Update architecture.md** — If the change affects harness components, the 8-component table, the three-layer diagram, or any architectural pattern
 4. **Update marketplace.json** — Every plugin must be registered in `.claude-plugin/marketplace.json`
 5. **Verify JSON** — After editing any JSON file, validate it parses: `python3 -c "import json; json.load(open('path'))"`

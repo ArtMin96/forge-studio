@@ -21,6 +21,8 @@ Design rationale, component model, hook mechanics. For research citations, see [
 
 Cross-cutting plugins: `evaluator`, `workflow`, `reference`, `traces`, `diagnostics`, `caveman`, `token-efficiency`, `research-gate`, `long-session`, `policy-gateway`.
 
+*arXiv:2605.26112 §3 maps a six-axis framework P_H = Φ(R,M,C,S,O,G) onto agent harness design: R is the model itself (outside marketplace scope); M→#5 Memory; C→#4 Context Management; S→#2 Tool System + #6 Multi-Agent Decomposition; O→`workflow/orchestrate`; G→#3 Permission System + `evaluator`/`policy-gateway`. The paper folds permissions into G and treats tools+subagents as a single S; Forge Studio splits them into separate components because the failure modes and plugin surfaces differ.*
+
 Component 8 is drawn from *Autogenesis: A Self-Evolving Agent Protocol* (arXiv:2604.15034, Apr 2026). See `docs/self-evolution.md` for the protocol and `HARNESS_SPEC.md` §Self-Evolution Protocol for invariants.
 
 #### Change Contract Requirement

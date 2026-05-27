@@ -31,6 +31,7 @@ Create `.claude/memory/topics/<slug>.md`:
 # <Topic Title>
 
 Last verified: YYYY-MM-DD
+Confidence: high | medium | low   # optional; omit to treat as medium
 Version: v1
 Previous: (none)
 
@@ -88,6 +89,7 @@ Output:
 
 - Check if a related topic already exists before creating a new one — update instead
 - Include `Last verified:` date so future sessions know staleness
+- `Confidence:` is optional; when omitted it is treated as `medium`. Use `high | medium | low` to reflect how firmly the fact is established — not how recent it is. Recency is tracked separately by `Last verified:`. (§4.2, Table 1: per-entry confidence as a retrieval-ranking field alongside recency — arXiv:2605.26112)
 - Don't store things derivable from code or git history
 - Don't store ephemeral task details — those belong in tasks, not memory
 - Frame stored knowledge as "Previously noted (may be outdated)" when recalled

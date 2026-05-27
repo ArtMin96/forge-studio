@@ -134,6 +134,17 @@ Five stages define Agentic Harness Engineering (AHE): observe (collect traces), 
 
 **Marketplace impact**: `/belief-audit` ([docs/belief-audit.md](belief-audit.md), context-engine PreToolUse + PostToolUse hooks), transactional manifest schema with `evidence_bundle` and `read_set` ([docs/transactional-manifest.md](transactional-manifest.md), forge-meta change-manifest), `/convergence-check` ([docs/convergence.md](convergence.md), workflow), `/failure-attribute` (traces), `/harness-metrics` ([docs/harness-metrics.md](harness-metrics.md), forge-meta), `change_contract` block enforced by `/assess-proposal` on every `/auto-tune-skill` proposal, adaptive reviewer pool in `/dispatch` (agents), structured pre-compact briefing via `forward-briefing.sh` (context-engine PreCompact) + `post-compact-recovery.sh` (PostCompact) ([docs/compaction-briefing.md](compaction-briefing.md)), feedback-type router `route-failure.sh` (evaluator PostToolUseFailure), `COVERED`/`UNCOVERED` lines in `/verify` verdict block, `[CONFIDENCE]` field in adversarial-reviewer findings, context-sensitive policy scope in `policy-gateway/rules.d/secrets.txt`, `/impact-trace` static × execution dual-view (code-graph).
 
+### From Model Scaling to System Scaling (arXiv 2605.26112)
+
+Gu et al., UC Berkeley. Argues that gains from model scaling are saturating and the next performance frontier is harness-system design.
+
+- **Six-component framework P_H = Φ(R,M,C,S,O,G)** (§3): R=model, M=memory, C=context, S=tools+subagents, O=orchestration, G=governance/permissions. Validates the 8-component decomposition as the right unit of analysis; the split of S into Tool System + Multi-Agent Decomposition and G into Permission System + evaluator/policy-gateway reflects the distinct failure surfaces each presents.
+- **Staleness + confidence as retrieval-ranking terms** (§4.2): trustworthy memory requires per-entry confidence alongside recency; retrieval ordering should weight relevance × staleness × confidence rather than treating freshness as a display label only.
+- **S⊥G coupling** (§4.3): when tool-invocation and governance signals share the same path, an unverified routing or dispatch decision scales unreliability directly into governed actions. Routing/dispatch skills lacking a `logical` post-condition are the highest-risk gap under this coupling.
+- **Longitudinal evaluation dimensions** (Table 4): memory hygiene, minimum-context efficiency, verification-aware recovery, trajectory drift, and safety-under-tool-access; the last three map to existing `harness-metrics` dimensions.
+
+**Marketplace impact**: validates `memory` recall/remember (staleness protocol + confidence field), `context-engine` (C axis), `harness-metrics` (Table 4 coverage), and `ssl-audit` logical-field enforcement (S⊥G coupling) as existing implementations of the framework's recommendations.
+
 ---
 
 ## Community Sources

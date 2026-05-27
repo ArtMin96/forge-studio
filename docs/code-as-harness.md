@@ -21,7 +21,7 @@ Forge Studio's work adopted eight capabilities from this paper. The rest of this
 | Long session compacted; about to edit a file | `/belief-audit` — compares stored sha256 fingerprints against disk | microseconds per file; one sha256 call per path |
 | Sprint declared "done" but no machine-checkable exit criterion exists | Add `convergence:` block to the plan, then `/verify` enforces it | one YAML block in the plan file |
 | Regression appeared between two sessions; unclear which change introduced it | `/failure-attribute` — walks last 20 manifest entries, re-runs each verifier_obligation | seconds; reads `.claude/evolution/change_manifest.jsonl` |
-| Want to know whether harness quality is improving | `/harness-metrics` — six-row scorecard from existing artifacts | sub-second; reads belief log + manifest |
+| Want to know whether harness quality is improving | `/harness-metrics` — seven-row scorecard from existing artifacts | sub-second; reads belief log + manifest + memory topics |
 | About to propose a harness change via `/auto-tune-skill` | The proposal must include a `change_contract:` block; `/assess-proposal` refuses if it is absent | one YAML block in the proposal file |
 | Multi-file refactor; single reviewer is a bottleneck | Planner enumerates files → `/dispatch` pools one reviewer per file (cap: 5) + aggregator | proportional to file count |
 | Session compacted; post-compact context is missing stack frames or failing test names | `forward-briefing.sh` (PreCompact) emits structured YAML; `post-compact-recovery.sh` (PostCompact) re-injects it | ~1 second on PreCompact |
@@ -83,13 +83,13 @@ bash plugins/context-engine/skills/belief-audit/scripts/audit.sh
 
 Exit 0 means all tracked files match their last recorded fingerprint. Exit 1 means at least one file has drifted — the output table shows which paths and how the hashes differ. If no snapshots exist yet (fresh clone, no edits made), the script reports "no snapshots recorded yet."
 
-**2. Harness metrics scorecard** — six quality dimensions from existing artifacts:
+**2. Harness metrics scorecard** — seven quality dimensions from existing artifacts:
 
 ```bash
 bash plugins/forge-meta/skills/harness-metrics/scripts/score.sh
 ```
 
-Prints a six-row Markdown table. Dimensions sourced from `.claude/evolution/change_manifest.jsonl` and `.claude/state/belief.jsonl`. Rows show `n/a` (not `NaN` or a crash) when the source artifact is absent or traces are disabled.
+Prints a seven-row Markdown table. Dimensions sourced from `.claude/evolution/change_manifest.jsonl`, `.claude/state/belief.jsonl`, and `.claude/memory/topics/`. Rows show `n/a` (not `NaN` or a crash) when the source artifact is absent or traces are disabled.
 
 **3. Convergence check** — confirm the plan that shipped this work exits 0:
 

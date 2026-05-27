@@ -22,7 +22,7 @@ Writing a memory with `/remember` is only half the equation. At the start of a n
 
 `/recall` handles retrieval in a deliberate, tier-aware way rather than loading everything at once. The index (Tier 1) is always small and fast; topic files (Tier 2) are loaded only when matched; raw transcripts (Tier 3) are grepped for specific terms only as a last resort. That tiered approach keeps retrieval cheap: a large memory store does not penalise every turn.
 
-The staleness protocol is the other reason to use `/recall` rather than just reading the topic file directly. Every topic file carries a `Last verified:` date, and `/recall` translates that date into a trust label — current knowledge, "may be outdated", or "verify before acting" — so you always know how much weight to place on a recalled fact before making a decision.
+The retrieval-ranking and staleness protocol is the other reason to use `/recall` rather than just reading the topic file directly. Every topic file carries a `Last verified:` date and an optional `Confidence:` field (`high | medium | low`; omitted ⇒ `medium`). When multiple topics match, `/recall` orders them by a composite trust weight (`relevance × staleness_weight × confidence_weight`) and prefers the higher-trust entry when two topics conflict — surfacing the lower as superseded-but-recorded. Each retrieved entry also carries a human-facing staleness label — current knowledge, "may be outdated", or "verify before acting" — so you always know how much weight to place on a recalled fact before making a decision.
 
 ## When to use it
 

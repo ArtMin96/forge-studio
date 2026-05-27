@@ -24,6 +24,8 @@ Claude Code's context window resets between sessions. Without a persistent store
 
 Updates are versioned. When you refine a stored fact, `/remember` takes a snapshot of the old version before overwriting, then records the change in the lineage ledger. That means you can roll back a memory the same way you roll back any other harness resource — the history is on disk, not just in your head.
 
+Each topic file also carries a `Last verified:` date and an optional `Confidence:` field (`high | medium | low`; omitted is treated as `medium`). Confidence records how firmly a fact is established, separate from how recent it is — [`/recall`](recall.md) combines the two into a retrieval-ranking weight so firmer, fresher facts surface first.
+
 ## When to use it
 
 Reach for `/remember` when:

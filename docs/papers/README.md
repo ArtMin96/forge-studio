@@ -10,6 +10,7 @@ Cited findings drive the marketplace's design. PDFs kept here for offline refere
 | `2603.28052` | Meta-Harness | Execution-trace ablation: full traces vs compressed summaries; environment-bootstrap pattern | `traces/` plugin, `context-engine/hooks/env-bootstrap.sh`, `docs/research.md`, `docs/traces.md` |
 | `2604.17025` | CAAF | Verification mandate (p.39): post-subagent verify hooks must not be discretionary | `evaluator/hooks/auto-verify.sh`, `evaluator/README.md` |
 | `2604.25850` | Agentic Harness Engineering (AHE) | Controllability invariant (p.5) — evolution agent must not disable its own oversight; paired predictions verified against outcomes | `forge-meta/POLICY.md`, `evaluator/skills/prediction-audit/SKILL.md`, `docs/self-evolution.md` |
+| `2605.26112` | System Scaling | Six-component framework `P_H = Φ(R,M,C,S,O,G)` (§3); validates the 8-component decomposition as the right unit of analysis and argues modularity is a deployment requirement (§6) | `docs/architecture.md`, `docs/research.md` |
 
 ## Unreferenced (kept for research reading)
 

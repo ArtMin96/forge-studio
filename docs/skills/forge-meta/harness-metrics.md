@@ -1,6 +1,6 @@
 # Harness Metrics
 
-`/harness-metrics` computes six harness-level quality dimensions from existing Forge Studio artifacts and renders a Markdown scorecard. It belongs to the `forge-meta` plugin, which manages Forge Studio's self-evolution boundary.
+`/harness-metrics` computes seven harness-level quality dimensions from existing Forge Studio artifacts and renders a Markdown scorecard. It belongs to the `forge-meta` plugin, which manages Forge Studio's self-evolution boundary.
 
 ---
 
@@ -18,7 +18,7 @@ No arguments needed for a standard run. You can optionally pass a path to a synt
 
 ## Why you need it
 
-Running a multi-task sprint produces a lot of activity — hooks fire, agents write to the ledger, verify gates pass and fail. Without a summary view, it is hard to know whether the harness is actually getting better or just staying busy. `/harness-metrics` answers that by computing six dimensions defined in arXiv:2605.18747 §5.2.1: trajectory efficiency, verification strength, recovery ability, state consistency, safety compliance, and replayability. Each dimension is derived purely from artifacts on disk — traces, the change manifest, the belief log, and hook logs — so there is no inference or fabrication involved.
+Running a multi-task sprint produces a lot of activity — hooks fire, agents write to the ledger, verify gates pass and fail. Without a summary view, it is hard to know whether the harness is actually getting better or just staying busy. `/harness-metrics` answers that by computing seven dimensions: six defined in arXiv:2605.18747 §5.2.1 (trajectory efficiency, verification strength, recovery ability, state consistency, safety compliance, and replayability), plus `memory_hygiene` from arXiv:2605.26112 §4.2 (the share of memory topics verified recently). Each dimension is derived purely from artifacts on disk — traces, the change manifest, the belief log, hook logs, and the memory topic files — so there is no inference or fabrication involved.
 
 The scorecard writes to both stdout and `.claude/metrics/<YYYY-MM-DD>.json`. When a prior-day file exists, `/session-digest` can compare today's values against it and show a per-dimension delta, making improvement or regression immediately visible.
 

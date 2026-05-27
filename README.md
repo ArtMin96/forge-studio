@@ -132,7 +132,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | `/evolution-history` | forge-meta | Render the change manifest as a reverse-chronological Markdown timeline (newest first, up to 200 entries) grouped by date |
 | `/session-digest` | forge-meta | Produce a ≤10KB per-session rollup at `.claude/sessions/<id>-digest.md` with Component/Experience/Decision sections. Also fires automatically on SessionEnd |
 | `/auto-tune-skill <plugin>:<skill>` | forge-meta | Produce a baseline proposal for a skill at `.claude/proposals/`. The autonomous Pareto-outer-loop is future work; current mode emits the original SKILL.md as a starting candidate for human review |
-| `/harness-metrics` | forge-meta | Compute six harness-level quality dimensions (trajectory_efficiency, verification_strength, recovery_ability, state_consistency, safety_compliance, replayability) from existing artifacts; render Markdown table and write `.claude/metrics/<date>.json` |
+| `/harness-metrics` | forge-meta | Compute seven harness-level quality dimensions (trajectory_efficiency, verification_strength, recovery_ability, state_consistency, safety_compliance, replayability, memory_hygiene) from existing artifacts; render Markdown table and write `.claude/metrics/<date>.json` |
 
 ### Agents
 
@@ -196,7 +196,7 @@ For the full event-by-event table — every hook, matcher, plugin, and behavior 
 | [Transactional Manifest](docs/transactional-manifest.md) | Contributor guide: writing change-manifest entries with read_set, assumptions, evidence_bundle |
 | [Belief Audit](docs/belief-audit.md) | Belief-state drift detection: sha256 snapshots, /belief-audit usage, when belief drifts from disk |
 | [Convergence Criteria](docs/convergence.md) | Six convergence types, /verify refusal flow, when implicit is fine vs dangerous |
-| [Harness Metrics](docs/harness-metrics.md) | Six harness quality dimensions: formulas, source artifacts, expected ranges, and how to improve each score |
+| [Harness Metrics](docs/harness-metrics.md) | Seven harness quality dimensions: formulas, source artifacts, expected ranges, and how to improve each score |
 | [Compaction Briefing](docs/compaction-briefing.md) | What survives compaction (4 structured fields), what is lost, how to manually trigger, when briefing fails |
 | [Code as Harness](docs/code-as-harness.md) | Decision table, architecture diagram, and try-it commands for the eight S8 capabilities (belief-audit, metrics, convergence, failure-attribution, change-contract, adaptive pool, compaction briefing) |
 | [Skill Guides](docs/skills/README.md) | Per-skill end-user guides grouped by plugin: what each skill does, when to use it, best practices, and how skills chain together |

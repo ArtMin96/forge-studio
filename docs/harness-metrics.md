@@ -1,12 +1,12 @@
 # Harness Metrics
 
-Forge Studio's `/harness-metrics` skill computes six quality dimensions defined in arXiv:2605.18747 §5.2.1 and renders them as a Markdown table. This doc explains what each dimension means, how to read the scorecard, what numbers are realistic at different maturity levels, and how to drive the numbers up.
+Forge Studio's `/harness-metrics` skill computes seven quality dimensions — six core dimensions defined in arXiv:2605.18747 §5.2.1, plus `memory_hygiene` from arXiv:2605.26112 §4.2 — and renders them as a Markdown table. This doc explains what each dimension means, how to read the scorecard, what numbers are realistic at different maturity levels, and how to drive the numbers up.
 
 ---
 
 ## What This Measures
 
-Six dimensions, each derived from artifacts already on disk. No inference; no fabricated values.
+Seven dimensions, each derived from artifacts already on disk. No inference; no fabricated values.
 
 ### trajectory_efficiency
 
@@ -58,6 +58,14 @@ Source: `.claude/evolution/change_manifest.jsonl`
 
 A non-empty `rollback_handle` (e.g., `"git revert HEAD"`) means the change can be mechanically reversed. Low replayability means regressions require manual archaeology to undo. The field is part of the v2 manifest schema introduced with the transactional manifest update.
 
+### memory_hygiene
+
+Formula: `% .claude/memory/topics/*.md files whose "Last verified:" date is within 30 days of today`
+
+Source: `.claude/memory/topics/*.md` — each topic file written by the `remember` skill carries a `Last verified: YYYY-MM-DD` line.
+
+A high score means the memory corpus is actively maintained and recently confirmed. A low score means many topic files have not been revisited within the freshness window — those entries carry higher staleness weight under the `recall` skill's retrieval-ranking rule (arXiv:2605.26112 §4.2). Topic files that lack a `Last verified:` field entirely count as stale. Shows `n/a` when `.claude/memory/topics/` is absent or empty — this is expected for projects that do not use the memory plugin.
+
 ---
 
 ## How to Read the Scorecard
@@ -73,6 +81,7 @@ Running `/harness-metrics` produces a table like this:
 | state_consistency      | 97%    | 1 drift in 40 edits                |
 | safety_compliance      | 100%   | 8 / 8 blocks honored               |
 | replayability          | 75%    | 15 / 20 entries have rollback_handle |
+| memory_hygiene         | 67%    | 8 / 12 topics verified within 30 days |
 ```
 
 Reading this example:
@@ -83,6 +92,7 @@ Reading this example:
 - `state_consistency: 97%` — near-perfect. One stale-belief write in 40 edits.
 - `safety_compliance: 100%` — all blocks honored.
 - `replayability: 75%` — 5 entries have no rollback_handle. Those changes cannot be mechanically reversed.
+- `memory_hygiene: 67%` — 4 of 12 topic files have not been verified in the past 30 days. Run `/recall` on stale topics or update their `Last verified:` dates to raise this.
 
 The JSON snapshot written to `.claude/metrics/<YYYY-MM-DD>.json` lets `/session-digest` compare today's values against the prior session's file and surface the delta.
 
@@ -137,6 +147,10 @@ Reduce exploratory thrashing by applying the `/scope` skill before starting, and
 ### safety_compliance
 
 This metric is defensive — it should already be 100%. If it isn't, inspect `.claude/state/hook-blocks.jsonl` for entries with `"override": true` and understand why the override happened.
+
+### memory_hygiene
+
+Use `/recall` to revisit stale topics and update them — the `remember` skill will rewrite the `Last verified:` date. For topics that are no longer relevant, remove the file rather than leaving it to drag down the score. The 30-day window is the default; it is not configurable per-invocation but reflects the staleness tiers the `recall` skill uses for retrieval ranking.
 
 ---
 
