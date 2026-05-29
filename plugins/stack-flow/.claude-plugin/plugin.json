@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "stack-flow",
+  "description": "Native-git stacked-PR management: push guard (blocks wrong-branch and bare --force pushes), stack-graph state, restack/reparent/submit workflows built on git rebase --update-refs and --onto. No third-party stacking binary.",
+  "version": "0.1.0",
+  "keywords": [
+    "stacked-prs",
+    "git",
+    "harness:multi-agent",
+    "overhead:minimal"
+  ]
+}
