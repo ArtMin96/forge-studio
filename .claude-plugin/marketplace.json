@@ -130,8 +130,8 @@
     },
     {
       "name": "code-graph",
-      "description": "Auto-install tirth8205/code-review-graph. Claude Code queries a Tree-sitter structural graph of the current repo through MCP instead of re-reading files on every task. Second SessionStart hook surfaces a remediation warning when the MCP server is missing or unhealthy. Claude Code only. Opt-out: FORGE_CODE_GRAPH_DISABLED=1.",
-      "version": "1.1.1",
+      "description": "Auto-install colbymchenry/codegraph. Claude Code queries a tree-sitter structural graph of the current repo through MCP instead of re-reading files on every task. Second SessionStart hook surfaces a remediation warning when the MCP server is missing or unhealthy. Claude Code only. Opt-out: FORGE_CODE_GRAPH_DISABLED=1.",
+      "version": "2.0.0",
       "source": "./plugins/code-graph",
       "category": "context-management",
       "keywords": ["code-graph", "mcp", "tree-sitter", "blast-radius", "external-tool", "harness:context-management", "overhead:moderate"]

@@ -133,7 +133,7 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | SessionStart | long-session | bootstrap-substrate.sh | Idempotently create `.claude/{plans,gate}/`, `.claude/spec.md`, `.claude/features.json` so handoff chain works on first run (opt-out: `FORGE_LONG_SESSION_BOOTSTRAP=0`) |
 | SessionStart | long-session | surface-progress.sh | Tail `claude-progress.txt`, `features.json` status, `spec.md` delta, `init.sh` presence |
 | SessionStart | rtk-optimizer | rtk-bootstrap.sh | First session: install `rtk` binary + run `rtk init -g`. Subsequent sessions: no-op |
-| SessionStart | code-graph | code-graph-bootstrap.sh | Install `code-review-graph` and register MCP server for current repo on first run |
+| SessionStart | code-graph | code-graph-bootstrap.sh | Install `codegraph` and register MCP server for current repo on first run |
 | PreCompact | context-engine | pre-compact-guard.sh | Block compaction when uncommitted work has no progress entry or tasks in-progress |
 | PreCompact | context-engine | pre-compact.sh | Save scope, plan, progress, git state to recovery file |
 | PreCompact | workflow | pre-compact-handoff.sh | Advisory nudge to run `/progress-log` before auto-compaction |

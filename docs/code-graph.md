@@ -1,6 +1,6 @@
 # Code Graph
 
-Auto-bundles [tirth8205/code-review-graph](https://github.com/tirth8205/code-review-graph). Claude Code queries a Tree-sitter structural graph of the current repo through MCP, so it pulls the minimum set of affected files instead of re-reading the codebase on every task.
+Auto-bundles [colbymchenry/codegraph](https://github.com/colbymchenry/codegraph). Claude Code queries a tree-sitter structural graph of the current repo through MCP, so it pulls the minimum set of affected files instead of re-reading the codebase on every task.
 
 **Claude Code only.**
 
@@ -8,101 +8,86 @@ Auto-bundles [tirth8205/code-review-graph](https://github.com/tirth8205/code-rev
 
 ## What happens when you install
 
-On the first session in a repo:
+On the first session in a repo, the bootstrap hook runs the whole setup **in the background** so session startup never blocks:
 
-1. The `code-review-graph` Python package is installed once per host (via `pipx` if present, otherwise in a private venv under `~/.local/share/code-review-graph/`). Binary lands at `~/.local/bin/code-review-graph`.
-2. The per-repo MCP server is registered by writing `.mcp.json` in the project root. Claude Code picks it up automatically.
-3. An initial graph `build` runs in the background.
+1. The `codegraph` CLI is installed if it isn't already on `PATH` — via `npm install -g @colbymchenry/codegraph`, falling back to `npx`. codegraph's own installer places the `codegraph` binary on `PATH` so the MCP server can launch later.
+2. `codegraph install --target=claude --location=local --yes` registers the per-repo MCP server, configures Claude Code auto-allow permissions, and initializes the project.
+3. The initial graph index builds (`.codegraph/`), in the background.
 
-On subsequent sessions in the same repo: nothing — everything is already set up.
+Because Claude Code reads MCP server config at session start, a freshly registered server first becomes available on the **next** session — the first session primes it. On subsequent sessions in the same repo nothing runs: the presence of `.codegraph/` short-circuits the bootstrap.
 
-The graph refreshes after `git commit`, `git merge`, `git rebase`, `git pull`, `git checkout`, `git reset`, or `git cherry-pick`. Uncommitted edits are not reflected until you commit.
+The graph refreshes with an incremental `codegraph sync` after `git commit`, `git merge`, `git rebase`, `git pull`, `git checkout`, `git reset`, or `git cherry-pick`. Routine edits are picked up by the next sync.
 
-A second SessionStart hook (`code-graph-healthcheck.sh`) runs immediately after the bootstrap and verifies three things: `code-review-graph` is on `PATH`, `code-review-graph --version` returns 0, and `.mcp.json` in the project root references the binary. On any miss it writes a multi-line stderr block with the exact remediation commands. Exit code stays 0 — a missing integration cannot kill session startup, but it can no longer fail silently. Set `FORGE_CODE_GRAPH_DISABLED=1` to suppress both bootstrap and healthcheck.
+A second SessionStart hook (`code-graph-healthcheck.sh`) runs immediately after the bootstrap. If `codegraph` is on `PATH` and a `.codegraph/` index exists, it confirms the index with `codegraph status`. If the binary is still absent it distinguishes two cases: Node.js (npm or npx) is present — setup is just running in the background, so it prints an informational note; or Node is missing entirely — it prints a remediation block, since nothing can install without it. Exit code stays 0 either way, so a missing integration cannot kill session startup but can no longer fail silently. Set `FORGE_CODE_GRAPH_DISABLED=1` to suppress both bootstrap and healthcheck.
 
 ---
 
 ## Files created in your repo
 
-`code-review-graph install` creates these in the project root on first run:
+`codegraph install --target=claude --location=local` writes, in the project root on first run:
 
-- `.mcp.json` — the MCP server entry Claude Code reads
-- `.claude/settings.json` and `.claude/skills/` — Claude Code config
-- `CLAUDE.md` — usage guidance for the model
-- `.gitignore` — adds `.code-review-graph/`
-- `.code-review-graph/` — the SQLite graph (add to `.gitignore` if not already)
+- the MCP server config Claude Code reads (so the `codegraph` server is registered for this repo)
+- Claude Code auto-allow permissions under `.claude/` (so the MCP tools don't prompt)
+- an instructions file describing the tools to the model
+- `.codegraph/` — the SQLite index (`codegraph.db`); add it to `.gitignore` if it isn't already
 
-**If you already had `CLAUDE.md`, back it up before the first session** — upstream's installer rewrites it.
+Uninstalling the plugin does not remove these. Use `codegraph uninstall` and the per-repo cleanup below.
 
 ---
 
 ## Verifying it works
 
 ```bash
-command -v code-review-graph && code-review-graph --version
-test -d .code-review-graph && ls .code-review-graph/
+command -v codegraph
+test -d .codegraph && codegraph status   # node/edge/file counts + backend
 
 # In a Claude Code session:
-/mcp   # expect `code-review-graph` listed and connected
+/mcp   # expect `codegraph` listed and connected
 ```
 
-If the initial `build` hasn't finished, graph queries return empty. Wait a few seconds on small repos, up to a minute on large monorepos, or run `code-review-graph build` yourself.
+If the initial index hasn't finished, graph queries return empty. Wait a few seconds on small repos, up to a minute on large monorepos, or run `codegraph index` yourself.
 
 ---
 
 ## Configuration
 
+codegraph is zero-config — there is no config file to write or keep in sync.
+
 | Variable | Effect |
 |---|---|
 | `FORGE_CODE_GRAPH_DISABLED=1` | Plugin is inert. No install, no MCP registration, no updates. |
-| `CRG_MAX_IMPACT_NODES` | Caps nodes returned by impact queries (default `500`). |
-| `CRG_TOOLS` | Comma-separated whitelist of MCP tools to expose. |
-| `CRG_GIT_TIMEOUT` | Seconds before git operations time out (default `30`). |
-| `CRG_EMBEDDING_MODEL` | Vector embedding model for semantic search. |
 
-See [upstream README](https://github.com/tirth8205/code-review-graph) for the complete list.
+Indexing scope is controlled by `.gitignore`. codegraph skips dependency/build directories (`node_modules`, `vendor`, `dist`, `build`, `target`, `.venv`, `Pods`, `.next`), anything listed in `.gitignore`, and files over 1 MB. To re-include an excluded directory, add a negation such as `!vendor/` to `.gitignore`. Nothing leaves your machine — the index is local SQLite.
+
+---
+
+## MCP tools
+
+Once the server is connected, codegraph exposes these tools:
+
+| Tool | Purpose |
+|---|---|
+| `codegraph_search` | Find symbols by name across the codebase |
+| `codegraph_context` | Build relevant context for a task — composes search + node + callers + callees |
+| `codegraph_trace` | Trace the call path between two symbols |
+| `codegraph_callers` | Find what calls a function |
+| `codegraph_callees` | Find what a function calls |
+| `codegraph_impact` | Analyze what code is affected by changing a symbol |
+| `codegraph_node` | Get details about a symbol (optionally with source) |
+| `codegraph_explore` | Source for several related symbols grouped by file, plus a relationship map |
+| `codegraph_files` | Get the indexed file structure |
+| `codegraph_status` | Check index health and statistics |
+
+The `/impact-trace` skill joins `codegraph_callers` with execution traces — see [skills/code-graph/impact-trace.md](skills/code-graph/impact-trace.md).
 
 ---
 
 ## Limitations
 
-- **Graph tracks commits, not edits.** Between commits the graph is stale with respect to the working tree. Commit early and often, or run `code-review-graph build` manually.
-- **Background `build` on large monorepos** takes a minute or more. Early queries may return nothing.
-- **Offline first session** — no PyPI means nothing installs. Rerun on reconnect.
-- **Language coverage is finite.** Tree-sitter grammars cover ~23 languages + Jupyter. Unsupported files don't contribute graph nodes; reads fall back to normal file I/O.
-- **First install in a repo rewrites `CLAUDE.md`** and adds files listed above. Know this before enabling the plugin on a repo with a curated `CLAUDE.md`.
-
----
-
-## Known upstream quirks
-
-Tracked here so you don't chase them as plugin bugs. Filed upstream where relevant.
-
-- **Orphan-target pivots in `get_impact_radius_tool` (worked around).** Upstream's extractor records CALLS edges for every call-shaped token — including shell builtins like `printf`, `grep`, `echo`, `jq`, `date`. These have no matching node, but the recursive BFS treats them as pivots, so every function that calls `printf` appears as impacted by every other function that does. This plugin runs a one-line sanitizer (`plugins/code-graph/hooks/sanitize-graph.sh`) after every `build` and `update` that deletes CALLS edges whose target has no matching node. Without the sanitizer the tool returns heavy false positives on any language with many external/builtin calls (shell, C with libc, etc.).
-- **`query_graph_tool` returns one result row per call site.** A function that calls another nine times shows nine identical rows. Cosmetic; costs tokens.
-- **Semantic search is keyword-only by default.** `semantic_search_nodes_tool` falls back to FTS until embeddings are populated — see the next section.
-
----
-
-## Enabling semantic search (optional)
-
-Out of the box `semantic_search_nodes_tool` runs keyword-only — it returns nothing (or very low scores) for queries that don't match file/symbol text. To get vector search, install the extras and embed the graph once.
-
-Pick the install location you already use (pipx shim or this plugin's venv):
-
-```bash
-# If installed via pipx
-pipx inject code-review-graph sentence-transformers
-
-# Or if installed via this plugin's venv fallback
-~/.local/share/code-review-graph/venv/bin/pip install sentence-transformers
-```
-
-Then in a Claude Code session, ask the model to call `embed_graph_tool` once per repo. It downloads `all-MiniLM-L6-v2` (~90 MB) on first use, then embeds every node. Re-embedding only touches new/changed nodes.
-
-Override the model with `CRG_EMBEDDING_MODEL=<huggingface-id>` before the session if you want something other than the default.
-
-Skip this if you only use the graph for structural queries (`query_graph_tool`, `get_impact_radius_tool`, `detect_changes_tool`) — they don't need embeddings.
+- **Node.js required.** codegraph installs from npm; without `npm` or `npx` on `PATH` the bootstrap cannot install it and the healthcheck reports so.
+- **First-session lag.** Setup runs in the background, so the MCP server first comes online on the session after install. Early graph queries may return nothing while the index builds.
+- **Sync cadence.** The graph refreshes on HEAD-moving git commands. Between those it can be stale with respect to uncommitted edits; run `codegraph sync` manually if you need it current.
+- **Language coverage is finite.** tree-sitter grammars cover a fixed set of languages. Unsupported files don't contribute graph nodes; reads fall back to normal file I/O.
 
 ---
 
@@ -112,15 +97,14 @@ Per repo:
 
 ```bash
 rm -f .mcp.json
-rm -rf .claude .code-review-graph
-# Restore your own CLAUDE.md if upstream replaced it
+rm -rf .codegraph
+# remove the codegraph instructions block / .claude auto-allow entries if you added them
 ```
 
 Global:
 
 ```bash
-pipx uninstall code-review-graph 2>/dev/null || true
-rm -f ~/.local/bin/code-review-graph
-rm -rf ~/.local/share/code-review-graph
+codegraph uninstall            # removes codegraph config from configured agents, keeps indexes
+npm uninstall -g @colbymchenry/codegraph 2>/dev/null || true
 /plugin uninstall code-graph@forge-studio
 ```

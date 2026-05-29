@@ -1,27 +1,40 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# code-graph: auto-install tirth8205/code-review-graph (PyPI) and register its
-# MCP server for the current repo so Claude Code can query a Tree-sitter graph
+# code-graph: auto-install colbymchenry/codegraph and register its MCP server
+# for the current repo so Claude Code queries a tree-sitter structural graph
 # instead of re-reading full files.
 #
-# Install strategy (first host): pipx if present; otherwise a self-contained
-# venv at ~/.local/share/code-review-graph/venv with a symlink into
-# ~/.local/bin. PEP 668 (Ubuntu 24.04+) blocks plain `pip install --user`, so
-# we do not rely on it.
+# All install work runs detached in the background, so SessionStart never
+# blocks: a slow first index on a large repo cannot stall startup. The
+# presence of $PROJECT_DIR/.codegraph/ marks "set up" — the bootstrap re-spawns
+# each new session only until that directory exists, so a transient failure
+# (offline, npm not ready) self-heals on the next session without a permanent
+# failure marker.
 #
-# First session on a new repo: runs `code-review-graph install --platform claude-code`
-# in the repo, kicks off `code-review-graph build` in the background.
-# Subsequent sessions: fast path, no network, no writes.
+# Setup chain (background):
+#   1. Ensure the `codegraph` binary is available. Prefer an existing one on
+#      PATH; otherwise `npm install -g @colbymchenry/codegraph`; otherwise run
+#      the installer through `npx`. codegraph's own installer places the binary
+#      on PATH, so the MCP server (command: codegraph) resolves later.
+#   2. `codegraph install --target=claude --location=local --yes` — writes the
+#      project MCP config + Claude Code auto-allow permissions and initializes
+#      the project (per upstream docs, --location=local inits the project).
+#   3. Fallback `codegraph init -i` if .codegraph/ still absent.
+#
+# The MCP server config is read by Claude Code at session start, so a freshly
+# registered server first becomes available on the *next* session — the first
+# session primes it.
 #
 # Opt-out: export FORGE_CODE_GRAPH_DISABLED=1
 #
 # Caveats:
-# - Installs a Python package (pipx-managed or in a plugin-owned venv).
-# - `code-review-graph install --platform claude-code` writes .mcp.json,
-#   .claude/, CLAUDE.md, and .gitignore into the project dir. This plugin
-#   then rewrites .mcp.json's command from `uvx` to the installed binary.
-#   Uninstalling this plugin does NOT remove those files — see docs/code-graph.md.
-# - Pinned to --platform claude-code: never configures Cursor/Windsurf/Zed/etc.
+# - Needs Node.js (npm or npx) to install codegraph. No Node → no install;
+#   the healthcheck reports this.
+# - `codegraph install --location=local` writes .mcp.json, .claude/ (auto-allow
+#   permissions), and an instructions file into the project dir, and creates
+#   .codegraph/ (the SQLite index). Uninstalling this plugin does NOT remove
+#   those files — see docs/code-graph.md.
+# - Pinned to --target=claude: never configures Cursor/Codex/other agents.
 # - Always exits 0 so session startup never fails.
 
 [ "${FORGE_CODE_GRAPH_DISABLED:-0}" = "1" ] && exit 0
@@ -32,81 +45,39 @@ touch "$SESSION_MARKER" 2>/dev/null || true
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 
-export PATH="$HOME/.local/bin:$PATH"
+# npm/npx global bins commonly land here; make sure background setup sees them.
+export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$PATH"
 
-STATE_DIR="$HOME/.local/share/code-review-graph"
-VENV_DIR="$STATE_DIR/venv"
-PIP_MARKER="$STATE_DIR/.forge-studio-pip-installed"
-BIN_LINK="$HOME/.local/bin/code-review-graph"
+# Already set up for this repo — nothing to do.
+[ -d "$PROJECT_DIR/.codegraph" ] && exit 0
 
-if ! command -v code-review-graph >/dev/null 2>&1 && [ ! -f "$PIP_MARKER" ]; then
-  installed=0
+nohup bash -c '
+  set -e
+  export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$PATH"
+  PROJECT_DIR="$1"
 
-  if command -v pipx >/dev/null 2>&1; then
-    if pipx install code-review-graph >/dev/null 2>&1; then
-      installed=1
+  if ! command -v codegraph >/dev/null 2>&1; then
+    if command -v npm >/dev/null 2>&1; then
+      npm install -g @colbymchenry/codegraph >/dev/null 2>&1 || true
     fi
   fi
 
-  if [ "$installed" -eq 0 ]; then
-    mkdir -p "$STATE_DIR" "$HOME/.local/bin" 2>/dev/null || true
-    if python3 -m venv "$VENV_DIR" >/dev/null 2>&1 \
-       && "$VENV_DIR/bin/pip" install --quiet --upgrade pip >/dev/null 2>&1 \
-       && "$VENV_DIR/bin/pip" install --quiet code-review-graph >/dev/null 2>&1; then
-      ln -sf "$VENV_DIR/bin/code-review-graph" "$BIN_LINK" 2>/dev/null && installed=1
+  cd "$PROJECT_DIR" || exit 0
+
+  if command -v codegraph >/dev/null 2>&1; then
+    codegraph install --target=claude --location=local --yes >/dev/null 2>&1 || true
+    [ -d "$PROJECT_DIR/.codegraph" ] || codegraph init -i >/dev/null 2>&1 || true
+  elif command -v npx >/dev/null 2>&1; then
+    npx -y @colbymchenry/codegraph install --target=claude --location=local --yes >/dev/null 2>&1 || true
+    if [ ! -d "$PROJECT_DIR/.codegraph" ]; then
+      if command -v codegraph >/dev/null 2>&1; then
+        codegraph init -i >/dev/null 2>&1 || true
+      else
+        npx -y @colbymchenry/codegraph init -i >/dev/null 2>&1 || true
+      fi
     fi
   fi
-
-  if [ "$installed" -eq 1 ]; then
-    touch "$PIP_MARKER" 2>/dev/null || true
-    export PATH="$HOME/.local/bin:$PATH"
-  else
-    echo "code-graph: install failed (needs python3 -m venv or pipx). Retry next session or set FORGE_CODE_GRAPH_DISABLED=1 to silence." >&2
-    exit 0
-  fi
-fi
-
-if ! command -v code-review-graph >/dev/null 2>&1; then
-  exit 0
-fi
-
-REPO_MARKER="$PROJECT_DIR/.code-review-graph/.forge-studio-initialized"
-if [ ! -f "$REPO_MARKER" ]; then
-  ( cd "$PROJECT_DIR" && code-review-graph install --platform claude-code >/dev/null 2>&1 ) \
-    || echo "code-graph: 'install --platform claude-code' failed in $PROJECT_DIR." >&2
-
-  # Upstream writes .mcp.json with `"command": "uvx"`. We did not install uvx;
-  # rewrite to invoke the binary we did install (pipx shim or our venv symlink).
-  CRG_BIN="$(command -v code-review-graph || true)"
-  MCP_FILE="$PROJECT_DIR/.mcp.json"
-  if [ -n "$CRG_BIN" ] && [ -f "$MCP_FILE" ]; then
-    python3 - "$MCP_FILE" "$CRG_BIN" <<'PY' 2>/dev/null || true
-import json, sys
-path, binary = sys.argv[1], sys.argv[2]
-with open(path) as f:
-    cfg = json.load(f)
-srv = cfg.get("mcpServers", {}).get("code-review-graph")
-if srv:
-    srv["command"] = binary
-    srv["args"] = ["serve"]
-    with open(path, "w") as f:
-        json.dump(cfg, f, indent=2)
-PY
-  fi
-
-  # Upstream's injected CLAUDE.md block references bare tool names (e.g.
-  # `query_graph`), but the actual MCP tool names have a `_tool` suffix.
-  # Patch the block in-place so Claude Code calls names that exist.
-  CLAUDE_MD="$PROJECT_DIR/CLAUDE.md"
-  if [ -f "$CLAUDE_MD" ]; then
-    python3 "${CLAUDE_PLUGIN_ROOT}/hooks/patch-claudemd-tool-names.py" "$CLAUDE_MD" 2>/dev/null || true
-  fi
-
-  mkdir -p "$PROJECT_DIR/.code-review-graph" 2>/dev/null || true
-  nohup bash -c "cd '$PROJECT_DIR' && code-review-graph build && bash '${CLAUDE_PLUGIN_ROOT}/hooks/sanitize-graph.sh' '$PROJECT_DIR'" >/dev/null 2>&1 &
-  disown 2>/dev/null || true
-
-  touch "$REPO_MARKER" 2>/dev/null || true
-fi
+' _ "$PROJECT_DIR" >/dev/null 2>&1 &
+disown 2>/dev/null || true
 
 exit 0

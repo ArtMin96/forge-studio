@@ -1,11 +1,12 @@
 {
   "mcpServers": {
-    "code-review-graph": {
-      "command": "/home/arthur/.local/bin/code-review-graph",
+    "codegraph": {
+      "type": "stdio",
+      "command": "codegraph",
       "args": [
-        "serve"
-      ],
-      "type": "stdio"
+        "serve",
+        "--mcp"
+      ]
     }
   }
 }

@@ -34,7 +34,7 @@ Do not use it for narrow line-level questions — reading the file directly or u
 
 - **Run it before the first deep read in an unfamiliar area.** The map is cheapest when you have not yet read a lot — it orients the subsequent reads so they are purposeful rather than exploratory.
 - **Use the caller list to scope refactors.** If `/zoom-out` surfaces three callers you did not know about, your refactor scope just expanded. Adjust the plan before writing code, not after discovering the callers in a broken build.
-- **Combine with the MCP graph tools for large codebases.** The `code-review-graph` MCP server can answer caller/callee questions with exact structural context. Use `/zoom-out` for the first orientation pass; use `query_graph_tool` or `get_impact_radius_tool` when you need precise references for a specific symbol.
+- **Combine with the MCP graph tools for large codebases.** The `codegraph` MCP server can answer caller/callee questions with exact structural context. Use `/zoom-out` for the first orientation pass; use `codegraph_callers` or `codegraph_impact` when you need precise references for a specific symbol.
 - **One level up at a time.** If the map returned is still too close to the detail, run `/zoom-out` again. Each pass goes up one layer of abstraction.
 
 ## How it improves your workflow

@@ -1,5 +1,5 @@
-# Added by code-review-graph
-.code-review-graph/
+# codegraph structural index (local-only, rebuilt per repo)
+.codegraph/
 
 # Per-session artifacts written by long-session/workflow plugins
 .claude/

@@ -101,5 +101,5 @@ Output:
 - Trend: stable
 
 ### Recommendations
-- Wasted-turn pattern: 6+ near-duplicate rg/grep queries per session. Vary search terms or consult `semantic_search_nodes_tool` first.
+- Wasted-turn pattern: 6+ near-duplicate rg/grep queries per session. Vary search terms or consult `codegraph_search` first.
 ```

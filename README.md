@@ -42,7 +42,7 @@ To pick a subset, run these inside Claude Code instead:
 /plugin install research-gate@forge-studio       # Read-before-edit enforcement
 /plugin install policy-gateway@forge-studio      # Secrets + prompt-injection scan, sensitive-ops audit
 /plugin install rtk-optimizer@forge-studio       # Auto-installs rtk binary + registers global hook
-/plugin install code-graph@forge-studio          # Auto-installs code-review-graph + registers MCP for Tree-sitter code graph
+/plugin install code-graph@forge-studio          # Auto-installs codegraph + registers MCP for tree-sitter code graph
 /plugin install themes@forge-studio              # Curated color themes (Catppuccin Mocha); pick via /theme
 /plugin install cross-repo@forge-studio          # Parallel work across sibling repos with result aggregation
 /plugin install forge-meta@forge-studio          # Self-evolution boundary: change-manifest, evolution-history, controllability guard
@@ -79,7 +79,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | [**research-gate**](plugins/research-gate/README.md) | Blocks Edit/Write on unread files + exploration depth warnings | 4 | 0 |
 | [**policy-gateway**](plugins/policy-gateway/README.md) | PreToolUse secrets scan + prompt-injection scan + sensitive-ops audit. Same `permissionDecision:deny` contract as block-destructive. Rules live in `rules.d/` so SEPL can evolve them. | 4 | 1 |
 | [**rtk-optimizer**](plugins/rtk-optimizer/README.md) | Auto-installs [rtk-ai/rtk](https://github.com/rtk-ai/rtk) on first session and runs `rtk init -g`. 60-90% token reduction on shell commands. Opt-out: `FORGE_RTK_DISABLED=1`. | 2 | 0 |
-| [**code-graph**](plugins/code-graph/README.md) | Auto-installs [tirth8205/code-review-graph](https://github.com/tirth8205/code-review-graph). Registers a Tree-sitter MCP graph per repo so Claude Code queries structural context instead of re-reading files. Adds `/impact-trace` (static × execution dual-view per arXiv:2605.18747 §4.4). Claude Code only. Opt-out: `FORGE_CODE_GRAPH_DISABLED=1`. | 3 | 1 |
+| [**code-graph**](plugins/code-graph/README.md) | Auto-installs [colbymchenry/codegraph](https://github.com/colbymchenry/codegraph). Registers a tree-sitter MCP graph per repo so Claude Code queries structural context instead of re-reading files. Adds `/impact-trace` (static × execution dual-view per arXiv:2605.18747 §4.4). Claude Code only. Opt-out: `FORGE_CODE_GRAPH_DISABLED=1`. | 3 | 1 |
 | [**themes**](plugins/themes/README.md) | Curated color themes for `/theme`: **Catppuccin Mocha**, **Tokyo Night**, **Nord**. Switch via `/theme`; `Ctrl+E` forks any theme into `~/.claude/themes/` for editing. Pure cosmetic — zero hooks. | 0 | 0 |
 | [**cross-repo**](plugins/cross-repo/README.md) | Parallel work across sibling repos: `/federated-fan-out` (per-repo subagents), `/sync-discovery` (pattern comparison across two repos), `/aggregate-results` (verdict matrix from fan-out run) | 0 | 3 |
 | [**forge-meta**](plugins/forge-meta/README.md) | Self-evolution boundary: change-manifest writer, evolution-history ledger, session-digest, auto-tune-skill outer loop, manifest-analyze reporter, skill-staleness-audit (read-only scoring → auto-tune candidate selector), harness-metrics scorecard, paper-research brief writer, controllability invariant (POLICY.md) | 3 | 8 |
@@ -190,7 +190,7 @@ For the full event-by-event table — every hook, matcher, plugin, and behavior 
 | [Execution Traces](docs/traces.md) | Trace collection, analysis, harness evolution |
 | [Research Gate](docs/research-gate.md) | Read-before-edit enforcement design and data |
 | [RTK Optimizer](docs/rtk-optimizer.md) | Auto-bundled rtk-ai/rtk: bootstrap flow, verification, uninstall |
-| [Code Graph](docs/code-graph.md) | Auto-bundled tirth8205/code-review-graph: MCP registration, Tree-sitter graph, update cadence |
+| [Code Graph](docs/code-graph.md) | Auto-bundled colbymchenry/codegraph: MCP registration, tree-sitter graph, update cadence |
 | [Agentic Workflow](docs/agentic-workflow.md) | Workflow plugin usage, configuration, skills, worked examples |
 | [Workflow Lifecycle](plugins/workflow/LIFECYCLE.md) | Event → hook → composed-plugin map |
 | [Transactional Manifest](docs/transactional-manifest.md) | Contributor guide: writing change-manifest entries with read_set, assumptions, evidence_bundle |

@@ -1,12 +1,12 @@
 # code-graph
 
-Auto-installs [tirth8205/code-review-graph](https://github.com/tirth8205/code-review-graph). Claude Code queries a Tree-sitter structural graph through MCP instead of re-reading every file.
+Auto-installs [colbymchenry/codegraph](https://github.com/colbymchenry/codegraph). Claude Code queries a tree-sitter structural graph through MCP instead of re-reading every file.
 
 ## What it does
 
-File scanning is expensive. A graph isn't. This plugin builds and maintains a structural graph of your repo (functions, callers, callees, imports, tests) so Claude can answer "what calls X" or "what's the impact of changing Y" without reading every file.
+File scanning is expensive. A graph isn't. This plugin builds and maintains a structural graph of your repo (functions, callers, callees, imports, references) so Claude can answer "what calls X" or "what's the impact of changing Y" without reading every file.
 
-The graph auto-updates after Bash commands that may have changed code (git operations, build steps, etc.).
+The graph auto-updates after Bash commands that move HEAD (git commit, merge, rebase, pull, checkout, reset, cherry-pick).
 
 ## When to use
 
@@ -20,27 +20,30 @@ Single-file scripts and tiny repos won't benefit.
 ## How it works
 
 ```text
- SessionStart        ──► bootstrap (idempotent: installs the MCP server + builds graph
-                                     on first run, no-ops on subsequent sessions)
- SessionStart        ──► healthcheck (verifies binary + MCP server, warns on drift)
- PostToolUse (Bash)  ──► incremental graph update after code-changing commands
+ SessionStart        ──► bootstrap (idempotent: installs codegraph + registers
+                                     the MCP server + builds the graph on first
+                                     run in the background, no-ops once .codegraph/ exists)
+ SessionStart        ──► healthcheck (verifies the binary, warns on drift)
+ PostToolUse (Bash)  ──► incremental `codegraph sync` after HEAD-moving git commands
 ```
 
-Once installed, use the MCP tools: `query_graph_tool`, `detect_changes_tool`, `get_impact_radius_tool`, `semantic_search_nodes_tool`, etc. The CLAUDE.md template included in this marketplace already documents the workflow.
+All install work runs detached, so SessionStart never blocks. The MCP server is read at session start, so it first comes online on the session after the one that installs it.
+
+Once installed, use the MCP tools: `codegraph_search`, `codegraph_context`, `codegraph_callers`, `codegraph_callees`, `codegraph_impact`, `codegraph_trace`, `codegraph_node`, `codegraph_explore`, `codegraph_files`, `codegraph_status`. The CLAUDE.md template included in this marketplace already documents the workflow.
 
 ## Skills
 
 | Skill | Purpose |
 |---|---|
-| `/impact-trace <symbol> [days]` | Static × execution dual-view (arXiv:2605.18747 §4.4). Joins `query_graph_tool callers_of` with recent execution traces. Emits three disjoint sets — intersection (real blast radius), static-only (callable but dormant), runtime-only (likely dynamic dispatch or graph drift). |
+| `/impact-trace <symbol> [days]` | Static × execution dual-view (arXiv:2605.18747 §4.4). Joins `codegraph_callers` with recent execution traces. Emits three disjoint sets — intersection (real blast radius), static-only (callable but dormant), runtime-only (likely dynamic dispatch or graph drift). |
 
 ## Hooks
 
 | Event | Hook | Effect |
 |---|---|---|
-| `SessionStart` | code-graph-bootstrap | First-time install + graph build (idempotent) |
-| `SessionStart` | code-graph-healthcheck | Warn if binary or MCP server is missing |
-| `PostToolUse` (`Bash`) | code-graph-update | Refresh graph after code-changing Bash commands |
+| `SessionStart` | code-graph-bootstrap | First-time install + graph build, in the background (idempotent) |
+| `SessionStart` | code-graph-healthcheck | Warn if the binary or Node toolchain is missing |
+| `PostToolUse` (`Bash`) | code-graph-update | `codegraph sync` after HEAD-moving git commands |
 
 ## Configuration
 
@@ -48,8 +51,8 @@ Once installed, use the MCP tools: `query_graph_tool`, `detect_changes_tool`, `g
 |---|---|
 | `FORGE_CODE_GRAPH_DISABLED=1` | Skip install and bootstrap entirely |
 
-Claude Code only — Codex CLI and other harnesses do not consume MCP servers in the same way.
+codegraph itself is zero-config: it respects `.gitignore` and skips dependency/build dirs and files over 1 MB. Claude Code only — Codex CLI and other harnesses do not consume MCP servers in the same way.
 
 ## Disable
 
-`/plugin disable code-graph@forge-studio`. The MCP server remains installed; remove it from your global MCP config to fully purge.
+`/plugin disable code-graph@forge-studio`. The MCP server remains installed; run `codegraph uninstall` to remove it from your agent configs (project indexes are preserved).
