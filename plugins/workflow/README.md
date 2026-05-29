@@ -6,7 +6,7 @@ Hook-driven agentic orchestrator. Routes prompts to the right pattern, enforces 
 
 Three jobs, all hook-mediated:
 
-1. **Routing** — every `UserPromptSubmit` is classified (single / pipeline / fan-out / TDD / auto) so multi-step work goes to the right pattern automatically.
+1. **Routing** — every `UserPromptSubmit` is classified (research / single / pipeline / fan-out / TDD / auto) so multi-step work goes to the right pattern automatically.
 2. **Lifecycle** — sprint-contract re-reads before generation, post-subagent handoff nudges, pre-compaction summaries.
 3. **Self-evolution** — `propose → assess → commit → rollback` over versioned resources, with an append-only ledger and snapshot store.
 
@@ -20,7 +20,7 @@ You always want it on. Routing is the entry point — without it, the harness is
 
 ```text
  SessionStart       ──► session-bootstrap.sh   surface active plan, unchecked items, recent progress
- UserPromptSubmit   ──► route-prompt.sh        classify into single / pipeline / fan-out / TDD
+ UserPromptSubmit   ──► route-prompt.sh        classify into research / single / pipeline / fan-out / TDD
                         (or route-prompt-llm.sh for hybrid/LLM mode)
  SubagentStop       ──► after-subagent.sh      append delta to spec.md, nudge handoff, mark features done
  PostToolUse        ──► plan-format-check.sh   validate .claude/plans/*.md format on every Edit/Write/MultiEdit
@@ -49,7 +49,7 @@ Every step writes to `.claude/lineage/ledger.jsonl` (append-only). Snapshots liv
 | Hook | Event | When it fires | What it does |
 |------|-------|---------------|-------------|
 | session-bootstrap.sh | `SessionStart` | Every new session | Surfaces the active plan, unchecked plan items, and the last few lines of `claude-progress.txt` so the session opens with context |
-| route-prompt.sh | `UserPromptSubmit` | Every user message | Shell-first classifier: maps prompt to single-agent / pipeline / fan-out / tdd-loop. Emits an advisory nudge only when confident (≥0.75). One-shot per unique (route, reason, prompt) within a session — use `FORGE_REMINDER_FORCE=1` to re-fire. Set `WORKFLOW_ROUTER_MODE=hybrid` or `llm` to escalate ambiguous prompts to an LLM classifier |
+| route-prompt.sh | `UserPromptSubmit` | Every user message | Shell-first classifier: maps prompt to research (→ `agents:researcher`) / single-agent / pipeline / fan-out / tdd-loop. Emits an advisory nudge only when confident (≥0.75). One-shot per unique (route, reason, prompt) within a session — use `FORGE_REMINDER_FORCE=1` to re-fire. Set `WORKFLOW_ROUTER_MODE=hybrid` or `llm` to escalate ambiguous prompts to an LLM classifier |
 | after-subagent.sh | `SubagentStop` | After any subagent finishes | Nudges the next phase in planner→generator→reviewer→/verify. Appends a delta block to `.claude/spec.md`. Flips `features.json` entries to `done` when commit messages reference their `F<n>` id. Emits a `handoff_open` ledger entry with the current plan. Deduplicates per-phase nudges with a TTL (`FORGE_AFTER_SUBAGENT_TTL_SECS`, default 1800s) — `FORGE_REMINDER_FORCE=1` bypasses. Unknown `agent_type` values emit a warning to stderr (exit 1) |
 | turn-gate.sh | `Stop` | Every N turns (default 3) | Checks for open handoffs past their age limit (`FORGE_HANDOFF_SKIP_SECS`, default 5400s), unchecked plan items in the most recent plan, context pressure above threshold (`WORKFLOW_HANDOFF_PCT`, default 75%), and recent unlogged commits. Set `WORKFLOW_TURN_GATE_INTERVAL` to change cadence |
 | pre-compact-handoff.sh | `PreCompact` | Before context compaction | Advisory nudge to run `/progress-log` before the compaction discards tool outputs |

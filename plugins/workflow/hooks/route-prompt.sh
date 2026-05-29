@@ -47,7 +47,20 @@ classify_shell() {
     reason="explicit TDD / test-first language"
     confidence="0.90"
 
-  # Priority 2: Pipeline — building something new.
+  # Priority 2: Research — investigation / codebase mapping, routed to the
+  # researcher subagent (read-only, codegraph-first). Checked before the build
+  # routes so "research how X works, then add Y" investigates first. Requires an
+  # investigation verb plus a code-scope noun, or a standalone structural
+  # question, so domain uses of "research" ("build a paper-research feature")
+  # do not match.
+  elif { has '\b(research|investigate|explore|understand|analy[sz]e|audit|map|trace|dig into|figure out)\b' \
+         && has '(code ?base|the code|implementation|architecture|dependenc|call ?graph|how .*(work|implemented|wired|handled)|where .*(is|are|defined|live|used)|what (calls|uses|references|depends))'; } \
+       || has '\b(where is|where are|how does|how do|what calls|what uses|who calls|find all( the)? (usages?|references?|callers?|callsites?|implementations?|definitions?) of|locate the (function|class|method|definition)|trace (the )?(call|code) ?path)\b'; then
+    route="research"
+    reason="codebase investigation / research intent"
+    confidence="0.85"
+
+  # Priority 3: Pipeline — building something new.
   # Checked before fan-out because "implement X across modules" is a feature build,
   # not the same-op-many-places pattern fan-out targets.
   elif has '\b(implement|build|design|architect|add (a )?(new )?(feature|module|endpoint|system|page|component|api))\b'; then
@@ -64,14 +77,14 @@ classify_shell() {
       confidence="0.70"
     fi
 
-  # Priority 3: Pipeline — large refactor. Kept separate so "refactor foo" (narrow)
+  # Priority 4: Pipeline — large refactor. Kept separate so "refactor foo" (narrow)
   # doesn't force the full pipeline.
   elif has '\brefactor\b' && { has '\b(across|multiple|several|entire|whole)\b' || [ "$WORD_COUNT" -ge 40 ]; }; then
     route="pipeline"
     reason="large refactor"
     confidence="0.80"
 
-  # Priority 4: Fan-out — same operation applied independently across many targets.
+  # Priority 5: Fan-out — same operation applied independently across many targets.
   # Strict AND across three signals: batch verb + many-targets preposition + target nouns.
   elif has '\b(update|migrate|rename|convert|apply|port|replace)\b' \
     && has '\b(across|in all|to each|for every|in every|in multiple|in several)\b' \
@@ -80,7 +93,7 @@ classify_shell() {
     reason="same op across enumerated targets"
     confidence="0.80"
 
-  # Priority 5: Single-agent — narrow verb + short prompt.
+  # Priority 6: Single-agent — narrow verb + short prompt.
   elif has '\b(fix typo|rename|add (a )?log|update (the )?comment|adjust (the )?(format|spacing|indent))\b' \
     || { has '\b(fix|tweak|adjust|update|change)\b' && [ "$WORD_COUNT" -lt 20 ]; }; then
     route="single-agent"
@@ -142,6 +155,9 @@ case "$ROUTE" in
   tdd-loop)
     SUGGESTION="Test-first intent detected. Consider /tdd-loop — RED→GREEN→REFACTOR gates enforced against a real test runner."
     ;;
+  research)
+    SUGGESTION="Codebase investigation detected. Delegate to the researcher subagent — Agent tool, subagent_type: agents:researcher (read-only, codegraph-first) — rather than grepping inline; it explores in its own context and returns a synthesis, not raw dumps. Use /impact-trace for single-symbol blast radius."
+    ;;
   *)
     exit 0
     ;;
@@ -191,6 +207,10 @@ if [ "$USE_DIRECTIVE" = "1" ]; then
     fan-out)
       HUMAN="fan-out batch"
       EXEC="/fan-out --workers 3-5   # parallel-safe batch across enumerated targets"
+      ;;
+    research)
+      HUMAN="researcher subagent"
+      EXEC="Agent(subagent_type=agents:researcher)   # read-only codebase investigation; returns research_findings"
       ;;
     *)
       HUMAN="$ROUTE"

@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-19 plugins. 82 skills. 76 hooks. 4 agents. 16 behavioral rules.
+19 plugins. 82 skills. 76 hooks. 5 agents. 16 behavioral rules.
 
 ---
 
@@ -70,7 +70,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | [**memory**](plugins/memory/README.md) | Three-tier memory: pointer index → topic files → searchable transcripts, version-aware updates, ledger audit | 1 | 4 |
 | [**evaluator**](plugins/evaluator/README.md) | Static analysis gates (PHP/JS/TS), adversarial review, verification (+features.json execution), reference-fidelity check, test nudge, self-evolution assessment, prediction audit, rubric scoring, **failure-type router** | 9 | 14 |
 | [**workflow**](plugins/workflow/README.md) | Hook-driven agentic orchestrator: advisory routing (recommends `/orchestrate` / `/tdd-loop` / `/fan-out` per prompt), sprint-contract, TDD, /progress-log nudges, self-evolution loop, **/living-spec** (auto-updating spec via after-subagent) | 6 | 11 |
-| [**agents**](plugins/agents/README.md) | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries, worktree-team orchestration, directory-ownership + output-schema checks | 4 | 5 |
+| [**agents**](plugins/agents/README.md) | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries, plus a read-only researcher for pre-planning investigation, worktree-team orchestration, directory-ownership + output-schema checks | 4 | 5 |
 | [**reference**](plugins/reference/README.md) | Hidden Claude Code features: thinking modes, parallel patterns, CLI piping | 0 | 3 |
 | [**traces**](plugins/traces/README.md) | JSONL execution traces, compiled views, failure mining, failure attribution, harness evolution | 6 | 7 |
 | [**diagnostics**](plugins/diagnostics/README.md) | `/entropy-scan` + `/validate-marketplace` + `/docs-maintenance` + **`/rest-audit`** (R.E.S.T. outcomes) + **`/md-structure`** (Karpathy 4-section audit) + **`/ssl-audit`** (SSL frontmatter coverage) + `/policies-list` + `/startup-profile` | 1 | 8 |
@@ -141,6 +141,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | planner | agents | Read, Glob, Grep, Bash | Read-only exploration + design |
 | generator | agents | Read, Write, Edit, Bash, Glob, Grep | Implementation |
 | reviewer | agents | Read, Grep, Glob, Bash | Read-only critique |
+| researcher | agents | inherits session tools minus Write/Edit/NotebookEdit (read-only; codegraph MCP + Skill when present) | Read-only investigation + synthesis (pre-planning) |
 | adversarial-reviewer | evaluator | Read, Grep, Glob | Skeptical security/edge-case review |
 
 ---

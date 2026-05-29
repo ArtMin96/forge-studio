@@ -2,6 +2,8 @@
 
 Multi-agent decomposition for Claude Code. When a task is too large for a single context window, or when you want a critic that cannot be primed by the implementer, this plugin splits the work into three role-isolated subagents: **planner** (research + writes `.claude/plans/s<N>-<slug>.md`; Write/Edit scoped to plan files by convention), **generator** (writes the code, one task at a time), and **reviewer** (adversarial critique of the diff; read-only). A contract-reread mechanism ensures each subagent sees the current sprint criteria from disk — not a potentially compacted or stale in-context copy.
 
+A fourth role, **researcher**, runs read-only ahead of the pipeline: it maps the codebase (patterns, dependencies, call graphs, prior art) and returns a synthesis the planner builds on. It is not a pipeline stage and writes nothing — investigation, not design.
+
 ## When to use
 
 - A task touches **5+ files** or has clear research → design → build → review phases
@@ -13,13 +15,14 @@ For simple single-file changes, direct work is faster — the subagent overhead 
 
 ## Subagent types
 
-The three roles are defined in `plugins/agents/agents/`. You dispatch them via the Agent tool's `subagent_type` parameter, or through the `/dispatch` and `/orchestrate pipeline` skills.
+These roles are defined in `plugins/agents/agents/`. You dispatch them via the Agent tool's `subagent_type` parameter (`agents:planner`, `agents:generator`, `agents:reviewer`, `agents:researcher`); the three pipeline roles also run through the `/dispatch` and `/orchestrate pipeline` skills.
 
 | Role | Capabilities | What it does |
 |------|-------------|--------------|
 | `agents:planner` | Read, Write, Edit, Grep, Glob, Bash (Write/Edit scoped to `.claude/plans/` by convention) | Explores the codebase and writes `.claude/plans/s<N>-<slug>.md` in canonical format (`## Contract` + `### Tasks` + `#### T<n>`) |
 | `agents:generator` | Read, Write, Edit, Bash | Implements one task from the plan; one task per dispatch |
 | `agents:reviewer` | Read, Grep, Glob, Bash (no Edit/Write) | Adversarial critique of the generator's diff; verifies contract compliance; emits Verdict in first 2 lines (truncation-safe format) |
+| `agents:researcher` | Inherits session tools, denies Write/Edit/NotebookEdit (read-only). Keeps codegraph MCP, WebFetch/WebSearch, and Skill when the session has them | Read-only investigation + synthesis before planning; maps patterns, dependencies, and call graphs (codegraph-first, defers single-symbol blast radius to `/impact-trace`) and returns a structured `research_findings` block. Not a pipeline stage |
 
 The planner writes only to `.claude/plans/` — source files are off-limits during planning (instruction-enforced, not schema-enforced). The reviewer cannot change code at all (schema-enforced). The generator cannot publish a plan. This three-role isolation is what makes the pipeline auditable.
 
@@ -68,7 +71,7 @@ Run `/dispatch` first. It will tell you whether the task warrants a pipeline, a 
 
 ## Agents
 
-`generator.md`, `planner.md`, `reviewer.md` — the three role definitions, each with capability-isolated tool lists.
+`generator.md`, `planner.md`, `reviewer.md` — the three pipeline role definitions, each with capability-isolated tool lists. `researcher.md` — the read-only investigation role that precedes the pipeline.
 
 ## Disable
 

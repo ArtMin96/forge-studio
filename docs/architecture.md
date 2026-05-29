@@ -393,6 +393,7 @@ Capability isolation prevents error propagation between phases:
 | planner | Read, Glob, Grep, Bash | Read-only exploration + design | agents |
 | generator | Read, Write, Edit, Bash, Glob, Grep | Implementation | agents |
 | reviewer | Read, Grep, Glob, Bash | Read-only critique | agents |
+| researcher | inherits session tools minus Write/Edit/NotebookEdit (read-only; codegraph MCP + Skill when present) | Read-only investigation + synthesis (pre-planning) | agents |
 | adversarial-reviewer | Read, Grep, Glob | Skeptical security/edge-case review | evaluator |
 
 Self-evaluation is unreliable — agents confidently praise their own work. Separate agents with separate tool sets prevent this.

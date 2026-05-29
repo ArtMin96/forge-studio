@@ -1,6 +1,6 @@
 # Agentic Workflow
 
-The `workflow` plugin instruments a development session with hook-driven advisories. Every prompt is classified into a recommended pattern (single-agent / pipeline / fan-out / tdd-loop), each subagent transition prints a next-step nudge, and context-pressure thresholds trigger handoff reminders. The hooks **only emit text suggestions** — they do not invoke skills or dispatch subagents on their own. To actually run a pattern, the user (or the model on the user's behalf) types `/orchestrate <pattern>`, `/tdd-loop`, etc. Read the suggestion, decide, then invoke.
+The `workflow` plugin instruments a development session with hook-driven advisories. Every prompt is classified into a recommended pattern (research / single-agent / pipeline / fan-out / tdd-loop), each subagent transition prints a next-step nudge, and context-pressure thresholds trigger handoff reminders. The hooks **only emit text suggestions** — they do not invoke skills or dispatch subagents on their own. To actually run a pattern, the user (or the model on the user's behalf) types `/orchestrate <pattern>`, `/tdd-loop`, etc., or for the research route dispatches the `agents:researcher` subagent via the Agent tool. Read the suggestion, decide, then invoke.
 
 ---
 
