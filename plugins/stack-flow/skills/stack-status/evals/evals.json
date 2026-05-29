@@ -1,0 +1,40 @@
+{
+  "skill_name": "stack-status",
+  "evals": [
+    {
+      "id": "clean-stack-three-branches",
+      "prompt": "/stack-status — Show the current stack. All branches are in sync with their parents.",
+      "files": [],
+      "assertions": [
+        "The response runs `bash plugins/stack-flow/skills/_lib/stack-discovery.sh` to retrieve the stack tree.",
+        "The response renders a tree rooted at the base branch (main or master) with indented child branches.",
+        "Each branch entry shows its PR number and state (e.g., [PR #42: OPEN]) when a PR exists.",
+        "No branch is tagged [DIVERGED] because all branches are in sync with their parents.",
+        "The response reports a summary: total branches in stack, number with open PRs, and confirms zero diverged branches."
+      ]
+    },
+    {
+      "id": "diverged-stack-needs-restack",
+      "prompt": "/stack-status — The base branch received new commits after the stack was created. Show which branches need to be restacked.",
+      "files": [],
+      "assertions": [
+        "The response runs `bash plugins/stack-flow/skills/_lib/stack-discovery.sh` to retrieve the stack tree.",
+        "The response renders the tree and tags every branch whose divergence count is non-zero with a [DIVERGED: ...] flag showing parent-ahead and branch-ahead counts.",
+        "The response identifies each diverged branch by name and explicitly tells the user to run `/stack-restack` to fix them.",
+        "The response does NOT attempt to push, rebase, or modify any branch — stack-status is read-only.",
+        "The response does not invoke `/stack-restack` or `/stack-reparent` automatically — it only reports state."
+      ]
+    },
+    {
+      "id": "wrong-tool-push-requested",
+      "prompt": "User: 'Use /stack-status to push my stacked branches to GitHub.' Should /stack-status do this?",
+      "files": [],
+      "assertions": [
+        "The response declines to push — the SKILL.md `when_to_use` exclusion clause explicitly says stack-status is read-only and directs the user to /stack-submit for pushing.",
+        "The response points to `/stack-submit` as the correct skill for pushing stacked branches.",
+        "The response may optionally offer to run /stack-status first so the user can inspect the current state before submitting.",
+        "The response does NOT invoke `git push` or `gh pr create` from within stack-status."
+      ]
+    }
+  ]
+}
