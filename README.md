@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-19 plugins. 82 skills. 76 hooks. 5 agents. 16 behavioral rules.
+20 plugins. 87 skills. 78 hooks. 5 agents. 16 behavioral rules.
 
 ---
 
@@ -46,6 +46,7 @@ To pick a subset, run these inside Claude Code instead:
 /plugin install themes@forge-studio              # Curated color themes (Catppuccin Mocha); pick via /theme
 /plugin install cross-repo@forge-studio          # Parallel work across sibling repos with result aggregation
 /plugin install forge-meta@forge-studio          # Self-evolution boundary: change-manifest, evolution-history, controllability guard
+/plugin install stack-flow@forge-studio          # Stacked-PR management: push guard, restack/reparent, clean PR bodies
 ```
 
 ### Templates
@@ -83,6 +84,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | [**themes**](plugins/themes/README.md) | Curated color themes for `/theme`: **Catppuccin Mocha**, **Tokyo Night**, **Nord**. Switch via `/theme`; `Ctrl+E` forks any theme into `~/.claude/themes/` for editing. Pure cosmetic — zero hooks. | 0 | 0 |
 | [**cross-repo**](plugins/cross-repo/README.md) | Parallel work across sibling repos: `/federated-fan-out` (per-repo subagents), `/sync-discovery` (pattern comparison across two repos), `/aggregate-results` (verdict matrix from fan-out run) | 0 | 3 |
 | [**forge-meta**](plugins/forge-meta/README.md) | Self-evolution boundary: change-manifest writer, evolution-history ledger, session-digest, auto-tune-skill outer loop, manifest-analyze reporter, skill-staleness-audit (read-only scoring → auto-tune candidate selector), harness-metrics scorecard, paper-research brief writer, controllability invariant (POLICY.md) | 3 | 8 |
+| [**stack-flow**](plugins/stack-flow/README.md) | Native-git stacked-PR management: PreToolUse push guard (blocks wrong-branch, detached-HEAD, and bare `--force` pushes via `permissionDecision:deny`), `--update-refs` restack with safe child force-push, squash-merge `--onto` reparent, template-first clean PR bodies, per-repo stack graph in `${CLAUDE_PLUGIN_DATA}` | 2 | 5 |
 
 ### Key Skills
 
@@ -133,6 +135,11 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | `/session-digest` | forge-meta | Produce a ≤10KB per-session rollup at `.claude/sessions/<id>-digest.md` with Component/Experience/Decision sections. Also fires automatically on SessionEnd |
 | `/auto-tune-skill <plugin>:<skill>` | forge-meta | Produce a baseline proposal for a skill at `.claude/proposals/`. The autonomous Pareto-outer-loop is future work; current mode emits the original SKILL.md as a starting candidate for human review |
 | `/harness-metrics` | forge-meta | Compute seven harness-level quality dimensions (trajectory_efficiency, verification_strength, recovery_ability, state_consistency, safety_compliance, replayability, memory_hygiene) from existing artifacts; render Markdown table and write `.claude/metrics/<date>.json` |
+| `/stack-status` | stack-flow | Read-only stack tree: each branch's PR number/state and a needs-restack flag from live divergence |
+| `/stack-create <name>` | stack-flow | Create a branch stacked on the current one and record its parent + parent-SHA in the stack graph |
+| `/stack-submit [branch]` | stack-flow | Push then open/refresh each stack branch's PR with the explicit parent base and a clean template-first body |
+| `/stack-restack [branch]` | stack-flow | Propagate a parent's changes down the stack via `--update-refs`, then safe-force-push the moved children |
+| `/stack-reparent <child>` | stack-flow | Recover a stack after a squash-merge: `rebase --onto` off the recorded old base, then retarget the child PR |
 
 ### Agents
 
@@ -148,11 +155,11 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 
 ## Active Hooks
 
-Hooks fire automatically. No commands needed. 76 hook command registrations across 16 plugins, spanning all major events:
+Hooks fire automatically. No commands needed. 78 hook command registrations across 17 plugins, spanning all major events:
 
-- **Session lifecycle** — `SessionStart` (11 hooks), `SessionEnd` (2), `PreCompact` (4), `PostCompact` (4)
+- **Session lifecycle** — `SessionStart` (12 hooks), `SessionEnd` (2), `PreCompact` (4), `PostCompact` (4)
 - **Per-turn** — `UserPromptSubmit` (7 hooks), `Stop`, `StopFailure`
-- **Tool execution** — `PreToolUse` (13 deny-chain hooks), `PostToolUse` (22), `PostToolUseFailure` (3)
+- **Tool execution** — `PreToolUse` (14 deny-chain hooks), `PostToolUse` (22), `PostToolUseFailure` (3)
 - **Agent / Task** — `SubagentStart` (1), `SubagentStop` (5), `TaskCreated`, `TaskCompleted`
 
 For the full event-by-event table — every hook, matcher, plugin, and behavior — see [`HARNESS_SPEC.md` §Hook Events Reference](HARNESS_SPEC.md#hook-events-reference). Architectural framing in [`docs/architecture.md`](docs/architecture.md).
