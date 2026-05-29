@@ -1,0 +1,41 @@
+{
+  "skill_name": "stack-restack",
+  "evals": [
+    {
+      "id": "restack-diverged-chain",
+      "prompt": "My stack has three branches: feat-login (parent: main), feat-login-ui (parent: feat-login), feat-login-tests (parent: feat-login-ui). A teammate pushed two commits to main. Restack the whole chain.",
+      "files": [],
+      "assertions": [
+        "runs preflight.sh detached-head before any rebase",
+        "runs preflight.sh dirty-tree before any rebase",
+        "runs preflight.sh rebase-in-progress before any rebase",
+        "calls restack.sh with the top branch",
+        "calls safe-push.sh for each branch restack.sh reports as moved",
+        "calls gh pr edit --body-file - to refresh PR bodies for moved branches",
+        "does not call git rebase directly — delegates to restack.sh"
+      ]
+    },
+    {
+      "id": "restack-dirty-tree-blocked",
+      "prompt": "I have uncommitted changes in my working tree and want to restack my stack onto the latest main.",
+      "files": [],
+      "assertions": [
+        "runs preflight.sh dirty-tree",
+        "stops before running restack.sh when dirty-tree check fails",
+        "reports that uncommitted changes must be committed or stashed first",
+        "does not rebase any branch"
+      ]
+    },
+    {
+      "id": "wrong-tool-squash-merge",
+      "prompt": "feat-auth was squash-merged into main. Now feat-auth-tests shows commits from feat-auth duplicated in its history. I want to rebase feat-auth-tests onto main to clean this up.",
+      "files": [],
+      "assertions": [
+        "recognizes this is the squash-merge duplicate-commit case, not a normal divergence",
+        "defers to /stack-reparent which uses onto-reparent.sh and rebase --onto",
+        "does not call restack.sh for this scenario",
+        "explains that /stack-reparent handles the squash-merge re-parent case"
+      ]
+    }
+  ]
+}

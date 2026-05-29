@@ -1,0 +1,42 @@
+{
+  "skill_name": "stack-submit",
+  "evals": [
+    {
+      "id": "submit-new-stack",
+      "prompt": "I have a stack with two branches: feat-auth (parent: main) and feat-auth-tests (parent: feat-auth). Neither has a PR yet. Open PRs for both.",
+      "files": [],
+      "assertions": [
+        "calls stack-graph.sh list to enumerate branches",
+        "calls pr-body.sh for each branch",
+        "calls gh pr create --base main --head feat-auth with a title that describes the change",
+        "calls gh pr create --base feat-auth --head feat-auth-tests with a descriptive title",
+        "base is the recorded parent, not the repo default",
+        "calls stack-graph.sh set to backfill PR numbers",
+        "calls safe-push.sh for branches whose tips have moved"
+      ]
+    },
+    {
+      "id": "submit-refresh-existing",
+      "prompt": "My stack already has PRs open for feat-auth (PR #42) and feat-auth-tests (PR #43). I added a commit to feat-auth. Refresh the PR bodies and push.",
+      "files": [],
+      "assertions": [
+        "detects existing PRs via gh pr view",
+        "does not call gh pr create for branches with existing PRs",
+        "calls gh pr edit --body-file - to refresh body for each branch",
+        "calls safe-push.sh for feat-auth because its tip moved",
+        "does not push feat-auth-tests if its tip is unchanged"
+      ]
+    },
+    {
+      "id": "wrong-tool-squash-merge-reparent",
+      "prompt": "The parent branch feat-auth was squash-merged into main. Now feat-auth-tests shows duplicate commits. I want to submit a PR for feat-auth-tests targeting main.",
+      "files": [],
+      "assertions": [
+        "recognizes that squash-merge duplicate-commit cleanup is not the job of stack-submit",
+        "defers to /stack-reparent for the squash-merge re-parent case",
+        "does not attempt to rebase or rewrite history",
+        "explains that stack-reparent should be run first before submitting"
+      ]
+    }
+  ]
+}

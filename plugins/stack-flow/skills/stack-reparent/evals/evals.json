@@ -1,0 +1,39 @@
+{
+  "skill_name": "stack-reparent",
+  "evals": [
+    {
+      "id": "reparent-after-squash-merge",
+      "prompt": "feat-auth was squash-merged into main. feat-auth-tests (parent: feat-auth) now has duplicate commits from feat-auth in its history. Re-parent feat-auth-tests onto main.",
+      "files": [],
+      "assertions": [
+        "reads parent_sha_at_stack_time from stack-graph.sh get feat-auth-tests",
+        "calls onto-reparent.sh with feat-auth-tests, main, and the recorded SHA",
+        "does not call restack.sh or git rebase --update-refs",
+        "calls safe-push.sh after onto-reparent.sh succeeds",
+        "updates the stack graph to record main as the new parent of feat-auth-tests"
+      ]
+    },
+    {
+      "id": "reparent-ancestor-check-fails",
+      "prompt": "I want to reparent feat-auth-tests onto main. The stack graph records parent_sha_at_stack_time as deadbeef123 but feat-auth-tests has already been rebased and that SHA is no longer reachable from it.",
+      "files": [],
+      "assertions": [
+        "calls onto-reparent.sh which performs the ancestor check",
+        "stops when onto-reparent.sh exits non-zero due to failed ancestor check",
+        "does not call safe-push.sh",
+        "reports that the recorded old-base SHA is not reachable and the stack graph needs updating"
+      ]
+    },
+    {
+      "id": "wrong-tool-normal-divergence",
+      "prompt": "A teammate pushed three commits to feat-auth. feat-auth-tests is now behind its parent but feat-auth was NOT squash-merged — the commits are still there on feat-auth. I want to bring feat-auth-tests up to date.",
+      "files": [],
+      "assertions": [
+        "recognizes this is ordinary divergence, not a squash-merge case",
+        "defers to /stack-restack which uses restack.sh and --update-refs",
+        "does not call onto-reparent.sh",
+        "explains that /stack-reparent is for squash-merge duplicate-commit removal, not normal divergence"
+      ]
+    }
+  ]
+}
