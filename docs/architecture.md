@@ -19,7 +19,7 @@ Design rationale, component model, hook mechanics. For research citations, see [
 | 7 | Behavioral Steering | Ongoing course correction | `behavioral-core` (hooks) |
 | 8 | Self-Evolution | Auditable propose → assess → commit → rollback over versioned resources | `workflow` + `evaluator` + `memory` (ledger at `.claude/lineage/`) |
 
-Cross-cutting plugins: `evaluator`, `workflow`, `reference`, `traces`, `diagnostics`, `caveman`, `token-efficiency`, `research-gate`, `long-session`, `policy-gateway`.
+Cross-cutting plugins: `evaluator`, `workflow`, `reference`, `traces`, `diagnostics`, `caveman`, `token-efficiency`, `research-gate`, `long-session`, `policy-gateway`, `stack-flow` (git-safety guardrail + stacked-PR orchestration; uses the same `permissionDecision: deny` PreToolUse contract as `policy-gateway`).
 
 *arXiv:2605.26112 §3 maps a six-axis framework P_H = Φ(R,M,C,S,O,G) onto agent harness design: R is the model itself (outside marketplace scope); M→#5 Memory; C→#4 Context Management; S→#2 Tool System + #6 Multi-Agent Decomposition; O→`workflow/orchestrate`; G→#3 Permission System + `evaluator`/`policy-gateway`. The paper folds permissions into G and treats tools+subagents as a single S; Forge Studio splits them into separate components because the failure modes and plugin surfaces differ.*
 
