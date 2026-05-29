@@ -168,7 +168,8 @@ Extended thinking is enabled by default and reserves up to 31,999 output tokens 
 - **low** — Simple, well-defined tasks. May skip thinking entirely.
 - **medium** — Everyday dev work: bugs, features, refactoring.
 - **high** (default) — Complex reasoning, nuanced analysis.
-- **max** — Opus 4.6 only.
+- **xhigh** — Deeper reasoning at higher spend. Opus 4.7 / 4.8.
+- **max** — Deepest reasoning, session-only. Opus 4.6 / 4.7 / 4.8.
 - **auto** — Claude decides per-task.
 
 **Cost reduction:** Setting `MAX_THINKING_TOKENS=8000` or `MAX_THINKING_TOKENS=10000` cuts hidden thinking cost by ~70%.

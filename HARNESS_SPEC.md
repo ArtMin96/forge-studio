@@ -71,9 +71,10 @@ disable-model-invocation: true # Required for Forge Studio. Zero cost until invo
 | `disable-model-invocation` | Forge Studio: Yes | `true` prevents Claude from auto-loading. Zero cost until manually invoked. |
 | `user-invocable` | No | `false` hides from `/` menu. Use for background knowledge Claude should auto-load but users shouldn't invoke. |
 | `allowed-tools` | No | Tools Claude can use **without asking permission** while skill is active. Space-separated string or YAML list. Does NOT restrict — all tools remain callable. |
+| `disallowed-tools` | No | Tools removed from the model while the skill is active. Unlike `allowed-tools`, this **does** restrict — listed tools become uncallable for the skill's lifetime. |
 | `argument-hint` | No | Hint shown during autocomplete (e.g., `[issue-number]`). |
 | `model` | No | Override session model when skill is active. |
-| `effort` | No | Override session effort level: `low`, `medium`, `high`, `max` (Opus 4.6 only). |
+| `effort` | No | Override session effort level: `low`, `medium`, `high`, `xhigh`, `max`. `xhigh`/`max` require Opus 4.7/4.8; on older models Claude Code falls back to the highest supported level. |
 | `context` | No | `fork` runs in isolated subagent context. Skill content becomes the subagent prompt. |
 | `agent` | No | Subagent type for `context: fork`. Built-in (`Explore`, `Plan`, `general-purpose`) or custom. |
 | `paths` | No | Glob patterns limiting auto-activation (e.g., `*.php`). Comma-separated or YAML list. |
@@ -164,12 +165,13 @@ Hooks must be **silent on success, verbose on failure**. When a hook has nothing
 
 ## Hook Events Reference
 
-28 hook events organized by lifecycle. Forge Studio plugins use a subset; all are available.
+Claude Code exposes 30+ hook events across the lifecycle. The groups below cover the events Forge Studio plugins use plus the most relevant others; all events are available.
 
 ### Session Lifecycle
 | Event | Matcher | Description |
 |---|---|---|
 | `SessionStart` | Session source (`startup`, `resume`, `clear`, `compact`) | Session begins or resumes |
+| `Setup` | None | `--init-only`, or `--init`/`--maintenance` in `-p` mode |
 | `SessionEnd` | End reason (`clear`, `resume`, `logout`) | Session terminates |
 | `InstructionsLoaded` | Load reason (`session_start`, `compact`, `include`) | CLAUDE.md or `.claude/rules/` loaded |
 
@@ -177,6 +179,7 @@ Hooks must be **silent on success, verbose on failure**. When a hook has nothing
 | Event | Matcher | Description |
 |---|---|---|
 | `UserPromptSubmit` | None (always fires) | User submits prompt, before Claude processes |
+| `MessageDisplay` | None | While assistant message text is displayed. Can transform or hide it. |
 | `Stop` | None | Claude finishes responding |
 | `StopFailure` | Error type (`rate_limit`, `server_error`, `authentication_failed`, `max_output_tokens`) | Turn ends due to API error |
 
@@ -317,7 +320,7 @@ Agent capability isolation prevents error propagation between phases:
 | `tools` | No | Allowlist of tools. Inherits all if omitted. Use `Agent(type)` to restrict subagent spawning. |
 | `disallowedTools` | No | Denylist. Applied before `tools`. Removes from inherited or specified pool. |
 | `model` | No | `sonnet`, `opus`, `haiku`, full model ID, or `inherit` (default). |
-| `effort` | No | Override effort: `low`, `medium`, `high`, `max` (Opus 4.6 only). |
+| `effort` | No | Override effort: `low`, `medium`, `high`, `xhigh`, `max`. `xhigh`/`max` require Opus 4.7/4.8; older models fall back to the highest supported level. |
 | `maxTurns` | No | Cap on agentic turns before agent stops. |
 | `skills` | No | Skills preloaded into agent context at startup (full content, not just metadata). |
 | `mcpServers` | No | Per-agent MCP server access. Reference by name or inline definition. |

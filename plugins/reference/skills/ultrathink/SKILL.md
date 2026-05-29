@@ -18,8 +18,9 @@ Control how hard Claude thinks with `/effort` or the `CLAUDE_CODE_EFFORT_LEVEL` 
 |-------|------------|-----------|
 | **low** | Simple lookups, quick questions, high-volume tasks | Minimal |
 | **medium** | Standard development, balanced speed/quality | Moderate |
-| **high** | Complex reasoning, nuanced analysis, difficult bugs (DEFAULT) | Higher |
-| **max** | Absolute hardest problems, multi-step deduction | Highest |
+| **high** | Complex reasoning, nuanced analysis, difficult bugs (default) | Higher |
+| **xhigh** | Hardest tasks needing deeper reasoning; persists in settings | High |
+| **max** | Deepest reasoning, session-only (set per-turn or via env) | Highest |
 
 ## Ultrathink Keyword
 
@@ -40,7 +41,7 @@ Example: "ultrathink: design the auth system for this app considering OAuth, JWT
 - Formatting or renaming
 - Standard CRUD operations
 
-## Adaptive Thinking (Opus 4.6 / Sonnet 4.6)
+## Adaptive Thinking (Opus 4.6+ / Sonnet 4.6)
 Claude dynamically decides how much to think based on query complexity. Higher effort + harder query = more thinking. Easy queries get direct responses even at high effort — no token waste.
 
 ## Monitor Tool

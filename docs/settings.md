@@ -115,7 +115,7 @@ Controls when context compaction triggers (percentage of context window used):
 
 ```json
 {
-  "effortLevel": "max"
+  "effortLevel": "xhigh"
 }
 ```
 
@@ -125,10 +125,11 @@ Maps directly to `output_config.effort` in the API call. Higher effort = more re
 |-------|----------|------|-------------|
 | `low` | Simple tasks, classification | Cheap | All users |
 | `medium` | Most coding tasks | Balanced | All users |
-| `high` | Complex debugging, architecture | Higher | All users |
-| `max` | Deepest reasoning, no token limit | Highest | Opus 4.6 only for external users |
+| `high` | Complex debugging, architecture (default on Opus 4.8) | Higher | All users |
+| `xhigh` | Deeper reasoning at higher spend | High | Opus 4.7 / 4.8 (falls back to `high` on older) |
+| `max` | Deepest reasoning, no token cap; prone to overthinking | Highest | Opus 4.6 / 4.7 / 4.8 |
 
-External users can persist `low`/`medium`/`high` in settings. `max` must be set per-session or via `CLAUDE_CODE_EFFORT_LEVEL=max` in env.
+`low`/`medium`/`high`/`xhigh` persist in the `effortLevel` setting. `max` (and `ultracode`) are session-only — set `max` per-session or via `CLAUDE_CODE_EFFORT_LEVEL=max` in env.
 
 ### Thinking
 

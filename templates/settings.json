@@ -61,7 +61,7 @@
     "defaultMode": "bypassPermissions"
   },
   "skipDangerousModePermissionPrompt": true,
-  "effortLevel": "max",
+  "effortLevel": "xhigh",
   "alwaysThinkingEnabled": true,
   "statusLine": {
     "type": "command",

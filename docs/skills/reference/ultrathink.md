@@ -18,7 +18,7 @@ No arguments. The skill emits the effort-level reference table and guidance inli
 
 ## Why you need it
 
-Claude's effort levels (`low`, `medium`, `high`, `max`) are not cosmetic labels — they determine how much compute is spent on internal reasoning before an answer is produced. Using `max` effort on a file rename wastes tokens with no quality return; using `low` effort on a security architecture decision produces shallow analysis. The gap between picking the right level and picking the wrong one is measurable in both output quality and token cost.
+Claude's effort levels (`low`, `medium`, `high`, `xhigh`, `max`) are not cosmetic labels — they determine how much compute is spent on internal reasoning before an answer is produced. Using `max` effort on a file rename wastes tokens with no quality return; using `low` effort on a security architecture decision produces shallow analysis. The gap between picking the right level and picking the wrong one is measurable in both output quality and token cost.
 
 Most users never change the effort level because they do not have a clear mental model of where each level pays off. `/ultrathink` makes that model explicit: a table of levels with their intended query shapes and relative cost, plus the `ultrathink` keyword shortcut for a one-off max-effort response without touching global settings.
 
