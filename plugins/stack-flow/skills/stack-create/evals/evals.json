@@ -1,0 +1,39 @@
+{
+  "skill_name": "stack-create",
+  "evals": [
+    {
+      "id": "create-stacked-branch-basic",
+      "prompt": "I'm on branch feat-auth. Create a new stacked branch called feat-auth-tests on top of it.",
+      "files": [],
+      "assertions": [
+        "invokes /stack-create with argument feat-auth-tests",
+        "runs git symbolic-ref --short HEAD to confirm current branch",
+        "runs git checkout -b feat-auth-tests feat-auth",
+        "runs stack-graph.sh set feat-auth-tests feat-auth <sha> null",
+        "does not run git push or gh pr create"
+      ]
+    },
+    {
+      "id": "create-stacked-branch-on-main",
+      "prompt": "Start a new stacked branch called feat-login on top of main.",
+      "files": [],
+      "assertions": [
+        "invokes /stack-create with argument feat-login",
+        "runs git checkout -b feat-login main",
+        "runs stack-graph.sh set feat-login main <sha> null",
+        "pr_number recorded as null in stack-graph.json",
+        "does not open a pull request"
+      ]
+    },
+    {
+      "id": "wrong-tool-pr-creation",
+      "prompt": "Create a stacked branch called feat-search and open a PR for it.",
+      "files": [],
+      "assertions": [
+        "uses /stack-create to create the branch and register it in the stack graph",
+        "defers PR creation to /stack-submit rather than running gh pr create inline",
+        "tells the user to run /stack-submit to open the PR"
+      ]
+    }
+  ]
+}
