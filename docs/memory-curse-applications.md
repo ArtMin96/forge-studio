@@ -137,7 +137,7 @@ The `/forward-briefing` skill addresses tone. A separate mechanism — the `forw
 
 The rule primes Claude to ask whether more deliberation is actually helping before reaching for `/ultrathink`, `/devils-advocate`, `/grill-me`, or extended-thinking blocks — *when the session has accumulated consecutive failures or repeated dead-ends*.
 
-It is descriptive, not enforcing. There is no hook that blocks the deliberation skills; the rule is a behavioral nudge that lives alongside the other 13 rules in `hooks/rules.d/`.
+It is descriptive, not enforcing. There is no hook that blocks the deliberation skills; the rule is a behavioral nudge that lives alongside the other 15 rules in `hooks/rules.d/`.
 
 ### Why
 

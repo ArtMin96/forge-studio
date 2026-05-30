@@ -13,7 +13,7 @@ scheduling: plugins/<plugin>/skills/<skill>/evals/evals.json exists and has ≥1
 structural:
   - Resolve the target skill path and locate its evals/evals.json
   - For each eval case, run N sub-Claude calls with the skill injected (--add-dir) and N without
-  - Per run, write outputs/, timing.json, then invoke score-rubric/scripts/score.py to produce grading.json
+  - Per run, write outputs/, timing.json, then grade each assertion against the captured output to produce grading.json
   - Aggregate per-iteration into benchmark.json with with_skill/without_skill/delta sections
   - Warn on assertions that have no signal (pass in both configs)
 logical: iteration-N/benchmark.json exists for each requested iteration with with_skill.pass_rate, without_skill.pass_rate, and delta.pass_rate all present and in [0,1]
@@ -96,5 +96,6 @@ Evidence for each assertion must be a quoted substring from `outputs/`.
 - **No evals.json** — bench exits 1 with `evals.json not found`. Run `/run-evals` to validate first.
 - **Sub-Claude timeout** — if a real `claude -p` call hangs, bench exits 1 after 120s per run. Reduce `--iterations` or add a shorter eval prompt.
 - **Mock mode is for dev/CI only** — `--mock` writes deterministic synthetic outputs and completes in <5 seconds. It does not call the model; `grading.json` evidence reflects synthetic strings. Never publish benchmark results produced in `--mock` mode.
+- **Grading is a keyword/substring heuristic, not a semantic judge** — in real mode an assertion passes when one of its first three words appears as a substring of the output (`grade_assertions` in bench.py). `pass_rate` is therefore coarse: hand-check `grading.json` evidence before trusting a `delta`, and phrase each assertion around a distinctive term unlikely to appear by chance.
 - **No-signal assertion** — if an assertion passes in both `with_skill` and `without_skill` configs, bench emits `WARN: assertion '<text>' has no signal (passes in both configs)` and continues. The delta row is still emitted; treat it as noise.
 - **Performance budget** — with `--iterations 3` × 2 configs × 1 eval, expect ~6 sub-Claude calls. With 10 assertions and a slow prompt, a full bench may take 10+ minutes. Benchmarks are not session-startup hot paths.

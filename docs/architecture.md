@@ -119,7 +119,7 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 
 ## Forge Hook Deployment
 
-69 hook command registrations across 16 plugins. Hooks fire automatically on events — no commands needed. For the underlying Claude Code event API catalog see [`HARNESS_SPEC.md` §Hook Events Reference](../HARNESS_SPEC.md#hook-events-reference); the tables below describe **what forge actually deploys** at each event.
+76 hook command registrations across 16 plugins. Hooks fire automatically on events — no commands needed. For the underlying Claude Code event API catalog see [`HARNESS_SPEC.md` §Hook Events Reference](../HARNESS_SPEC.md#hook-events-reference); the tables below describe **what forge actually deploys** at each event.
 
 ### Session Lifecycle
 
@@ -133,11 +133,16 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | SessionStart | long-session | bootstrap-substrate.sh | Idempotently create `.claude/{plans,gate}/`, `.claude/spec.md`, `.claude/features.json` so handoff chain works on first run (opt-out: `FORGE_LONG_SESSION_BOOTSTRAP=0`) |
 | SessionStart | long-session | surface-progress.sh | Tail `claude-progress.txt`, `features.json` status, `spec.md` delta, `init.sh` presence |
 | SessionStart | rtk-optimizer | rtk-bootstrap.sh | First session: install `rtk` binary + run `rtk init -g`. Subsequent sessions: no-op |
+| SessionStart | rtk-optimizer | rtk-healthcheck.sh | Verify the bootstrap left `rtk` usable; warn to stderr if broken (always exits 0 so startup survives) |
 | SessionStart | code-graph | code-graph-bootstrap.sh | Install `codegraph` and register MCP server for current repo on first run |
+| SessionStart | code-graph | code-graph-healthcheck.sh | Verify the bootstrap left the codegraph integration usable; warn to stderr if broken (always exits 0 so startup survives) |
 | PreCompact | context-engine | pre-compact-guard.sh | Block compaction when uncommitted work has no progress entry or tasks in-progress |
 | PreCompact | context-engine | pre-compact.sh | Save scope, plan, progress, git state to recovery file |
+| PreCompact | context-engine | forward-briefing.sh | Emit structured pre-compaction briefing (open_failures, recent_edits, pending_verifications, belief_snapshots) to the recovery file |
 | PreCompact | workflow | pre-compact-handoff.sh | Advisory nudge to run `/progress-log` before auto-compaction |
 | PostCompact | context-engine | post-compact.sh | Re-inject scope, plan, tasks, modified files from recovery |
+| PostCompact | context-engine | post-compact-recovery.sh | Re-inject the structured forward-briefing (failures, edits, pending verifications, snapshots) after compaction |
+| PostCompact | context-engine | post-compact-belief-audit.sh | Run `/belief-audit` after compaction to detect file drift before re-editing |
 | PostCompact | caveman | caveman-restore.sh | Re-inject compressed communication rules |
 | SessionEnd | traces | session-summary.sh | Write session summary to trace file |
 | SessionEnd | forge-meta | session-end-digest.sh | Write a ≤10KB AHE-pillar digest (Component/Experience/Decision) to `.claude/sessions/<session-id>-digest.md` |
@@ -172,7 +177,7 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | Read | token-efficiency | track-duplicate-reads.sh | Warn on duplicate reads |
 | Edit\|Write | context-engine | belief-snapshot.sh | Record sha256 of file before edit; feeds `/belief-audit` drift detection |
 
-### After Tool Use (PostToolUse — 21 hooks)
+### After Tool Use (PostToolUse — 22 hooks)
 
 | Matcher | Plugin | Hook | What It Does |
 |---------|--------|------|-------------|
@@ -197,6 +202,7 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | Write\|Edit | traces | collect-file-trace.sh | Log file change to session trace |
 | Bash | traces | collect-bash-trace.sh | Log command, exit code, output to session trace |
 | Bash | code-graph | code-graph-update.sh | Refresh graph after `git commit/merge/rebase/pull/checkout/reset/cherry-pick` |
+| Edit\|Write\|MultiEdit | workflow | plan-format-check.sh | Validate plan-file structure after writes to `.claude/plans/*.md`; catch canonical-format drift (`## Tasks`→`### Tasks`, `### T<n>`→`#### T<n>`) at write time |
 
 ### Failure & Task Events
 
@@ -346,11 +352,12 @@ Forge Studio uses hooks for enforcement, skills for guidance. Anything that must
 
 ## Behavioral Rules (`rules.d/`)
 
-14 rules in `plugins/behavioral-core/hooks/rules.d/`. Each `.txt` file = one behavioral rule. Re-injected every message via `behavioral-anchor.sh`.
+16 rules in `plugins/behavioral-core/hooks/rules.d/`. Each `.txt` file = one behavioral rule. Re-injected every message via `behavioral-anchor.sh`.
 
 | # | Rule | Purpose |
 |---|------|---------|
 | 10 | tone | No sycophancy, no filler, lead with substance |
+| 20 | formatting | Natural prose by default; structure follows the answer's shape, not a template |
 | 25 | brevity | 25 words between tools, 100 word responses |
 | 30 | intellectual-honesty | Challenge own work, admit uncertainty |
 | 35 | no-code-narration | No what-comments, no changelog notes in source |
@@ -363,6 +370,7 @@ Forge Studio uses hooks for enforcement, skills for guidance. Anything that must
 | 70 | confidence-escalation | When confidence low, escalate (/safe-mode, /verify) rather than guess and act |
 | 70 | follow-plans | Execute approved plans exactly |
 | 80 | no-redundant-exploration | Reasonable defaults, vary search terms |
+| 85 | take-a-position | Have an opinion when asked; pick and defend, name what would change the call |
 | 90 | single-variable-changes | Change one thing, verify, proceed |
 
 **Adding rules**: Drop a `.txt` in the directory. Picked up on next message. Rename to `.txt.disabled` to disable.
@@ -390,7 +398,7 @@ Capability isolation prevents error propagation between phases:
 
 | Agent | Tools | Role | Plugin |
 |-------|-------|------|--------|
-| planner | Read, Glob, Grep, Bash | Read-only exploration + design | agents |
+| planner | Read, Write, Edit, Glob, Grep, Bash, WebFetch, WebSearch, Task{Create,List,Get,Update} | Exploration + plan-authoring; Write/Edit scoped to `.claude/plans/` by convention | agents |
 | generator | Read, Write, Edit, Bash, Glob, Grep | Implementation | agents |
 | reviewer | Read, Grep, Glob, Bash | Read-only critique | agents |
 | researcher | inherits session tools minus Write/Edit/NotebookEdit (read-only; codegraph MCP + Skill when present) | Read-only investigation + synthesis (pre-planning) | agents |

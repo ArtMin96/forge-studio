@@ -26,9 +26,6 @@ import tempfile
 from pathlib import Path
 
 
-SCORE_PY = Path(__file__).parent.parent.parent.parent / "score-rubric" / "scripts" / "score.py"
-
-
 def find_skill_dir(skill_arg: str) -> Path:
     """Resolve skill name or path to a directory that contains evals/evals.json."""
     p = Path(skill_arg)
