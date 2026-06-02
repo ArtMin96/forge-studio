@@ -37,6 +37,7 @@ PLUGINS=(
   themes
   cross-repo
   forge-meta
+  stack-flow
 )
 
 # Colour palette — empty when stdout is not a TTY (CI, piped to file, etc.).
