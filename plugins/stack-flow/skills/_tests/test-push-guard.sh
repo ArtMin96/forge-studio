@@ -152,6 +152,56 @@ else
   _fail "push with only remote should pass, got: $OUT"
 fi
 
+# ----- Case 12: 'git push origin HEAD' (HEAD = current branch) → pass -----
+# HEAD resolves to the current branch, so this is a push of the current branch.
+git -C "$FIXTURE_REPO" checkout main
+OUT=$(_guard "git push origin HEAD")
+if ! printf '%s' "$OUT" | grep -q "deny"; then
+  _pass "push origin HEAD (resolves to current branch) passes"
+else
+  _fail "push origin HEAD should pass, got: $OUT"
+fi
+
+# ----- Case 13: 'git push origin HEAD:main' on main → pass (dest matches) -----
+OUT=$(_guard "git push origin HEAD:main")
+if ! printf '%s' "$OUT" | grep -q "deny"; then
+  _pass "push origin HEAD:main (dest matches current) passes"
+else
+  _fail "push origin HEAD:main should pass on main, got: $OUT"
+fi
+
+# ----- Case 14: --mirror (force-updates/deletes all remote refs) → deny -----
+OUT=$(_guard "git push --mirror origin")
+if printf '%s' "$OUT" | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['hookSpecificOutput']['permissionDecision']=='deny'" 2>/dev/null; then
+  _pass "--mirror push is denied"
+else
+  _fail "--mirror push should be denied, got: $OUT"
+fi
+
+# ----- Case 15: --all (pushes every local branch) → deny -----
+OUT=$(_guard "git push --all origin")
+if printf '%s' "$OUT" | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['hookSpecificOutput']['permissionDecision']=='deny'" 2>/dev/null; then
+  _pass "--all push is denied"
+else
+  _fail "--all push should be denied, got: $OUT"
+fi
+
+# ----- Case 16: --delete (drops a remote branch) → deny -----
+OUT=$(_guard "git push origin --delete feat-a")
+if printf '%s' "$OUT" | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['hookSpecificOutput']['permissionDecision']=='deny'" 2>/dev/null; then
+  _pass "--delete push is denied"
+else
+  _fail "--delete push should be denied, got: $OUT"
+fi
+
+# ----- Case 17: deletion refspec ':<branch>' (drops a remote branch) → deny -----
+OUT=$(_guard "git push origin :feat-a")
+if printf '%s' "$OUT" | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['hookSpecificOutput']['permissionDecision']=='deny'" 2>/dev/null; then
+  _pass "deletion refspec (:feat-a) is denied"
+else
+  _fail "deletion refspec (:feat-a) should be denied, got: $OUT"
+fi
+
 # Summary
 echo ""
 echo "test-push-guard.sh: $PASS_COUNT passed, $FAIL_COUNT failed"

@@ -84,7 +84,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | [**themes**](plugins/themes/README.md) | Curated color themes for `/theme`: **Catppuccin Mocha**, **Tokyo Night**, **Nord**. Switch via `/theme`; `Ctrl+E` forks any theme into `~/.claude/themes/` for editing. Pure cosmetic — zero hooks. | 0 | 0 |
 | [**cross-repo**](plugins/cross-repo/README.md) | Parallel work across sibling repos: `/federated-fan-out` (per-repo subagents), `/sync-discovery` (pattern comparison across two repos), `/aggregate-results` (verdict matrix from fan-out run) | 0 | 3 |
 | [**forge-meta**](plugins/forge-meta/README.md) | Self-evolution boundary: change-manifest writer, evolution-history ledger, session-digest, auto-tune-skill outer loop, manifest-analyze reporter, skill-staleness-audit (read-only scoring → auto-tune candidate selector), harness-metrics scorecard, paper-research brief writer, controllability invariant (POLICY.md) | 3 | 8 |
-| [**stack-flow**](plugins/stack-flow/README.md) | Native-git stacked-PR management: PreToolUse push guard (blocks wrong-branch, detached-HEAD, and bare `--force` pushes via `permissionDecision:deny`), `--update-refs` restack with safe child force-push, squash-merge `--onto` reparent, template-first clean PR bodies, per-repo stack graph in `${CLAUDE_PLUGIN_DATA}` | 2 | 5 |
+| [**stack-flow**](plugins/stack-flow/README.md) | Native-git stacked-PR management: PreToolUse push guard (blocks wrong-branch, detached-HEAD, bare `--force`, and whole-remote/deletion `--mirror`/`--all`/`--delete` pushes via `permissionDecision:deny`), `--update-refs` restack with safe child force-push, squash-merge `--onto` reparent, template-first clean PR bodies, per-repo stack graph in `${CLAUDE_PLUGIN_DATA}` | 2 | 5 |
 
 ### Key Skills
 

@@ -14,8 +14,8 @@
 #
 # On conflict: git rebase --abort restores HEAD to its pre-rebase position, then
 # this script exits non-zero with a diagnostic.  No mid-rebase state is left
-# behind (abort is verified by confirming rebase dirs are gone and HEAD matches
-# the pre-rebase commit).
+# behind (abort is verified by confirming rebase dirs are gone and the rebased
+# branch is back at its pre-rebase tip).
 
 set -euo pipefail
 
@@ -55,12 +55,11 @@ if [[ -z "$BASE" ]]; then
     || { echo "restack.sh: no base given and '$TOP_BRANCH' is not in the stack graph" >&2; exit 1; }
 fi
 
-# Record the pre-rebase HEAD so we can verify abort restored state.
-PRE_REBASE_HEAD=$(git rev-parse HEAD)
-PRE_REBASE_BRANCH=$(git symbolic-ref --short HEAD 2>/dev/null || true)
-
-# Record the tip's pre-rebase SHA: git's --update-refs block reports only the
-# intermediate refs, never the rebased tip, so we detect a moved tip ourselves.
+# Record the tip's pre-rebase SHA. git's --update-refs block reports only the
+# intermediate refs, never the rebased tip, so we detect a moved tip ourselves;
+# it also lets us verify a clean restore if the rebase aborts on conflict.
+# (git rebase <base> <top> switches to <top> first, so on --abort HEAD is reset
+# to <top>'s pre-rebase tip — TOP_PRE — not whatever branch we started on.)
 TOP_PRE=$(git rev-parse "$TOP_BRANCH" 2>/dev/null || true)
 
 # Run the rebase, capturing BOTH streams into the temp file: --update-refs
@@ -85,6 +84,15 @@ if [[ "$rebase_exit" -ne 0 ]]; then
   rebase_apply_dir=$(git rev-parse --git-path rebase-apply 2>/dev/null || true)
   if [[ -d "$rebase_merge_dir" || -d "$rebase_apply_dir" ]]; then
     echo "restack.sh: rebase --abort did not clean up rebase dirs — manual intervention required" >&2
+  fi
+
+  # The branch being rebased must be back at its pre-rebase tip; if not, the abort
+  # left it in an unexpected position and the user needs to inspect it by hand.
+  if [[ -n "$TOP_PRE" ]]; then
+    top_post_abort=$(git rev-parse "$TOP_BRANCH" 2>/dev/null || true)
+    if [[ -n "$top_post_abort" && "$top_post_abort" != "$TOP_PRE" ]]; then
+      echo "restack.sh: after --abort, '$TOP_BRANCH' ($top_post_abort) does not match its pre-rebase tip ($TOP_PRE) — manual intervention required" >&2
+    fi
   fi
 
   cat "$REBASE_OUT" >&2

@@ -6,7 +6,7 @@ Native-git stacked-PR management. Keeps a branch tree synchronized as parent bra
 
 Sits between the developer and git, providing three layers of safety:
 
-1. A `PreToolUse` guard blocks any `git push` that targets a branch other than `HEAD`, any detached-HEAD push, and any bare `--force`/`-f` push — directing Claude to the skill that does the safe equivalent instead.
+1. A `PreToolUse` guard blocks any `git push` that targets a branch other than the current one, any detached-HEAD push, any bare `--force`/`-f` push, and any whole-remote or deletion push (`--mirror`, `--all`, `--delete`, `:<branch>`) — directing Claude to the skill that does the safe equivalent instead. (`git push origin HEAD` is allowed: `HEAD` resolves to the current branch.)
 2. A `SessionStart` hook emits the current branch and its stack position so Claude always knows where it sits in the tree.
 3. Skills for reading the stack, creating stacked branches, submitting PRs, restacking after a parent update, and re-parenting after a squash merge — each built on `git rebase --update-refs`, `git rebase --onto`, and `gh`, with force-pushes done safely via `--force-with-lease --force-if-includes`.
 
@@ -26,7 +26,7 @@ Stack state (parent relationships, pre-merge SHAs, PR numbers) is persisted in `
 
 | Event | Hook | Effect |
 |---|---|---|
-| `PreToolUse` (`Bash`) | guard-push | Block wrong-branch, detached-HEAD, and bare `--force` pushes. Emits `permissionDecision: deny` JSON + exit 0. |
+| `PreToolUse` (`Bash`) | guard-push | Block wrong-branch, detached-HEAD, bare `--force`, and whole-remote/deletion (`--mirror`/`--all`/`--delete`/`:<branch>`) pushes. Emits `permissionDecision: deny` JSON + exit 0. |
 | `SessionStart` | session-context | Print current branch and stack position; verify `git >= 2.38` and `gh` are available. |
 
 ## State

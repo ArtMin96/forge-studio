@@ -81,6 +81,7 @@ fi
 # Strategy: walk the space-split tokens, track flags, collect positional args.
 
 BARE_FORCE=0
+DESTRUCTIVE=""
 POSITIONAL=()
 
 # Split the command into tokens.  We rely on word-splitting the command string.
@@ -101,6 +102,9 @@ for TOKEN in "${TOKENS[@]}"; do
     # Bare force flags: -f and --force but NOT --force-with-lease or --force-if-includes.
     # Use exact match so --force-with-lease does not trip the bare-force check.
     -f | --force)      BARE_FORCE=1 ;;
+    # Whole-remote / multi-ref / deletion flags update or drop refs beyond the
+    # current branch and can break the stack tree, so they are blocked outright.
+    --mirror | --all | --delete | -d) DESTRUCTIVE="$TOKEN" ;;
     --force-with-lease | --force-if-includes) : ;;  # safe — ignore
     # --force-with-lease=... (pinned-SHA form)
     --force-with-lease=*) : ;;
@@ -115,6 +119,12 @@ for TOKEN in "${TOKENS[@]}"; do
     *)                 POSITIONAL+=("$TOKEN") ;;
   esac
 done
+
+# Deny whole-remote / multi-ref / deletion pushes before anything else — these
+# act beyond the current branch and can wipe or force-update the whole stack.
+if [[ -n "$DESTRUCTIVE" ]]; then
+  deny "stack-flow: '${DESTRUCTIVE}' force-updates or deletes remote refs beyond the current branch and can break the stack tree. Push one branch at a time with /stack-submit or /stack-restack."
+fi
 
 # Deny bare --force / -f before the branch check.  Point Claude at the safe skills.
 if [[ $BARE_FORCE -eq 1 ]]; then
@@ -138,11 +148,23 @@ if [[ ${#POSITIONAL[@]} -ge 2 ]]; then
   # Strip a leading '+' (force indicator in refspec).
   REFSPEC="${REFSPEC#+}"
 
+  # An empty source side (':<branch>') deletes <branch> on the remote — another
+  # branch in the stack may depend on it, so block this like an explicit --delete.
+  if [[ "$REFSPEC" == :* ]]; then
+    deny "stack-flow: deleting a remote branch via a ':<branch>' refspec is blocked — it can drop a branch the rest of the stack depends on. Restructure the stack with /stack-reparent, or delete the branch deliberately outside the stack."
+  fi
+
   if [[ "$REFSPEC" == *:* ]]; then
     # <local>:<remote> or HEAD:<remote> — extract the right-hand (destination) side.
     TARGET_BRANCH="${REFSPEC##*:}"
   else
     TARGET_BRANCH="$REFSPEC"
+  fi
+
+  # 'HEAD' resolves to the current branch, so 'git push origin HEAD' (and
+  # 'HEAD:HEAD') targets the current branch — compare against it, not the literal.
+  if [[ "$TARGET_BRANCH" == "HEAD" ]]; then
+    TARGET_BRANCH="$CURRENT_BRANCH"
   fi
 fi
 

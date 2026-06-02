@@ -88,6 +88,51 @@ else
   _fail "no-op restack should emit empty stdout; got: $NOOP"
 fi
 
+# ----- Assertion 4: conflict → restack aborts cleanly and exits non-zero -----
+# Build a real rebase conflict: feat-x edits a line that the new base also edits.
+_c() { git -C "$FIXTURE_REPO" -c user.email="t@t.com" -c user.name="T" "$@"; }
+
+git -C "$FIXTURE_REPO" checkout -q main
+printf 'shared line\n' > "$FIXTURE_REPO/conflict.txt"
+_c add conflict.txt; _c commit -q -m "base: add conflict.txt"
+BASE_SHA=$(git -C "$FIXTURE_REPO" rev-parse main)
+
+git -C "$FIXTURE_REPO" checkout -q -b feat-x
+printf 'feat-x version\n' > "$FIXTURE_REPO/conflict.txt"
+_c add conflict.txt; _c commit -q -m "feat-x: edit conflict.txt"
+FEATX_PRE=$(git -C "$FIXTURE_REPO" rev-parse feat-x)
+
+# Advance main with a conflicting edit to the same line, then register feat-x
+# against the pre-advance base so restack rebases it onto the new main.
+git -C "$FIXTURE_REPO" checkout -q main
+printf 'main version\n' > "$FIXTURE_REPO/conflict.txt"
+_c add conflict.txt; _c commit -q -m "main: conflicting edit"
+(cd "$FIXTURE_REPO" && bash "$LIB_DIR/stack-graph.sh" set feat-x main "$BASE_SHA" null)
+
+git -C "$FIXTURE_REPO" checkout -q feat-x
+set +e
+CONFLICT_ERR=$(cd "$FIXTURE_REPO" && bash "$RESTACK" feat-x main 2>&1 >/dev/null)
+CONFLICT_EXIT=$?
+set -e
+
+if [[ "$CONFLICT_EXIT" -ne 0 ]]; then
+  _pass "restack exits non-zero on conflict"
+else
+  _fail "restack should exit non-zero on conflict (got exit 0)"
+fi
+
+FEATX_POST=$(git -C "$FIXTURE_REPO" rev-parse feat-x)
+if (cd "$FIXTURE_REPO" && [ -d "$(git rev-parse --git-path rebase-merge)" ]); then
+  RB_INPROGRESS=1
+else
+  RB_INPROGRESS=0
+fi
+if [[ "$FEATX_POST" == "$FEATX_PRE" && "$RB_INPROGRESS" -eq 0 && "$CONFLICT_ERR" != *"does not match its pre-rebase tip"* ]]; then
+  _pass "conflict abort restored feat-x to its pre-rebase tip, no rebase left in progress"
+else
+  _fail "conflict abort did not cleanly restore feat-x (post=$FEATX_POST pre=$FEATX_PRE inprogress=$RB_INPROGRESS); err: $CONFLICT_ERR"
+fi
+
 # Summary
 echo ""
 echo "test-restack.sh: $PASS_COUNT passed, $FAIL_COUNT failed"
