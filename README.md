@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-20 plugins. 87 skills. 78 hooks. 5 agents. 16 behavioral rules.
+20 plugins. 87 skills. 79 hooks. 5 agents. 16 behavioral rules.
 
 ---
 
@@ -69,7 +69,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | [**context-engine**](plugins/context-engine/README.md) | Context management: progressive pressure, edit safety, environment bootstrap, compaction recovery, task tracking, failure escalation, safe-mode trigger, belief-state drift detection | 21 | 6 |
 | [**long-session**](plugins/long-session/README.md) | Long-running sessions: `init.sh` bootstrap, append-only `claude-progress.txt`, `features.json` testable requirements, `surface-progress` SessionStart hook, `/session-resume` briefing. | 4 | 5 |
 | [**memory**](plugins/memory/README.md) | Three-tier memory: pointer index → topic files → searchable transcripts, version-aware updates, ledger audit | 1 | 4 |
-| [**evaluator**](plugins/evaluator/README.md) | Static analysis gates (PHP/JS/TS), adversarial review, verification (+features.json execution), reference-fidelity check, test nudge, self-evolution assessment, prediction audit, rubric scoring, **failure-type router** | 9 | 14 |
+| [**evaluator**](plugins/evaluator/README.md) | Static analysis gates (PHP/JS/TS), adversarial review, verification (+features.json execution), reference-fidelity check, test nudge, self-evolution assessment, prediction audit, rubric scoring, **failure-type router**, **docs-drift gate** | 10 | 14 |
 | [**workflow**](plugins/workflow/README.md) | Hook-driven agentic orchestrator: advisory routing (recommends `/orchestrate` / `/tdd-loop` / `/fan-out` per prompt), sprint-contract, TDD, /progress-log nudges, self-evolution loop, **/living-spec** (auto-updating spec via after-subagent) | 6 | 11 |
 | [**agents**](plugins/agents/README.md) | Multi-agent decomposition: planner/generator/reviewer triad with tool-isolated capability boundaries, plus a read-only researcher for pre-planning investigation, worktree-team orchestration, directory-ownership + output-schema checks | 4 | 5 |
 | [**reference**](plugins/reference/README.md) | Hidden Claude Code features: thinking modes, parallel patterns, CLI piping | 0 | 3 |
@@ -155,7 +155,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 
 ## Active Hooks
 
-Hooks fire automatically. No commands needed. 78 hook command registrations across 17 plugins, spanning all major events:
+Hooks fire automatically. No commands needed. 79 hook command registrations across 17 plugins, spanning all major events:
 
 - **Session lifecycle** — `SessionStart` (12 hooks), `SessionEnd` (2), `PreCompact` (4), `PostCompact` (4)
 - **Per-turn** — `UserPromptSubmit` (7 hooks), `Stop`, `StopFailure`
