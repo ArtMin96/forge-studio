@@ -10,7 +10,7 @@ set -euo pipefail
 # This keeps the hybrid mode safe for users without API access.
 
 PROMPT=$(cat 2>/dev/null || true)
-MODEL="${WORKFLOW_ROUTER_LLM_MODEL:-claude-haiku-4-5-20251001}"
+MODEL="${WORKFLOW_ROUTER_LLM_MODEL:-haiku}"
 
 if [ -z "$PROMPT" ]; then
   exit 0

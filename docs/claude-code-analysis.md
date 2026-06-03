@@ -253,11 +253,11 @@ Environment variables and settings that reduce overhead:
 
 ### What `effortLevel` Does
 
-Maps directly to `output_config.effort` in the API call:
+Sets the session reasoning effort (via `/effort` or `CLAUDE_CODE_EFFORT_LEVEL`):
 - `low` — minimal reasoning compute
 - `medium` — balanced
-- `high` — more reasoning compute (default on Opus 4.8)
-- `xhigh` — deeper reasoning at higher spend (Opus 4.7 / 4.8)
-- `max` — maximum reasoning (Opus 4.6 / 4.7 / 4.8)
+- `high` — more reasoning compute (default effort)
+- `xhigh` — deeper reasoning at higher spend (recent Opus models)
+- `max` — maximum reasoning (recent Opus models)
 
 `low`/`medium`/`high`/`xhigh` persist in the `effortLevel` setting. `max` is session-only — set per-session or via env var `CLAUDE_CODE_EFFORT_LEVEL=max`.

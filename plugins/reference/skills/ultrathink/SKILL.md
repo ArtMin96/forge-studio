@@ -24,7 +24,7 @@ Control how hard Claude thinks with `/effort` or the `CLAUDE_CODE_EFFORT_LEVEL` 
 
 ## Ultrathink Keyword
 
-Include "ultrathink" anywhere in your prompt for a one-off max-effort response. No need to change global settings.
+Include "ultrathink" anywhere in your prompt to request deeper reasoning on that turn. Claude Code recognizes the keyword and adds an in-context instruction to think harder — your session effort level is unchanged. No need to change global settings.
 
 Example: "ultrathink: design the auth system for this app considering OAuth, JWT, and session-based approaches"
 
@@ -41,7 +41,7 @@ Example: "ultrathink: design the auth system for this app considering OAuth, JWT
 - Formatting or renaming
 - Standard CRUD operations
 
-## Adaptive Thinking (Opus 4.6+ / Sonnet 4.6)
+## Adaptive Thinking (current Opus and Sonnet)
 Claude dynamically decides how much to think based on query complexity. Higher effort + harder query = more thinking. Easy queries get direct responses even at high effort — no token waste.
 
 ## Monitor Tool

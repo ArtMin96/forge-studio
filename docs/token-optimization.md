@@ -43,20 +43,20 @@ When you need to understand an unfamiliar codebase, the worst approach is readin
 ```json
 {
   "model": "sonnet",
+  "effortLevel": "medium",
   "env": {
-    "MAX_THINKING_TOKENS": "10000",
     "CLAUDE_CODE_SUBAGENT_MODEL": "haiku"
   }
 }
 ```
 
-**`"model": "sonnet"`** — Opus costs ~5x Sonnet per token. Sonnet handles ~80% of real development work without quality loss: writing tests, simple edits, explaining code, reading logs. Reserve Opus for genuinely complex multi-file reasoning or architecture decisions.
+**`"model": "sonnet"`** — Opus costs ~1.7x Sonnet per token (and ~5x Haiku). Sonnet handles ~80% of real development work without quality loss: writing tests, simple edits, explaining code, reading logs. Reserve Opus for genuinely complex multi-file reasoning or architecture decisions.
 
-**`MAX_THINKING_TOKENS: "10000"`** — Extended thinking defaults to 31,999 tokens per request, billed as output tokens (expensive). Capping at 10,000 cuts thinking cost by ~70%. For most tasks, 10K is more than enough internal deliberation.
+**`effortLevel: "medium"`** — Thinking is adaptive, so the effort level is how you control how much Claude reasons and spends. `medium` trims token use on routine work while holding quality; raise it to `high` for complex multi-file reasoning.
 
 **`CLAUDE_CODE_SUBAGENT_MODEL: "haiku"`** — Subagents inherit the parent model by default. A Haiku subagent exploring 30 files to find a function signature is doing mechanical search work — it doesn't need Opus. This setting runs all subagents on Haiku unless you override per-agent.
 
-Combined, these three settings yield roughly 60% cost reduction versus always-on Opus with default thinking.
+Combined, these settings cut cost versus running Opus at high effort on every task — chiefly the model switch and the subagent downshift, with lower effort trimming the rest.
 
 ---
 

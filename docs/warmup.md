@@ -60,7 +60,7 @@ Claude will create the trigger using the `schedule` skill. Manage it at https://
     "ccr": {
       "environment_id": "<your-environment-id>",
       "session_context": {
-        "model": "claude-haiku-4-5-20251001",
+        "model": "haiku",
         "sources": [],
         "allowed_tools": ["Read"]
       },

@@ -119,15 +119,15 @@ Controls when context compaction triggers (percentage of context window used):
 }
 ```
 
-Maps directly to `output_config.effort` in the API call. Higher effort = more reasoning compute before the model responds.
+Sets the session effort level (same as `/effort`). Higher effort = more reasoning before the model responds.
 
 | Level | Use case | Cost | Who can use |
 |-------|----------|------|-------------|
 | `low` | Simple tasks, classification | Cheap | All users |
 | `medium` | Most coding tasks | Balanced | All users |
-| `high` | Complex debugging, architecture (default on Opus 4.8) | Higher | All users |
-| `xhigh` | Deeper reasoning at higher spend | High | Opus 4.7 / 4.8 (falls back to `high` on older) |
-| `max` | Deepest reasoning, no token cap; prone to overthinking | Highest | Opus 4.6 / 4.7 / 4.8 |
+| `high` | Complex debugging, architecture (default effort) | Higher | All users |
+| `xhigh` | Deeper reasoning at higher spend | High | Recent Opus models (falls back to `high` where unsupported) |
+| `max` | Deepest reasoning, no token cap; prone to overthinking | Highest | Recent Opus models |
 
 `low`/`medium`/`high`/`xhigh` persist in the `effortLevel` setting. `max` (and `ultracode`) are session-only — set `max` per-session or via `CLAUDE_CODE_EFFORT_LEVEL=max` in env.
 
@@ -139,7 +139,7 @@ Maps directly to `output_config.effort` in the API call. Higher effort = more re
 }
 ```
 
-Forces extended thinking on every response. More internal reasoning = better output quality.
+Turns thinking on by default for all sessions (same toggle as `/config` → thinking mode). The model still decides per step whether to think; the effort level controls how much. Force it off with `CLAUDE_CODE_DISABLE_THINKING=1`.
 
 ### Prompt Caching
 
@@ -158,8 +158,8 @@ These are native Claude Code aliases, available via `--model` flag or `model` ke
 
 | Alias | Resolves to |
 |-------|-------------|
-| `sonnet` | Latest Claude Sonnet 4.6 |
-| `opus` | Latest Claude Opus 4.6 |
+| `sonnet` | Latest Claude Sonnet |
+| `opus` | Latest Claude Opus |
 | `haiku` | Fast, efficient model |
 | `opus[1m]` | Opus with 1M context window |
 | `opusplan` | Opus for planning, Sonnet for execution |
@@ -193,8 +193,8 @@ The `templates/settings.json` in this repo provides:
 
 1. **Auto-compact at 75%** — Prevents context quality decay
 2. **11 deny rules** — Blocks destructive commands at the permission layer
-3. **Extended thinking** — Always-on for better reasoning
-4. **Max effort** — Deepest reasoning on Opus 4.6
+3. **Thinking enabled by default** — `alwaysThinkingEnabled`; depth is set by effort, not forced per turn
+4. **Max effort** — Deepest reasoning on the latest Opus
 5. **Tool search enabled** — Defers unused tool schemas, saves 500-2K tokens per deferred tool
 6. **Git instructions disabled** — Saves ~2K tokens (covered by CLAUDE.md)
 7. **Prompt suggestions disabled** — Eliminates background compute after every turn
@@ -378,7 +378,6 @@ See [Claude Code Analysis](claude-code-analysis.md) for the full source analysis
 | Setting | Why it's bad |
 |---------|-------------|
 | `DISABLE_PROMPT_CACHING: "1"` | Wastes cost and increases latency |
-| `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING: "1"` | Removes dynamic thinking budget |
 | `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE: "95"` | Default — compacts too late |
 | `bypassPermissions` without deny rules | No safety net at all |
 | No `deny` rules in any settings file | Relies entirely on hooks (bypassable) |
@@ -423,7 +422,7 @@ Useful variables to set in `settings.json` under `"env"`:
 | `FORGE_MCP_INJECTION_SCAN` | `"1"` or `"0"` | Enable/disable MCP config injection-pattern scan at SessionStart (default on) |
 | `FORGE_TOOL_MENU_MAX` | `"10"` | Max tools per agent/skill before `/entropy-scan` Check 9 flags tool-bloat (default 10) |
 | `WORKFLOW_ROUTER_MODE` | `"shell"` \| `"hybrid"` \| `"llm"` | Agentic-workflow router: `shell` = regex only (zero tokens), `hybrid` = shell-first then Haiku on low confidence, `llm` = always Haiku |
-| `WORKFLOW_ROUTER_LLM_MODEL` | model ID | Model used by the LLM fallback (default `claude-haiku-4-5-20251001`) |
+| `WORKFLOW_ROUTER_LLM_MODEL` | `haiku` | Model used by the LLM fallback |
 | `WORKFLOW_ROUTER_CONFIDENCE_THRESHOLD` | `"0.75"` | In `hybrid` mode, shell results below this escalate to the LLM |
 | `WORKFLOW_TURN_GATE_INTERVAL` | `"3"` | Stop-hook nudges fire every N turns (plan items + context pressure) |
 | `WORKFLOW_HANDOFF_PCT` | `"75"` | Context pressure threshold that triggers a `/progress-log` nudge (env name retained for back-compat) |

@@ -115,7 +115,7 @@ All settings live under `env` in `~/.claude/settings.json` or the project's `.cl
 {
   "env": {
     "WORKFLOW_ROUTER_MODE": "shell",
-    "WORKFLOW_ROUTER_LLM_MODEL": "claude-haiku-4-5-20251001",
+    "WORKFLOW_ROUTER_LLM_MODEL": "haiku",
     "WORKFLOW_ROUTER_CONFIDENCE_THRESHOLD": "0.75",
     "WORKFLOW_TURN_GATE_INTERVAL": "3",
     "WORKFLOW_HANDOFF_PCT": "75"
@@ -126,7 +126,7 @@ All settings live under `env` in `~/.claude/settings.json` or the project's `.cl
 | Variable | Default | Purpose |
 |---|---|---|
 | `WORKFLOW_ROUTER_MODE` | `shell` | `shell` (regex only, zero tokens), `hybrid` (shell first, Haiku when uncertain), `llm` (always Haiku). |
-| `WORKFLOW_ROUTER_LLM_MODEL` | `claude-haiku-4-5-20251001` | Model the LLM fallback uses. |
+| `WORKFLOW_ROUTER_LLM_MODEL` | `haiku` | Model the LLM fallback uses. |
 | `WORKFLOW_ROUTER_CONFIDENCE_THRESHOLD` | `0.75` | In `hybrid`, shell results under this threshold escalate to the LLM. |
 | `WORKFLOW_TURN_GATE_INTERVAL` | `3` | Stop-hook fires every N turns. Higher = quieter. |
 | `WORKFLOW_HANDOFF_PCT` | `75` | Context pressure % that triggers the handoff nudge. |

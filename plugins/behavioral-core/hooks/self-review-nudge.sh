@@ -2,7 +2,7 @@
 set -euo pipefail
 # Behavioral Core: Periodic self-review nudge after code writes.
 # Fires every Nth edit (default 3) instead of every single one.
-# Opus 4.6 overtriggers on per-edit nudges — interval reduces over-caution.
+# Models can overtrigger on per-edit nudges — interval reduces over-caution.
 
 INPUT=$(cat)
 FILE=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null || true)

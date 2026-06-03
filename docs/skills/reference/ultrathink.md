@@ -20,7 +20,7 @@ No arguments. The skill emits the effort-level reference table and guidance inli
 
 Claude's effort levels (`low`, `medium`, `high`, `xhigh`, `max`) are not cosmetic labels — they determine how much compute is spent on internal reasoning before an answer is produced. Using `max` effort on a file rename wastes tokens with no quality return; using `low` effort on a security architecture decision produces shallow analysis. The gap between picking the right level and picking the wrong one is measurable in both output quality and token cost.
 
-Most users never change the effort level because they do not have a clear mental model of where each level pays off. `/ultrathink` makes that model explicit: a table of levels with their intended query shapes and relative cost, plus the `ultrathink` keyword shortcut for a one-off max-effort response without touching global settings.
+Most users never change the effort level because they do not have a clear mental model of where each level pays off. `/ultrathink` makes that model explicit: a table of levels with their intended query shapes and relative cost, plus the `ultrathink` keyword shortcut that asks Claude to reason deeper on a single turn without touching global settings.
 
 ## When to use it
 
@@ -33,7 +33,7 @@ Do not use it for changing the effort level mid-session — use the `/effort` co
 ## Best practices
 
 - **Default to `high` for anything ambiguous.** The skill documents `high` as the default for a reason: it is the level where most development work produces the best quality-to-cost ratio. Reserve `max` for genuinely multi-step deductions.
-- **Use the `ultrathink` keyword for one-offs.** Including the word "ultrathink" anywhere in a prompt triggers max-effort for that turn only, leaving the global setting unchanged. This is cheaper than a global `/effort max` when you need one deep response.
+- **Use the `ultrathink` keyword for one-offs.** Including the word "ultrathink" anywhere in a prompt adds an in-context request to reason deeper for that turn; Claude Code recognizes the keyword while leaving your session effort level unchanged. It is a lighter-touch nudge than a global `/effort max` when you want one deeper response.
 - **Match effort to query shape.** Simple file reads, straightforward renames, and standard CRUD operations do not need elevated effort — the skill's "When Deep Thinking Wastes Tokens" section is the guide for when to stay low.
 - **Remember adaptive thinking.** On capable models, Claude scales internal reasoning dynamically within the selected level. An easy query at `high` effort still gets a direct response; the model does not pad reasoning to fill a budget.
 

@@ -9,7 +9,7 @@ Confidence: High (primarily sourced from official Anthropic docs, the Claude Cod
 1. [Where Tokens Actually Go (Benchmarks)](#1-where-tokens-actually-go)
 2. [Prompt Caching — The Single Biggest Lever](#2-prompt-caching)
 3. [Context Window Management and Compaction](#3-context-window-management)
-4. [Model Selection and Extended Thinking](#4-model-selection-and-extended-thinking)
+4. [Model Selection and Adaptive Thinking](#4-model-selection-and-adaptive-thinking)
 5. [Subagent Efficiency](#5-subagent-efficiency)
 6. [Hook-Based Optimizations](#6-hook-based-optimizations)
 7. [MCP and Tool Overhead](#7-mcp-and-tool-overhead)
@@ -31,7 +31,7 @@ Confidence: High (primarily sourced from official Anthropic docs, the Claude Cod
 | Single file read (500 lines) | 5,000-8,000 | This is a major token sink |
 | Each tool invocation overhead | 50-200 | Function call structure, params, return formatting |
 | 50+ tool calls session overhead | 2,500-10,000 | Cumulative |
-| Extended thinking (default) | Up to 31,999/request | Billed as output tokens |
+| Adaptive thinking | Varies per step (model decides) | Billed as output tokens; effort sets the ceiling |
 | Agent teams | ~7x standard sessions | Each teammate has its own context window |
 | A "simple" edit command end-to-end | 50,000-150,000 | Read + generate edit + test + verify |
 | 20 file reads + 10 edits session | 150,000+ | With full reads and full rewrites |
@@ -146,7 +146,7 @@ Use `Esc + Esc` or `/rewind`, select a message checkpoint, and choose "Summarize
 
 ---
 
-## 4. Model Selection and Extended Thinking
+## 4. Model Selection and Adaptive Thinking
 
 ### Model Selection
 
@@ -160,36 +160,36 @@ Switch with `/model` mid-session. Set default in `/config` or `settings.json`.
 
 **Important caveat:** Switching models in the main conversation breaks prompt cache (see Section 2). Use subagents for model switching instead.
 
-### Extended Thinking
+### Adaptive Thinking
 
-Extended thinking is enabled by default and reserves up to 31,999 output tokens per request.
+Thinking is adaptive: the model decides per step whether and how much to think, and the effort level sets how much it spends.
 
 **Effort levels** (`/effort`):
 - **low** — Simple, well-defined tasks. May skip thinking entirely.
 - **medium** — Everyday dev work: bugs, features, refactoring.
 - **high** (default) — Complex reasoning, nuanced analysis.
-- **xhigh** — Deeper reasoning at higher spend. Opus 4.7 / 4.8.
-- **max** — Deepest reasoning, session-only. Opus 4.6 / 4.7 / 4.8.
+- **xhigh** — Deeper reasoning at higher spend. Recent Opus models.
+- **max** — Deepest reasoning, session-only. Recent Opus models.
 - **auto** — Claude decides per-task.
 
-**Cost reduction:** Setting `MAX_THINKING_TOKENS=8000` or `MAX_THINKING_TOKENS=10000` cuts hidden thinking cost by ~70%.
+**Cost reduction:** Lower the effort level (`effortLevel` setting, `--effort`, or `CLAUDE_CODE_EFFORT_LEVEL`) — the lever for trimming reasoning spend.
 
 **Recommended cost-optimized settings.json:**
 ```json
 {
   "model": "sonnet",
+  "effortLevel": "medium",
   "env": {
-    "MAX_THINKING_TOKENS": "10000",
     "CLAUDE_CODE_SUBAGENT_MODEL": "haiku"
   }
 }
 ```
 
-This yields ~60% cost reduction versus always running Opus with default thinking.
+This cuts cost versus running Opus at high effort on every task — mainly the model switch and subagent downshift, with lower effort trimming the rest.
 
-Note: `budget_tokens` is deprecated on Claude Opus 4.6 and Sonnet 4.6. Use the effort parameter instead.
+Note: thinking is adaptive — the effort level controls how much Claude thinks; there is no separate thinking-token budget to tune.
 
-**Sources:** [Effort — Claude API Docs](https://platform.claude.com/docs/en/build-with-claude/effort), [Claude Code Effort Levels Explained](https://www.mindstudio.ai/blog/claude-code-effort-levels-explained)
+**Sources:** [Effort — Claude Docs](https://platform.claude.com/docs/en/build-with-claude/effort), [Claude Code Effort Levels Explained](https://www.mindstudio.ai/blog/claude-code-effort-levels-explained)
 
 ---
 
@@ -345,7 +345,7 @@ Specialized instructions (PR review checklists, migration guides, etc.) should b
 
 | Variable | Default | Effect |
 |---|---|---|
-| `MAX_THINKING_TOKENS` | 31,999 | Cap on extended thinking tokens per request |
+| `CLAUDE_CODE_EFFORT_LEVEL` | (model default) | Reasoning effort: `low`/`medium`/`high`/`xhigh`/`max`/`auto`. The reasoning-cost lever |
 | `MAX_MCP_OUTPUT_TOKENS` | 25,000 | Cap on MCP tool output tokens |
 | `CLAUDE_CODE_SUBAGENT_MODEL` | (inherits parent) | Model for subagents |
 | `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` | 0 | Enable agent teams |
@@ -355,8 +355,8 @@ Specialized instructions (PR review checklists, migration guides, etc.) should b
 ```json
 {
   "model": "sonnet",
+  "effortLevel": "medium",
   "env": {
-    "MAX_THINKING_TOKENS": "10000",
     "CLAUDE_CODE_SUBAGENT_MODEL": "haiku",
     "MAX_MCP_OUTPUT_TOKENS": "15000"
   }
@@ -392,7 +392,7 @@ For CI/CD and unattended runs:
 ### Immediate Wins (do today)
 
 - [ ] Set default model to Sonnet in settings.json
-- [ ] Set `MAX_THINKING_TOKENS` to 10000
+- [ ] Set `effortLevel` to `medium` (or `CLAUDE_CODE_EFFORT_LEVEL=medium`)
 - [ ] Set `CLAUDE_CODE_SUBAGENT_MODEL` to haiku
 - [ ] Run `/mcp` and disable unused MCP servers
 - [ ] Audit CLAUDE.md — keep under 200 lines, move specialized content to skills
@@ -442,7 +442,6 @@ For CI/CD and unattended runs:
 | Hook-based optimization patterns | High | Official docs, verified community implementations |
 | Third-party plugin savings claims | Medium | Community claims, not independently verified |
 | Specific dollar amounts ($6/dev/day average) | Medium | Official but will vary significantly by usage pattern |
-| MAX_THINKING_TOKENS impact estimate (~70% reduction) | Medium | Community measurement, plausible but context-dependent |
 
 ---
 

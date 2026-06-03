@@ -74,7 +74,7 @@ disable-model-invocation: true # Required for Forge Studio. Zero cost until invo
 | `disallowed-tools` | No | Tools removed from the model while the skill is active. Unlike `allowed-tools`, this **does** restrict — listed tools become uncallable for the skill's lifetime. |
 | `argument-hint` | No | Hint shown during autocomplete (e.g., `[issue-number]`). |
 | `model` | No | Override session model when skill is active. |
-| `effort` | No | Override session effort level: `low`, `medium`, `high`, `xhigh`, `max`. `xhigh`/`max` require Opus 4.7/4.8; on older models Claude Code falls back to the highest supported level. |
+| `effort` | No | Override session effort level: `low`, `medium`, `high`, `xhigh`, `max`. `xhigh`/`max` require a recent Opus model; on older models Claude Code falls back to the highest supported level. |
 | `context` | No | `fork` runs in isolated subagent context. Skill content becomes the subagent prompt. |
 | `agent` | No | Subagent type for `context: fork`. Built-in (`Explore`, `Plan`, `general-purpose`) or custom. |
 | `paths` | No | Glob patterns limiting auto-activation (e.g., `*.php`). Comma-separated or YAML list. |
@@ -320,7 +320,7 @@ Agent capability isolation prevents error propagation between phases:
 | `tools` | No | Allowlist of tools. Inherits all if omitted. Use `Agent(type)` to restrict subagent spawning. |
 | `disallowedTools` | No | Denylist. Applied before `tools`. Removes from inherited or specified pool. |
 | `model` | No | `sonnet`, `opus`, `haiku`, full model ID, or `inherit` (default). |
-| `effort` | No | Override effort: `low`, `medium`, `high`, `xhigh`, `max`. `xhigh`/`max` require Opus 4.7/4.8; older models fall back to the highest supported level. |
+| `effort` | No | Override effort: `low`, `medium`, `high`, `xhigh`, `max`. `xhigh`/`max` require a recent Opus model; older models fall back to the highest supported level. |
 | `maxTurns` | No | Cap on agentic turns before agent stops. |
 | `skills` | No | Skills preloaded into agent context at startup (full content, not just metadata). |
 | `mcpServers` | No | Per-agent MCP server access. Reference by name or inline definition. |

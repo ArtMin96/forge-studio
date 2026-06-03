@@ -107,7 +107,7 @@ Set in `~/.claude/settings.json` or project `.claude/settings.json` under the `e
 | Variable | Default | Purpose |
 |---|---|---|
 | `WORKFLOW_ROUTER_MODE` | `shell` | `shell` / `hybrid` / `llm`. Controls the UserPromptSubmit classifier. |
-| `WORKFLOW_ROUTER_LLM_MODEL` | `claude-haiku-4-5-20251001` | Model used by the LLM fallback when escalated. |
+| `WORKFLOW_ROUTER_LLM_MODEL` | `haiku` | Model used by the LLM fallback when escalated. |
 | `WORKFLOW_ROUTER_CONFIDENCE_THRESHOLD` | `0.75` | In `hybrid` mode, escalate to LLM when shell confidence falls below this. |
 | `WORKFLOW_TURN_GATE_INTERVAL` | `3` | Turn-gate fires every N turns (reduces nag cadence). |
 | `WORKFLOW_HANDOFF_PCT` | `75` | Context-pressure threshold triggering `/progress-log` nudge (env var name kept for backward compat). |
