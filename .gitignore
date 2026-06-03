@@ -7,3 +7,6 @@ claude-progress.txt
 
 # Local research material — not part of the marketplace
 *.pdf
+
+# JetBrains IDE config — local-only
+.idea/
