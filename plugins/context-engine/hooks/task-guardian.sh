@@ -15,7 +15,7 @@ INCOMPLETE=$(jq -r '[.[] | select(.status != "completed")] | length' "$TASKFILE"
 CURRENT=$(jq -r '[.[] | select(.status == "in_progress")][0].subject // empty' "$TASKFILE" 2>/dev/null || true)
 
 if [ "${INCOMPLETE:-0}" -gt 0 ]; then
-  MSG="You have ${INCOMPLETE} incomplete task(s)."
+  MSG="[context-engine] You have ${INCOMPLETE} incomplete task(s)."
   if [ -n "$CURRENT" ]; then
     MSG="${MSG} Current: ${CURRENT}"
   fi

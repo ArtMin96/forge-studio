@@ -16,7 +16,7 @@ if [[ ! -f "$STATE_FILE" ]]; then
   exit 0
 fi
 
-OUTPUT+="[Post-Compaction Recovery]"$'\n'
+OUTPUT+="[Post-Compaction Pointers]"$'\n'
 OUTPUT+="Context was just compacted. Key pointers:"$'\n'
 
 # Read and relay saved state
@@ -66,7 +66,7 @@ if [[ -f "${VERIFY_DIR}/edit-count" ]]; then
 fi
 
 OUTPUT+="- Full state: ${STATE_FILE}"$'\n'
-OUTPUT+="[/Post-Compaction Recovery]"
+OUTPUT+="[/Post-Compaction Pointers]"
 
 echo "$OUTPUT"
 exit 0

@@ -172,7 +172,7 @@ Overall: WARN
 - `/entropy-scan` includes this skill as a sub-check
 - `/evolve` reads the FAIL list to seed proposals (e.g. if Security axis fails, propose adding a rule to `rules.d/secrets.txt`)
 
-## Failure Modes
+## Known Failure Modes
 
 - Ledger missing → axes that depend on it report WARN (not FAIL) and suggest running the producing skills at least once.
 - `/lineage-audit` not installed → Traceability axis still runs (skips only the sub-call).

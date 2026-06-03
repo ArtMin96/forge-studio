@@ -74,7 +74,7 @@ Report: `Safe-mode active. Mutations blocked until /safe-mode off.`
 - **Ledger:** All entries use the SEPL schema so `/rest-audit` Reliability axis and `/lineage-audit` can inspect them.
 - **Partner skill:** `/postmortem` (evaluator plugin) — the intended follow-up after every exit.
 
-## Failure Modes
+## Known Failure Modes
 
 - `.claude/safe-mode` exists but malformed JSON → treat as active (safer default); `/safe-mode off` still clears it.
 - Ledger write fails → flag state still changes (the flag is the source of truth; ledger is audit metadata).

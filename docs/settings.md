@@ -131,6 +131,8 @@ Sets the session effort level (same as `/effort`). Higher effort = more reasonin
 
 `low`/`medium`/`high`/`xhigh` persist in the `effortLevel` setting. `max` (and `ultracode`) are session-only — set `max` per-session or via `CLAUDE_CODE_EFFORT_LEVEL=max` in env.
 
+`ultracode` is more than an effort level: it pairs `xhigh` reasoning with native **dynamic-workflow** orchestration, so Claude plans a background multi-agent workflow for each substantive task instead of working turn by turn. It appears in the `/effort` menu only on Claude Code builds that support dynamic workflows. See [`/ultrathink`](skills/reference/ultrathink.md) for the keyword-vs-effort distinction.
+
 ### Thinking
 
 ```json

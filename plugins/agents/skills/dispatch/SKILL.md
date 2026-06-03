@@ -97,6 +97,8 @@ else:
 
 The cap is enforced in the pool decision, not just documented. If the planner enumerates 8 files, dispatch 5 reviewers + 1 aggregator covering files 1–5; note the cap in the handoff log.
 
+The cap of 5 is a *reviewer-pool* ceiling, not a limit on the work itself. When the independent work set is genuinely large (a codebase-wide migration or audit), the execution can hand off to a native **dynamic workflow** (the `ultracode` keyword) that orchestrates many more subagents under the runtime — while `/dispatch` keeps its distinct role: the routing decision, reviewer-pool sizing, and handoff logging that the native feature does not do. Available on Claude Code builds that support dynamic workflows.
+
 ### Dispatcher prompt for a pooled reviewer
 
 ```

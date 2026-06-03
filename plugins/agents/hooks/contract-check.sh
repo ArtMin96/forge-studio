@@ -32,7 +32,7 @@ if grep -q "^## Contract" "$LATEST_PLAN" 2>/dev/null; then
   if [ -n "$RESULT" ] && echo "$RESULT" | grep -qi "contract"; then
     exit 0
   fi
-  echo "Sprint contract exists in $(basename "$LATEST_PLAN") but reviewer output doesn't mention contract compliance. Verify contract criteria were checked."
+  echo "[agents] Sprint contract exists in $(basename "$LATEST_PLAN") but reviewer output doesn't mention contract compliance. Verify contract criteria were checked."
 fi
 
 exit 0

@@ -100,7 +100,7 @@ Append this session's outcomes to `claude-progress.txt` at the repo root. Durabl
 - `/rest-audit` Traceability axis checks log-coverage rate (sessions-with-log / total-sessions).
 - The structured YAML briefing written by `forward-briefing.sh` (PreCompact) is the canonical post-compact state record; progress-log appends ongoing session outcomes and does not duplicate what the briefing captured.
 
-## Failure Modes
+## Known Failure Modes
 
 - `claude-progress.txt` is a directory → fail loudly; tell the user.
 - Ledger append fails → entry still written to log (log is the source of truth; ledger is secondary metadata). Report the ledger failure.

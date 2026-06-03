@@ -150,7 +150,7 @@ case "$ROUTE" in
     SUGGESTION="Non-trivial feature detected. Run /orchestrate pipeline once a plan exists; it iterates each #### T<n> task with its own generator → reviewer → /verify cycle (small, predictable agent-loop surface)."
     ;;
   fan-out)
-    SUGGESTION="Parallel-safe batch detected. Consider /fan-out (agents plugin) with 3–5 workers per batch."
+    SUGGESTION="Parallel-safe batch detected. Consider /fan-out (agents plugin) with 3–5 workers per batch — or, for a very large mechanical batch (dozens-plus targets), a native dynamic workflow (the ultracode keyword) where the build supports it."
     ;;
   tdd-loop)
     SUGGESTION="Test-first intent detected. Consider /tdd-loop — RED→GREEN→REFACTOR gates enforced against a real test runner."

@@ -53,7 +53,7 @@ fi
 jq -n --arg task "$task_name" --arg base "$TARGET_BASENAME" '{
   hookSpecificOutput: {
     hookEventName: "PreToolUse",
-    additionalContext: ("File " + $base + " is outside active scope '" + $task + "'. Acknowledge scope expansion if intended.")
+    additionalContext: ("File " + $base + " is outside active scope " + $task + ". Acknowledge scope expansion if intended.")
   }
 }'
 

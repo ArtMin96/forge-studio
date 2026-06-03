@@ -76,7 +76,7 @@ Write `.claude/spec.md` from the latest plan's `## Contract`. Unlike `/contract`
 - `.claude/plans/*.md` — the input
 - `.claude/features.json` — the parallel testable view (from `/feature-list`)
 
-## Failure Modes
+## Known Failure Modes
 
 - Plan's `## Contract` is empty → write spec.md with `## Contract` section empty + warn.
 - `.claude/spec.md` is a directory → fail loudly.

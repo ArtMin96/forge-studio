@@ -75,7 +75,7 @@ Reads the long-session artifacts; outputs a briefing so work continues without r
 - Complements `surface-progress.sh` (SessionStart) — that hook previews; this skill produces the full briefing on demand.
 - No ledger writes (this skill is read-only).
 
-## Failure Modes
+## Known Failure Modes
 
 - None of the artifacts exist → report `No long-session artifacts found. Start with Plan mode + /feature-list + /living-spec.`
 - `.claude/features.json` malformed → report parse error; skip that section but continue.

@@ -55,7 +55,7 @@ bash plugins/diagnostics/skills/policies-list/scripts/render.sh
 ...
 ```
 
-## Failure Modes
+## Known Failure Modes
 
 - **Registry missing or malformed:** the script reports the parse error and exits 0 — every other diagnostic still works.
 - **Implementation path drift:** `/entropy-scan` Check 13 catches registry rows whose `implementation` path no longer exists, and enforcement scripts on disk that have no registry entry. Fix in the registry, not by deleting evidence.

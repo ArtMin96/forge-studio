@@ -350,7 +350,7 @@ Add a `## Convergence` section to the plan file after `## Why this sprint exists
 ```yaml
 convergence:
   type: hybrid
-  criterion: "python3 -c \"import json; json.load(open('.claude-plugin/marketplace.json'))\" && bash plugins/diagnostics/skills/entropy-scan/scripts/count.sh . | grep '^19 plugins'"
+  criterion: "python3 -c \"import json; json.load(open('.claude-plugin/marketplace.json'))\" && bash plugins/diagnostics/skills/entropy-scan/scripts/count.sh . | grep '^21 plugins'"
   max_iterations: 5
 ```
 ```
@@ -365,7 +365,7 @@ When the active plan declares `## Convergence`, `/verify` calls `convergence-che
 
 ```markdown
 ## Contract
-- [ ] `bash count.sh . | grep '^19 plugins'` exits 0
+- [ ] `bash count.sh . | grep '^21 plugins'` exits 0
 - [ ] `python3 -c "import json; json.load(open('.claude-plugin/marketplace.json'))"` exits 0
 - [ ] All new shell scripts are executable (`ls -la plugins/**/hooks/*.sh | grep ^-r-x`)
 
@@ -373,7 +373,7 @@ When the active plan declares `## Convergence`, `/verify` calls `convergence-che
 ```yaml
 convergence:
   type: hybrid
-  criterion: "python3 -c \"import json; json.load(open('.claude-plugin/marketplace.json'))\" && bash plugins/diagnostics/skills/entropy-scan/scripts/count.sh . | grep '^19 plugins'"
+  criterion: "python3 -c \"import json; json.load(open('.claude-plugin/marketplace.json'))\" && bash plugins/diagnostics/skills/entropy-scan/scripts/count.sh . | grep '^21 plugins'"
   max_iterations: 3
 ```
 ```

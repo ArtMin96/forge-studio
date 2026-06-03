@@ -40,7 +40,7 @@ if [ -n "$LINE_HINT" ]; then
     REGION_HITS=${REGION_HITS:-0}
     if [ "$REGION_HITS" -ge 3 ]; then
       BASENAME=$(basename "$FILE_PATH")
-      echo "Oscillating on ${BASENAME} — same region edited ${REGION_HITS} times. Stop. Re-read the whole function. What's the actual requirement?"
+      echo "[context-engine] Oscillating on ${BASENAME} — same region edited ${REGION_HITS} times. Stop. Re-read the whole function. What's the actual requirement?"
       exit 0
     fi
   fi
@@ -49,7 +49,7 @@ fi
 # Check total edit count
 if [ "$COUNT" -ge 5 ]; then
   BASENAME=$(basename "$FILE_PATH")
-  echo "Thrashing detected on ${BASENAME} — ${COUNT} edits this session. Step back, re-read the full file, and reconsider approach."
+  echo "[context-engine] Thrashing detected on ${BASENAME} — ${COUNT} edits this session. Step back, re-read the full file, and reconsider approach."
 fi
 
 exit 0

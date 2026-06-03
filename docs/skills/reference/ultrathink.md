@@ -34,6 +34,7 @@ Do not use it for changing the effort level mid-session — use the `/effort` co
 
 - **Default to `high` for anything ambiguous.** The skill documents `high` as the default for a reason: it is the level where most development work produces the best quality-to-cost ratio. Reserve `max` for genuinely multi-step deductions.
 - **Use the `ultrathink` keyword for one-offs.** Including the word "ultrathink" anywhere in a prompt adds an in-context request to reason deeper for that turn; Claude Code recognizes the keyword while leaving your session effort level unchanged. It is a lighter-touch nudge than a global `/effort max` when you want one deeper response.
+- **Don't confuse `ultrathink` with `ultracode`.** They are different mechanisms: `ultrathink` reasons harder in-context for one turn, while `ultracode` (or `/effort ultracode`, where the build supports it) triggers a native dynamic workflow that orchestrates many subagents in the background with verification built in. One thinks harder; the other fans the work out. The skill body documents both side by side.
 - **Match effort to query shape.** Simple file reads, straightforward renames, and standard CRUD operations do not need elevated effort — the skill's "When Deep Thinking Wastes Tokens" section is the guide for when to stay low.
 - **Remember adaptive thinking.** On capable models, Claude scales internal reasoning dynamically within the selected level. An easy query at `high` effort still gets a direct response; the model does not pad reasoning to fill a budget.
 

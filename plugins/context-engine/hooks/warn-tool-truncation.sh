@@ -17,15 +17,17 @@ OUTPUT_LEN=${#OUTPUT}
 THRESHOLD=45000
 
 if [ "$OUTPUT_LEN" -ge "$THRESHOLD" ]; then
-  echo "Tool result may be truncated (${OUTPUT_LEN} chars, limit ~50K). Re-run with narrower scope if results seem incomplete."
+  echo "[context-engine] Tool result may be truncated (${OUTPUT_LEN} chars, limit ~50K). Re-run with narrower scope if results seem incomplete."
   exit 0
 fi
 
-# Check line count (token waste for large but non-truncated output)
+# Check line count (token waste for large but non-truncated output).
+# Default raised above routine grep/ls output so this flags only genuinely large dumps.
 LINE_COUNT=$(echo "$OUTPUT" | wc -l)
+LINE_THRESHOLD=${FORGE_LARGE_OUTPUT_LINES:-400}
 
-if [ "$LINE_COUNT" -gt 100 ]; then
-  echo "Large output (${LINE_COUNT} lines). Consider piping through head/tail/grep to reduce context usage."
+if [ "$LINE_COUNT" -gt "$LINE_THRESHOLD" ]; then
+  echo "[context-engine] Large output (${LINE_COUNT} lines). Consider piping through head/tail/grep to reduce context usage."
 fi
 
 exit 0

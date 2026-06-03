@@ -36,7 +36,7 @@ Do not use it for sequential pipelines where each step depends on the previous r
 - **Keep batch size between three and five.** Smaller batches mean more subagents and more overhead; larger batches push each agent toward the context quality degradation the skill exists to avoid. Three to five is the empirically validated sweet spot.
 - **Use `isolation: worktree` for write operations.** Read-only exploration agents can share a worktree safely; write agents cannot. Without worktree isolation, two agents editing files that happen to share a dependency can produce a corrupt intermediate state.
 - **Verify one result manually before trusting the batch.** The synthesis step catches structural conflicts, but it does not substitute for spot-checking. Pick one result from the batch and confirm it matches your expectations before accepting the rest.
-- **Cap at five parallel agents.** More than five is hard to review and the coordination overhead begins to outweigh the parallelism benefit. If the file list is longer, run multiple fan-out passes rather than raising the cap.
+- **Cap at five parallel agents — or change tier.** More than five is hard to review and the coordination overhead begins to outweigh the parallelism benefit. If the file list is a little longer, run multiple fan-out passes. If it runs to dozens or hundreds of purely mechanical edits, `/fan-out` is the wrong tool: hand off to a native dynamic workflow (the `ultracode` keyword, on builds that support it), which orchestrates many more subagents under the runtime with verification built in. Keep `/fan-out` when per-batch conflict surfacing and worktree write-isolation matter more than raw scale.
 
 ## How it improves your workflow
 

@@ -64,7 +64,7 @@ JSON form: `{"runs_at":"…","totals":{"stale":N,"aging":N,"fresh":N},"skills":[
 - `/auto-tune-skill` — feed `--format=json | jq` to surface stale candidates.
 - `/ssl-audit` — single-skill SSL frontmatter validation (this skill aggregates across the marketplace).
 
-## Known failure modes
+## Known Failure Modes
 
 - **Stale `git` mtime.** A freshly-cloned worktree resets file mtimes; the script reads commit time, not stat mtime, so this is not a problem in CI but can mislead on a `cp -a` mirror. Document the source repo if running outside the original clone.
 - **No citation present.** A skill with no `arXiv:` reference scores `0.5` on freshness (neutral). Real skills without academic backing aren't penalized; skills with intentionally-stale citations are flagged.

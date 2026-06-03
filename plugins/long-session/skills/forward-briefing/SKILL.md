@@ -126,7 +126,7 @@ README counts in progress; marketplace.json updated.
 - Does the long-session entry count as a patch or minor bump? (ask user, then commit the version bump)
 ```
 
-## Failure Modes
+## Known Failure Modes
 
 - **`claude-progress.txt` missing** — write stub briefing: `No prior session log. Start with /feature-list or /living-spec.` Exit without error; this is a soft enhancement.
 - **`.claude/` directory missing** — `mkdir -p .claude/` first; this is idempotent and safe in any repo.

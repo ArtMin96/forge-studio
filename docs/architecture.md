@@ -119,7 +119,7 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 
 ## Forge Hook Deployment
 
-76 hook command registrations across 16 plugins. Hooks fire automatically on events — no commands needed. For the underlying Claude Code event API catalog see [`HARNESS_SPEC.md` §Hook Events Reference](../HARNESS_SPEC.md#hook-events-reference); the tables below describe **what forge actually deploys** at each event.
+79 hook command registrations across 17 plugins. Hooks fire automatically on events — no commands needed. For the underlying Claude Code event API catalog see [`HARNESS_SPEC.md` §Hook Events Reference](../HARNESS_SPEC.md#hook-events-reference); the tables below describe **what forge actually deploys** at each event.
 
 ### Session Lifecycle
 
@@ -159,7 +159,7 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | traces | collect-user-turn.sh | Append `user_turn` JSONL entry (prompt_length, session_id; no content stored) for clarification-timing analysis |
 | long-session | budget-trigger.sh | Graduated context-budget advisory at 70/80/90/99% of `CLAUDE_CONTEXT_WINDOW_USED_PCT` |
 
-### Before Tool Use (PreToolUse — 13 hooks, deny-chain)
+### Before Tool Use (PreToolUse — 15 hooks, deny-chain)
 
 | Matcher | Plugin | Hook | What It Does |
 |---------|--------|------|-------------|
@@ -170,6 +170,8 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | Edit\|Write | policy-gateway | scan-secrets.sh | **Block** on secret pattern match; ledger `policy-block` |
 | Bash\|Edit\|Write | policy-gateway | scan-injection.sh | **Block** on prompt-injection pattern; ledger `policy-block` |
 | Bash | evaluator | pre-commit-gate.sh | Warn if plan exists but `/verify` not run |
+| Bash | evaluator | docs-drift-gate.sh | Before `git commit`, name the guide file to reopen so docs track code; warn (`FORGE_DOCS_GATE=1`) or **block** (`=strict`) |
+| Bash | stack-flow | guard-push.sh | **Block** wrong-branch, detached-HEAD, and bare-force `git push` (JSON deny) |
 | Edit\|Write | agents | directory-ownership.sh | Worktree-team scope guard (opt-in: `FORGE_DIRECTORY_OWNERSHIP=1`) |
 | Edit\|Write | forge-meta | pre-edit-guard.sh | **Block** edits to protected verifier paths when `FORGE_META_EVOLVE=1`; human edits pass silently |
 | Edit\|Write | long-session | spec-drift-detect.sh | Detect drift between active plan and HEAD on edit attempts |
@@ -182,7 +184,7 @@ The 8-component model describes *what* Forge Studio controls. TRAE's "Definitive
 | Matcher | Plugin | Hook | What It Does |
 |---------|--------|------|-------------|
 | Write\|Edit | behavioral-core | self-review-nudge.sh | "Does this change do ONLY what was asked?" |
-| Read | context-engine | check-large-file.sh | Warn on files >500 lines |
+| Read | context-engine | check-large-file.sh | Warn on files >1200 lines (`FORGE_LARGE_FILE_LINES`) |
 | Bash\|Grep | context-engine | warn-tool-truncation.sh | Warn on large output or near-truncation |
 | Edit\|Read | context-engine | track-edits.sh | Track edits per file; warn after 3 without re-reading |
 | Edit | context-engine | detect-thrashing.sh | Detect thrashing (5+ edits same file, oscillating regions) |

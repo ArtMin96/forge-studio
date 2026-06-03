@@ -36,7 +36,7 @@ TOOL=$(echo "$INPUT" | jq -r '.tool_name // "unknown"' 2>/dev/null)
 
 # Emit warning once we cross the warn threshold (does not block).
 if [ "$COUNT" -ge "$WARN_THRESH" ] && [ "$COUNT" -lt "$SAFE_THRESH" ]; then
-  echo "${COUNT} consecutive tool failures (last: ${TOOL}). Stop. Re-read the error output. What assumption is wrong? Consider a different approach."
+  echo "[context-engine] ${COUNT} consecutive tool failures (last: ${TOOL}). Stop. Re-read the error output. What assumption is wrong? Consider a different approach."
 fi
 
 # Cross into safe-mode: write flag + ledger entry. Only on the transition (first time
@@ -68,7 +68,7 @@ if [ "$COUNT" -ge "$SAFE_THRESH" ] && [ ! -f "$SAFE_FLAG" ]; then
   LEDGER_LINE=$(printf '{"ts":"%s","operator":"safe-mode-enter","resource":"session/%s","trigger":"consecutive-failure-guard","evidence":"counter:%d last:%s","actor":"context-engine:consecutive-failure-guard"}' \
     "$TS" "$SESSION_ID" "$COUNT" "$TOOL")
   bash "${CLAUDE_PLUGIN_ROOT}/_lib/jsonl-append.sh" --with-turn-id .claude/lineage/ledger.jsonl "$LEDGER_LINE" <<< "$INPUT"
-  echo "SAFE MODE ENTERED after ${COUNT} consecutive failures. Write/Edit/destructive Bash are now blocked. Diagnose the root cause, then run: /safe-mode off"
+  echo "[context-engine] SAFE MODE ENTERED after ${COUNT} consecutive failures. Write/Edit/destructive Bash are now blocked. Diagnose the root cause, then run: /safe-mode off"
 fi
 
 exit 0

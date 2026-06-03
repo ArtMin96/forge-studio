@@ -96,7 +96,7 @@ Print the recommendation in a boxed line so it's hard to miss.
 - **Delegates to (recommended next actions):** `/compact`, `/lean-md`, `/progress-log`, `/memory-index`.
 - **Feeds:** `/rest-audit` Efficiency axis consumes this skill's recommendations.
 
-## Failure Modes
+## Known Failure Modes
 
 - No .claude/ artifacts → still run; recommendation will lean toward `/lean-md` if CLAUDE.md is the dominant load.
 - `jq` unavailable → skip features.json stage; note in output.

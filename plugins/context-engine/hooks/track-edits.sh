@@ -38,7 +38,7 @@ echo "$COUNT" > "${TRACKDIR}/${SAFE_NAME}"
 
 if [ "$COUNT" -ge 3 ]; then
   BASENAME=$(basename "$FILE_PATH")
-  echo "Edit safety: ${COUNT} edits to ${BASENAME} without re-reading. Re-read to verify current file state."
+  echo "[context-engine] Edit safety: ${COUNT} edits to ${BASENAME} without re-reading. Re-read to verify current file state."
 fi
 
 exit 0

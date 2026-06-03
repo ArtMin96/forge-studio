@@ -28,7 +28,7 @@ echo "$COUNT" > "$COUNTFILE"
 INTERVAL="${FORGE_SELF_REVIEW_INTERVAL:-3}"
 
 if [ $((COUNT % INTERVAL)) -eq 0 ] && [ "$COUNT" -gt 0 ]; then
-  echo "Self-check: Does this change do ONLY what was asked? Anything added that wasn't requested?"
+  echo "[behavioral-core] Self-check: Does this change do ONLY what was asked? Anything added that wasn't requested?"
 fi
 
 exit 0

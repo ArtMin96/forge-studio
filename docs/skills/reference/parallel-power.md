@@ -33,7 +33,7 @@ Do not use it for dispatching the actual work — use [`/dispatch`](../agents/di
 ## Best practices
 
 - **Orient before you dispatch.** Read the pattern descriptions once before invoking `/dispatch` or `/fan-out`. A five-second orientation prevents the wrong isolation model from causing merge conflicts or context bleed.
-- **Respect the 3–5 agent ceiling.** The skill documents this limit explicitly because more parallel agents becomes harder to review than it is worth. If the work exceeds five independent units, decompose it into sequential batches.
+- **Respect the 3–5 agent ceiling — for hand-rolled subagents.** The skill documents this limit because more parallel agents you review yourself becomes harder than it is worth. If the work exceeds five independent units, decompose it into sequential batches — or, when the batch is large and mechanical, hand it to a native dynamic workflow (the `ultracode` keyword, on builds that support it), which orchestrates many more subagents under the runtime with verification built in. The ceiling is about *your* review bandwidth, not a system cap.
 - **Use `.worktreeinclude` for secrets.** When working in parallel worktrees, gitignored files such as `.env` are not copied automatically. The `.worktreeinclude` mechanism from the reference prevents hard-to-debug auth failures in isolated branches.
 - **Separate writing and reviewing sessions.** The writer/reviewer split pattern exists because fresh context catches anchoring bias. The reference is a reminder that the review session should be new, not `--resume` on the same session that wrote the code.
 - **Name sessions explicitly.** `claude -n "auth-refactor"` makes resumption and context management tractable. Unnamed sessions are hard to resume correctly.

@@ -160,7 +160,7 @@ Hooks fire automatically. No commands needed. 79 hook command registrations acro
 
 - **Session lifecycle** — `SessionStart` (12 hooks), `SessionEnd` (2), `PreCompact` (4), `PostCompact` (4)
 - **Per-turn** — `UserPromptSubmit` (7 hooks), `Stop`, `StopFailure`
-- **Tool execution** — `PreToolUse` (14 deny-chain hooks), `PostToolUse` (22), `PostToolUseFailure` (3)
+- **Tool execution** — `PreToolUse` (15 deny-chain hooks), `PostToolUse` (22), `PostToolUseFailure` (3)
 - **Agent / Task** — `SubagentStart` (1), `SubagentStop` (5), `TaskCreated`, `TaskCompleted`
 
 For the full event-by-event table — every hook, matcher, plugin, and behavior — see [`HARNESS_SPEC.md` §Hook Events Reference](HARNESS_SPEC.md#hook-events-reference). Architectural framing in [`docs/architecture.md`](docs/architecture.md).
@@ -173,7 +173,9 @@ For the full event-by-event table — every hook, matcher, plugin, and behavior 
 - **Context thresholds**: Set `FORGE_CONTEXT_STAGE1`-`STAGE5` in settings.json env (message counts) or `FORGE_CONTEXT_PCT1`-`PCT5` (percentages).
 - **Exploration depth**: Set `FORGE_EXPLORE_DEPTH` (default 6, IDE-Bench recommends 8+).
 - **Test nudge interval**: Set `FORGE_TEST_NUDGE_INTERVAL` (default 3 edits).
-- **Large file warning**: Set `FORGE_LARGE_FILE_LINES` (default 500).
+- **Large file warning**: Set `FORGE_LARGE_FILE_LINES` (default 1200).
+- **Large output warning**: Set `FORGE_LARGE_OUTPUT_LINES` (default 400 lines of tool output).
+- **Duplicate-read window**: Set `FORGE_DUP_READ_WINDOW_MIN` (default 10 — only flag re-reads within this many minutes).
 - **Disable traces**: Set `FORGE_TRACES_ENABLED` to `"0"`.
 - **Disable evaluation gate**: Set `FORGE_EVALUATION_GATE` to `"0"`.
 - **Disable research gate**: Set `FORGE_RESEARCH_GATE` to `"0"`.

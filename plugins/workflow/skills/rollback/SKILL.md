@@ -79,7 +79,7 @@ Rolled back <slug> <current> → <target>. Forward version snapshot saved: /roll
 
 The report hints at the re-roll-forward path: the user can `/rollback` back to the version they just rolled out of.
 
-## Failure Modes
+## Known Failure Modes
 
 - No commit found for this resource → "nothing to roll back" message.
 - Snapshot file missing → `/entropy-scan` should have caught this; tell the user to investigate manually. Do not fabricate a version.

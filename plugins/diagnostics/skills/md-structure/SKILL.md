@@ -134,7 +134,7 @@ Next: scaffold section 4 with `/md-structure --scaffold`, then /lean-md.
 - **Meta-check:** `/entropy-scan` (diagnostics) invokes this as a sub-check — weak CLAUDE.md surfaces as a drift signal.
 - No ledger writes (read-only audit). Ledger writes happen only when a scaffold is applied, via follow-up `/commit-proposal` if the user chooses.
 
-## Failure Modes
+## Known Failure Modes
 
 - CLAUDE.md empty → report all four sections MISSING; recommend scaffold.
 - Exotic headings that don't map to the four sections → report PRESENT under "custom" with a note; user decides whether to refactor.

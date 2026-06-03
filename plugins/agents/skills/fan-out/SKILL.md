@@ -69,3 +69,5 @@ After all agents complete:
 - Max 5 parallel agents (more is hard to review)
 - Max 8 files per agent (context quality degrades beyond this)
 - Always verify one result manually before trusting the batch
+
+When the independent target list runs to dozens or hundreds and the operation is purely mechanical, this manual 5-agent batching is the wrong tier: hand off to a native **dynamic workflow** (the `ultracode` keyword) instead, which orchestrates many more subagents under the runtime with verification built in. Keep `/fan-out` when per-batch conflict surfacing and `isolation: worktree` write-isolation matter more than raw scale. Native workflows require a Claude Code build that supports them.

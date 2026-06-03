@@ -113,7 +113,7 @@ One line:
 Committed <slug> <prev> → <target>. Rollback: /rollback <slug> <prev>
 ```
 
-## Failure Modes
+## Known Failure Modes
 
 - Snapshot write fails → abort, no ledger entry.
 - File write fails after snapshot → **restore from snapshot**, abort, no ledger entry.

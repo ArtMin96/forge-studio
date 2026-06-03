@@ -76,7 +76,7 @@ echo "dev server: <command>"
 echo "test:       <command>"
 ```
 
-## Failure Modes
+## Known Failure Modes
 
 - No recognizable stack → write a stub init.sh with a TODO comment; tell the user explicitly.
 - `chmod +x` fails → report; don't claim success.

@@ -64,7 +64,7 @@ Convert the latest plan's `## Contract` into `.claude/features.json`. This file 
   - `/rest-audit` — Efficiency axis (pending/done ratio).
 - `/tdd-loop` does not read this file; it accepts a feature description as `$ARGUMENTS` and runs Red/Green/Refactor against the test suite. Use `/feature-list` first to make the contract machine-readable for `/verify`, then drive `/tdd-loop` per item.
 
-## Failure Modes
+## Known Failure Modes
 
 - `.claude/features.json` exists and has `done` items → do NOT clobber silently. Read it; preserve completed entries when re-expanding; assign new IDs to new items.
 - Contract bullets are ambiguous → emit `verify_cmd: "# manual"` and report count; the user can refine.

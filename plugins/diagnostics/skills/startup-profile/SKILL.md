@@ -129,7 +129,7 @@ Output: excerpt
 rtk-optimizer/rtk-bootstrap.sh at 18300 ms on session cold-9f3a
 ```
 
-## Failure Modes
+## Known Failure Modes
 
 - **Log missing:** `~/.local/share/forge-studio/startup.jsonl` does not exist. The wrapper has not run yet. Open one new session, then re-run.
 - **Sessions tagged `unknown`:** `$CLAUDE_SESSION_ID` was not set when the hook ran (e.g. simulated runs). Filter these out by passing `EXCLUDE_UNKNOWN=1`.

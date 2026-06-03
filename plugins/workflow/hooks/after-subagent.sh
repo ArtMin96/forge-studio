@@ -152,8 +152,8 @@ case "$AGENT_TYPE" in
     append_spec_delta "reviewer"
     ;;
   *)
-    echo "[forge-workflow] unknown agent_type='$AGENT_TYPE' — handoff not opened" >&2
-    exit 1
+    # Unknown-but-valid agent types (researcher, custom subagents) open no handoff.
+    # Advisory plugin: stay silent rather than emit a stderr error for normal cases.
     ;;
 esac
 

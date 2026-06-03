@@ -28,6 +28,10 @@ Include "ultrathink" anywhere in your prompt to request deeper reasoning on that
 
 Example: "ultrathink: design the auth system for this app considering OAuth, JWT, and session-based approaches"
 
+## Ultracode Keyword (a different mechanism)
+
+`ultracode` is a separate keyword. `ultrathink` adds an in-context "think harder" instruction for one turn; `ultracode` (or `/effort ultracode`) tells Claude Code to plan a native dynamic workflow — a background script that orchestrates many subagents with verification built in — for the task. It pairs `xhigh` effort with automatic workflow orchestration, lasts the session, and uses more tokens per task. Reach for `ultrathink` to reason harder in place; reach for `ultracode` to fan a large task out to a verified multi-agent workflow. It appears in the `/effort` menu only on Claude Code builds that support dynamic workflows — if you don't see it there, the feature isn't available.
+
 ## When Deep Thinking Helps
 - Complex architectural decisions
 - Multi-step debugging with non-obvious root causes

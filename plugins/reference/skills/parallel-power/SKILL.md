@@ -56,7 +56,9 @@ For large features with independent subtasks:
 
 **Sweet spot:** 3-5 parallel agents. More than that is hard to review.
 
-**Tip:** `/proactive` is an alias for `/loop` — use either for recurring orchestration patterns.
+That 3-5 ceiling is a *human-review* limit, not a system one. When the batch is large and mechanical — a codebase-wide sweep, a few-hundred-file migration, research cross-checked across many sources — a native **dynamic workflow** (trigger it with the `ultracode` keyword in your prompt) orchestrates many more subagents under the runtime, with adversarial verification built in, and runs in the background while your session stays free. Keep hand-rolled subagents when you want to review each result yourself; reach for a workflow when scale matters more than per-item review. Available on Claude Code builds that support dynamic workflows.
+
+**Tip:** `/loop` runs a prompt or slash command on a recurring interval — pair it with a saved workflow for recurring orchestration.
 
 ## Pattern 5: Session Per Concern
 Don't mix unrelated tasks. Instead:
