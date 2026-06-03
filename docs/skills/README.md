@@ -140,3 +140,4 @@ These are usage guides, not reference. For the mechanical contract of a skill, r
 | `/policy-audit` | [policy-audit.md](policy-gateway/policy-audit.md) | policy-gateway — scans for credential/policy exposure |
 | `/impact-trace` | [impact-trace.md](code-graph/impact-trace.md) | code-graph — blast-radius trace via the knowledge graph |
 | `/caveman` | [caveman.md](caveman/caveman.md) | caveman — terse output-style mode |
+| `/humanizer` | [humanizer.md](humanizer/humanizer.md) | humanizer — rewrite text to remove AI-writing tells |

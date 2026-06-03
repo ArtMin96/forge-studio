@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "humanizer",
+  "description": "On-demand rewrite that strips AI-writing tells from a piece of text so it reads natural and human. Detects 30+ patterns from Wikipedia's \"Signs of AI writing\" guide and can match your own voice from a sample. Explicit-invocation, no hooks.",
+  "version": "1.0.0",
+  "keywords": ["humanizer", "ai-writing", "editing", "prose", "writing-style"]
+}

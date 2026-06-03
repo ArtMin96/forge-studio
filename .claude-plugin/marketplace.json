@@ -89,6 +89,14 @@
       "keywords": ["token-optimization", "output-compression", "brevity", "productivity", "harness:behavioral-steering", "overhead:minimal", "role:guide-computational"]
     },
     {
+      "name": "humanizer",
+      "description": "On-demand rewrite that strips AI-writing tells from a piece of text so it reads natural and human. Detects 30+ patterns from Wikipedia's \"Signs of AI writing\" guide and can match your own voice from a sample. Explicit-invocation, no hooks.",
+      "version": "1.0.0",
+      "source": "./plugins/humanizer",
+      "category": "productivity",
+      "keywords": ["humanizer", "ai-writing", "editing", "prose", "harness:behavioral-steering", "overhead:zero", "role:guide-inferential"]
+    },
+    {
       "name": "token-efficiency",
       "description": "Prevents token waste: duplicate read detection, large output warnings, session token audit",
       "version": "1.0.0",

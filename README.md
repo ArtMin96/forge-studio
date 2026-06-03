@@ -2,7 +2,7 @@
 
 **Agent = Model + Harness.** Research shows changing only the harness produces a 6x performance gap ([Meta-Harness, 2026](docs/research.md)). Forge Studio implements harness principles as composable Claude Code plugins.
 
-20 plugins. 87 skills. 79 hooks. 5 agents. 16 behavioral rules.
+21 plugins. 88 skills. 79 hooks. 5 agents. 16 behavioral rules.
 
 ---
 
@@ -14,7 +14,7 @@ cd forge-studio
 ./install.sh
 ```
 
-`install.sh` registers the marketplace, installs all 19 plugins to user scope, and copies `templates/CLAUDE.md` to `~/.claude/CLAUDE.md` (backing up any existing file). Idempotent — safe to re-run.
+`install.sh` registers the marketplace, installs all 21 plugins to user scope, and copies `templates/CLAUDE.md` to `~/.claude/CLAUDE.md` (backing up any existing file). Idempotent — safe to re-run.
 
 If you ran `./install.sh` from a clone, Forge Studio also exposes its skills under `~/.agents/skills/` (the cross-vendor convention from agentskills.io spec) so other clients (Cursor, Cline, Aider) can discover them. The links point back into your clone — keep the clone around or they will dangle. Manual `/plugin marketplace add` users do not get this surface.
 
@@ -76,6 +76,7 @@ See [docs/settings.md](docs/settings.md) for settings documentation.
 | [**traces**](plugins/traces/README.md) | JSONL execution traces, compiled views, failure mining, failure attribution, harness evolution | 6 | 7 |
 | [**diagnostics**](plugins/diagnostics/README.md) | `/entropy-scan` + `/validate-marketplace` + `/docs-maintenance` + **`/rest-audit`** (R.E.S.T. outcomes) + **`/md-structure`** (Karpathy 4-section audit) + **`/ssl-audit`** (SSL frontmatter coverage) + `/policies-list` + `/startup-profile` | 1 | 8 |
 | [**caveman**](plugins/caveman/README.md) | Always-on compressed output (~65% token savings). Survives compaction. | 2 | 1 |
+| [**humanizer**](plugins/humanizer/README.md) | On-demand `/humanizer` rewrite that strips AI-writing tells from text so it reads human. 30+ patterns, voice matching, no hooks. | 0 | 1 |
 | [**token-efficiency**](plugins/token-efficiency/README.md) | Duplicate read detection, session token audit | 1 | 1 |
 | [**research-gate**](plugins/research-gate/README.md) | Blocks Edit/Write on unread files + exploration depth warnings | 4 | 0 |
 | [**policy-gateway**](plugins/policy-gateway/README.md) | PreToolUse secrets scan + prompt-injection scan + sensitive-ops audit. Same `permissionDecision:deny` contract as block-destructive. Rules live in `rules.d/` so SEPL can evolve them. | 4 | 1 |
